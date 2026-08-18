@@ -14,6 +14,9 @@ export const INDEXER_URL = process.env.NEXT_PUBLIC_INDEXER_URL?.trim() || DEFAUL
 /** Green Globe live map (data.gainforest.app). */
 export const GLOBE_URL = "https://data.gainforest.app";
 
+/** Local activity feed. */
+export const FEED_URL = "/feed";
+
 /** Drone/orthophoto/point-cloud viewer. */
 const DRONE_APP_URL = (process.env.NEXT_PUBLIC_DRONE_APP_URL || "https://drone.gainforest.app").replace(/\/$/, "");
 

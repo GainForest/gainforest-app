@@ -1,0 +1,3807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GainForest — Decision Sovereignty for Nature · ETH Zurich 2026</title>
+
+<!--
+  GainForest · case study deck
+  ─────────────────────────────────────────────────────────────
+  Speaker     : Dr. David Dao (Co-Founder & Chief Scientist)
+  Event       : Unlocking AI Opportunities for Climate Resilience
+                London Climate Action Week — 23 June 2026
+                "The View" at Sustainable Ventures, London
+  Host        : Klarna, in partnership with Milkywire
+  Theme       : AI for Climate Resilience — from pilots to scale
+  Slot        : Featured case study
+  House style : mirrors gainforest.earth — cream background, sage
+                forest-green primary, Cormorant Garamond + Instrument
+                Serif italic accents, a single brushed paint stroke
+                under one marked headline word.
+
+  Navigation  : Arrow keys / Space / scroll / swipe / nav dots.
+  Videos      : Autoplay muted on slide enter; pause when off-screen
+                so we never burn battery on the projector laptop.
+-->
+
+<!-- Google Fonts — exact families used by app/layout.tsx -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap">
+
+<!-- three.js + three-globe via UMD builds. These attach to window
+     (THREE / ThreeGlobe) and avoid the ESM webgpu/tsl submodule mess
+     that esm.sh hits with newer three.js. Same library the live
+     LiveGlobe.tsx wraps via react-globe.gl. -->
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three-globe@2.42.5/dist/three-globe.min.js"></script>
+
+<!-- model-viewer web component — renders the Bumimic PCB slide's
+     interactive 3D board (assets/bumimic-v0.3.glb, Draco-compressed
+     export of the real KiCad manufacturing files). -->
+<script type="module" src="https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+
+<style>
+/* ===========================================
+   THEME — design tokens straight from
+   gainforest-app/app/globals.css
+   =========================================== */
+:root {
+    /* Palette */
+    --bg-cream:        #f4efe4;
+    --bg-cream-warm:   #ecdac6;          /* impact-report card warm tone */
+    --fg-ink:          #1c1c1a;
+    --fg-muted:        rgba(28,28,26,0.62);
+    --fg-faint:        rgba(28,28,26,0.45);
+    --primary:         #3e7053;          /* sage forest — CTA pill */
+    --primary-dark:    #2e5840;
+    --brand-mint:      #2fce8a;          /* logo + LIVE accents */
+    --brand-mint-dark: #21b073;
+    --border-soft:     #e6dfd0;
+    --ink:             #141413;
+    --ink-fg:          #f4efe4;
+    --ink-muted:       #a8a59a;
+
+    /* Type families */
+    --font-display:   'Cormorant Garamond', Georgia, serif;
+    --font-italic:    'Instrument Serif', Georgia, serif;
+    --font-body:      'Inter', system-ui, sans-serif;
+
+    /* Type scale — all clamp() for viewport fitting */
+    --eyebrow-size:   clamp(0.7rem,  1.1vw, 0.85rem);
+    --display-size:   clamp(2.4rem,  7.2vw, 6.4rem);
+    --display-tight:  clamp(2rem,    5.6vw, 5rem);
+    --h2-size:        clamp(1.6rem,  3.6vw, 3rem);
+    --h3-size:        clamp(1.1rem,  2vw,   1.6rem);
+    --body-size:      clamp(0.85rem, 1.25vw,1.05rem);
+    --small-size:     clamp(0.72rem, 1vw,   0.85rem);
+
+    /* Spacing */
+    --slide-padding:  clamp(1.5rem,  4vw,  4.2rem);
+    --content-gap:    clamp(0.75rem, 2vw,  2rem);
+
+    /* Motion */
+    --ease-out:       cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-soft:      cubic-bezier(0.22, 1, 0.36, 1);
+    --duration:       0.85s;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ===========================================
+   VIEWPORT FITTING — mandatory base from
+   frontend-slides/viewport-base.css
+   =========================================== */
+html, body { height: 100%; overflow-x: hidden; }
+html {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    background: var(--bg-cream);
+    color: var(--fg-ink);
+    font-family: var(--font-body);
+    font-size: var(--body-size);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+.slide {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding: var(--slide-padding);
+}
+
+/* Mobile-aware breakpoints */
+@media (max-height: 700px) {
+    :root {
+        --slide-padding: clamp(1rem, 3vw, 2.5rem);
+        --display-size:  clamp(2rem, 6vw, 4.4rem);
+        --h2-size:       clamp(1.3rem, 3vw, 2.4rem);
+    }
+}
+@media (max-height: 600px) {
+    :root {
+        --slide-padding: clamp(0.75rem, 2.5vw, 2rem);
+        --display-size:  clamp(1.7rem, 5vw, 3.4rem);
+        --h2-size:       clamp(1.2rem, 2.5vw, 2rem);
+        --body-size:     clamp(0.75rem, 1.1vw, 0.95rem);
+    }
+    .nav-dots, .keyboard-hint { display: none; }
+}
+@media (max-width: 600px) {
+    .grid-3 { grid-template-columns: 1fr !important; }
+    .grid-2 { grid-template-columns: 1fr !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.2s !important;
+    }
+    html { scroll-behavior: auto; }
+    video { display: none; }   /* respect strict reduced motion */
+}
+
+/* ===========================================
+   SHARED PRIMITIVES — eyebrow, header bar
+   =========================================== */
+.eyebrow {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: var(--eyebrow-size);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+}
+.slide-ink .eyebrow { color: var(--ink-muted); opacity: 0.85; }
+
+.h-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--display-size);
+    line-height: 1.04;
+    letter-spacing: -0.015em;
+}
+.h-display em,
+.italic-accent {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 400;
+}
+
+/* Top status bar — page number + brand mark + tiny live dot */
+.slide-chrome {
+    position: absolute;
+    top: clamp(1rem, 2.2vw, 1.6rem);
+    left: var(--slide-padding);
+    right: var(--slide-padding);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-body);
+    font-size: var(--small-size);
+    color: var(--fg-faint);
+    pointer-events: none;
+    z-index: 5;
+}
+.slide-ink .slide-chrome { color: var(--ink-muted); }
+.brand-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55em;
+    letter-spacing: 0.04em;
+    font-weight: 500;
+    color: var(--fg-ink);
+}
+.slide-ink .brand-mark { color: var(--ink-fg); }
+.brand-mark::before {
+    /* Mint dot stands in for the leaf logo at this size */
+    content: '';
+    width: 0.55em;
+    height: 0.55em;
+    border-radius: 999px;
+    background: var(--brand-mint);
+    box-shadow: 0 0 0 0.18em rgba(47, 206, 138, 0.18);
+}
+.page-num {
+    font-variant-numeric: tabular-nums;
+    font-size: calc(var(--small-size) * 0.95);
+}
+
+/* Live pill — exactly the same affordance the live cards use */
+.live-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    padding: 0.32em 0.7em;
+    border-radius: 999px;
+    background: rgba(47, 206, 138, 0.14);
+    color: var(--brand-mint-dark);
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: calc(var(--small-size) * 0.95);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.live-pill::before {
+    content: '';
+    width: 0.45em;
+    height: 0.45em;
+    border-radius: 999px;
+    background: var(--brand-mint);
+    box-shadow: 0 0 0 0.18em rgba(47, 206, 138, 0.35);
+    animation: pulse-dot 1.8s var(--ease-out) infinite;
+}
+@keyframes pulse-dot {
+    0%, 100% { box-shadow: 0 0 0 0.18em rgba(47, 206, 138, 0.35); }
+    50%      { box-shadow: 0 0 0 0.5em  rgba(47, 206, 138, 0); }
+}
+
+.slide-ink .live-pill {
+    background: rgba(47, 206, 138, 0.18);
+    color: var(--brand-mint);
+}
+
+/* CTA pill — sage on cream, cream on ink (matches site rules) */
+.cta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55em;
+    height: clamp(2.5rem, 4vh, 3.4rem);
+    padding: 0 clamp(1.1rem, 2vw, 1.8rem);
+    border-radius: 999px;
+    background: var(--primary);
+    color: var(--ink-fg);
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: var(--body-size);
+    text-decoration: none;
+    letter-spacing: -0.005em;
+}
+.slide-ink .cta-pill { background: var(--ink-fg); color: var(--ink); }
+
+/* Section dark band — ink surface for problem + closing */
+.slide-ink {
+    background: var(--ink);
+    color: var(--ink-fg);
+}
+
+/* ===========================================
+   REVEAL ANIMATIONS — driven by .visible
+   =========================================== */
+.reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity var(--duration) var(--ease-out),
+                transform var(--duration) var(--ease-out);
+}
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+
+/* Stagger up to 8 children */
+.slide.visible .reveal:nth-child(1) { transition-delay: 0.05s; }
+.slide.visible .reveal:nth-child(2) { transition-delay: 0.15s; }
+.slide.visible .reveal:nth-child(3) { transition-delay: 0.25s; }
+.slide.visible .reveal:nth-child(4) { transition-delay: 0.35s; }
+.slide.visible .reveal:nth-child(5) { transition-delay: 0.45s; }
+.slide.visible .reveal:nth-child(6) { transition-delay: 0.55s; }
+.slide.visible .reveal:nth-child(7) { transition-delay: 0.65s; }
+.slide.visible .reveal:nth-child(8) { transition-delay: 0.75s; }
+
+.reveal-scale { opacity: 0; transform: scale(0.96); transition: opacity var(--duration) var(--ease-out), transform var(--duration) var(--ease-out); }
+.slide.visible .reveal-scale { opacity: 1; transform: scale(1); }
+
+.reveal-blur { opacity: 0; filter: blur(14px); transition: opacity 1.1s var(--ease-out), filter 1.1s var(--ease-out); }
+.slide.visible .reveal-blur { opacity: 1; filter: blur(0); }
+
+/* Brush-stroke draw — animates the SVG path from 0 to full length */
+.brush-path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-dasharray: 200;
+    stroke-dashoffset: 200;
+    transition: stroke-dashoffset 1.4s var(--ease-out) 0.6s;
+}
+.slide.visible .brush-path { stroke-dashoffset: 0; }
+
+/* ===========================================
+   SLIDE 1 — TITLE  (elegant + classic)
+   Centered editorial composition: GainForest logo mark on
+   top, wordmark in Cormorant Garamond beneath, italic
+   tagline, and a large rotating Earth as the hero visual.
+   The earth is a CSS-only spinning sphere — the equirect
+   blue-marble texture (same one react-globe.gl uses on the
+   live site) is wrapped in a circular clip with an inner
+   radial-gradient overlay for 3D sphere shading and a soft
+   atmospheric glow.
+   =========================================== */
+.title-slide {
+    justify-content: center;
+    align-items: center;
+}
+.title-frame {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: min(96vw, 1180px);
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    align-items: center;
+    gap: clamp(2rem, 6vw, 5rem);
+}
+@media (max-width: 820px) {
+    .title-frame { grid-template-columns: 1fr; text-align: center; }
+    .title-meta-row { justify-content: center; }
+}
+
+/* ── Earth stage ────────────────────────────────────────
+   Holds the real three-globe canvas + a mint atmospheric
+   halo behind it. The canvas itself paints transparently
+   (backgroundColor = rgba(0,0,0,0)) so the cream slide
+   shows through outside the sphere — same trick the live
+   site uses in LiveGlobe.tsx. */
+.earth-stage {
+    position: relative;
+    aspect-ratio: 1/1;
+    width: 100%;
+    max-width: clamp(280px, 38vw, 520px);
+    margin: 0 auto;
+}
+.earth-glow {
+    /* Soft atmospheric halo behind the sphere, matches the
+       mint accent so the brand carries through the visual. */
+    position: absolute;
+    inset: -8%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 50%,
+        rgba(47, 206, 138, 0.18) 0%,
+        rgba(47, 206, 138, 0.06) 38%,
+        transparent 62%);
+    filter: blur(8px);
+    z-index: 0;
+    pointer-events: none;
+}
+#earth-host {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+}
+#earth-host canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 50%;
+}
+/* Cream-disc skeleton mirrors LiveGlobe's loading state so
+   the slide never shows an empty rectangle while three.js
+   downloads. Fades out the instant the WebGL canvas mounts. */
+.earth-skeleton {
+    position: absolute;
+    inset: 5%;
+    z-index: 2;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 32% 26%, rgba(255,255,255,0.72), transparent 50%),
+        radial-gradient(circle at center, var(--bg-cream) 30%, var(--border-soft) 88%);
+    box-shadow: inset 0 0 28px rgba(40,50,30,0.05);
+    transition: opacity 0.6s var(--ease-out);
+    pointer-events: none;
+}
+.earth-stage.is-ready .earth-skeleton { opacity: 0; }
+
+
+/* ── Brand mark + wordmark ──────────────────────────── */
+.title-copy {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.9rem, 1.6vw, 1.4rem);
+}
+.title-logo {
+    /* The GainForest leaf mark, rendered via mask-image so it
+       picks up currentColor — same trick the live Logo.tsx
+       uses. The wordmark sits below, never beside, to keep
+       the composition vertically classic. */
+    width: clamp(56px, 7vw, 84px);
+    height: clamp(56px, 7vw, 84px);
+    background-color: var(--brand-mint);
+    -webkit-mask-image: url('assets/gainforest-logo.svg');
+            mask-image: url('assets/gainforest-logo.svg');
+    -webkit-mask-size: contain;
+            mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+            mask-position: center;
+}
+.title-wordmark {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(3rem, 8.4vw, 7rem);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    color: var(--fg-ink);
+}
+.title-rule {
+    /* Single hairline rule beneath the wordmark — classic
+       editorial separator, replaces the brush stroke. */
+    width: clamp(48px, 6vw, 72px);
+    height: 1px;
+    background: var(--fg-ink);
+    opacity: 0.7;
+    margin: clamp(0.3rem, 0.8vw, 0.6rem) 0;
+}
+.title-eyebrow-line {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: var(--eyebrow-size);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+}
+.title-tagline {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: clamp(1.05rem, 1.7vw, 1.45rem);
+    line-height: 1.4;
+    color: var(--fg-muted);
+    max-width: 38ch;
+}
+.title-meta-row {
+    margin-top: clamp(0.9rem, 2vw, 1.6rem);
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(0.9rem, 2vw, 1.5rem) clamp(1.4rem, 2.6vw, 2.2rem);
+    align-items: center;
+    font-family: var(--font-body);
+    font-size: var(--body-size);
+    color: var(--fg-ink);
+}
+.title-meta-row .meta-block {
+    display: flex; flex-direction: column;
+    line-height: 1.25;
+}
+.title-meta-row .meta-block .lbl {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: var(--small-size);
+    color: var(--fg-faint);
+    letter-spacing: 0.04em;
+}
+.title-meta-row .meta-block .val {
+    font-weight: 500;
+    letter-spacing: -0.005em;
+}
+.title-meta-row .speaker {
+    display: flex; align-items: center;
+    gap: 0.7em;
+}
+.title-meta-row .speaker img {
+    width: clamp(2.2rem, 2.6vw, 2.6rem);
+    height: clamp(2.2rem, 2.6vw, 2.6rem);
+    border-radius: 999px;
+    object-fit: cover;
+    border: 1.5px solid var(--border-soft);
+}
+
+/* ===========================================
+   SLIDE 2 — THE 1% PROBLEM (ink band)
+   Huge number with count-up animation.
+   =========================================== */
+.problem-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(1.5rem, 4vw, 4rem);
+    align-items: center;
+    margin-top: clamp(2rem, 5vh, 3.5rem);
+}
+@media (max-width: 800px) {
+    .problem-grid { grid-template-columns: 1fr; gap: 1.2rem; }
+}
+.huge-stat {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(8rem, 26vw, 22rem);
+    line-height: 0.88;
+    letter-spacing: -0.04em;
+    color: var(--ink-fg);
+    position: relative;
+}
+.huge-stat .pct {
+    color: var(--brand-mint);
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 400;
+}
+.huge-stat .underline {
+    display: block;
+    height: 3px;
+    width: 0;
+    background: linear-gradient(90deg, var(--brand-mint) 0%, transparent 100%);
+    margin-top: 0.4em;
+    transition: width 1.6s var(--ease-out) 0.8s;
+}
+.slide.visible .huge-stat .underline { width: 70%; }
+
+.problem-claim {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.5rem, 3.4vw, 2.8rem);
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+    color: var(--ink-fg);
+}
+.problem-claim em {
+    font-family: var(--font-italic);
+    font-style: italic;
+    color: var(--brand-mint);
+}
+.problem-claim-body {
+    margin-top: 1.1em;
+    color: rgba(244, 239, 228, 0.72);
+    font-size: clamp(0.9rem, 1.3vw, 1.1rem);
+    line-height: 1.55;
+    max-width: 42ch;
+}
+.problem-claim-meta {
+    margin-top: 1.4em;
+    font-family: var(--font-italic);
+    font-style: italic;
+    color: var(--ink-muted);
+    font-size: var(--small-size);
+}
+
+/* ===========================================
+   SLIDE 3 — MISSION  ("Open tools for
+   regenerative intelligence", with brushed
+   stroke under "Open" — same brush path as
+   the live site Hero.tsx)
+   =========================================== */
+.mission-slide {
+    justify-content: center;
+    align-items: center;
+    text-align: left;
+}
+.mission-frame {
+    max-width: min(95vw, 1300px);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1rem, 2.5vw, 2rem);
+}
+.mission-headline {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(2.6rem, 8.4vw, 7.2rem);
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+}
+.mission-headline .brushed {
+    position: relative;
+    display: inline-block;
+    color: var(--primary);
+}
+.mission-headline .brushed svg {
+    position: absolute;
+    left: 0; right: 0; bottom: -0.16em;
+    width: 100%; height: 0.36em;
+    color: var(--primary);
+    pointer-events: none;
+}
+.mission-headline em {
+    font-family: var(--font-italic);
+    font-style: italic;
+    color: var(--fg-ink);
+}
+.mission-sub {
+    font-size: clamp(1.05rem, 1.7vw, 1.4rem);
+    line-height: 1.5;
+    max-width: 56ch;
+    color: var(--fg-muted);
+}
+.mission-row {
+    display: flex; gap: clamp(1rem, 2.5vw, 2rem);
+    flex-wrap: wrap;
+    align-items: center;
+}
+.mission-row .tag {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: var(--small-size);
+    color: var(--fg-faint);
+    padding-right: 1.4em;
+    position: relative;
+}
+.mission-row .tag + .tag::before {
+    content: '·';
+    position: absolute;
+    left: -1.1em; top: -0.05em;
+    color: var(--fg-faint);
+}
+/* Italic-emphasis inside the mission/values sub-paragraph,
+   so words like "decision-making" pick up the sage italic
+   the rest of the deck uses. */
+.mission-sub em {
+    font-family: var(--font-italic);
+    font-style: italic;
+    color: var(--primary);
+}
+/* ----------------------------------------------------------
+   VALUES SLIDE (04 · Data is soil)
+   Editorial two-column treatment: copy on the left, Christian
+   Cassiel's photograph from Atmos on the right. The visual
+   recipe is consciously magazine-style — generous gap, no
+   caption overlay (credit lives beneath the photo), softer
+   shadow + smaller radius so the image reads as a print
+   rather than a UI card. The source citation sits BELOW the
+   tag row as a quiet footnote, not as a subtitle to the
+   headline.
+   ---------------------------------------------------------- */
+.values-slide .mission-frame {
+    display: grid;
+    grid-template-columns: 6fr 5fr;
+    gap: clamp(2rem, 5vw, 4.5rem);
+    align-items: center;
+    max-width: min(96vw, 1340px);
+}
+@media (max-width: 800px) {
+    .values-slide .mission-frame { grid-template-columns: 1fr; }
+}
+/* Tighter headline so the iconic 'Data is soil' line breathes
+   in the narrower left column instead of overflowing. */
+.values-slide .mission-headline {
+    font-size: clamp(2.2rem, 6.2vw, 5.6rem);
+    line-height: 1.02;
+}
+.values-slide .mission-sub {
+    margin-top: 0.3em;
+    max-width: 50ch;
+}
+/* Footer-style citation under the tag row. No border
+   divider — just whitespace + smaller, more muted type
+   so the eye reads it as a source reference. */
+.values-slide .attribution {
+    margin-top: 1.4em;
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: calc(var(--small-size) * 0.95);
+    color: var(--fg-faint);
+    letter-spacing: 0.01em;
+    max-width: 56ch;
+}
+.values-slide .attribution em {
+    color: var(--primary);
+}
+/* Photo — magazine print, not UI card. Small radius, soft
+   layered shadow, credit lives outside the frame as a small
+   italic line so the image stays unobstructed. */
+.values-photo {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85em;
+}
+.values-photo img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    display: block;
+    border-radius: 10px;
+    box-shadow:
+        0 18px 50px -24px rgba(20, 20, 19, 0.34),
+        0 2px 6px -2px rgba(20, 20, 19, 0.08);
+}
+.values-photo figcaption {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: calc(var(--small-size) * 0.95);
+    color: var(--fg-faint);
+    letter-spacing: 0.01em;
+    padding-left: 0.2em;
+}
+.values-photo figcaption em {
+    color: var(--primary);
+}
+
+
+/* ===========================================
+   SLIDE 4 — THREE PILLARS (autoplay videos)
+   Mirrors EquitableAI.tsx layout exactly.
+   =========================================== */
+.pillars-header {
+    display: grid;
+    grid-template-columns: 7fr 5fr;
+    gap: clamp(1rem, 3vw, 2.5rem);
+    align-items: end;
+    margin-top: clamp(1.5rem, 3vh, 2.4rem);
+}
+@media (max-width: 800px) {
+    .pillars-header { grid-template-columns: 1fr; }
+}
+.pillars-header h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    line-height: 1.06;
+    letter-spacing: -0.01em;
+}
+.pillars-header h2 em {
+    font-family: var(--font-italic);
+    font-style: italic;
+}
+.pillars-header p {
+    font-size: var(--body-size);
+    color: var(--fg-muted);
+    line-height: 1.55;
+}
+.pillars-grid {
+    flex: 1;
+    margin-top: clamp(1rem, 2.5vh, 2rem);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(1rem, 2vw, 2rem);
+    align-items: stretch;
+    min-height: 0;
+}
+.pillar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6em;
+    min-height: 0;
+}
+.pillar .video-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    max-height: 58vh;
+    overflow: hidden;
+    border-radius: 14px;
+    background: var(--border-soft);
+    box-shadow: 0 18px 50px -28px rgba(0,0,0,0.35);
+}
+.pillar .video-frame video {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.pillar .duration {
+    position: absolute;
+    right: 0.7em; bottom: 0.6em;
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: 0.85em;
+    color: rgba(255,255,255,0.85);
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+.pillar .caption {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: var(--small-size);
+    color: var(--fg-faint);
+    margin-top: 0.4em;
+}
+.pillar h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.15rem, 2.1vw, 1.7rem);
+    line-height: 1.12;
+    color: var(--fg-ink);
+}
+.pillar p {
+    font-size: calc(var(--body-size) * 0.95);
+    color: var(--fg-muted);
+    line-height: 1.5;
+    max-width: 38ch;
+}
+
+/* ===========================================
+   SLIDE 5 — MEET TAINA (split, video right)
+   =========================================== */
+.taina-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 7fr 5fr;
+    gap: clamp(1.5rem, 4vw, 4rem);
+    align-items: center;
+    min-height: 0;
+}
+@media (max-width: 800px) {
+    .taina-grid { grid-template-columns: 1fr; }
+}
+.taina-copy h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(2rem, 5vw, 3.8rem);
+    line-height: 1.04;
+    letter-spacing: -0.015em;
+    margin-top: 0.4em;
+}
+.taina-copy h2 em {
+    font-family: var(--font-italic);
+    font-style: italic;
+    color: var(--primary);
+}
+.taina-copy p {
+    margin-top: 1em;
+    font-size: clamp(0.95rem, 1.45vw, 1.2rem);
+    line-height: 1.55;
+    max-width: 46ch;
+    color: var(--fg-muted);
+}
+.taina-copy .attrib {
+    margin-top: 1em;
+    font-family: var(--font-italic);
+    font-style: italic;
+    color: var(--fg-faint);
+    font-size: var(--small-size);
+}
+.taina-stats {
+    display: flex;
+    gap: clamp(1.4rem, 3vw, 2.4rem);
+    margin-top: 1.6em;
+}
+.taina-stats .s-num {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+    color: var(--primary);
+    line-height: 1;
+}
+.taina-stats .s-lbl {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: var(--small-size);
+    color: var(--fg-muted);
+    margin-top: 0.3em;
+    max-width: 18ch;
+    line-height: 1.3;
+}
+
+.taina-frame {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    aspect-ratio: 4/5;
+    max-height: 78vh;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 28px 70px -28px rgba(0,0,0,0.4);
+    background: var(--border-soft);
+}
+.taina-frame video {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.taina-frame .caption-overlay {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding: 1em 1.2em;
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: var(--small-size);
+    color: rgba(255,255,255,0.95);
+    background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.55) 100%);
+}
+
+/* ===========================================
+   SLIDE 6 — THE DATA COUNCIL  (Nature Guild)
+   Portrait wall of the 8 community scientists who
+   steer GainForest's research priorities and govern
+   Taina-collected data. Mirrors the live NatureGuild
+   grid: circular headshots, single hairline sage ring,
+   wider cream offset ring, name in Cormorant, italic
+   affiliation underneath.
+   =========================================== */
+.council-header {
+    display: grid;
+    grid-template-columns: 7fr 5fr;
+    gap: clamp(1rem, 3vw, 2.5rem);
+    align-items: end;
+    /* Top margin clears the absolute-positioned slide-chrome bar;
+       bottom margin guarantees a real gap between the H1 baseline
+       (or the right column's tallest line, whichever is lower)
+       and the first row of portraits. Without it the right
+       paragraph's bottom collides with the top of row 1. */
+    margin-top: clamp(2rem, 4vh, 3.2rem);
+    margin-bottom: clamp(2rem, 4vh, 3.2rem);
+}
+@media (max-width: 800px) {
+    .council-header { grid-template-columns: 1fr; }
+}
+.council-header h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    /* Trimmed one notch — a smaller H1 keeps the portrait grid
+       the visual anchor of the slide. */
+    font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+    line-height: 1.06;
+    letter-spacing: -0.01em;
+}
+.council-header h2 em {
+    font-family: var(--font-italic);
+    font-style: italic;
+    color: var(--primary);
+}
+.council-header p {
+    font-size: calc(var(--body-size) * 0.95);
+    color: var(--fg-muted);
+    line-height: 1.55;
+    max-width: 44ch;
+}
+.council-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(0.9rem, 1.6vh, 1.6rem) clamp(0.8rem, 1.6vw, 1.4rem);
+    align-content: center;
+    min-height: 0;
+}
+@media (max-width: 900px) {
+    .council-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.council-member {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.2em;
+    min-width: 0;
+}
+.council-member .portrait {
+    /* Trimmed max width from 132 to 112 — leaves more headroom for
+       the name + affiliation lines so 2 rows + labels always fit
+       in the available viewport between header and footer. */
+    width: clamp(64px, 8.6vw, 112px);
+    height: clamp(64px, 8.6vw, 112px);
+    border-radius: 999px;
+    object-fit: cover;
+    background: #fbf8f0;
+    border: 1px solid rgba(62, 112, 83, 0.3);
+    box-shadow:
+        0 0 0 2px var(--bg-cream),
+        0 0 0 3px var(--border-soft),
+        0 4px 18px -10px rgba(20, 30, 15, 0.35);
+}
+.council-member .name {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(0.9rem, 1.25vw, 1.1rem);
+    line-height: 1.15;
+    letter-spacing: -0.005em;
+    color: var(--fg-ink);
+    margin-top: 0.5em;
+}
+.council-member .org {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: clamp(0.7rem, 0.95vw, 0.84rem);
+    line-height: 1.3;
+    color: var(--fg-muted);
+    max-width: 22ch;
+}
+.council-footer {
+    margin-top: clamp(1rem, 2vh, 1.6rem);
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: var(--small-size);
+    color: var(--fg-faint);
+    text-align: center;
+}
+
+/* ===========================================
+   SLIDE 8 — LIVE INDEXER FEED
+   Horizontal marquee of the freshest Bumicert records
+   from the GainForest indexer (last 14 days, baked at
+   build-time by scripts/build-live-records.mjs). Cards
+   show the real PDS image, title, short desc, country,
+   date, and a truncated AT-URI to drive home that
+   these are real records, not stock content.
+   =========================================== */
+/* Single editorial column; the technical meta block
+   (counts, endpoint, sync timestamp) was stripped to
+   keep the slide high-level. */
+.stream-header {
+    margin-top: clamp(2rem, 4vh, 3.2rem);
+}
+.stream-header h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.6rem, 3.4vw, 2.6rem);
+    line-height: 1.06;
+    letter-spacing: -0.01em;
+}
+.stream-header h2 em {
+    font-family: var(--font-italic);
+    font-style: italic;
+    color: var(--primary);
+}
+.stream-header .stream-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7em;
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: var(--eyebrow-size);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+}
+/* Explanatory paragraph under the headline; mirrors
+   .data-copy p so the prose feels native to the deck. */
+.stream-header p {
+    margin-top: 0.9em;
+    font-family: var(--font-body);
+    font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+    line-height: 1.55;
+    max-width: 52ch;
+    color: var(--fg-muted);
+}
+.stream-header p em {
+    font-family: var(--font-italic);
+    font-style: italic;
+    color: var(--primary);
+}
+
+/* Marquee track — the 12 cards are rendered TWICE in a row
+   so the animation can loop seamlessly (we translate one
+   set's width to the left, then the duplicate set takes over
+   the visible area without a visible jump). */
+.stream-stage {
+    flex: 1;
+    margin-top: clamp(1.4rem, 3vh, 2.4rem);
+    position: relative;
+    overflow: hidden;
+    /* Hairline rules above + below the track — reads like a
+       data band cut into the page. */
+    border-top: 1px solid var(--border-soft);
+    border-bottom: 1px solid var(--border-soft);
+    padding: clamp(1rem, 2vh, 1.6rem) 0;
+    min-height: 0;
+    /* Fade-out edges so cards don't pop in/out abruptly. */
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 4%, #000 96%, transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0, #000 4%, #000 96%, transparent 100%);
+}
+.stream-track {
+    display: inline-flex;
+    gap: clamp(0.8rem, 1.4vw, 1.4rem);
+    /* The keyframe translates one full set width to the left
+       (the second set is identical, so the loop is seamless). */
+    animation: stream-scroll 110s linear infinite;
+    will-change: transform;
+}
+.stream-stage:hover .stream-track {
+    /* Pause on hover so the audience can read a specific card
+       if they squint at it during the talk. */
+    animation-play-state: paused;
+}
+@keyframes stream-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+}
+
+.stream-card {
+    flex: 0 0 auto;
+    width: clamp(220px, 22vw, 320px);
+    background: var(--bg-cream);
+    border: 1px solid var(--border-soft);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 26px -18px rgba(20, 30, 15, 0.35);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
+}
+.stream-stage:hover .stream-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 40px -22px rgba(20, 30, 15, 0.45);
+}
+.stream-card .img {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    background: #e1dccf;
+    overflow: hidden;
+}
+.stream-card .img img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.stream-card .img .live-corner {
+    position: absolute;
+    top: 0.55em; left: 0.55em;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    padding: 0.22em 0.6em;
+    border-radius: 999px;
+    background: rgba(244, 239, 228, 0.92);
+    color: var(--brand-mint-dark);
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.stream-card .img .live-corner::before {
+    content: '';
+    width: 0.4em; height: 0.4em; border-radius: 999px;
+    background: var(--brand-mint);
+    box-shadow: 0 0 0 0.16em rgba(47, 206, 138, 0.35);
+    animation: pulse-dot 1.8s var(--ease-out) infinite;
+}
+.stream-card .body {
+    padding: 0.9em 1em 1em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35em;
+    flex: 1;
+}
+.stream-card .title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(0.95rem, 1.15vw, 1.1rem);
+    line-height: 1.18;
+    color: var(--fg-ink);
+    /* Cap to two lines */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.stream-card .desc {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: 0.78rem;
+    line-height: 1.35;
+    color: var(--fg-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.stream-card .meta {
+    margin-top: auto;
+    padding-top: 0.5em;
+    border-top: 1px solid var(--border-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+}
+.stream-card .meta .date-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: var(--font-body);
+    font-size: 0.68rem;
+    color: var(--fg-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.stream-card .meta .at-uri {
+    font-family: 'SF Mono', 'JetBrains Mono', Menlo, monospace;
+    font-size: 0.65rem;
+    color: var(--primary);
+    letter-spacing: -0.01em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.stream-footer {
+    margin-top: clamp(0.8rem, 1.6vh, 1.2rem);
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: var(--small-size);
+    color: var(--fg-faint);
+    text-align: center;
+}
+
+/* ===========================================
+   SLIDE 9 — SPECIMEN WALL  (Darwin Core occurrences)
+   Field-notebook grid of real species observations
+   from app.gainforest.dwc.occurrence — the open
+   biodiversity-standard collection (~417k records).
+   Different rhythm from the streaming slide before it:
+   instead of a horizontal marquee, this is a static
+   specimen wall so the audience can read each card.
+   =========================================== */
+.spec-header {
+    display: grid;
+    grid-template-columns: 7fr 5fr;
+    gap: clamp(1rem, 3vw, 2.5rem);
+    align-items: end;
+    margin-top: clamp(2rem, 4vh, 3.2rem);
+}
+@media (max-width: 800px) {
+    .spec-header { grid-template-columns: 1fr; }
+}
+.spec-header h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.6rem, 3.4vw, 2.6rem);
+    line-height: 1.06;
+    letter-spacing: -0.01em;
+}
+.spec-header h2 em {
+    font-family: var(--font-italic);
+    font-style: italic;
+    color: var(--primary);
+}
+.spec-header .spec-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7em;
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: var(--eyebrow-size);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+}
+.spec-header .meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+    font-family: var(--font-body);
+    font-size: calc(var(--body-size) * 0.95);
+    color: var(--fg-muted);
+    line-height: 1.5;
+}
+.spec-header .meta .total {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.5rem, 2.6vw, 2.2rem);
+    color: var(--fg-ink);
+    letter-spacing: -0.01em;
+    line-height: 1;
+}
+.spec-header .meta .lex {
+    font-family: 'SF Mono', 'JetBrains Mono', Menlo, monospace;
+    font-size: calc(var(--small-size) * 0.95);
+    letter-spacing: -0.01em;
+    color: var(--primary);
+}
+.spec-header .meta .sync {
+    font-family: var(--font-italic);
+    font-style: italic;
+    color: var(--fg-faint);
+}
+
+/* Two-row carousel of square specimen cards — every matching
+   record from the snapshot, split across two rows scrolling in
+   opposite directions (top → left, bottom → right). Each row
+   repeats its content twice for a seamless marquee loop. Hover
+   anywhere on the band to pause both rows. */
+.spec-wall {
+    flex: 1;
+    margin-top: clamp(1.2rem, 2.6vh, 2rem);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.5rem, 0.8vw, 0.85rem);
+    min-height: 0;
+    /* Hairline rules above + below mirror the streaming slide,
+       so the two data slides feel like a matched pair. */
+    border-top: 1px solid var(--border-soft);
+    border-bottom: 1px solid var(--border-soft);
+    padding: clamp(0.8rem, 1.4vh, 1.2rem) 0;
+    overflow: hidden;
+    /* Fade-out edges so cards don't pop in/out abruptly. */
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 3%, #000 97%, transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0, #000 3%, #000 97%, transparent 100%);
+}
+.spec-row {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+}
+.spec-track {
+    display: inline-flex;
+    gap: clamp(0.4rem, 0.7vw, 0.75rem);
+    height: 100%;
+    will-change: transform;
+}
+.spec-track.dir-left  { animation: spec-scroll-left  140s linear infinite; }
+.spec-track.dir-right { animation: spec-scroll-right 160s linear infinite; }
+.spec-wall:hover .spec-track {
+    /* Pause on hover so the audience can read a specific card. */
+    animation-play-state: paused;
+}
+@keyframes spec-scroll-left {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+}
+@keyframes spec-scroll-right {
+    from { transform: translateX(-50%); }
+    to   { transform: translateX(0); }
+}
+
+.spec-card {
+    flex: 0 0 auto;
+    aspect-ratio: 1 / 1;
+    height: 100%;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #e1dccf;
+    border: 1px solid var(--border-soft);
+    transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
+}
+.spec-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px -16px rgba(20, 30, 15, 0.4);
+    z-index: 2;
+}
+.spec-card .img {
+    position: absolute; inset: 0;
+    z-index: 0;
+}
+.spec-card .img img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.7s var(--ease-out);
+}
+.spec-card:hover .img img { transform: scale(1.06); }
+/* Bottom-anchored caption sits over a soft dark wash so the
+   species name stays legible against any photo. */
+.spec-card .cap {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    z-index: 2;
+    padding: 0.55em 0.65em 0.5em;
+    background: linear-gradient(180deg,
+        transparent 0%,
+        rgba(20, 20, 18, 0.55) 45%,
+        rgba(20, 20, 18, 0.85) 100%);
+    color: var(--ink-fg);
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+}
+.spec-card .sci {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: clamp(0.66rem, 0.86vw, 0.84rem);
+    line-height: 1.15;
+    color: var(--ink-fg);
+    /* Cap to 2 lines */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.spec-card .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: 'SF Mono', 'JetBrains Mono', Menlo, monospace;
+    font-size: clamp(0.55rem, 0.7vw, 0.66rem);
+    color: rgba(244, 239, 228, 0.85);
+    letter-spacing: 0;
+    margin-top: 0.1em;
+}
+.spec-card .row .cc {
+    color: var(--brand-mint);
+    font-weight: 500;
+}
+/* Tiny floating IUCN badge — used only when the record
+   carries a conservation status. */
+.spec-card .iucn-tag {
+    position: absolute;
+    top: 0.45em; right: 0.45em;
+    z-index: 2;
+    padding: 0.15em 0.45em;
+    border-radius: 999px;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(244, 239, 228, 0.92);
+    color: var(--primary-dark);
+}
+
+.spec-footer {
+    margin-top: clamp(0.6rem, 1.4vh, 1.2rem);
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: var(--small-size);
+    color: var(--fg-faint);
+    text-align: center;
+}
+
+/* ===========================================
+   SLIDE 7 — COMMUNITY-OWNED DATA  (photos +
+   tiny live Bumicerts panel mock)
+   =========================================== */
+.data-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 6fr 6fr;
+    gap: clamp(1.5rem, 4vw, 4rem);
+    align-items: center;
+    margin-top: clamp(1.5rem, 3vh, 2.5rem);
+    min-height: 0;
+}
+@media (max-width: 800px) {
+    .data-grid { grid-template-columns: 1fr; }
+}
+.data-copy h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.8rem, 4.2vw, 3.2rem);
+    line-height: 1.06;
+    letter-spacing: -0.015em;
+    margin-top: 0.3em;
+}
+.data-copy h2 em {
+    font-family: var(--font-italic);
+    font-style: italic;
+    color: var(--primary);
+}
+.data-copy p {
+    margin-top: 1em;
+    font-size: clamp(0.95rem, 1.4vw, 1.15rem);
+    line-height: 1.55;
+    max-width: 46ch;
+    color: var(--fg-muted);
+}
+.data-stat-row {
+    margin-top: 1.4em;
+    display: flex;
+    gap: clamp(1.2rem, 2.5vw, 2.2rem);
+    flex-wrap: wrap;
+}
+.data-stat .v {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.5rem, 2.8vw, 2.2rem);
+    color: var(--fg-ink);
+    line-height: 1;
+}
+.data-stat .l {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: var(--small-size);
+    color: var(--fg-muted);
+    margin-top: 0.3em;
+    max-width: 18ch;
+    line-height: 1.3;
+}
+
+.data-collage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 7/6;
+    max-height: 70vh;
+}
+.data-collage img {
+    position: absolute;
+    object-fit: cover;
+    box-shadow: 0 24px 60px -24px rgba(0,0,0,0.35);
+    display: block;
+}
+.data-collage .top {
+    right: 0; top: 0;
+    width: 72%;
+    height: 60%;
+}
+.data-collage .bot {
+    left: -3%; bottom: 0;
+    width: 70%;
+    height: 56%;
+}
+.data-collage .badge {
+    position: absolute;
+    top: -1.4em; right: 1em;
+    z-index: 3;
+}
+
+/* ===========================================
+   SLIDE 7 — PROOF & PARTNERS
+   Press / award strip + 50+ partners stat
+   =========================================== */
+.proof-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    align-items: center;
+    margin-top: clamp(1.5rem, 3vh, 2.5rem);
+    min-height: 0;
+}
+@media (max-width: 800px) {
+    .proof-grid { grid-template-columns: 1fr; }
+}
+.proof-copy h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.8rem, 4.2vw, 3.2rem);
+    line-height: 1.06;
+    letter-spacing: -0.015em;
+    margin-top: 0.3em;
+}
+.proof-copy h2 em {
+    font-family: var(--font-italic);
+    font-style: italic;
+    color: var(--primary);
+}
+.proof-stat {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1.4em;
+    gap: 0.2em;
+}
+.proof-stat .big {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(3rem, 7vw, 5.6rem);
+    line-height: 1;
+    color: var(--primary);
+}
+.proof-stat .lbl {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+    color: var(--fg-muted);
+}
+/* Switzerland & Amazonia partnership recognition (Swissnex Brazil) */
+.proof-ack {
+    margin-top: clamp(1em, 2.4vh, 1.5em);
+    padding-top: clamp(0.8em, 1.8vh, 1.1em);
+    border-top: 1px solid var(--border-soft);
+    display: flex; flex-direction: column; gap: 0.5em;
+    max-width: 48ch;
+}
+.proof-ack .ack-label {
+    font-family: var(--font-body); font-size: var(--small-size);
+    letter-spacing: 0.13em; text-transform: uppercase; color: var(--fg-muted);
+}
+.proof-ack .ack-tags { display: flex; flex-wrap: wrap; gap: 0.45em; }
+.proof-ack .ack-tags span {
+    font-family: var(--font-body); font-size: var(--small-size); color: var(--fg-ink);
+    padding: 0.32em 0.72em; border: 1px solid var(--border-soft); border-radius: 999px;
+    background: rgba(28, 28, 26, 0.025);
+}
+.proof-ack .ack-sub {
+    font-family: var(--font-italic); font-style: italic;
+    font-size: var(--small-size); color: var(--fg-muted);
+}
+.proof-ack .ack-sub em { font-style: italic; color: var(--fg-ink); }
+
+.proof-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: clamp(0.7rem, 1.5vw, 1.2rem);
+    height: 100%;
+    max-height: 78vh;
+    min-height: 0;
+}
+@media (max-width: 800px) {
+    .proof-cards { max-height: 50vh; }
+}
+.proof-card {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--ink);
+    color: var(--ink-fg);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: clamp(0.9rem, 1.5vw, 1.3rem);
+    min-height: 0;
+}
+.proof-card img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    opacity: 0.88;
+    transition: transform 0.8s var(--ease-out);
+}
+.proof-card:hover img { transform: scale(1.04); }
+.proof-card::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 30%, rgba(20,20,19,0.85) 100%);
+    z-index: 1;
+}
+.proof-card .meta {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+}
+.proof-card .kind {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brand-mint);
+}
+.proof-card .ttl {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(0.95rem, 1.45vw, 1.2rem);
+    line-height: 1.18;
+    color: var(--ink-fg);
+}
+
+/* ===========================================
+   SLIDE 8 — CLOSING / CTA (ink band)
+   Planetary Healing tie-in + url.
+   =========================================== */
+.closing-slide {
+    justify-content: center;
+}
+.closing-grid {
+    display: grid;
+    grid-template-columns: 6fr 6fr;
+    gap: clamp(2rem, 5vw, 5rem);
+    align-items: center;
+    max-width: min(95vw, 1300px);
+    margin: 0 auto;
+    width: 100%;
+}
+@media (max-width: 800px) {
+    .closing-grid { grid-template-columns: 1fr; }
+}
+.closing-copy h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(2.2rem, 6vw, 5rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+}
+.closing-copy h2 em {
+    font-family: var(--font-italic);
+    font-style: italic;
+    color: var(--brand-mint);
+}
+.closing-copy p {
+    margin-top: 1em;
+    font-size: clamp(1rem, 1.45vw, 1.2rem);
+    line-height: 1.55;
+    color: rgba(244, 239, 228, 0.72);
+    max-width: 44ch;
+}
+.closing-cta-row {
+    margin-top: 1.8em;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8em 1.2em;
+    align-items: center;
+}
+.closing-cta-row .url {
+    font-family: var(--font-italic);
+    font-style: italic;
+    color: var(--ink-fg);
+    font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+    letter-spacing: -0.005em;
+}
+.closing-photo-stack {
+    position: relative;
+    aspect-ratio: 1/1;
+    max-width: 460px;
+    margin-left: auto;
+    width: 100%;
+}
+.closing-photo-stack img {
+    position: absolute;
+    border-radius: 10px;
+    object-fit: cover;
+    box-shadow: 0 30px 80px -30px rgba(0,0,0,0.7);
+}
+.closing-photo-stack .img-a {
+    top: 0; left: 6%;
+    width: 70%; height: 70%;
+    transform: rotate(-2.5deg);
+}
+.closing-photo-stack .img-b {
+    bottom: 0; right: 0;
+    width: 70%; height: 60%;
+    transform: rotate(2deg);
+}
+.closing-photo-stack .glow {
+    position: absolute;
+    inset: 8% -4% -8% -4%;
+    background: radial-gradient(circle at 40% 60%, rgba(47, 206, 138, 0.22) 0%, transparent 60%);
+    z-index: -1;
+    border-radius: 50%;
+    filter: blur(40px);
+}
+
+/* ===========================================
+   PROGRESS BAR + NAV DOTS
+   =========================================== */
+.progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    background: var(--primary);
+    width: 0%;
+    z-index: 100;
+    transition: width 0.25s var(--ease-out);
+}
+.nav-dots {
+    position: fixed;
+    right: clamp(0.8rem, 1.4vw, 1.4rem);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 0.6em;
+    z-index: 50;
+}
+.nav-dots button {
+    width: 9px; height: 9px;
+    border-radius: 999px;
+    background: rgba(28,28,26,0.22);
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.25s var(--ease-out), transform 0.25s var(--ease-out);
+}
+.nav-dots button.active {
+    background: var(--primary);
+    transform: scale(1.4);
+}
+.slide-ink .nav-dots-rebind button { background: rgba(244,239,228,0.3); }
+/* Body class flip when active slide is ink — handled in JS */
+body.on-ink .nav-dots button { background: rgba(244,239,228,0.22); }
+body.on-ink .nav-dots button.active { background: var(--brand-mint); }
+
+.keyboard-hint {
+    position: fixed;
+    left: 50%;
+    bottom: 1.2rem;
+    transform: translateX(-50%);
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-size: 0.75rem;
+    color: var(--fg-faint);
+    letter-spacing: 0.04em;
+    z-index: 50;
+    pointer-events: none;
+    transition: opacity 0.4s var(--ease-out);
+}
+body.on-ink .keyboard-hint { color: rgba(244,239,228,0.55); }
+.keyboard-hint.hidden { opacity: 0; }
+
+/* ===========================================
+   LISTEN intro — a three-slide narrative arc
+   that opens the talk with a mystery sound:
+     1. listen  — "what is this sound?" + a live
+        scrolling spectrogram of a 60s AudioMoth
+        field recording (right arrow plays it).
+     2. marina  — the story (Marina Mura laughed).
+     3. howler  — the reveal (Amazon black howler).
+   The spectrogram is hand-coloured ink -> sage ->
+   mint -> cream so it sits on the ink band. See
+   the ListenIntro controller in the script.
+   =========================================== */
+.listen-slide { justify-content: center; }
+.listen-frame {
+    display: flex; flex-direction: column;
+    gap: clamp(0.85rem, 2.2vh, 1.5rem);
+    width: 100%; max-width: 1180px; margin: 0 auto;
+}
+.listen-head {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: var(--display-tight); line-height: 1.04;
+    letter-spacing: -0.015em; color: var(--ink-fg);
+    max-width: 18ch;
+}
+.listen-head em {
+    font-family: var(--font-italic); font-style: italic;
+    color: var(--brand-mint);
+}
+.spectro-stage {
+    position: relative; width: 100%;
+    height: clamp(190px, 40vh, 400px);
+    border-radius: 14px; overflow: hidden;
+    background: var(--ink);
+    border: 1px solid #2a2a27;
+    box-shadow: 0 24px 60px -30px rgba(0,0,0,0.75);
+    cursor: pointer;   /* click anywhere to play / pause the clip */
+}
+.spectro-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.spectro-axis {
+    position: absolute; inset: 0; pointer-events: none; z-index: 2;
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding: 0.55rem 0;
+    font-family: var(--font-body); font-size: 0.6rem;
+    letter-spacing: 0.05em; color: rgba(244,239,228,0.32);
+}
+.spectro-axis span { padding-left: 0.7rem; }
+.spectro-progress {
+    position: absolute; left: 0; bottom: 0; height: 3px; width: 0%;
+    background: var(--brand-mint); z-index: 3;
+    box-shadow: 0 0 12px rgba(47,206,138,0.7);
+}
+.spectro-idle {
+    position: absolute; inset: 0; z-index: 4;
+    display: flex; flex-direction: column; gap: 0.45rem;
+    align-items: center; justify-content: center; text-align: center;
+    background: radial-gradient(130% 130% at 50% 50%, rgba(20,20,19,0.1), rgba(20,20,19,0.72));
+    transition: opacity 0.55s var(--ease-out);
+}
+/* Hide the play overlay only while actually playing; when paused or
+   ended it returns so the visitor can click to resume / replay. */
+.spectro-stage.playing .spectro-idle { opacity: 0; pointer-events: none; }
+.spectro-play {
+    appearance: none; -webkit-appearance: none; border: 0; cursor: pointer;
+    width: clamp(54px, 7vw, 74px); height: clamp(54px, 7vw, 74px);
+    border-radius: 999px; display: flex; align-items: center; justify-content: center;
+    color: var(--ink); background: var(--brand-mint);
+    box-shadow: 0 12px 32px -8px rgba(47,206,138,0.6);
+    transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+}
+.spectro-play:hover { transform: scale(1.06); box-shadow: 0 16px 38px -8px rgba(47,206,138,0.78); }
+.spectro-play:active { transform: scale(0.97); }
+.spectro-play svg { width: 42%; height: 42%; fill: currentColor; margin-left: 6%; }
+.spectro-cue {
+    font-family: var(--font-italic); font-style: italic;
+    font-size: clamp(1.05rem, 2vw, 1.5rem); color: var(--ink-fg);
+}
+.spectro-sub { font-family: var(--font-body); font-size: var(--small-size); color: var(--ink-muted); }
+.spectro-cue kbd, .spectro-sub kbd {
+    font-family: var(--font-body); font-style: normal; font-weight: 600;
+    font-size: 0.82em; padding: 0.04em 0.5em; margin: 0 0.12em;
+    border-radius: 6px; color: var(--brand-mint);
+    background: rgba(47,206,138,0.14); border: 1px solid rgba(47,206,138,0.42);
+}
+.spectro-meta {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; flex-wrap: wrap;
+    font-family: var(--font-body); font-size: var(--small-size); color: var(--ink-muted);
+}
+.spectro-state { display: inline-flex; align-items: center; gap: 0.55em; font-variant-numeric: tabular-nums; }
+.spectro-dot { width: 0.5em; height: 0.5em; border-radius: 999px; background: var(--ink-muted); transition: background 0.3s, box-shadow 0.3s; }
+.spectro-dot.live { background: var(--brand-mint); box-shadow: 0 0 0 0.16em rgba(47,206,138,0.2); }
+#spectro-time { color: rgba(244,239,228,0.5); }
+
+/* ---- slide 2 : Marina story (split copy + portrait) ---- */
+.story-grid {
+    display: grid; grid-template-columns: 1.04fr 0.96fr;
+    gap: clamp(1.6rem, 4vw, 3.4rem); align-items: center;
+    width: 100%; max-width: 1180px; margin: 0 auto; flex: 1; min-height: 0;
+}
+.story-copy { display: flex; flex-direction: column; gap: clamp(0.7rem, 1.8vh, 1.3rem); }
+.story-head {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: var(--h2-size); line-height: 1.08;
+    letter-spacing: -0.015em; color: var(--ink-fg); max-width: 16ch;
+}
+.story-head em { font-family: var(--font-italic); font-style: italic; color: var(--brand-mint); }
+.story-body { font-size: var(--body-size); color: var(--ink-muted); max-width: 36ch; line-height: 1.55; }
+.story-body em { font-family: var(--font-italic); font-style: italic; color: var(--ink-fg); }
+.story-portrait {
+    position: relative; width: 100%; aspect-ratio: 4 / 3; max-height: 60vh;
+    border-radius: 16px; overflow: hidden;
+    border: 1px solid #2a2a27; box-shadow: 0 30px 70px -34px rgba(0,0,0,0.8);
+}
+.story-portrait img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.story-cap {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-direction: column; gap: 0.1em;
+    padding: 1.5rem 1.2rem 1rem;
+    background: linear-gradient(to top, rgba(10,10,9,0.92), rgba(10,10,9,0));
+    font-family: var(--font-body); color: var(--ink-fg);
+}
+.story-cap strong { font-weight: 600; font-size: clamp(0.95rem,1.5vw,1.2rem); }
+.story-cap span { font-size: var(--small-size); color: var(--ink-muted); }
+
+/* ---- slide 3 : the howler reveal (full-bleed photo) ---- */
+.reveal-slide { padding: 0; overflow: hidden; }
+.reveal-photo { position: absolute; inset: 0; }
+.reveal-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.reveal-scrim {
+    position: absolute; inset: 0;
+    background:
+        linear-gradient(to top, rgba(10,10,9,0.92) 4%, rgba(10,10,9,0.12) 46%, rgba(10,10,9,0.46) 100%),
+        linear-gradient(to right, rgba(10,10,9,0.7), rgba(10,10,9,0) 60%);
+}
+.reveal-body {
+    position: absolute; left: var(--slide-padding); right: var(--slide-padding);
+    bottom: clamp(2rem, 7vh, 4rem); z-index: 2;
+    display: flex; flex-direction: column; gap: clamp(0.5rem, 1.4vh, 1rem);
+    max-width: 30ch;
+}
+.reveal-eyebrow { color: rgba(244,239,228,0.78) !important; }
+.reveal-head {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: var(--display-tight); line-height: 1.02;
+    letter-spacing: -0.015em; color: var(--ink-fg);
+}
+.reveal-species {
+    font-family: var(--font-italic); font-style: italic;
+    font-size: clamp(1.1rem, 2.2vw, 1.7rem); color: var(--brand-mint);
+}
+.reveal-fact { font-size: var(--body-size); color: rgba(244,239,228,0.82); max-width: 32ch; line-height: 1.5; }
+.reveal-credit {
+    position: absolute; right: var(--slide-padding); top: clamp(1rem, 2.4vw, 1.8rem);
+    z-index: 2; font-family: var(--font-body); font-size: 0.62rem;
+    letter-spacing: 0.03em; color: rgba(244,239,228,0.5);
+}
+
+@media (max-width: 820px) {
+    .story-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .story-portrait { max-height: 34vh; }
+    .reveal-body { max-width: none; }
+}
+
+/* ---- slide 0d : the acoustic-niche soundscape clock (cream) ---- */
+.niche-slide { justify-content: center; }
+.niche-grid {
+    display: grid; grid-template-columns: 0.82fr 1.18fr;
+    gap: clamp(1.4rem, 4vw, 3.2rem); align-items: center;
+    width: 100%; max-width: 1240px; margin: 0 auto; flex: 1; min-height: 0;
+}
+.niche-copy { display: flex; flex-direction: column; gap: clamp(0.7rem, 1.8vh, 1.2rem); }
+.niche-head {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: var(--h2-size); line-height: 1.08;
+    letter-spacing: -0.015em; color: var(--fg-ink); max-width: 15ch;
+}
+.niche-head em { font-family: var(--font-italic); font-style: italic; color: var(--primary); }
+.niche-sub { font-size: var(--body-size); color: var(--fg-muted); max-width: 36ch; line-height: 1.55; }
+.niche-legend { list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem 1.1rem; }
+.niche-legend li { display: inline-flex; align-items: center; gap: 0.5em; font-size: var(--small-size); color: var(--fg-ink); }
+.niche-legend i { width: 0.85em; height: 0.85em; border-radius: 3px; background: var(--c); }
+.niche-foot { font-family: var(--font-italic); font-style: italic; font-size: var(--small-size); color: var(--fg-faint); max-width: 34ch; }
+.niche-stage { position: relative; width: min(100%, 80vh); aspect-ratio: 1 / 1; margin-inline: auto; }
+#niche-svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+@media (max-width: 900px) {
+    .niche-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .niche-stage { width: min(100%, 46vh); }
+}
+
+/* ---- soundscape comparison : biodiversity as a vital sign ---- */
+.compare-slide { justify-content: flex-start; gap: clamp(0.5rem, 1.4vh, 1rem); }
+.compare-head { width: 100%; max-width: 1220px; margin: clamp(1.6rem, 4vh, 2.8rem) auto 0; display: flex; flex-direction: column; gap: 0.35rem; }
+.compare-title { font-family: var(--font-display); font-weight: 400; font-size: var(--h2-size); line-height: 1.06; letter-spacing: -0.015em; color: var(--fg-ink); }
+.compare-title em { font-family: var(--font-italic); font-style: italic; color: var(--primary); }
+.compare-sub { font-size: var(--body-size); color: var(--fg-muted); max-width: 66ch; line-height: 1.5; }
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1rem, 3vw, 2.6rem); width: 100%; max-width: 1220px; margin: 0 auto; flex: 1; min-height: 0; }
+.compare-card { display: flex; flex-direction: column; align-items: center; gap: 0.45rem; min-height: 0; }
+.compare-cap { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.08em; }
+.compare-name { font-family: var(--font-display); font-size: clamp(1.15rem, 2.1vw, 1.7rem); color: var(--fg-ink); letter-spacing: -0.01em; }
+.compare-place { font-size: var(--small-size); color: var(--fg-muted); }
+.compare-verdict { margin-top: 0.2em; font-size: var(--small-size); letter-spacing: 0.05em; display: inline-flex; align-items: center; gap: 0.5em; }
+.compare-verdict::before { content: ''; width: 0.5em; height: 0.5em; border-radius: 999px; background: currentColor; }
+.compare-verdict.good { color: var(--brand-mint-dark); }
+.compare-verdict.weak { color: var(--fg-faint); }
+.compare-card img { flex: 1; min-height: 0; width: 100%; object-fit: contain; }
+.compare-foot { width: 100%; max-width: 1220px; margin: 0 auto; font-family: var(--font-italic); font-style: italic; font-size: var(--small-size); color: var(--fg-faint); }
+@media (max-width: 820px) {
+    .compare-grid { grid-template-columns: 1fr; gap: 0.8rem; }
+}
+
+/* ---- Ma Earth collective funding round (before the closing slide) ---- */
+/* ---- slide : bumimic 3D board (interactive model-viewer) ---- */
+.bumi-slide { justify-content: center; }
+.bumi-grid {
+    display: grid; grid-template-columns: 0.86fr 1.14fr;
+    gap: clamp(1.6rem, 4vw, 3.2rem); align-items: center;
+    width: 100%; max-width: 1240px; margin: 0 auto; flex: 1; min-height: 0;
+}
+.bumi-copy { display: flex; flex-direction: column; gap: clamp(0.8rem, 2vh, 1.3rem); }
+.bumi-title {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: var(--display-tight); line-height: 1.04;
+    letter-spacing: -0.015em; color: var(--fg-ink); max-width: 12ch;
+}
+.bumi-title em { font-family: var(--font-italic); font-style: italic; color: var(--primary); }
+.bumi-sub { font-size: var(--body-size); color: var(--fg-muted); max-width: 44ch; line-height: 1.55; }
+.bumi-sub strong { color: var(--primary); font-weight: 600; }
+.bumi-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.bumi-chip {
+    font-family: var(--font-body); font-size: var(--small-size); font-weight: 500;
+    color: var(--fg-ink); background: var(--bg-cream-warm);
+    border: 1px solid var(--border-soft); border-radius: 999px;
+    padding: 0.38em 0.95em; white-space: nowrap;
+}
+.bumi-chip b { color: var(--primary); font-weight: 600; }
+.bumi-stage {
+    position: relative; height: min(62vh, 560px); min-height: 320px;
+    background:
+        radial-gradient(ellipse at 50% 42%, rgba(62,112,83,0.10), transparent 62%),
+        var(--bg-cream-warm);
+    border: 1px solid var(--border-soft); border-radius: 18px;
+    overflow: hidden;
+}
+.bumi-stage model-viewer {
+    width: 100%; height: 100%; display: block;
+    --poster-color: transparent;
+    background: transparent;
+}
+.bumi-stage .bumi-hint {
+    position: absolute; left: 50%; bottom: 0.85rem; transform: translateX(-50%);
+    font-family: var(--font-body); font-size: var(--small-size);
+    color: var(--fg-faint); pointer-events: none; white-space: nowrap;
+}
+.bumi-stage .bumi-live {
+    position: absolute; top: 0.85rem; left: 0.95rem;
+    display: inline-flex; align-items: center; gap: 0.45em;
+    font-family: var(--font-body); font-size: var(--small-size); font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase; color: var(--primary-dark);
+}
+.bumi-stage .bumi-live::before {
+    content: ''; width: 0.55em; height: 0.55em; border-radius: 50%;
+    background: var(--brand-mint); box-shadow: 0 0 0 0 rgba(47,206,138,0.5);
+    animation: bumiPulse 2.2s infinite;
+}
+@keyframes bumiPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(47,206,138,0.45); }
+    70%  { box-shadow: 0 0 0 9px rgba(47,206,138,0); }
+    100% { box-shadow: 0 0 0 0 rgba(47,206,138,0); }
+}
+@media (max-width: 900px) {
+    .bumi-grid { grid-template-columns: 1fr; }
+    .bumi-stage { height: 44vh; }
+}
+
+.fund-slide { justify-content: center; }
+.fund-grid {
+    display: grid; grid-template-columns: 0.82fr 1.18fr;
+    gap: clamp(1.6rem, 4vw, 3.4rem); align-items: center;
+    width: 100%; max-width: 1240px; margin: 0 auto;
+}
+.fund-copy { display: flex; flex-direction: column; gap: clamp(0.75rem, 1.9vh, 1.25rem); }
+.fund-title {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: var(--display-tight); line-height: 1.04;
+    letter-spacing: -0.015em; color: var(--fg-ink); max-width: 13ch;
+}
+.fund-title em { font-family: var(--font-italic); font-style: italic; color: var(--primary); }
+.fund-sub { font-size: var(--body-size); color: var(--fg-muted); max-width: 46ch; line-height: 1.55; }
+.fund-sub strong { color: var(--primary); font-weight: 600; }
+.fund-copy .cta-pill { margin-top: 0.4rem; align-self: flex-start; }
+/* a browser-window frame around the live Ma Earth landing screenshot */
+.maearth-window {
+    width: 100%; border-radius: 14px; overflow: hidden;
+    border: 1px solid var(--border-soft); background: #fff;
+    box-shadow: 0 30px 72px -36px rgba(0, 0, 0, 0.45);
+}
+.mw-bar {
+    display: flex; align-items: center; gap: 0.5em;
+    padding: 0.5em 0.85em; background: #efe9dc;
+    border-bottom: 1px solid var(--border-soft);
+}
+.mw-bar .mw-dot { width: 0.62em; height: 0.62em; border-radius: 999px; background: #cfc7b4; }
+.mw-bar .mw-url {
+    margin-left: 0.55em; font-family: var(--font-body); font-size: var(--small-size);
+    color: var(--fg-muted); background: #fff; padding: 0.18em 0.85em;
+    border-radius: 999px; border: 1px solid var(--border-soft);
+}
+.maearth-window img { display: block; width: 100%; height: auto; }
+@media (max-width: 820px) {
+    .fund-grid { grid-template-columns: 1fr; gap: 1.2rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- Top progress bar + side dots are global UI -->
+<div class="progress-bar"></div>
+<nav class="nav-dots" aria-label="Slides"></nav>
+<div class="keyboard-hint">← → · space · scroll</div>
+
+<!-- ============================================================
+     SLIDE 1 · TITLE  (elegant + classic)
+     Centered split composition: GainForest logo mark + word-
+     mark + meta on the left; a slowly rotating Earth on the
+     right. No brush stroke, no video — just the brand mark,
+     a hairline rule, and the planet turning.
+     ============================================================ -->
+<section class="slide title-slide" data-section="title">
+    <div class="slide-chrome">
+        <span class="brand-mark">GainForest</span>
+        <span class="page-num">Case study</span>
+    </div>
+
+    <div class="title-frame">
+        <!-- LEFT: brand mark, wordmark, italic tagline, meta -->
+        <div class="title-copy">
+            <span class="title-eyebrow-line reveal">
+                Decision Sovereignty for Nature · ETH Zurich
+            </span>
+            <div class="title-logo reveal" aria-label="GainForest logo"></div>
+            <h1 class="title-wordmark reveal">GainForest</h1>
+            <div class="title-rule reveal" aria-hidden="true"></div>
+            <p class="title-tagline reveal">
+                We build open tools for <em>regenerative intelligence</em>.
+            </p>
+
+            <div class="title-meta-row reveal">
+                <div class="speaker">
+                    <img src="assets/david-dao.webp" alt="Dr. David Dao">
+                    <div class="meta-block">
+                        <span class="lbl">Speaker</span>
+                        <span class="val">Dr. David Dao</span>
+                    </div>
+                </div>
+                <div class="meta-block">
+                    <span class="lbl">Hosted by</span>
+                    <span class="val">AI4PG &amp; ETH AI Center</span>
+                </div>
+                <div class="meta-block">
+                    <span class="lbl">Full-day workshop</span>
+                    <span class="val">22 July 2026 · ETH Zurich</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: the LIVE Green Globe.
+             Same three-globe + blue-marble + bump + dark-green
+             atmosphere + ping-ring config as LiveGlobe.tsx in
+             the running app. Real partner pins are fetched at
+             slide-load time from data.gainforest.app's
+             /api/list-organizations (50+ real ATProto orgs)
+             with FALLBACK_PINS baked in so the globe is never
+             empty if the upstream is unreachable. Auto-rotates,
+             zoom disabled, transparent canvas so the cream
+             slide surface shows through. -->
+        <div class="earth-stage reveal-scale" id="earth-stage" aria-label="Live globe of community partners">
+            <div class="earth-glow" aria-hidden="true"></div>
+            <div id="earth-host"></div>
+            <div class="earth-skeleton" aria-hidden="true"></div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Field-recording audio for the opening narrative. The 60s
+     AudioMoth clip (AAC transcode of the source FLAC) is played
+     once, on the listen slide, behind the live spectrogram. Routed
+     through a Web Audio AnalyserNode by the ListenIntro controller
+     below; not autoplayed — the first right-arrow press is the user
+     gesture that starts the context. -->
+<audio id="listen-audio" preload="auto" crossorigin="anonymous">
+    <source src="assets/forest-sound.m4a" type="audio/mp4">
+</audio>
+
+<!-- ============================================================
+     SLIDE 0 · LISTEN  (the mystery sound)
+     Opens the talk with a question. The right arrow plays a 60s
+     AudioMoth field recording and a live scrolling spectrogram
+     (Web Audio AnalyserNode); a second press advances to the
+     story slide. See ListenIntro in the script.
+     ============================================================ -->
+<section class="slide slide-ink listen-slide" data-section="listen">
+    <div class="slide-chrome">
+        <span class="brand-mark">GainForest</span>
+        <span class="page-num">Listen · what is this?</span>
+    </div>
+
+    <div class="listen-frame">
+        <h2 class="listen-head reveal">What <em>is</em> this sound?</h2>
+
+        <div class="spectro-stage reveal-scale" id="spectro-stage">
+            <canvas class="spectro-canvas" id="spectro-canvas"></canvas>
+            <div class="spectro-axis" aria-hidden="true">
+                <span>16 kHz</span><span>4 kHz</span><span>1 kHz</span><span>250 Hz</span>
+            </div>
+            <div class="spectro-progress" id="spectro-progress"></div>
+            <div class="spectro-idle" id="spectro-idle">
+                <button type="button" class="spectro-play" id="spectro-play"
+                        aria-label="Play the field recording">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+                <div class="spectro-cue" id="spectro-cue">Press <kbd>→</kbd> or click to play</div>
+            </div>
+        </div>
+
+
+    </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 0b · THE STORY  (Marina Mura)
+     The turn: I was afraid of the sound until Marina Mura, our
+     Indigenous scientist, laughed and told me not to worry.
+     ============================================================ -->
+<section class="slide slide-ink story-slide" data-section="marina">
+    <div class="slide-chrome">
+        <span class="brand-mark">GainForest</span>
+        <span class="page-num">Listen · the story</span>
+    </div>
+
+    <div class="story-grid">
+        <div class="story-copy">
+            <h2 class="story-head reveal">I was afraid of it ; until <em>Marina Mura</em> laughed.</h2>
+        </div>
+        <figure class="story-portrait reveal-scale">
+            <img src="assets/marina-mura.webp"
+                 alt="Marina Mura holding a survey drone during fieldwork in the Amazon">
+        </figure>
+    </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 0c · THE REVEAL  (Amazon black howler)
+     Full-bleed photo of the howler mid-call ; the answer to the
+     mystery sound from the listen slide.
+     ============================================================ -->
+<section class="slide slide-ink reveal-slide" data-section="howler">
+    <div class="reveal-photo">
+        <img src="assets/howler-monkey.webp"
+             alt="An Amazon black howler monkey calling from a branch in the canopy">
+    </div>
+    <div class="reveal-scrim" aria-hidden="true"></div>
+
+    <div class="slide-chrome">
+        <span class="brand-mark">GainForest</span>
+    </div>
+
+    <div class="reveal-body">
+        <h2 class="reveal-head reveal">It's an Amazon black howler.</h2>
+        <span class="reveal-species reveal">Alouatta nigerrima</span>
+    </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 2 · THE PROBLEM (ink band)
+     Frame the planetary-healing gap with the 1% data stat.
+     ============================================================ -->
+<section class="slide slide-ink" data-section="problem">
+    <div class="slide-chrome">
+        <span class="brand-mark">GainForest</span>
+        <span class="page-num">02 · The blind spot</span>
+    </div>
+
+    <div class="problem-grid">
+        <div class="huge-stat reveal-scale" aria-label="Only one percent">
+            <span class="counter" data-target="1" data-suffix=""></span><span class="pct">%</span>
+            <span class="underline" aria-hidden="true"></span>
+        </div>
+
+        <div>
+            <p class="problem-claim reveal">
+                Only <em>1%</em> of global biodiversity data comes from the world's largest rainforests.
+            </p>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 3 · MISSION
+     Big brushed headline — same composition as the live hero.
+     ============================================================ -->
+<section class="slide mission-slide" data-section="mission">
+    <div class="slide-chrome">
+        <span class="brand-mark">GainForest</span>
+        <span class="page-num">03 · Our mission</span>
+    </div>
+
+    <div class="mission-frame">
+        <h2 class="mission-headline reveal">
+            We build
+            <span class="brushed">
+                open
+                <svg viewBox="0 0 178 16" preserveAspectRatio="none" aria-hidden="true">
+                    <path class="brush-path"
+                          d="M 3 10.5 C 44 6.5 87 6 175 8.5" />
+                </svg>
+            </span>
+            tools for<br>
+            <em>regenerative intelligence</em>.
+        </h2>
+    </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 4 · VALUES  (Indigenous data sovereignty ; data is soil)
+     Sets up the philosophical frame for the technical
+     section that follows. Mirrors the mission slide's
+     typographic system (mission-headline + sub + tag-row)
+     so the two editorial slides read as siblings.
+
+     Headline is the iconic line; the rest of the slide is
+     built on Audrey Tang's "Supplementary Statement on
+     Indigenous Data Sovereignty and AI" submitted to the
+     Senate of Canada (2026). The cultivation framing,
+     community-defined boundaries, and the right to inspect /
+     correct / reject / remain unmodeled all come from there.
+     ============================================================ -->
+<section class="slide mission-slide values-slide" data-section="values">
+    <div class="slide-chrome">
+        <span class="brand-mark">GainForest</span>
+        <span class="page-num">04 · Data is soil</span>
+    </div>
+
+    <div class="mission-frame">
+        <div class="values-copy">
+            <h2 class="mission-headline reveal">
+                Data is not oil.<br>
+                <em>Data is soil.</em>
+            </h2>
+        </div>
+
+        <figure class="values-photo reveal-scale">
+            <img src="assets/atmos-cassiel-hands.webp"
+                 alt="Close-up of hands tending bark on a tree in the Amazon, from the Atmos feature on Taina"
+                 loading="lazy" decoding="async">
+        </figure>
+    </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 5 · THREE PILLARS (autoplay videos)
+     ============================================================ -->
+<section class="slide" data-section="pillars">
+    <div class="slide-chrome">
+        <span class="brand-mark">GainForest</span>
+        <span class="page-num">05 · Local-first AI</span>
+    </div>
+
+    <div class="pillars-header" style="margin-top: clamp(2rem, 5vh, 3rem);">
+        <div>
+            <h2 class="reveal" style="margin-top: 0.4em;">
+                We build local-first <em>technology</em><br>and AI.
+            </h2>
+        </div>
+    </div>
+
+    <div class="pillars-grid">
+        <article class="pillar reveal">
+            <div class="video-frame">
+                <video src="assets/pillar-ai-assistants.mp4"
+                       poster="assets/pillar-ai-assistants-poster.webp"
+                       muted playsinline loop preload="metadata"
+                       aria-label="Indigenous scientists using the Taina AI assistant"></video>
+            </div>
+            <h3>AI Assistants</h3>
+        </article>
+
+        <article class="pillar reveal">
+            <div class="video-frame">
+                <video src="assets/pillar-bioacoustics.mp4"
+                       poster="assets/pillar-bioacoustics-poster.webp"
+                       muted playsinline loop preload="metadata"
+                       aria-label="Field researcher recording bioacoustic data in mangrove forest"></video>
+            </div>
+            <h3>Bioacoustics</h3>
+        </article>
+
+        <article class="pillar reveal">
+            <div class="video-frame">
+                <video src="assets/pillar-remote-sensing.mp4"
+                       poster="assets/pillar-remote-sensing-poster.webp"
+                       muted playsinline loop preload="metadata"
+                       aria-label="Aerial canopy footage with tree-crown segmentation"></video>
+            </div>
+            <h3>Remote Sensing</h3>
+        </article>
+    </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 5 · MEET TAINA
+     Real Indigenous-scientist footage; community AI thesis.
+     ============================================================ -->
+<section class="slide" data-section="taina">
+    <div class="slide-chrome">
+        <span class="brand-mark">GainForest</span>
+        <span class="page-num">06 · Indigenous AI</span>
+    </div>
+
+    <div class="taina-grid">
+        <div class="taina-copy">
+            <h2 class="reveal">Meet <em>Taina</em>,<br>our community AI.</h2>
+        </div>
+
+        <div class="reveal-scale">
+            <div class="taina-frame">
+                <!-- Taina clip plays WITH sound on enter (data-sound).
+                     preload="auto" so the audio is buffered before the
+                     slide is reached; the playVideos() fallback drops
+                     to muted only if a browser blocks unmuted autoplay. -->
+                <video src="assets/taina-feature.mp4"
+                       poster="assets/taina-feature-poster.webp"
+                       playsinline loop preload="auto" data-sound
+                       aria-label="Indigenous scientists from Greater Manaus speaking about Taina"></video>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 8 · DATA COUNCIL  (Nature Guild portrait wall)
+     Real headshots of the 8 community scientists who steer
+     GainForest's research priorities and govern Taina-
+     collected data. Same portrait recipe as the live
+     NatureGuild grid — mirrored asset-for-asset.
+     ============================================================ -->
+<section class="slide" data-section="council">
+    <div class="slide-chrome">
+        <span class="brand-mark">GainForest</span>
+        <span class="page-num">07 · Data Council</span>
+    </div>
+
+    <div class="council-header">
+        <div>
+            <h2 class="reveal" style="margin-top: 0.3em;">
+                We listen to our <em>Nature Guild</em>.
+            </h2>
+        </div>
+    </div>
+
+    <div class="council-grid">
+        <figure class="council-member reveal">
+            <img class="portrait" src="assets/guild/stephen-bright-sakwa.png" alt="Stephen Bright Sakwa">
+            <figcaption class="name">Stephen Bright Sakwa</figcaption>
+            <span class="org">Uganda</span>
+        </figure>
+        <figure class="council-member reveal">
+            <img class="portrait" src="assets/guild/jaya-kandir.png" alt="Jaya Kandir">
+            <figcaption class="name">Jaya Kandir</figcaption>
+            <span class="org">India</span>
+        </figure>
+        <figure class="council-member reveal">
+            <img class="portrait" src="assets/guild/esayu-daniel.png" alt="Esayu Daniel">
+            <figcaption class="name">Esayu Daniel</figcaption>
+            <span class="org">Uganda</span>
+        </figure>
+        <figure class="council-member reveal">
+            <img class="portrait" src="assets/guild/njambi-njoroge.png" alt="Njambi Njoroge">
+            <figcaption class="name">Njambi Njoroge</figcaption>
+            <span class="org">Kenya</span>
+        </figure>
+        <figure class="council-member reveal">
+            <img class="portrait" src="assets/guild/simon-peter-okoth.png" alt="Simon Peter Okoth">
+            <figcaption class="name">Simon Peter Okoth</figcaption>
+            <span class="org">Uganda</span>
+        </figure>
+        <figure class="council-member reveal">
+            <img class="portrait" src="assets/guild/marina-mura.jpg" alt="Marina Mura">
+            <figcaption class="name">Marina Mura</figcaption>
+            <span class="org">Brazil</span>
+        </figure>
+        <figure class="council-member reveal">
+            <img class="portrait" src="assets/guild/nurfatin-hamzah.jpg" alt="Nurfatin Hamzah">
+            <figcaption class="name">Nurfatin Hamzah</figcaption>
+            <span class="org">Malaysia</span>
+        </figure>
+        <figure class="council-member reveal">
+            <img class="portrait" src="assets/guild/tin-dalida.jpg" alt="Tin Dalida">
+            <figcaption class="name">Tin Dalida</figcaption>
+            <span class="org">Philippines</span>
+        </figure>
+    </div>
+
+</section>
+
+
+<!-- ============================================================
+     SLIDE 7 · COMMUNITY-OWNED DATA  (Bumicerts + Globe)
+     ============================================================ -->
+<section class="slide" data-section="data">
+    <div class="slide-chrome">
+        <span class="brand-mark">GainForest</span>
+        <span class="page-num">08 · Data commons</span>
+    </div>
+
+    <div class="data-grid">
+        <div class="data-copy">
+            <h2 class="reveal">
+                The first <em>community-owned</em><br>
+                data commons for biodiversity.
+            </h2>
+        </div>
+
+        <div class="data-collage reveal-scale">
+            <span class="badge live-pill">Live</span>
+            <img src="assets/community-drone.webp"
+                 alt="Indigenous community gathering inside a maloca, launching a drone"
+                 class="top">
+            <img src="assets/community-mangrove.webp"
+                 alt="Field researchers sampling water in a mangrove forest"
+                 class="bot">
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 7 · PROOF & PARTNERS
+     ============================================================ -->
+<!-- ============================================================
+     SLIDE 8 · LIVE INDEXER FEED  (streaming records)
+     Marquee of the freshest Bumicert records from the
+     GainForest indexer (last 14 days). Baked at deck-build
+     time by scripts/build-live-records.mjs so it always works
+     on conference WiFi; re-run that script to refresh.
+     ============================================================ -->
+<section class="slide" data-section="stream">
+    <div class="slide-chrome">
+        <span class="brand-mark">GainForest</span>
+        <span class="page-num">09 · Streaming live</span>
+    </div>
+
+    <div class="stream-header">
+        <h2 class="reveal" style="margin-top: 0.5em;">
+            What is a <em>Bumicert</em>?
+        </h2>
+    </div>
+
+    <div class="stream-stage reveal" id="stream-stage">
+        <div class="stream-track" id="stream-track">
+            <!-- Cards injected at runtime from assets/live-records.json.
+                 The duplicate set required for the seamless marquee
+                 loop is added by the same JS block. -->
+        </div>
+    </div>
+
+</section>
+
+
+<!-- ============================================================
+     SLIDE 9 · SPECIMEN WALL  (Darwin Core occurrences)
+     16 real species observations baked from
+     app.gainforest.dwc.occurrence (the open DwC biodiversity
+     standard) via scripts/build-occurrences.mjs. The collection
+     holds ~417k records and counting; this slide is the visual
+     proof that the 1% problem from slide 2 is being closed,
+     one community at a time.
+     ============================================================ -->
+<section class="slide" data-section="specimens">
+    <div class="slide-chrome">
+        <span class="brand-mark">GainForest</span>
+        <span class="page-num">10 · Closing the 1%</span>
+    </div>
+
+    <div class="spec-header">
+        <div>
+            <h2 class="reveal" style="margin-top: 0.5em;">
+                <em><span id="occ-matched">—</span></em>
+                species observations from the last 14 days
+                in <em>Amazonas</em>.
+            </h2>
+        </div>
+    </div>
+
+    <div class="spec-wall reveal" id="spec-wall">
+        <!-- Two rows of cards injected from assets/occurrence-records.json,
+             scrolling in opposite directions for an editorial-ticker feel. -->
+        <div class="spec-row"><div class="spec-track dir-left"  id="spec-row-a"></div></div>
+        <div class="spec-row"><div class="spec-track dir-right" id="spec-row-b"></div></div>
+    </div>
+
+</section>
+
+
+<!-- ============================================================
+     SLIDE 0d · THE ACOUSTIC NICHE  (24-hour soundscape clock)
+     A polar clock: time of day runs around the rim (18:00 top,
+     0:00 right, 6:00 bottom, 12:00 left), distance from centre
+     is acoustic power, each coloured loop is a frequency band.
+     Because each band peaks at a different hour, the loops bulge
+     toward different sectors — frogs, birds, insects and bats
+     share the soundscape by splitting both pitch and time. The
+     loops draw on and a clock hand sweeps the day (NicheClock in
+     the script). Real Max-PMN data from GainForest's bioacoustic
+     monitoring at the Inglês site, Greater Manaus (5 frequency
+     bins, 5-minute samples; ingles/max_results_final_r1.csv).
+     ============================================================ -->
+<section class="slide niche-slide" data-section="niche">
+    <div class="slide-chrome">
+        <span class="brand-mark">GainForest</span>
+        <span class="page-num">Acoustic niche · 24 hours</span>
+    </div>
+
+    <div class="niche-grid">
+        <div class="niche-copy">
+            <h2 class="niche-head reveal">Every species sings in its own <em>frequency</em>.</h2>
+            <ul class="niche-legend reveal" aria-label="Frequency bands">
+                <li><i style="--c:#3f6fae"></i>0–1.5 kHz</li>
+                <li><i style="--c:#43935b"></i>1.5–5 kHz</li>
+                <li><i style="--c:#c2922f"></i>5–10 kHz</li>
+                <li><i style="--c:#d2503e"></i>10–20 kHz</li>
+                <li><i style="--c:#7b5ea7"></i>20–60 kHz</li>
+            </ul>
+
+        </div>
+
+        <div class="niche-stage reveal-scale">
+            <svg id="niche-svg" viewBox="0 0 1000 1000" role="img"
+                 aria-label="A 24-hour polar soundscape clock; each coloured loop is a frequency band that peaks at a different time of day, with frogs, birds, insects and bats marked at their niche."></svg>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 0e · SOUNDSCAPE AS A VITAL SIGN  (Aldeia Inhaã-bé vs suburb)
+     Two 24-hour polar soundscapes (Average Max PMN, all days):
+     left = Marina's Indigenous village, Aldeia Inhaã-bé (loud, layered,
+     structured = high biodiversity) ; right = a Manaus suburb
+     (quiet, flat, homogeneous = a thinned ecosystem). The point:
+     a soundscape is a measurable vital sign of biodiversity.
+     Images are real GainForest figures (assets/soundscape-*.webp).
+     ============================================================ -->
+<section class="slide compare-slide" data-section="soundscape">
+    <div class="slide-chrome">
+        <span class="brand-mark">GainForest</span>
+        <span class="page-num">Soundscape · a vital sign</span>
+    </div>
+
+    <div class="compare-head">
+        <h2 class="compare-title reveal">You can <em>hear</em> a healthy forest.</h2>
+    </div>
+
+    <div class="compare-grid reveal">
+        <figure class="compare-card">
+            <figcaption class="compare-cap">
+                <span class="compare-name">Aldeia Inhaã-bé</span>
+            </figcaption>
+            <img src="assets/soundscape-inhaabe.webp"
+                 alt="A 24-hour polar soundscape chart for Aldeia Inhaã-bé ; tall, varied, multi-coloured bars showing a loud, diverse soundscape.">
+        </figure>
+        <figure class="compare-card">
+            <figcaption class="compare-cap">
+                <span class="compare-name">Manaus suburb</span>
+            </figcaption>
+            <img src="assets/soundscape-manaus.webp"
+                 alt="A 24-hour polar soundscape chart for a Manaus suburb ; short, uniform, muted bars showing a quiet, sparse soundscape.">
+        </figure>
+    </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE · BUMIPOD  (interactive 3D PCB)
+     The hardware behind the soundscapes : BumiPod, GainForest's
+     open ultrasonic recorder. The 3D board is NOT an illustration ;
+     it is the actual v0.3 EVT design (KiCad → GLB, Draco-
+     compressed to ~490 KB). Drag to rotate ; auto-rotates on idle.
+     ============================================================ -->
+<section class="slide bumi-slide" data-section="bumipod">
+    <div class="slide-chrome">
+        <span class="brand-mark">GainForest</span>
+        <span class="page-num">BumiPod · open hardware</span>
+    </div>
+
+    <div class="bumi-grid">
+        <div class="bumi-copy">
+            <h2 class="bumi-title reveal">This is what we <em>listen</em> with.</h2>
+            <p class="bumi-sub reveal">
+                <strong>BumiPod</strong> is our open-hardware ultrasonic
+                recorder — bat-band audio, months on three AA batteries,
+                monitoring deep inside the forest and relaying alerts
+                device-to-device across several kilometres.
+            </p>
+            <div class="bumi-chips reveal">
+                <span class="bumi-chip"><b>384 kS/s</b> ultrasonic capture</span>
+                <span class="bumi-chip"><b>Mesh radio</b> · links devices over several km</span>
+                <span class="bumi-chip"><b>4</b> environment sensors</span>
+                <span class="bumi-chip"><b>57 × 47 mm</b> · smaller than a credit card</span>
+                <span class="bumi-chip"><b>4×</b> cheaper than an AudioMoth</span>
+            </div>
+        </div>
+
+        <div class="bumi-stage reveal-scale">
+            <span class="bumi-live">Real design files</span>
+            <model-viewer
+                src="assets/bumimic-v0.3.glb"
+                alt="Interactive 3D model of the BumiPod v0.3 printed circuit board"
+                camera-controls
+                disable-zoom
+                auto-rotate
+                auto-rotate-delay="1200"
+                rotation-per-second="14deg"
+                interaction-prompt="none"
+                camera-orbit="20deg 62deg 108%"
+                min-camera-orbit="auto 15deg auto"
+                max-camera-orbit="auto 130deg auto"
+                exposure="1.15"
+                shadow-intensity="0.75"
+                shadow-softness="0.9">
+            </model-viewer>
+            <span class="bumi-hint">drag to rotate · BumiPod v0.3 — real design files</span>
+        </div>
+    </div>
+</section>
+
+
+<section class="slide" data-section="proof">
+    <div class="slide-chrome">
+        <span class="brand-mark">GainForest</span>
+        <span class="page-num">11 · Receipts</span>
+    </div>
+
+    <div class="proof-grid">
+        <div class="proof-copy">
+            <h2 class="reveal">
+                Grateful for our<br>
+                <em>supporters</em>.
+            </h2>
+        </div>
+
+        <div class="proof-cards reveal">
+            <div class="proof-card">
+                <img src="assets/xprize.jpg" alt="XPRIZE Rainforest finals in Manaus">
+                <div class="meta">
+                    <span class="ttl">XPRIZE Rainforest Winner — Amazon, 2024</span>
+                </div>
+            </div>
+            <div class="proof-card">
+                <img src="assets/klarna.jpg" alt="Klarna AI for Climate Resilience">
+                <div class="meta">
+                    <span class="ttl">Klarna AI for Climate Resilience</span>
+                </div>
+            </div>
+            <div class="proof-card">
+                <img src="assets/atmos.jpg" alt="Atmos feature on Taina">
+                <div class="meta">
+                    <span class="ttl">Atmos · Their own ChatGPT for Indigenous knowledge</span>
+                </div>
+            </div>
+            <div class="proof-card">
+                <img src="assets/swissnex.jpg" alt="Swissnex on GainForest in Amazonia">
+                <div class="meta">
+                    <span class="ttl">Swissnex in Brazil · Switzerland &amp; Amazônia</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE · COLLECTIVE FUNDING  (Ma Earth donation round)
+     Connects the Bumicerts to money : together with Ma Earth,
+     Restor, One Earth and others, GainForest is hosting a
+     collective funding round that matches donations to these
+     community Bumicerts from a $500,000 pool. Mirrors Ma Earth's
+     "Collective funding for community-led regeneration" page.
+     ============================================================ -->
+<section class="slide fund-slide" data-section="funding">
+    <div class="slide-chrome">
+        <span class="brand-mark">GainForest</span>
+        <span class="page-num">Collective funding</span>
+    </div>
+
+    <div class="fund-grid">
+        <div class="fund-copy">
+            <h2 class="fund-title reveal">Together, we match every <em>Bumicert</em>.</h2>
+            <a class="cta-pill reveal" href="https://maearth.com/" target="_blank" rel="noreferrer">
+                maearth.com →
+            </a>
+        </div>
+
+        <div class="maearth-window reveal-scale">
+            <div class="mw-bar" aria-hidden="true">
+                <span class="mw-dot"></span><span class="mw-dot"></span><span class="mw-dot"></span>
+                <span class="mw-url">maearth.com</span>
+            </div>
+            <img src="assets/maearth-landing.webp"
+                 alt="Ma Earth's collective funding page ; 'Collective funding for community-led regeneration', a $500,000 matching pool, with partners Restor, GainForest, One Earth and others.">
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 8 · CLOSING / CTA  (ink band)
+     Planetary Healing tie-in with the event theme.
+     ============================================================ -->
+<section class="slide slide-ink closing-slide" data-section="closing">
+    <div class="slide-chrome">
+        <span class="brand-mark">GainForest</span>
+        <span class="page-num">From pilots to scale</span>
+    </div>
+
+    <div class="closing-grid">
+        <div class="closing-copy">
+            <h2 class="reveal" style="margin-top: 0.4em;">
+                Scale starts when we put<br>
+                nature stewards in the <em>driver's seat</em>.
+            </h2>
+            <div class="closing-cta-row reveal">
+                <a href="https://gainforest.earth" class="cta-pill" target="_blank" rel="noreferrer">
+                    Explore gainforest.earth →
+                </a>
+            </div>
+        </div>
+
+        <div class="closing-photo-stack reveal-scale">
+            <span class="glow" aria-hidden="true"></span>
+            <img src="assets/impact-group.webp"
+                 alt="XPRIZE Rainforest team and community at the maloca"
+                 class="img-a">
+            <img src="assets/impact-ceremony.webp"
+                 alt="Bumicerts certificate ceremony, Philippines"
+                 class="img-b">
+        </div>
+    </div>
+</section>
+
+
+<script>
+/* ============================================================
+   SlidePresentation — keyboard, swipe, scroll, dots,
+   per-slide video autoplay-on-enter, counter animation,
+   ink-aware nav styling.
+   ============================================================ */
+class SlidePresentation {
+    constructor() {
+        this.slides    = Array.from(document.querySelectorAll('.slide'));
+        this.dotsEl    = document.querySelector('.nav-dots');
+        this.progress  = document.querySelector('.progress-bar');
+        this.hint      = document.querySelector('.keyboard-hint');
+        this.current   = 0;
+        this.buildDots();
+        this.observe();
+        this.bindKeys();
+        this.bindTouch();
+        this.bindHintAutohide();
+        this.updateProgress();
+    }
+
+    /* Build right-side nav dots, one per slide. Clearing innerHTML
+       first protects against a duplicate set being appended when the
+       saved HTML already includes a rendered set (matches the
+       html-template.md guidance). */
+    buildDots() {
+        this.dotsEl.innerHTML = '';
+        this.slides.forEach((s, i) => {
+            const b = document.createElement('button');
+            b.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+            b.addEventListener('click', () => this.goto(i));
+            this.dotsEl.appendChild(b);
+        });
+        this.markActive(0);
+    }
+
+    markActive(i) {
+        this.current = i;
+        this.dotsEl.querySelectorAll('button').forEach((b, idx) => {
+            b.classList.toggle('active', idx === i);
+        });
+        /* Flip nav-dots colour when the current slide is on ink */
+        const onInk = this.slides[i].classList.contains('slide-ink');
+        document.body.classList.toggle('on-ink', onInk);
+        /* Drive the opening narrative's audio: each slide change
+           tells ListenIntro which section is active so the field
+           recording plays on the listen slide and stops elsewhere. */
+        if (window.__listen) window.__listen.onEnter(this.slides[i].dataset.section);
+        this.updateProgress();
+    }
+
+    updateProgress() {
+        const pct = ((this.current) / (this.slides.length - 1)) * 100;
+        this.progress.style.width = pct + '%';
+    }
+
+    /* Intersection Observer drives .visible (for CSS reveals) AND
+       video autoplay so a clip starts the second it enters view. */
+    observe() {
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                const slide = e.target;
+                const idx   = this.slides.indexOf(slide);
+                if (e.isIntersecting && e.intersectionRatio > 0.6) {
+                    slide.classList.add('visible');
+                    this.markActive(idx);
+                    /* Run any one-shot animators on the slide */
+                    if (!slide.dataset.animated) {
+                        slide.dataset.animated = '1';
+                        this.runCounters(slide);
+                    }
+                    this.playVideos(slide);
+                } else if (e.intersectionRatio < 0.2) {
+                    /* Pause off-screen videos to save battery */
+                    this.pauseVideos(slide);
+                }
+            });
+        }, { threshold: [0, 0.2, 0.6, 0.9] });
+        this.slides.forEach(s => io.observe(s));
+
+        /* Mark the first slide visible immediately so its reveal
+           triggers without waiting for a scroll. */
+        requestAnimationFrame(() => this.slides[0].classList.add('visible'));
+        this.playVideos(this.slides[0]);
+    }
+
+    playVideos(slide) {
+        slide.querySelectorAll('video').forEach(v => {
+            /* Videos tagged data-sound (the Taina clip) play with audio;
+               re-assert unmuted on every enter so a previous fallback
+               doesn't permanently silence it. All other clips stay muted. */
+            if (v.dataset.sound !== undefined) v.muted = false;
+            const p = v.play();
+            if (p && p.catch) p.catch(() => {
+                /* Browsers block unmuted autoplay without sticky activation;
+                   by slide 6 the deck has it, but if a cold load lands here
+                   first, retry muted so the clip still runs. */
+                if (!v.muted) { v.muted = true; v.play().catch(() => {}); }
+            });
+        });
+    }
+    pauseVideos(slide) {
+        slide.querySelectorAll('video').forEach(v => v.pause());
+    }
+
+    /* Count-up animation for any .counter span on the slide. */
+    runCounters(slide) {
+        slide.querySelectorAll('.counter').forEach(el => {
+            const target = parseFloat(el.dataset.target || '0');
+            const suffix = el.dataset.suffix || '';
+            const dur    = 1400;
+            const start  = performance.now();
+            const ease   = (t) => 1 - Math.pow(1 - t, 3);
+            const step = (now) => {
+                const t = Math.min(1, (now - start) / dur);
+                const val = target * ease(t);
+                el.textContent = (target % 1 === 0 ? Math.round(val) : val.toFixed(1)) + suffix;
+                if (t < 1) requestAnimationFrame(step);
+            };
+            requestAnimationFrame(step);
+        });
+    }
+
+    bindKeys() {
+        document.addEventListener('keydown', (e) => {
+            switch (e.key) {
+                case 'ArrowRight':
+                    e.preventDefault();
+                    /* On the listen slide the first right arrow plays the
+                       field recording (onRightA returns false to swallow
+                       the press); the next press advances. */
+                    if (this.slides[this.current] &&
+                        this.slides[this.current].dataset.section === 'listen' &&
+                        window.__listen && !window.__listen.onRightA()) break;
+                    this.goto(this.current + 1); break;
+                case 'ArrowDown':
+                case 'PageDown':
+                case ' ':
+                    e.preventDefault(); this.goto(this.current + 1); break;
+                case 'ArrowUp':
+                case 'ArrowLeft':
+                case 'PageUp':
+                    e.preventDefault(); this.goto(this.current - 1); break;
+                case 'Home':
+                    e.preventDefault(); this.goto(0); break;
+                case 'End':
+                    e.preventDefault(); this.goto(this.slides.length - 1); break;
+            }
+        });
+    }
+
+    /* Touch / swipe with a small threshold so accidental taps
+       don't navigate. */
+    bindTouch() {
+        let y0 = null;
+        document.addEventListener('touchstart', (e) => {
+            y0 = e.touches[0].clientY;
+        }, { passive: true });
+        document.addEventListener('touchend', (e) => {
+            if (y0 === null) return;
+            const dy = e.changedTouches[0].clientY - y0;
+            if (Math.abs(dy) > 50) {
+                this.goto(this.current + (dy < 0 ? 1 : -1));
+            }
+            y0 = null;
+        }, { passive: true });
+    }
+
+    /* Auto-hide the keyboard hint after a few seconds idle. */
+    bindHintAutohide() {
+        let t = null;
+        const arm = () => {
+            this.hint.classList.remove('hidden');
+            clearTimeout(t);
+            t = setTimeout(() => this.hint.classList.add('hidden'), 4000);
+        };
+        arm();
+        ['keydown', 'mousemove', 'touchstart'].forEach(ev => {
+            document.addEventListener(ev, arm, { passive: true });
+        });
+    }
+
+    goto(i) {
+        i = Math.max(0, Math.min(this.slides.length - 1, i));
+        this.slides[i].scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+/* ============================================================
+   ListenIntro — the three-slide opening narrative.
+
+   The listen slide renders a live, real-time scrolling
+   spectrogram of the 60s AudioMoth field recording
+   (assets/forest-sound.m4a) onto a canvas, driven by a Web
+   Audio AnalyserNode with a hand-built colormap (ink -> forest
+   -> sage -> mint -> cream) so it sits on the ink band.
+
+   Interaction:
+     - listen slide : right arrow (1st) plays the recording +
+       spectrogram, (2nd) advances to the story slide.
+   The clip is played once, on the listen slide; every other
+   slide stops it. onEnter() is called by
+   SlidePresentation.markActive on every slide change so audio
+   follows the narrative and never plays off-screen. The
+   first press is a real user gesture, so the AudioContext is
+   allowed to start under the browser autoplay policy.
+   ============================================================ */
+window.__listen = (() => {
+    const audio    = document.getElementById('listen-audio');
+    const canvas   = document.getElementById('spectro-canvas');
+    const stage    = document.getElementById('spectro-stage');
+    const statusEl = document.getElementById('spectro-status');
+    const timeEl   = document.getElementById('spectro-time');
+    const dotEl    = document.getElementById('spectro-dot');
+    const progEl   = document.getElementById('spectro-progress');
+    const playBtn  = document.getElementById('spectro-play');
+    const cueEl    = document.getElementById('spectro-cue');
+    /* Defensive no-op if the intro slides aren't on the page. */
+    if (!audio || !canvas) return { onRightA: () => true, onEnter: () => {} };
+
+    const cx = canvas.getContext('2d', { alpha: false });
+    let actx, analyser, freq, raf = null;
+    let graphOk = false;                // did the Web Audio graph build?
+    let W = 0, H = 0, dpr = 1;
+    let state = 'idle';                 // 'idle' | 'playing' | 'paused' | 'ended'
+    let spectroOn = true;               // run the spectrogram loop (listen slide only)
+
+    const INK   = '#141413';
+    const F_MIN = 250, F_MAX = 16000;   // displayed frequency window (log y-axis)
+
+    /* 256-entry RGB lookup: ink -> deep forest -> sage -> mint ->
+       cream. Built once; the per-frame column loop just indexes it. */
+    const STOPS = [
+        [0.00, [20, 20, 19]],
+        [0.18, [26, 51, 38]],
+        [0.42, [62, 112, 83]],
+        [0.66, [47, 206, 138]],
+        [0.84, [150, 232, 198]],
+        [1.00, [244, 239, 228]],
+    ];
+    const LUT = new Uint8ClampedArray(256 * 3);
+    for (let i = 0; i < 256; i++) {
+        const t = i / 255;
+        let a = STOPS[0], b = STOPS[STOPS.length - 1];
+        for (let s = 0; s < STOPS.length - 1; s++) {
+            if (t >= STOPS[s][0] && t <= STOPS[s + 1][0]) { a = STOPS[s]; b = STOPS[s + 1]; break; }
+        }
+        const k = (t - a[0]) / ((b[0] - a[0]) || 1);
+        LUT[i*3]   = a[1][0] + (b[1][0] - a[1][0]) * k;
+        LUT[i*3+1] = a[1][1] + (b[1][1] - a[1][1]) * k;
+        LUT[i*3+2] = a[1][2] + (b[1][2] - a[1][2]) * k;
+    }
+
+    function resize() {
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const r = canvas.getBoundingClientRect();
+        const nw = Math.max(1, Math.round(r.width  * dpr));
+        const nh = Math.max(1, Math.round(r.height * dpr));
+        if (nw === W && nh === H) return;
+        W = canvas.width = nw; H = canvas.height = nh;
+        cx.fillStyle = INK; cx.fillRect(0, 0, W, H);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    /* Lazy graph build — createMediaElementSource can only run once
+       per element, so guard on actx. Best-effort: if the graph can't
+       be built (some browsers/origins throw), the clip still plays
+       straight through the <audio> element; we just lose the live
+       spectrogram. Returns whether the analyser graph is usable. */
+    function ensureGraph() {
+        if (actx) return graphOk;
+        try {
+            actx = new (window.AudioContext || window.webkitAudioContext)();
+            const src = actx.createMediaElementSource(audio);
+            analyser = actx.createAnalyser();
+            analyser.fftSize = 2048;
+            analyser.smoothingTimeConstant = 0.55;
+            analyser.minDecibels = -92;
+            analyser.maxDecibels = -28;
+            src.connect(analyser);
+            analyser.connect(actx.destination);   // keep the audio audible
+            freq = new Uint8Array(analyser.frequencyBinCount);
+            graphOk = true;
+        } catch (e) {
+            graphOk = false;                      // audio still plays without the visualiser
+        }
+        return graphOk;
+    }
+
+    const fmt = (s) => {
+        s = Math.max(0, Math.floor(s || 0));
+        return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+    };
+
+    /* One animation frame: scroll the canvas left and paint a fresh
+       column on the right from the analyser's frequency bins, mapped
+       log-frequency on the vertical axis with a noise-floor gate. */
+    function tick() {
+        if (state !== 'playing' || !spectroOn) return;
+        analyser.getByteFrequencyData(freq);
+        const bins = freq.length;
+        const nyq  = actx.sampleRate / 2;
+        const step = Math.max(1, Math.round(2 * dpr));
+        cx.drawImage(canvas, step, 0, W - step, H, 0, 0, W - step, H);
+        const col = cx.createImageData(step, H);
+        const data = col.data;
+        for (let y = 0; y < H; y++) {
+            const frac = 1 - y / (H - 1);                  // 0 bottom .. 1 top
+            const f = F_MIN * Math.pow(F_MAX / F_MIN, frac);
+            let bin = (f / nyq * bins) | 0;
+            if (bin < 0) bin = 0; else if (bin >= bins) bin = bins - 1;
+            let v = freq[bin] / 255;
+            v = (v - 0.10) / 0.90;                         // gate out the noise floor
+            if (v < 0) v = 0; else if (v > 1) v = 1;
+            v = Math.pow(v, 0.80);                          // gentle gamma
+            const li = (v * 255) | 0;
+            const r = LUT[li*3], g = LUT[li*3+1], b = LUT[li*3+2];
+            for (let xx = 0; xx < step; xx++) {
+                const di = (y * step + xx) * 4;
+                data[di] = r; data[di+1] = g; data[di+2] = b; data[di+3] = 255;
+            }
+        }
+        cx.putImageData(col, W - step, 0);
+        const dur = audio.duration || 60;
+        if (progEl) progEl.style.width = (100 * audio.currentTime / dur) + '%';
+        if (timeEl) timeEl.textContent = fmt(audio.currentTime) + ' / ' + fmt(dur);
+        raf = requestAnimationFrame(tick);
+    }
+
+    function setState(s) {
+        state = s;
+        const playing = s === 'playing';
+        stage.classList.toggle('playing', playing);
+        if (dotEl) dotEl.classList.toggle('live', playing);
+        if (statusEl) statusEl.textContent =
+            playing ? 'Playing' : (s === 'ended' ? 'Ended' : (s === 'paused' ? 'Paused' : 'Ready'));
+        if (cueEl) cueEl.innerHTML =
+            s === 'ended'  ? 'Click to replay' :
+            s === 'paused' ? 'Click to resume' :
+            'Press <kbd>\u2192</kbd> or click to play';
+        if (playBtn) playBtn.setAttribute('aria-label',
+            playing        ? 'Pause the field recording' :
+            s === 'ended'  ? 'Replay the field recording' :
+            s === 'paused' ? 'Resume the field recording' :
+            'Play the field recording');
+    }
+
+    function play() {
+        resize();
+        /* Start the element first so the clip is audible even when the
+           Web Audio graph can't be built; the spectrogram is then
+           best-effort and never blocks playback. */
+        audio.play().catch(() => {/* gesture should allow it; ignore */});
+        setState('playing');
+        if (ensureGraph()) {
+            if (actx.state === 'suspended') actx.resume();
+            cancelAnimationFrame(raf);
+            raf = requestAnimationFrame(tick);
+        }
+    }
+
+    function pause() {
+        try { audio.pause(); } catch (e) {}
+        cancelAnimationFrame(raf); raf = null;
+        setState('paused');
+    }
+
+    /* Click anywhere on the stage (or the play button inside it):
+       play when idle/paused, restart when ended, pause when playing. */
+    function toggle() {
+        if (state === 'playing') { pause(); return; }
+        if (state === 'ended') { try { audio.currentTime = 0; } catch (e) {} }
+        play();
+    }
+    stage.addEventListener('click', toggle);
+
+    /* Keep the progress bar / time readout moving even when the
+       spectrogram loop isn't running (e.g. graph unavailable). */
+    audio.addEventListener('timeupdate', () => {
+        const dur = audio.duration || 60;
+        if (progEl && state === 'playing') progEl.style.width = (100 * audio.currentTime / dur) + '%';
+        if (timeEl) timeEl.textContent = fmt(audio.currentTime) + ' / ' + fmt(dur);
+    });
+
+    /* When the clip plays out on its own, freeze and offer a replay;
+       slide navigation is independent of playback. */
+    audio.addEventListener('ended', () => {
+        cancelAnimationFrame(raf); raf = null;
+        if (progEl) progEl.style.width = '100%';
+        setState('ended');
+    });
+
+    /* Reset the listen slide back to its idle, pre-play state. */
+    function resetListen() {
+        cancelAnimationFrame(raf); raf = null;
+        try { audio.pause(); audio.currentTime = 0; } catch (e) {}
+        if (progEl) progEl.style.width = '0%';
+        if (timeEl) timeEl.textContent = '0:00 / 1:00';
+        resize();
+        cx.fillStyle = INK; cx.fillRect(0, 0, W, H);
+        setState('idle');
+    }
+
+    return {
+        /* Right arrow on the listen slide: 1st press plays, any
+           later press lets the deck advance.
+           true  -> deck should advance on this press
+           false -> the press was consumed (started playback) */
+        onRightA() {
+            if (state === 'idle') { play(); return false; }
+            return true;
+        },
+        /* Called on every slide change with the active slide's
+           data-section, so audio follows the narrative. */
+        onEnter(section) {
+            if (section === 'listen') { spectroOn = true; resetListen(); return; }
+            /* Any other slide: stop the clip. It only ever plays
+               once, on the listen slide. */
+            spectroOn = false;
+            cancelAnimationFrame(raf); raf = null;
+            try { audio.pause(); } catch (e) {}
+        },
+    };
+})();
+
+const __pres = new SlidePresentation();
+
+/* ============================================================
+   NicheClock — the acoustic-niche soundscape clock.
+
+   A polar 24-hour clock: time of day runs around the rim
+   (18:00 top, 0:00 right, 6:00 bottom, 12:00 left), distance
+   from the centre is acoustic power, and each coloured loop is
+   one frequency band. Because each band peaks at a different
+   hour, the loops bulge toward different sectors — the visual
+   argument that frogs, birds, insects and bats share the forest
+   by splitting both pitch and time.
+
+   Built as inline SVG so it scales crisply. The loops draw on
+   (stroke-dashoffset) and an inner clock hand sweeps the day;
+   it replays whenever the slide re-enters view. The traces are
+   real Max-PMN data baked from the Ingles site (Greater Manaus),
+   five frequency bins sampled every five minutes over 24 hours.
+   ============================================================ */
+(() => {
+    const svg = document.getElementById('niche-svg');
+    if (!svg) return;
+    const NS = 'http://www.w3.org/2000/svg';
+    const CX = 500, CY = 500, R_RIM = 360, R_MIN = 140, R_MAX = 338, R_DIAL = 104;
+    const MUT = '#5b5b56', GRID = '#d9d3c3', GRIDF = '#e9e2d3';
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const EASE = 'cubic-bezier(0.16,1,0.3,1)';
+
+    /* hour (0..24) -> point at radius r ; 18:00 at top, clockwise */
+    const ang = (h) => ((h - 18) / 24) * Math.PI * 2;
+    const pt  = (h, r) => [CX + r * Math.sin(ang(h)), CY - r * Math.cos(ang(h))];
+    const add = (parent, name, attrs, text) => {
+        const e = document.createElementNS(NS, name);
+        for (const k in attrs) e.setAttribute(k, attrs[k]);
+        if (text != null) e.textContent = text;
+        parent.appendChild(e); return e;
+    };
+    /* Real Max-PMN data, Ingles site (Greater Manaus), 5-min samples
+       over 24h ; columns 0-1.5k / 1.5-5k / 5-10k / 10-20k / 20-60k Hz.
+       Baked from ingles/max_results_final_r1.csv. row i -> hour i/12. */
+    const D = [[14852,18951,20372,23445,29333,36716,25754,23834,17336,36877,24275,22236,32830,33196,32725,44722,31911,41512,53416,50672,98117,28530,20256,16464,23189,15227,36950,32441,29203,20598,31014,52266,27028,59797,68879,40250,29494,31071,21734,24221,15724,29391,22493,24825,28877,41694,57391,27939,19441,34369,21487,28358,45332,24853,27194,22339,27725,36092,34787,28245,61136,22139,28799,36409,16926,25440,12382,26730,23264,27584,29976,34755,48310,104103,68800,52300,36998,27754,54414,38691,59549,24705,31939,34084,30576,33310,29550,42312,26460,50045,30904,26826,29660,22257,24274,27498,21262,21271,29398,19211,23647,29049,26458,24083,22032,27669,29179,27111,35641,48214,30065,24787,34144,23626,19595,46786,29839,30990,35409,55345,53311,36096,46018,22506,20550,34535,25502,23830,21303,29552,31244,32538,34605,18082,24021,68915,35682,36147,24390,23330,30253,15962,23705,17270,34014,20680,16962,29890,17601,34163,17396,38302,22341,26108,28620,30247,38083,25857,86795,60497,57752,61441,62547,56093,63428,55960,44333,96512,100425,77265,49098,89340,20807,18959,49738,33114,33142,53757,41059,107252,92569,89805,56822,42314,33631,40966,52285,23125,19039,28020,79790,28191,25207,30191,30233,32557,106275,196485,74666,71710,74671,71874,82540,77867,23855,83346,29023,32335,38869,141558,212222,94476,115471,60863,56802,74241,65729,66273,59344,51883,64820,47019,76154,45055,55155,49330,45959,54964,87118,88682,43077,51818,65840,68730,69840,57577,72287,65026,76667,74788,90269,94970,103460,64575,71835,71495,66455,77666,83556,62514,88383,97488,103894,80922,104929,102509,126011,91979,102591,94178,97211,80074,57420,103726,86822,80617,72129,75483,88222,87400,62311,78419,72136,68821,88420,82794,51702,54926,48212,54045,71152,54382,58183,54708,50608,33184,42223,18983],[7324,11325,10231,12549,3230,18413,15604,14241,3789,8076,11356,11236,13122,4370,4172,6999,8162,6738,3191,12902,9480,21864,4095,9079,5174,4721,3275,3400,3404,2990,5001,2746,5141,8914,13705,2259,5870,3538,1816,2836,5893,2069,1803,2645,14030,6970,3078,1982,1523,2867,4428,2886,1506,2818,3691,2335,4399,4134,1954,1939,2964,4558,2843,2641,6309,3099,5897,15328,20820,48448,89635,104479,163710,159699,98168,85909,64598,24095,69258,25023,15269,41033,41329,32453,21470,23569,16100,56665,10025,24268,10883,9755,8771,12246,21309,30231,8682,6522,9733,5932,6025,13457,37963,22748,9578,9980,9312,27300,15454,10126,10138,9763,27598,15695,8136,39743,33944,4539,5279,31561,57728,26856,48881,8808,6351,10161,8112,7267,22727,11499,30309,30807,36776,8316,17425,47454,37116,36143,25629,14872,14244,12811,7137,6003,18362,11827,10830,10175,8537,9142,7146,16476,12232,15630,10403,9443,9780,8253,48121,10168,14436,14225,17449,9106,10585,9180,7921,11541,10743,6718,9076,11828,10738,8822,6584,24932,20484,29215,24012,12654,7991,12455,19245,14286,9071,8483,10964,12854,9998,12737,11212,15219,10852,12488,12321,15202,50964,103748,31493,328305,45413,24773,22733,26436,10153,19630,14843,49182,15367,95781,112758,96403,111717,84149,67099,102304,95940,65304,56992,62168,56717,42545,34322,39401,19066,37041,30258,37719,44845,52793,36296,34717,40368,50954,61932,47936,64217,56674,59019,58925,68514,76372,86009,52406,47722,43987,46263,44344,66447,43625,64155,82345,82224,67617,85733,78965,105377,67057,85853,79158,78755,60864,41640,88568,67937,64863,56927,58489,62652,63970,45501,54972,45907,43420,65035,54134,35514,39166,31674,25468,39092,38603,43308,38862,31710,19309,30240,12474],[85416,39783,39045,62170,88925,62283,68905,50596,23338,18618,24295,20139,19043,23033,25756,22374,22221,24422,38228,60007,33999,25519,23167,38377,17790,16684,16878,29120,17585,20125,26520,24299,63903,23401,16404,13915,15655,13790,19215,18408,22090,23730,24791,63010,41776,37476,19982,21600,18074,15468,25964,30863,29553,24521,35073,30904,18970,23212,18376,23007,36757,26487,41726,28863,28250,28690,28654,43728,32038,55131,83460,99350,188617,121436,118551,85744,80195,68875,76502,69838,83009,57042,60115,83642,117392,87105,93172,106555,97316,103785,87235,91518,89492,97152,94467,89729,90046,74993,84929,94597,88690,108020,112486,119422,111116,104058,95069,97876,105253,92583,117943,117637,103390,101619,118140,109300,112254,121695,114631,104639,113934,117710,101849,87833,106534,117810,121492,112150,126248,110749,115582,113123,137932,109597,99889,146316,123095,112810,100789,120139,107326,129993,116253,113460,118802,113713,123832,132449,130464,100153,128815,130971,162829,128670,119568,127210,113861,117577,119694,145883,149387,133735,161342,148420,123232,139266,155178,174630,160035,102412,154335,177597,144251,171897,170821,179271,180135,110967,118293,78112,77177,86115,66490,75185,48744,47011,46688,50700,69313,67023,44873,43984,54376,58594,57906,52751,71746,104305,58720,356025,384147,123631,69412,62212,51559,119305,69832,90608,71387,106326,100615,88359,71745,55295,52416,50061,68395,52084,37896,54474,43277,43927,73568,84015,67729,57467,61601,55437,55746,52796,51135,38199,42181,38262,44647,36377,42651,47232,41667,41262,45902,39035,42258,34951,38416,22349,20697,24081,27331,22985,28391,35824,35819,29740,28529,29183,33108,31421,39276,29430,27887,26608,36505,28582,31958,36835,69022,31563,27051,30853,24165,31568,28901,26309,37957,32804,84971,90082,94153,29003,74112,29949,20107,19986,37745,88597,77340,35985],[101515,143660,124560,154374,101798,128634,133741,114904,148200,156440,141275,141385,144497,140342,85477,79058,84040,129714,116472,80001,108587,86596,65713,110599,147144,153858,145223,145478,117791,78647,111033,108992,88999,42692,79961,104189,123076,121035,112941,145697,154562,78611,167720,124328,102053,71472,36663,38692,97011,85331,112668,124090,130766,145577,127409,145943,90398,93388,86046,122606,100058,71279,106762,104730,95510,92869,101565,53647,57081,63525,48615,75159,206591,134990,117973,123184,106919,69351,84099,72156,62777,33648,40318,43409,66314,40497,41550,56540,62211,94255,56917,50010,55238,44073,42856,53133,37236,41589,72278,45724,39939,48907,64995,42500,45752,48180,44532,59981,42708,38930,44074,56552,30284,52404,73154,47874,46697,69197,74783,60607,55353,36008,34453,60536,40563,51369,39550,34646,54396,40490,42576,35466,35235,31268,30866,134363,29021,37158,31510,28835,39548,30300,41463,52161,36934,40068,47855,39839,45038,45196,44620,39435,45437,42979,45491,66665,30365,58429,44316,53775,38081,48556,38941,36350,55540,34073,63114,90767,23834,37523,51525,33346,36866,39416,41224,49958,35662,51923,72099,40964,40283,50698,42252,63897,50512,37212,43972,44984,78894,65858,50329,68097,39010,51123,73126,43870,67787,93552,43116,345552,320031,96981,40613,61383,38734,119769,40266,68962,54233,51870,66802,80672,60358,35470,42546,30216,66902,70386,53580,32051,78532,75451,84591,94850,90249,67632,68704,84847,68657,67516,89046,92922,69114,89409,103091,107844,118813,126667,139991,130914,137180,133301,135296,136725,112057,133844,146796,151609,165446,150604,191766,151264,136584,125014,144023,179044,111850,114003,137448,161686,114326,122733,184993,182791,151940,157035,140510,126531,91740,98171,96625,92902,107632,87527,128956,124874,181396,122585,122947,158032,139584,140282,93557,105750,89498,94962,101929,98092],[120036,134675,104404,137985,142648,127151,130967,124457,129352,105237,120088,118428,117796,120296,118179,115917,123937,127813,93756,107334,111053,133319,110652,80329,94044,95465,90432,102438,59879,78381,56233,70028,59560,58591,50289,56346,66070,60264,64930,49988,61772,48820,59945,67896,53875,60586,45195,42491,49846,41071,44069,38828,42027,60535,58656,55644,30920,34882,31399,34059,36098,38772,40572,41691,46140,41458,54855,33197,40190,29958,25026,26437,61503,28966,57360,50547,25492,24191,23535,21734,23699,24996,27464,27158,25332,25815,25463,26900,24537,26939,25090,28520,25656,25577,26998,23654,22774,24365,27470,24075,22622,23027,23725,26060,36175,29097,33035,33334,29557,24785,26402,26724,26119,33024,35965,40977,33821,44506,56105,33722,32711,35699,32395,39354,43084,37629,40435,39959,37370,35862,38959,36546,41042,38382,35172,42740,39211,35167,39596,37207,42374,40166,40619,42787,36240,39782,41550,37687,39984,27238,59505,42110,42837,58566,63117,68513,40450,47323,89157,88612,45097,41169,44819,45640,33862,38537,43018,45337,34538,37576,46463,44312,42782,50084,48417,40699,37362,47156,56905,36046,30078,56637,77973,55897,58687,46730,46325,47872,85242,72162,77021,103215,51447,119800,142023,54156,72878,78380,54782,318390,356044,287330,233486,96292,21396,45472,23342,24889,21702,26645,55778,30606,28253,32886,33144,28524,26103,25497,24270,32144,32003,39114,30417,50820,38708,30175,41726,55346,78858,90071,114767,120687,98164,122340,128698,139562,136275,146691,160998,149947,113637,162037,148133,181534,161457,138665,145587,143852,168639,154385,199685,189891,155133,189072,183762,178607,158395,172428,174190,165776,132696,145937,139493,149416,154415,150258,176008,183856,142644,143498,160714,144850,161004,148156,138977,116532,132776,130914,111523,134635,118570,127647,126775,121931,129738,140485,142691,123014]];
+    /* radial scale : Max-PMN value mapped 0..rim (p99 ~ 1.9e5, spikes
+       above clip to the rim) so the loops fill the dial with body. */
+    const RIM_VAL = 185000;
+    /* five real frequency bins, in column order, with the legend colours */
+    const BANDS = [
+        { color:'#3f6fae' },   // 0-1.5 kHz
+        { color:'#43935b' },   // 1.5-5 kHz
+        { color:'#c2922f' },   // 5-10 kHz
+        { color:'#d2503e' },   // 10-20 kHz
+        { color:'#7b5ea7' },   // 20-60 kHz
+    ];
+    /* fauna placed at the REAL per-band peak hour from this data */
+    const FAUNA = [
+        { e:'\uD83D\uDC38', name:'Frogs',    when:'night',  h:17,  color:'#3f6fae' },  // 0-1.5k, evening->night
+        { e:'\uD83D\uDC26', name:'Birds',    when:'dawn',   h:6,   color:'#43935b' },  // 1.5-5k, dawn chorus
+        { e:'\uD83E\uDD97', name:'Cicadas',  when:'midday', h:14,  color:'#c2922f' },  // 5-10k, daytime
+        { e:'\uD83E\uDD97', name:'Katydids', when:'night',  h:23,  color:'#d2503e' },  // 10-20k, night
+        { e:'\uD83E\uDD87', name:'Bats',     when:'night',  h:21,  color:'#7b5ea7' },  // 20-60k, ultrasonic
+    ];
+
+    /* ---- static grid + day/night dial ---- */
+    const gGrid = add(svg, 'g', {});
+    add(gGrid, 'circle', { cx:CX, cy:CY, r:R_RIM, fill:'#fffdf8', 'fill-opacity':0.5, stroke:GRID, 'stroke-width':1.4 });
+    [200,266,332].forEach(r => add(gGrid, 'circle', { cx:CX, cy:CY, r, fill:'none', stroke:GRIDF, 'stroke-width':1, 'stroke-dasharray':'2 5' }));
+    for (let h=0; h<24; h++) { const [x1,y1]=pt(h,R_RIM); const [x2,y2]=pt(h, R_RIM-(h%3===0?16:8)); add(gGrid,'line',{ x1,y1,x2,y2, stroke:GRID, 'stroke-width':h%3===0?1.4:0.8 }); }
+    for (let h=0; h<24; h+=3) { const [x1,y1]=pt(h,R_DIAL+6); const [x2,y2]=pt(h,R_RIM-16); add(gGrid,'line',{ x1,y1,x2,y2, stroke:GRIDF, 'stroke-width':0.8 }); }
+    [0,3,6,9,12,15,18,21].forEach(h => { const [x,y]=pt(h, R_RIM+24); add(gGrid,'text',{ x, y, 'text-anchor':'middle', 'dominant-baseline':'central', 'font-family':'Inter, sans-serif', 'font-size':19, fill:MUT }, (h<10?'0'+h:h)+':00'); });
+
+    const gd = add(svg, 'g', {});
+    add(gd,'path',{ d:`M ${CX} ${CY-R_DIAL} A ${R_DIAL} ${R_DIAL} 0 0 0 ${CX} ${CY+R_DIAL} Z`, fill:'#f3dca0' });   // left half = day
+    add(gd,'path',{ d:`M ${CX} ${CY-R_DIAL} A ${R_DIAL} ${R_DIAL} 0 0 1 ${CX} ${CY+R_DIAL} Z`, fill:'#33415f' });  // right half = night
+    add(gd,'circle',{ cx:CX, cy:CY, r:R_DIAL, fill:'none', stroke:'#cbb27a', 'stroke-width':1.4 });
+    add(gd,'line',{ x1:CX, y1:CY-R_DIAL, x2:CX, y2:CY+R_DIAL, stroke:'#cbb27a', 'stroke-width':1, 'stroke-opacity':0.6 });
+    const sx = CX-48; add(gd,'circle',{ cx:sx, cy:CY, r:15, fill:'#e2a93f' });
+    for (let i=0;i<8;i++){ const a=i/8*Math.PI*2; add(gd,'line',{ x1:sx+Math.cos(a)*20, y1:CY+Math.sin(a)*20, x2:sx+Math.cos(a)*27, y2:CY+Math.sin(a)*27, stroke:'#e2a93f','stroke-width':2.2,'stroke-linecap':'round' }); }
+    const mx = CX+48; add(gd,'circle',{ cx:mx, cy:CY, r:14, fill:'#eee7d4' }); add(gd,'circle',{ cx:mx+6, cy:CY-3, r:14, fill:'#33415f' });
+    [[mx-2,CY+22],[mx+18,CY+8],[mx+10,CY-20]].forEach(([x,y]) => add(gd,'circle',{ cx:x, cy:y, r:1.6, fill:'#eee7d4' }));
+
+    /* circular moving-average ; light smoothing of the 5-min series */
+    const smooth = (arr, w) => arr.map((_, i) => {
+        let s = 0; for (let j=-w;j<=w;j++) s += arr[(i+j+arr.length)%arr.length];
+        return s / (2*w+1);
+    });
+    /* drop the broadband noise transient around 16:40 (a non-biological
+       spike where every band jumps to 3-4x at once, the data's global
+       max) and linearly interpolate across it. Only values above the
+       cap are touched, so genuine single-band peaks stay intact. */
+    const despike = (arr, cap) => {
+        const n = arr.length, out = arr.slice(), bad = i => arr[((i%n)+n)%n] > cap;
+        for (let i=0;i<n;i++){ if (!bad(i)) continue;
+            let p=1; while (bad(i-p) && p<n) p++;
+            let q=1; while (bad(i+q) && q<n) q++;
+            const lo=arr[((i-p)%n+n)%n], hi=arr[((i+q)%n)%n];
+            out[i] = lo + (hi-lo)*p/(p+q);
+        }
+        return out;
+    };
+    /* closed Catmull-Rom spline -> cubic bezier, so the loops curve
+       smoothly through the (lightly smoothed) sample points */
+    const spline = (P) => {
+        const n = P.length; let d = `M ${P[0][0].toFixed(1)} ${P[0][1].toFixed(1)}`;
+        for (let i=0;i<n;i++){
+            const p0=P[(i-1+n)%n], p1=P[i], p2=P[(i+1)%n], p3=P[(i+2)%n];
+            d += ` C ${(p1[0]+(p2[0]-p0[0])/6).toFixed(1)} ${(p1[1]+(p2[1]-p0[1])/6).toFixed(1)}`
+              +  ` ${(p2[0]-(p3[0]-p1[0])/6).toFixed(1)} ${(p2[1]-(p3[1]-p1[1])/6).toFixed(1)}`
+              +  ` ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
+        }
+        return d + ' Z';
+    };
+
+    /* ---- the frequency-band loops (real Max-PMN data) ---- */
+    const traces = [];
+    BANDS.forEach((b, bi) => {
+        const col = smooth(despike(D[bi], 230000), 2);      // de-spike 16:40 artifact, then +/- 10 min smoothing
+        const P = col.map((v, k) => pt(k/12, R_MIN + Math.max(0,Math.min(1, v/RIM_VAL))*(R_MAX-R_MIN)));
+        const p = add(svg,'path',{ d:spline(P), fill:'none', stroke:b.color, 'stroke-width':2.6, 'stroke-linejoin':'round', 'stroke-linecap':'round', 'stroke-opacity':0.92 });
+        p.__len = p.getTotalLength(); traces.push(p);
+    });
+
+    /* ---- inner clock hand (subtle, sweeps the day) ---- */
+    const hand = add(svg,'g',{});
+    add(hand,'line',{ x1:CX, y1:CY, x2:CX, y2:CY-(R_MIN-8), stroke:'#cf5b43', 'stroke-width':3, 'stroke-linecap':'round' });
+    add(hand,'line',{ x1:CX, y1:CY, x2:CX, y2:CY+22, stroke:'#cf5b43', 'stroke-width':3, 'stroke-linecap':'round', 'stroke-opacity':0.5 });
+    add(hand,'circle',{ cx:CX, cy:CY-(R_MIN-8), r:4.5, fill:'#cf5b43' });
+    add(hand,'circle',{ cx:CX, cy:CY, r:5, fill:'#cf5b43' });
+    if (reduce) { hand.setAttribute('transform', `rotate(-8 ${CX} ${CY})`); }
+    else { const at = document.createElementNS(NS,'animateTransform'); const opts={ attributeName:'transform', type:'rotate', from:`0 ${CX} ${CY}`, to:`360 ${CX} ${CY}`, dur:'24s', repeatCount:'indefinite' }; for (const k in opts) at.setAttribute(k, opts[k]); hand.appendChild(at); }
+
+    /* ---- fauna niche chips ---- */
+    const faunaEls = [], defs = add(svg, 'defs', {});
+    FAUNA.forEach((fa, fi) => {
+        const g = add(svg,'g',{});
+        /* An elegant clockwise ribbon arrow : a tapered swoosh that
+           sweeps along the rim and opens into a broad, expanding head
+           pointing at the animal, filled with a pale->saturated
+           gradient of the band colour (mirrors the source figure). */
+        const P0=pt(fa.h-2.6,R_RIM+14), P1=pt(fa.h-1.7,R_RIM+13), P2=pt(fa.h-0.6,R_RIM+22), P3=pt(fa.h,R_RIM+40);
+        const Bz=(t,a,b,c,d)=>{ const u=1-t; return u*u*u*a+3*u*u*t*b+3*u*t*t*c+t*t*t*d; };
+        const Bp=t=>[Bz(t,P0[0],P1[0],P2[0],P3[0]), Bz(t,P0[1],P1[1],P2[1],P3[1])];
+        const Bd=t=>{ const u=1-t; return [3*u*u*(P1[0]-P0[0])+6*u*t*(P2[0]-P1[0])+3*t*t*(P3[0]-P2[0]), 3*u*u*(P1[1]-P0[1])+6*u*t*(P2[1]-P1[1])+3*t*t*(P3[1]-P2[1])]; };
+        const tH=0.6, wT=1.0, wM=5.2, hH=14, NA=18, lf=[], rt=[];
+        for (let i=0;i<=NA;i++){ const t=tH*i/NA, p=Bp(t), d=Bd(t), Ln=Math.hypot(d[0],d[1])||1, nx=-d[1]/Ln, ny=d[0]/Ln, w=wT+(wM-wT)*(i/NA); lf.push([p[0]+nx*w,p[1]+ny*w]); rt.push([p[0]-nx*w,p[1]-ny*w]); }
+        const ph=Bp(tH), dh=Bd(tH), Lh=Math.hypot(dh[0],dh[1])||1, hnx=-dh[1]/Lh, hny=dh[0]/Lh, tp=Bp(1);
+        let ad='M '+lf[0][0].toFixed(1)+' '+lf[0][1].toFixed(1);
+        for (let i=1;i<lf.length;i++) ad+=' L '+lf[i][0].toFixed(1)+' '+lf[i][1].toFixed(1);
+        ad+=' L '+(ph[0]+hnx*hH).toFixed(1)+' '+(ph[1]+hny*hH).toFixed(1)
+          +' L '+tp[0].toFixed(1)+' '+tp[1].toFixed(1)
+          +' L '+(ph[0]-hnx*hH).toFixed(1)+' '+(ph[1]-hny*hH).toFixed(1);
+        for (let i=rt.length-1;i>=0;i--) ad+=' L '+rt[i][0].toFixed(1)+' '+rt[i][1].toFixed(1);
+        ad+=' Z';
+        const gid='na'+fi;
+        const grad=add(defs,'linearGradient',{ id:gid, gradientUnits:'userSpaceOnUse', x1:P0[0].toFixed(1), y1:P0[1].toFixed(1), x2:tp[0].toFixed(1), y2:tp[1].toFixed(1) });
+        add(grad,'stop',{ offset:'0',   'stop-color':fa.color, 'stop-opacity':0.16 });
+        add(grad,'stop',{ offset:'0.5', 'stop-color':fa.color, 'stop-opacity':0.7 });
+        add(grad,'stop',{ offset:'1',   'stop-color':fa.color, 'stop-opacity':0.97 });
+        add(g,'path',{ d:ad, fill:`url(#${gid})` });
+        /* emoji on the radius ; the two labels stack OUTWARD (away from
+           the clock centre) so the arrow stays clear of them at any angle */
+        const [ex,ey] = pt(fa.h, R_RIM+50), dir = ey <= CY ? -1 : 1;
+        add(g,'text',{ x:ex, y:ey, 'text-anchor':'middle', 'dominant-baseline':'central', 'font-size':34 }, fa.e);
+        add(g,'text',{ x:ex, y:ey+dir*27, 'text-anchor':'middle', 'dominant-baseline':'central', 'font-family':'Inter, sans-serif', 'font-size':19, 'font-weight':600, fill:fa.color }, fa.name);
+        add(g,'text',{ x:ex, y:ey+dir*45, 'text-anchor':'middle', 'dominant-baseline':'central', 'font-family':'Inter, sans-serif', 'font-size':14, fill:MUT }, fa.when);
+        faunaEls.push(g);
+    });
+
+    /* ---- play / reset on slide enter ---- */
+    const slide = svg.closest('.slide'); let anims = [], playing = false;
+    function reset() {
+        anims.forEach(a => { try { a.cancel(); } catch (e) {} }); anims = [];
+        traces.forEach(p => { p.style.strokeDasharray = p.__len; p.style.strokeDashoffset = reduce ? 0 : p.__len; });
+        faunaEls.forEach(g => { g.style.opacity = reduce ? 1 : 0; });
+        playing = false;
+    }
+    function play() {
+        if (playing) return; playing = true;
+        if (reduce) { traces.forEach(p => p.style.strokeDashoffset = 0); faunaEls.forEach(g => g.style.opacity = 1); return; }
+        traces.forEach((p, i) => {
+            p.style.strokeDasharray = p.__len; p.style.strokeDashoffset = p.__len;
+            anims.push(p.animate([{ strokeDashoffset:p.__len }, { strokeDashoffset:0 }], { duration:1700, delay:140+i*260, easing:EASE, fill:'forwards' }));
+        });
+        faunaEls.forEach((g, i) => {
+            g.style.opacity = 0;
+            anims.push(g.animate([{ opacity:0 }, { opacity:1 }], { duration:650, delay:1050+i*200, easing:EASE, fill:'forwards' }));
+        });
+    }
+    reset();
+    new IntersectionObserver((es) => { es.forEach(e => {
+        if (e.isIntersecting && e.intersectionRatio > 0.55) play();
+        else if (e.intersectionRatio < 0.2) reset();
+    }); }, { threshold:[0,0.2,0.55,0.9] }).observe(slide);
+})();
+
+/* ============================================================
+   Live indexer feed — hydrate the streaming-records slide
+   from the baked snapshot at assets/live-records.json.
+
+   The snapshot is produced by scripts/build-live-records.mjs
+   which walks the hyperlabel high-quality feed → indexer
+   activity-by-uri → plc.directory → PDS blob download, all
+   in the last 14 days. Baking sidesteps hyperlabel's missing
+   CORS headers so the deck stays self-contained.
+
+   Each card renders the real PDS image, title, short desc,
+   country/date, and a truncated AT-URI to make it obvious
+   these are real records, not stock content.
+   ============================================================ */
+(async () => {
+    const track  = document.getElementById('stream-track');
+    const synced = document.getElementById('stream-synced');
+    const countN = document.getElementById('stream-count');
+    const totalN = document.getElementById('stream-total');
+    if (!track) return;
+
+    let snap;
+    try {
+        const r = await fetch('assets/live-records.json', { cache: 'no-store' });
+        snap = await r.json();
+    } catch (e) {
+        track.innerHTML = `<div style="padding:1em;font-family:var(--font-italic);font-style:italic;color:var(--fg-faint)">
+            Live snapshot missing — run <code>node scripts/build-live-records.mjs</code> in decks/klarna/ to bake it.
+        </div>`;
+        return;
+    }
+
+    if (countN) countN.textContent = snap.records.length;
+    if (totalN) totalN.textContent = snap.hyperlabelTotal;
+    if (synced) {
+        const d = new Date(snap.generatedAt);
+        synced.textContent = d.toLocaleString('en-CH', {
+            day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit',
+            timeZoneName: 'short',
+        });
+    }
+
+    /* Build one set of cards, then clone the same DOM into a
+       second sibling so the marquee can scroll −50% without a
+       visible seam. */
+    function buildCard(rec) {
+        const dateStr = (rec.createdAt || '').slice(0, 10);
+        const country = rec.country || '';   /* not in snapshot today */
+        const atUri   = truncateAtUri(rec.atUri || `at://${rec.did}/org.hypercerts.claim.activity/${rec.rkey}`);
+        const desc    = rec.shortDescription || '';
+        const el = document.createElement('article');
+        el.className = 'stream-card';
+        el.innerHTML = `
+            <div class="img">
+                <span class="live-corner">Live</span>
+                <img src="${rec.image}" alt="" loading="lazy" decoding="async">
+            </div>
+            <div class="body">
+                <div class="title">${escape(rec.title)}</div>
+                ${desc ? `<div class="desc">${escape(desc)}</div>` : ''}
+                <div class="meta">
+                    <div class="date-row">
+                        <span>${dateStr}</span>
+                        <span>ATProto</span>
+                    </div>
+                    <div class="at-uri" title="${escape(rec.atUri || '')}">${escape(atUri)}</div>
+                </div>
+            </div>`;
+        return el;
+    }
+
+    function escape(s) {
+        return String(s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function truncateAtUri(uri) {
+        /* at://did:plc:abc…xyz/collection/rkey */
+        const m = uri.match(/^at:\/\/(did:plc:)([^/]+)\/([^/]+)\/(.+)$/);
+        if (!m) return uri;
+        const [, prefix, did, , rkey] = m;
+        return `at://${prefix}${did.slice(0,5)}…${did.slice(-4)}/…/${rkey.slice(-7)}`;
+    }
+
+    /* Two passes so the marquee loops seamlessly. */
+    for (let pass = 0; pass < 2; pass++) {
+        for (const rec of snap.records) {
+            track.appendChild(buildCard(rec));
+        }
+    }
+})();
+
+/* ============================================================
+   Specimen wall — hydrate slide 9 from the Darwin Core
+   occurrence snapshot at assets/occurrence-records.json,
+   baked by scripts/build-occurrences.mjs.
+   ============================================================ */
+(async () => {
+    const rowA     = document.getElementById('spec-row-a');
+    const rowB     = document.getElementById('spec-row-b');
+    const wall     = document.getElementById('spec-wall');
+    const totalEl  = document.getElementById('occ-total');
+    const matchedEl= document.getElementById('occ-matched');
+    const taxaEl   = document.getElementById('occ-taxa');
+    const commEl   = document.getElementById('occ-communities');
+    const commNoun = document.getElementById('occ-communities-noun');
+    const syncEl   = document.getElementById('occ-synced');
+    if (!rowA || !rowB) return;
+
+    let snap;
+    try {
+        const r = await fetch('assets/occurrence-records.json', { cache: 'no-store' });
+        snap = await r.json();
+    } catch (e) {
+        wall.innerHTML = `<div style="padding:1em;font-family:var(--font-italic);font-style:italic;color:var(--fg-faint)">
+            Occurrence snapshot missing — run <code>node scripts/build-occurrences.mjs</code> in decks/klarna/ to bake it.
+        </div>`;
+        return;
+    }
+
+    /* Headline counts:
+       - matched  = filtered window count (Manaus + last 14 days) — hero number
+       - total    = global DwC collection size (context)
+       - taxa     = unique species in this snapshot
+       - communities = unique DIDs / stewards */
+    if (matchedEl) matchedEl.textContent = (snap.matched ?? snap.records.length).toLocaleString('en-US');
+    if (totalEl)   totalEl.textContent   = (snap.totalCount || 0).toLocaleString('en-US');
+    if (taxaEl)    taxaEl.textContent    = snap.summary?.taxa ?? snap.records.length;
+    if (commEl)    commEl.textContent    = snap.summary?.communities ?? '—';
+    if (commNoun && snap.summary?.communities === 1) commNoun.textContent = 'community';
+    if (syncEl) {
+        const d = new Date(snap.generatedAt);
+        syncEl.textContent = d.toLocaleString('en-CH', {
+            day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit',
+            timeZoneName: 'short',
+        });
+    }
+
+    function escape(s) {
+        return String(s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function fmtCoord(lat, lon) {
+        if (lat == null || lon == null) return '';
+        return `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
+    }
+
+    function buildCard(rec) {
+        const card = document.createElement('article');
+        card.className = 'spec-card';
+        const sci = rec.scientificName || rec.vernacularName || 'Unidentified';
+        const cc  = rec.countryCode || (rec.country ? rec.country.slice(0, 2).toUpperCase() : '');
+        const coord = fmtCoord(rec.lat, rec.lon);
+        const iucn = rec.iucn ? `<span class="iucn-tag" title="IUCN ${escape(rec.iucn)}">${escape(rec.iucn)}</span>` : '';
+        card.innerHTML = `
+            ${iucn}
+            <div class="img"><img src="${rec.image}" alt="${escape(sci)}" loading="lazy" decoding="async"></div>
+            <div class="cap">
+                <div class="sci" title="${escape(sci)}">${escape(sci)}</div>
+                <div class="row">
+                    <span>${escape(coord)}</span>
+                    ${cc ? `<span class="cc">${escape(cc)}</span>` : ''}
+                </div>
+            </div>`;
+        return card;
+    }
+
+    /* Interleave records across the two rows so each is its own
+       sample of the feed (not first-half / second-half of the
+       same list). Then duplicate each row's contents so the
+       -50% translate keyframe loops seamlessly. */
+    const evens = snap.records.filter((_, i) => i % 2 === 0);
+    const odds  = snap.records.filter((_, i) => i % 2 === 1);
+    function fillRow(row, recs) {
+        for (let pass = 0; pass < 2; pass++) {
+            for (const rec of recs) row.appendChild(buildCard(rec));
+        }
+    }
+    fillRow(rowA, evens);
+    fillRow(rowB, odds);
+})();
+
+
+/* ============================================================
+   Title-slide globe — the same react-globe.gl globe the live
+   site's Partners section uses, mounted standalone here via
+   three-globe + three.js loaded from esm.sh. Mirrors
+   LiveGlobe.tsx config: blue-marble texture, bump map, dark
+   green atmosphere (#2a4a31), mint pin dots, sparse ping
+   rings on a subset of pins, auto-rotation, zoom disabled.
+
+   Pin data is fetched at runtime from the same indexer
+   endpoint LiveGlobe pulls (data.gainforest.app/api/
+   list-organizations?info=true&mapPoint=true) and falls
+   back to a hardcoded representative set if the network
+   call fails. CORS is open on the upstream so this works
+   from any origin (including file://).
+   ============================================================ */
+(async () => {
+    const stage = document.getElementById('earth-stage');
+    const host  = document.getElementById('earth-host');
+    if (!stage || !host) return;
+
+    // Same five fallback pins as app/_lib/projects.ts. Used only
+    // when the live fetch fails (offline projector, etc.).
+    const FALLBACK_PINS = [
+        { name: 'Agape Hand',                    country: 'PE', lat: -11.26, lon: -75.64 },
+        { name: 'Bula Garden Tanzania',          country: 'TZ', lat:  -4.80, lon:  38.29 },
+        { name: 'Restoring Lobongia rangelands', country: 'UG', lat:   3.51, lon:  34.13 },
+        { name: 'Marina Gardens',                country: 'SG', lat:   1.28, lon: 103.86 },
+        { name: 'Precious Forests',              country: 'BR', lat:  -3.47, lon: -62.21 },
+    ];
+
+    async function loadPins() {
+        try {
+            const r = await fetch('https://data.gainforest.app/api/list-organizations?info=true&mapPoint=true', {
+                cache: 'no-store',
+            });
+            if (!r.ok) throw new Error('upstream ' + r.status);
+            const data = await r.json();
+            const pins = [];
+            for (const o of data) {
+                const name = o?.info?.name?.trim();
+                const lat  = o?.mapPoint?.lat;
+                const lon  = o?.mapPoint?.lon;
+                if (!name || typeof lat !== 'number' || typeof lon !== 'number') continue;
+                pins.push({ name, country: o.info?.country?.trim() || '', lat, lon });
+            }
+            return pins.length ? pins : FALLBACK_PINS;
+        } catch (e) {
+            console.warn('[deck] partner pins fetch failed, using fallback', e);
+            return FALLBACK_PINS;
+        }
+    }
+
+    /* three.js + three-globe are loaded via UMD <script> tags in
+       the document head — reference them off `window`. If either
+       failed to load we leave the cream skeleton disc in place. */
+    const THREE      = window.THREE;
+    const ThreeGlobe = window.ThreeGlobe;
+    if (!THREE || !ThreeGlobe) {
+        console.warn('[deck] three / three-globe globals missing');
+        return;
+    }
+
+    const pins = await loadPins();
+
+    /* === Globe instance, mirrors LiveGlobe.tsx === */
+    const MAX_PING = 14;
+    const stride = Math.max(1, Math.ceil(pins.length / MAX_PING));
+    const rings  = pins.filter((_, i) => i % stride === 0).map((p, i) => ({
+        ...p,
+        repeatPeriod: 4000 + ((i * 1303) % 5000),
+    }));
+
+    const globe = new ThreeGlobe()
+        .globeImageUrl('assets/earth-blue-marble.jpg')
+        .bumpImageUrl('assets/earth-topology.png')
+        .showAtmosphere(true)
+        .atmosphereColor('#2a4a31')
+        .atmosphereAltitude(0.18)
+        /* Pin dots */
+        .pointsData(pins)
+        .pointLat('lat').pointLng('lon')
+        .pointAltitude(0.012)
+        .pointRadius(1.1)
+        .pointColor(() => '#bff0ce')
+        /* Ping rings on a sparse subset for the ‘live data’ feel */
+        .ringsData(rings)
+        .ringLat('lat').ringLng('lon')
+        .ringMaxRadius(12)
+        .ringPropagationSpeed(2.4)
+        .ringAltitude(0.012)
+        .ringResolution(96)
+        .ringRepeatPeriod((d) => d.repeatPeriod)
+        .ringColor(() => (t) => {
+            const eased = Math.pow(1 - t, 1.6);
+            return `rgba(140, 220, 165, ${eased * 0.95})`;
+        });
+
+    /* Renderer + scene */
+    const size = () => Math.min(host.clientWidth, host.clientHeight);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0);
+    renderer.setSize(size(), size(), false);
+    host.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.add(globe);
+    /* Lighting matches three-globe's example defaults so the
+       blue-marble texture reads with full colour. */
+    scene.add(new THREE.AmbientLight(0xffffff, Math.PI));
+    const dir = new THREE.DirectionalLight(0xffffff, 0.7 * Math.PI);
+    dir.position.set(1, 0.5, 1);
+    scene.add(dir);
+
+    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 2000);
+    camera.position.z = 235;   /* tight framing — sphere fills the disc */
+
+    /* Auto-rotate at LiveGlobe pace (0.55 ≈ same orbital cadence) */
+    const ROT_PER_SEC = 0.08;  /* radians/sec, gentle */
+    let last = performance.now();
+    function animate(now) {
+        const dt = (now - last) / 1000;
+        last = now;
+        globe.rotation.y += ROT_PER_SEC * dt;
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+    }
+    requestAnimationFrame((t) => { last = t; animate(t); });
+
+    /* Resize handling — keep the canvas a perfect square that
+       follows the disc's clamp() max-size. */
+    const ro = new ResizeObserver(() => {
+        const s = size();
+        renderer.setSize(s, s, false);
+    });
+    ro.observe(host);
+
+    /* Reveal: drop the skeleton disc once the first frame paints */
+    requestAnimationFrame(() => stage.classList.add('is-ready'));
+})();
+
+/* Deep-link support: index.html?slide=4 jumps to that slide on load.
+   Used by the screenshot pipeline; harmless in normal use. */
+(() => {
+    const m = new URL(location.href).searchParams.get('slide');
+    if (m) {
+        const i = Math.max(0, Math.min(__pres.slides.length - 1, parseInt(m, 10) - 1));
+        requestAnimationFrame(() => __pres.slides[i].scrollIntoView({behavior:'instant', block:'start'}));
+    }
+})();
+</script>
+</body>
+</html>

@@ -120,10 +120,6 @@
     "editTitle": "Ubah acara",
     "draftSaved": "Draf tersimpan",
     "close": "Tutup",
-    "basicsTitle": "Hal dasar",
-    "basicsIntro": "Cukup tiga hal ini dan kamu bisa menerbitkan. Semua yang di bawah bersifat opsional.",
-    "requiredMark": "Wajib",
-    "optionalMark": "Opsional",
     "nameLabel": "Apa nama acaranya?",
     "namePlaceholder": "Beri nama acara Anda",
     "aboutLabel": "Tentang",
@@ -138,31 +134,23 @@
     "wherePlaceholder": "Parkiran Marsh Lane, Lahan Basah Ipswich",
     "localityLabel": "Kota atau daerah",
     "countryLabel": "Negara",
-    "mapHint": "Penanda muncul saat kamu mengetik",
     "onlineUrlLabel": "Di mana orang bergabung secara daring?",
-    "addMore": "Tambahkan lagi (opsional)",
     "remove": "Hapus",
     "sections": {
-      "cover": {
-        "title": "Foto sampul",
-        "hint": "Foto untuk bagian atas acara Anda"
-      },
-      "agenda": {
-        "title": "Agenda / apa yang akan terjadi",
-        "hint": "Daftar sederhana jam demi jam"
-      },
       "capacity": {
         "title": "Batasi jumlah orang",
-        "hint": "Nonaktif — siapa pun boleh datang",
         "waitlistNote": "Pendaftar tambahan masuk daftar tunggu."
       }
     },
+    "capacityPlaceholder": "Tanpa batas",
     "descriptionPlaceholder": "Beberapa kalimat. Apa yang akan dilakukan, untuk siapa, apa yang perlu dibawa.",
-    "coverDrop": "Tambahkan foto sampul (opsional)",
     "coverRemove": "Hapus foto",
+    "coverAdd": "Tambahkan foto sampul",
+    "coverChange": "Ganti foto sampul",
     "agendaTime": "Waktu",
     "agendaWhat": "Apa yang terjadi",
     "agendaAdd": "Tambah baris",
+    "you": "Anda",
     "themeTagLabel": "Satu label singkat",
     "themeTagPlaceholder": "Pemula dipersilakan",
     "meetingNoteLabel": "Titik kumpul persis (ditampilkan setelah mendaftar)",
@@ -177,7 +165,6 @@
     "publishFailed": "Kami tidak dapat menerbitkan acaramu. Silakan coba lagi.",
     "errors": {
       "summary": "Beberapa hal perlu diperbaiki sebelum tayang",
-      "summaryHint": "Sudah ditandai di bawah.",
       "nameMissing": "Beri nama acaramu.",
       "dateMissing": "Pilih tanggal.",
       "datePassed": "Tanggal ini sudah lewat. Pilih hari ini atau setelahnya.",

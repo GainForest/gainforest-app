@@ -12,7 +12,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { eventHref, type CommunityEvent, type EventCrowd } from "@/app/_lib/community-events";
 import { eventDateBlock, eventShortDateLine, eventTimeRange } from "../_lib/dates";
 import type { EventAccountCard } from "../_lib/adapter";
-import { AvatarFace, FaceStack, RsvpTrailingControl } from "./EventBits";
+import { AvatarFace, CoverArt, FaceStack, RsvpTrailingControl } from "./EventBits";
 
 export type EventCardData = {
   event: CommunityEvent;
@@ -86,7 +86,7 @@ export function FeaturedEventCard({ data, busy, onRsvp }: { data: EventCardData;
           // eslint-disable-next-line @next/next/no-img-element -- PDS blob URL resolved at runtime; hosts are unbounded.
           <img src={coverUrl} alt="" className="size-full object-cover transition-transform duration-300 group-hover:scale-105" />
         ) : (
-          <span className="grid size-full place-items-center px-2 text-center text-[11px] text-muted-foreground">{event.name}</span>
+          <CoverArt seed={event.name.trim() || event.rkey} className="size-full" />
         )}
       </span>
 

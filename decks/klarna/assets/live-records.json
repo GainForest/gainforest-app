@@ -1,0 +1,128 @@
+{
+  "generatedAt": "2026-05-24T23:16:33.475Z",
+  "windowDays": 14,
+  "hyperlabelTotal": 165,
+  "countInWindow": 100,
+  "records": [
+    {
+      "id": "did:plc:k4akoa7yd32le5wjv37dv2xr-3mmgogmggj22q",
+      "did": "did:plc:k4akoa7yd32le5wjv37dv2xr",
+      "rkey": "3mmgogmggj22q",
+      "title": "Mangrove Restoration & Environmental Education",
+      "shortDescription": "Saving-Planet aims to leverage Bumicerts  impact monitoring tools to strengthen the visibility and credibility of our restoration in mangroves and schools across Kenya. we seek to showcase measurable climate and community benefits while using the platform to support fundraising efforts and scale up.",
+      "createdAt": "2026-05-22T10:00:26.227Z",
+      "image": "assets/live/9f3470f588acdf28.jpg",
+      "atUri": "at://did:plc:k4akoa7yd32le5wjv37dv2xr/org.hypercerts.claim.activity/3mmgogmggj22q"
+    },
+    {
+      "id": "did:plc:tgr7mfeodwiegvnhy7ae2xhd-3mmgmtmq53k2q",
+      "did": "did:plc:tgr7mfeodwiegvnhy7ae2xhd",
+      "rkey": "3mmgmtmq53k2q",
+      "title": "Jagomir Bee Corridor - dMRV Report",
+      "shortDescription": "24-month verified dMRV report for the Jagomir Bee Corridor, documenting 56.50t of CO2 and a 35.3% growth in vegetation health. Data is anchored on IPFS/blockchain with new verified reports issued monthly.",
+      "createdAt": "2026-05-22T09:31:55.025Z",
+      "image": "assets/live/6046f2e2116a74d3.jpg",
+      "atUri": "at://did:plc:tgr7mfeodwiegvnhy7ae2xhd/org.hypercerts.claim.activity/3mmgmtmq53k2q"
+    },
+    {
+      "id": "did:plc:csr6m5gak7octhj4js3bor3w-3mmg6tnsiak2q",
+      "did": "did:plc:csr6m5gak7octhj4js3bor3w",
+      "rkey": "3mmg6tnsiak2q",
+      "title": "Restoring soil and food security at Kanyanjwa community in Homa Bay, Kenya",
+      "shortDescription": "Kanyanjwa Community Farm: Growing Hope, Growing Food",
+      "createdAt": "2026-05-22T04:37:36.760Z",
+      "image": "assets/live/3f45cc4de8ced086.jpg",
+      "atUri": "at://did:plc:csr6m5gak7octhj4js3bor3w/org.hypercerts.claim.activity/3mmg6tnsiak2q"
+    },
+    {
+      "id": "did:plc:caqlp22nnz6avdjf5m7nkd5z-3mmfppyslvs2q",
+      "did": "did:plc:caqlp22nnz6avdjf5m7nkd5z",
+      "rkey": "3mmfppyslvs2q",
+      "title": "Whaka Ora Pest Project, Supporting Native Biodiversity in Lyttleton Harbour",
+      "shortDescription": "Whaka Ora Pest Project",
+      "createdAt": "2026-05-21T22:46:01.799Z",
+      "image": "assets/live/9aa7fcd576be1b09.jpg",
+      "atUri": "at://did:plc:caqlp22nnz6avdjf5m7nkd5z/org.hypercerts.claim.activity/3mmfppyslvs2q"
+    },
+    {
+      "id": "did:plc:ud4j6tjbqvcllusgnijs4elk-3mmflpw5fn22q",
+      "did": "did:plc:ud4j6tjbqvcllusgnijs4elk",
+      "rkey": "3mmflpw5fn22q",
+      "title": "Ubeji Freshwater Biodiversity Recovery and Youth Livelihoods Initiative",
+      "shortDescription": "Our project was inspired by years of ecological research and conservation work within the Ubeji Axis of the Warri River in Delta State, Nigeria. During field activities, we observed severe oil pollution, heavy metal contamination, biodiversity decline, and increasing pressure on indigenous freshw...",
+      "createdAt": "2026-05-21T22:36:11.119Z",
+      "image": "assets/live/cd76a63d0dcd8759.jpg",
+      "atUri": "at://did:plc:ud4j6tjbqvcllusgnijs4elk/org.hypercerts.claim.activity/3mmflpw5fn22q"
+    },
+    {
+      "id": "did:plc:izdfssgtvgsg5cl2roqewuwo-3mmfgoyuaik2q",
+      "did": "did:plc:izdfssgtvgsg5cl2roqewuwo",
+      "rkey": "3mmfgoyuaik2q",
+      "title": "Otaihanga timber pyrolysis for soil regeneration",
+      "shortDescription": "The Waste Timber to Biochar Initiative",
+      "createdAt": "2026-05-21T21:59:40.316Z",
+      "image": "assets/live/2d72f136c0ca0fb9.jpg",
+      "atUri": "at://did:plc:izdfssgtvgsg5cl2roqewuwo/org.hypercerts.claim.activity/3mmfgoyuaik2q"
+    },
+    {
+      "id": "did:plc:vnmvs5yoq6kvndbg2nsdkclc-3mmf3evxvs22q",
+      "did": "did:plc:vnmvs5yoq6kvndbg2nsdkclc",
+      "rkey": "3mmf3evxvs22q",
+      "title": "Green Nairobi: youth-led conservation and farming",
+      "shortDescription": "Youth for Climate Change Action: Empowering the Next Generation",
+      "createdAt": "2026-05-21T18:31:53.860Z",
+      "image": "assets/live/784453965e0547d4.jpg",
+      "atUri": "at://did:plc:vnmvs5yoq6kvndbg2nsdkclc/org.hypercerts.claim.activity/3mmf3evxvs22q"
+    },
+    {
+      "id": "did:plc:xmtbyav6djilhvuwk6yvxndf-3mmetsuecxc2q",
+      "did": "did:plc:xmtbyav6djilhvuwk6yvxndf",
+      "rkey": "3mmetsuecxc2q",
+      "title": "Mauritius circular economy supply chain traceability platform",
+      "shortDescription": "Project Description: TechCycle Traceability Intelligence Platform",
+      "createdAt": "2026-05-21T16:10:41.754Z",
+      "image": "assets/live/825e0c175c0da9ba.png",
+      "atUri": "at://did:plc:xmtbyav6djilhvuwk6yvxndf/org.hypercerts.claim.activity/3mmetsuecxc2q"
+    },
+    {
+      "id": "did:plc:y6pxboftabmgumuvpbpz7iyu-3mmeq7dbdpk2q",
+      "did": "did:plc:y6pxboftabmgumuvpbpz7iyu",
+      "rkey": "3mmeq7dbdpk2q",
+      "title": "Protecting Bakossi forest through sustainable farming in Bangem",
+      "shortDescription": "About the Project and the Ecosystem",
+      "createdAt": "2026-05-21T15:11:47.887Z",
+      "image": "assets/live/e3e3e6ee8f35534a.jpg",
+      "atUri": "at://did:plc:y6pxboftabmgumuvpbpz7iyu/org.hypercerts.claim.activity/3mmeq7dbdpk2q"
+    },
+    {
+      "id": "did:plc:jq3l2pq7iflysyyldbyspi6y-3mmeolaf7wc2q",
+      "did": "did:plc:jq3l2pq7iflysyyldbyspi6y",
+      "rkey": "3mmeolaf7wc2q",
+      "title": "Reforestando(NOS): community nurseries to restore Puerto Rico coastline",
+      "shortDescription": "Reforestando(Nos): Protecting Puerto Rico's Communities",
+      "createdAt": "2026-05-21T14:18:36.916Z",
+      "image": "assets/live/2fc63a8a60e3e17f.jpg",
+      "atUri": "at://did:plc:jq3l2pq7iflysyyldbyspi6y/org.hypercerts.claim.activity/3mmeolaf7wc2q"
+    },
+    {
+      "id": "did:plc:ma3hqvizchz4g5pv74wtbglh-3mmefvy4qpc2q",
+      "did": "did:plc:ma3hqvizchz4g5pv74wtbglh",
+      "rkey": "3mmefvy4qpc2q",
+      "title": "Community-Led Mangrove Ecosystem Restoration in Lhokseumawe",
+      "shortDescription": "This community-driven initiative focuses on restoring, managing, and protecting a critical 0.31-hectare coastal mangrove ecosystem located in Desa Kuala, Blang Mangat, Lhokseumawe. Driven entirely by grassroots mobilization, the project addresses severe coastal degradation, operational challenges...",
+      "createdAt": "2026-05-21T11:26:52.053Z",
+      "image": "assets/live/8f021014d9ca465d.jpg",
+      "atUri": "at://did:plc:ma3hqvizchz4g5pv74wtbglh/org.hypercerts.claim.activity/3mmefvy4qpc2q"
+    },
+    {
+      "id": "did:plc:mr4dv2rxfk6npof5jebt4ym6-3mmefbwiel22q",
+      "did": "did:plc:mr4dv2rxfk6npof5jebt4ym6",
+      "rkey": "3mmefbwiel22q",
+      "title": "Plant your Age, Restore the Earth in Tanzania",
+      "shortDescription": "Plant Your Age: Growing a Greener Future",
+      "createdAt": "2026-05-21T11:03:53.268Z",
+      "image": "assets/live/30fb4fb71f5b619f.png",
+      "atUri": "at://did:plc:mr4dv2rxfk6npof5jebt4ym6/org.hypercerts.claim.activity/3mmefbwiel22q"
+    }
+  ]
+}

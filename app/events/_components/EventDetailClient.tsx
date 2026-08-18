@@ -34,7 +34,7 @@ import { useViewer } from "@/app/_lib/viewer";
 import { liveEventsAdapter, type EventAccountCard, type EventsAdapter } from "../_lib/adapter";
 import { eventDayLine, eventLongDateLine, eventTimeRange } from "../_lib/dates";
 import { downloadEventIcs } from "../_lib/ics";
-import { AvatarFace, FaceStack } from "./EventBits";
+import { AvatarFace, CoverArt, FaceStack } from "./EventBits";
 
 type PanelMode = "default" | "cancelConfirm" | "cancelEventConfirm";
 
@@ -413,13 +413,14 @@ export function EventDetailClient({
 
       <div className="mt-4 flex flex-col gap-8 lg:flex-row">
         <article className="min-w-0 flex-1">
-          {/* Cover — falls back to a plain block carrying the title. */}
+          {/* Cover — falls back to the event's generated art, the same art
+              the host editor previews. */}
           <div className="overflow-hidden rounded-3xl border border-border-soft bg-surface-sunken">
             {coverUrl ? (
               // eslint-disable-next-line @next/next/no-img-element -- PDS blob URL resolved at runtime; hosts are unbounded.
               <img src={coverUrl} alt="" className="aspect-[3/1] w-full object-cover" />
             ) : (
-              <div className="grid aspect-[3/1] place-items-center px-6 text-center text-lg font-semibold text-muted-foreground">{event.name}</div>
+              <CoverArt seed={event.name.trim() || event.rkey} className="aspect-[3/1] w-full" />
             )}
           </div>
 

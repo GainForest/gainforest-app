@@ -120,10 +120,6 @@
     "editTitle": "Editar evento",
     "draftSaved": "Rascunho salvo",
     "close": "Fechar",
-    "basicsTitle": "O básico",
-    "basicsIntro": "Só estas três coisas e você pode publicar. Todo o resto é opcional.",
-    "requiredMark": "Obrigatório",
-    "optionalMark": "Opcional",
     "nameLabel": "Como você vai chamá-lo?",
     "namePlaceholder": "Dê um nome ao seu evento",
     "aboutLabel": "Sobre",
@@ -138,31 +134,23 @@
     "wherePlaceholder": "Estacionamento de Marsh Lane, Pantanal de Ipswich",
     "localityLabel": "Cidade ou região",
     "countryLabel": "País",
-    "mapHint": "O pino aparece enquanto você digita",
     "onlineUrlLabel": "Onde as pessoas entram on-line?",
-    "addMore": "Adicionar mais (opcional)",
     "remove": "Remover",
     "sections": {
-      "cover": {
-        "title": "Foto de capa",
-        "hint": "Uma foto para o topo do seu evento"
-      },
-      "agenda": {
-        "title": "Programação / o que esperar",
-        "hint": "Uma lista simples, horário por horário"
-      },
       "capacity": {
         "title": "Limitar o número de pessoas",
-        "hint": "Desativado — qualquer pessoa pode vir",
         "waitlistNote": "Inscrições extras entram numa lista de espera."
       }
     },
+    "capacityPlaceholder": "Sem limite",
     "descriptionPlaceholder": "Algumas frases. O que vão fazer, para quem é, o que levar.",
-    "coverDrop": "Adicionar uma foto de capa (opcional)",
     "coverRemove": "Remover foto",
+    "coverAdd": "Adicione uma foto de capa",
+    "coverChange": "Mudar a foto de capa",
     "agendaTime": "Hora",
     "agendaWhat": "O que acontece",
     "agendaAdd": "Adicionar uma linha",
+    "you": "Você",
     "themeTagLabel": "Uma etiqueta curta",
     "themeTagPlaceholder": "Iniciantes bem-vindos",
     "meetingNoteLabel": "Ponto de encontro exato (mostrado após a confirmação)",
@@ -177,7 +165,6 @@
     "publishFailed": "Não foi possível publicar seu evento. Tente novamente.",
     "errors": {
       "summary": "Algumas coisas precisam de ajuste antes de publicar",
-      "summaryHint": "Elas estão marcadas abaixo.",
       "nameMissing": "Dê um nome ao seu evento.",
       "dateMissing": "Escolha uma data.",
       "datePassed": "Esta data já passou. Escolha hoje ou uma data futura.",

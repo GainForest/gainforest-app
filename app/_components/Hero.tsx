@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { LiveBumicertsSnapshot } from "../_lib/bumicerts";
-import { GLOBE_URL, PROJECTS_URL } from "../_lib/urls";
+import { GLOBE_URL, FEED_URL } from "../_lib/urls";
 import { BrushedText } from "./BrushedText";
 import { useT } from "./LocaleProvider";
 
@@ -89,7 +89,7 @@ export function Hero({
           <div className="mt-8 lg:mt-10 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
             {/* Primary pill — bright mint, matching gainforest.earth. */}
             <Link
-              href={PROJECTS_URL}
+              href={FEED_URL}
               target="_blank"
               rel="noreferrer"
               className="inline-flex h-[54px] items-center justify-center rounded-full bg-primary px-8 lg:px-10 text-[15px] lg:text-[16px] font-medium text-primary-foreground transition-colors hover:bg-primary-dark"
