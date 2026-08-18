@@ -884,6 +884,7 @@
           "empty": "Belum ada tonggak pencapaian. Semuanya muncul di sini setelah hibah Anda disiapkan.",
           "confirmed": "Terkonfirmasi",
           "payout": "Mencairkan ${amount} · pembayaran {tranche}",
+          "payoutNoTranche": "Mencairkan ${amount}",
           "reviewNote": "GainForest mengonfirmasi setiap tonggak — setiap tonggak yang dikonfirmasi mencairkan bagian hibah berikutnya.",
           "pending": "Belum dikonfirmasi",
           "dueOn": "Tenggat {date}",

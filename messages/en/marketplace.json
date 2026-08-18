@@ -884,6 +884,7 @@
           "empty": "No milestones yet. They appear here once your grant is set up.",
           "confirmed": "Confirmed",
           "payout": "Releases ${amount} · payment {tranche}",
+          "payoutNoTranche": "Releases ${amount}",
           "reviewNote": "GainForest confirms each milestone — every confirmed milestone releases the next part of your grant.",
           "pending": "Not confirmed",
           "dueOn": "Due {date}",

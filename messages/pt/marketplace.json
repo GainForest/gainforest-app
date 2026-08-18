@@ -884,6 +884,7 @@
           "empty": "Ainda não há marcos. Eles aparecem aqui depois que seu subsídio for configurado.",
           "confirmed": "Confirmado",
           "payout": "Libera ${amount} · pagamento {tranche}",
+          "payoutNoTranche": "Libera ${amount}",
           "reviewNote": "A GainForest confirma cada marco — cada marco confirmado libera a próxima parte do seu subsídio.",
           "pending": "Não confirmado",
           "dueOn": "Até {date}",

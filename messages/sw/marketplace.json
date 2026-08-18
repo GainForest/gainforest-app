@@ -884,6 +884,7 @@
           "empty": "Bado hakuna hatua muhimu. Zitaonekana hapa mara ruzuku yako itakapowekwa.",
           "confirmed": "Imethibitishwa",
           "payout": "Hutoa ${amount} · malipo ya {tranche}",
+          "payoutNoTranche": "Hutoa ${amount}",
           "reviewNote": "GainForest huthibitisha kila hatua muhimu — kila hatua iliyothibitishwa hufungua sehemu inayofuata ya ruzuku yako.",
           "pending": "Haijathibitishwa",
           "dueOn": "Ifikapo {date}",

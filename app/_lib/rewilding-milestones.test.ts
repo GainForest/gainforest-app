@@ -12,17 +12,22 @@ import {
 import { isDueDatePast } from "@/app/grants/_components/rewilding/model";
 import {
   REWILDING_MILESTONES,
+  customPayoutGranteeDids,
   doneRewildingMilestoneIds,
   effectiveRewildingMilestones,
   effectiveRewildingMilestonePlans,
   isCustomRewildingMilestoneId,
   isRewildingDueDate,
+  isRewildingPayoutCustom,
+  isRewildingPayoutUsd,
   newCustomRewildingMilestoneId,
   parseRewildingMilestonePlanRecord,
   parseRewildingMilestoneRecord,
+  parseRewildingPayoutModeRecord,
   resolveRewildingMilestonePlan,
   type RewildingMilestonePlanRecord,
   type RewildingMilestoneRecord,
+  type RewildingPayoutModeRecord,
 } from "./rewilding-milestones";
 
 const GRANTEE_A = "did:plc:grantee-a";
@@ -187,7 +192,10 @@ describe("milestone plans", () => {
     rkey: string,
     createdAt: string,
     extra: Partial<
-      Pick<RewildingMilestonePlanRecord, "title" | "description" | "dueDate" | "removed">
+      Pick<
+        RewildingMilestonePlanRecord,
+        "title" | "description" | "dueDate" | "payoutUsd" | "removed"
+      >
     > = {},
   ): RewildingMilestonePlanRecord => ({
     rkey,
@@ -197,6 +205,7 @@ describe("milestone plans", () => {
     title: extra.title ?? null,
     description: extra.description ?? null,
     dueDate: extra.dueDate ?? null,
+    payoutUsd: extra.payoutUsd ?? null,
     removed: extra.removed ?? false,
     createdAt,
   });
@@ -351,6 +360,102 @@ describe("milestone plans", () => {
     // Not overdue on the due day itself.
     expect(isDueDatePast("2026-10-15", during)).toBe(false);
     expect(isDueDatePast("2026-10-16", during)).toBe(false);
+  });
+
+  it("validates payout amounts as whole, non-negative dollars", () => {
+    expect(isRewildingPayoutUsd(0)).toBe(true);
+    expect(isRewildingPayoutUsd(500)).toBe(true);
+    expect(isRewildingPayoutUsd(-1)).toBe(false);
+    expect(isRewildingPayoutUsd(12.5)).toBe(false);
+    expect(isRewildingPayoutUsd(2_000_000)).toBe(false);
+    expect(isRewildingPayoutUsd("500")).toBe(false);
+  });
+
+  it("parses a payout override, keeps an explicit zero, and drops a malformed one", () => {
+    expect(
+      parseRewildingMilestonePlanRecord({
+        uri: `${planUri}a1`,
+        value: { subject: GRANTEE_A, milestoneId: "m1", payoutUsd: 500, createdAt: "2026-01-01T00:00:00.000Z" },
+      })?.payoutUsd,
+    ).toBe(500);
+    expect(
+      parseRewildingMilestonePlanRecord({
+        uri: `${planUri}a2`,
+        value: { subject: GRANTEE_A, milestoneId: "m1", payoutUsd: 0, createdAt: "2026-01-01T00:00:00.000Z" },
+      })?.payoutUsd,
+    ).toBe(0);
+    // A bad amount is dropped without losing the rest of the event.
+    expect(
+      parseRewildingMilestonePlanRecord({
+        uri: `${planUri}a3`,
+        value: {
+          subject: GRANTEE_A,
+          milestoneId: "m1",
+          payoutUsd: -5,
+          dueDate: "2026-10-01",
+          createdAt: "2026-01-01T00:00:00.000Z",
+        },
+      }),
+    ).toMatchObject({ dueDate: "2026-10-01", payoutUsd: null });
+  });
+
+  it("parses payout-mode events and lets the newest win per grantee", () => {
+    const modeUri = "at://did:plc:moderation/app.gainforest.grant.rewilding.payoutMode/";
+    expect(
+      parseRewildingPayoutModeRecord({
+        uri: `${modeUri}a1`,
+        value: { subject: GRANTEE_A, custom: true, createdAt: "2026-01-01T00:00:00.000Z" },
+      }),
+    ).toMatchObject({ subjectDid: GRANTEE_A, custom: true });
+
+    const records: RewildingPayoutModeRecord[] = [
+      { rkey: "a1", uri: `${modeUri}a1`, subjectDid: GRANTEE_A, custom: true, createdAt: "2026-01-01T00:00:00.000Z" },
+      { rkey: "a2", uri: `${modeUri}a2`, subjectDid: GRANTEE_A, custom: false, createdAt: "2026-02-01T00:00:00.000Z" },
+      { rkey: "b1", uri: `${modeUri}b1`, subjectDid: GRANTEE_B, custom: true, createdAt: "2026-01-01T00:00:00.000Z" },
+    ];
+    // A's newest event switched custom back off; B is still custom.
+    expect(isRewildingPayoutCustom(records, GRANTEE_A)).toBe(false);
+    expect(isRewildingPayoutCustom(records, GRANTEE_B)).toBe(true);
+    expect(customPayoutGranteeDids(records)).toEqual(new Set([GRANTEE_B]));
+  });
+
+  it("keeps the handbook payouts under the default split", () => {
+    const resolved = resolveRewildingMilestonePlan(
+      [
+        plan(GRANTEE_A, "m1", "a1", "2026-01-01T00:00:00.000Z", { payoutUsd: 900 }),
+        plan(GRANTEE_A, "ccustom1", "a2", "2026-01-02T00:00:00.000Z", { title: "Extra", payoutUsd: 100 }),
+      ],
+      GRANTEE_A,
+    );
+    // Overrides are ignored: M1 keeps its handbook tranche and amount, and the
+    // custom milestone stays unpaid.
+    expect(resolved.find((m) => m.id === "m1")?.payout).toEqual({ tranche: 1, amountUsd: 333 });
+    expect(resolved.find((m) => m.id === "ccustom1")?.payout).toBeNull();
+  });
+
+  it("applies custom payouts without tranches, falling back to the handbook amount", () => {
+    const resolved = resolveRewildingMilestonePlan(
+      [
+        plan(GRANTEE_A, "m1", "a1", "2026-01-01T00:00:00.000Z", { payoutUsd: 400 }),
+        plan(GRANTEE_A, "m2", "a2", "2026-01-02T00:00:00.000Z", { payoutUsd: 0 }),
+        plan(GRANTEE_A, "ccustom1", "a3", "2026-01-03T00:00:00.000Z", { title: "Extra", payoutUsd: 266 }),
+      ],
+      GRANTEE_A,
+      { customPayouts: true },
+    );
+    // No tranche numbers under a custom split.
+    expect(resolved.find((m) => m.id === "m1")?.payout).toEqual({ amountUsd: 400 });
+    // An explicit zero releases nothing.
+    expect(resolved.find((m) => m.id === "m2")?.payout).toBeNull();
+    // No override falls back to the handbook amount, still without a tranche.
+    expect(resolved.find((m) => m.id === "m3")?.payout).toEqual({ amountUsd: 333 });
+    // A custom milestone carries its override.
+    expect(resolved.find((m) => m.id === "ccustom1")?.payout).toEqual({ amountUsd: 266 });
+    // The raw override and handbook default are exposed for the admin panel.
+    expect(resolved.find((m) => m.id === "m1")).toMatchObject({
+      payoutUsd: 400,
+      defaultPayout: { tranche: 1, amountUsd: 333 },
+    });
   });
 });
 

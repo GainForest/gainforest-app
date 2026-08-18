@@ -884,6 +884,7 @@
           "empty": "Aún no hay hitos. Aparecerán aquí cuando se configure tu subvención.",
           "confirmed": "Confirmado",
           "payout": "Libera ${amount} · pago {tranche}",
+          "payoutNoTranche": "Libera ${amount}",
           "reviewNote": "GainForest confirma cada hito: cada hito confirmado libera la siguiente parte de tu subvención.",
           "pending": "Sin confirmar",
           "dueOn": "Vence {date}",

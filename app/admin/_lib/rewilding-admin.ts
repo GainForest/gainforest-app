@@ -6,9 +6,11 @@ import {
 } from "@/app/_lib/indexer";
 import { resolveDidHandle } from "@/app/_lib/pds";
 import {
+  customPayoutGranteeDids,
   effectiveRewildingMilestones,
   fetchRewildingMilestonePlans,
   fetchRewildingMilestones,
+  fetchRewildingPayoutModes,
   resolveRewildingMilestonePlan,
 } from "@/app/_lib/rewilding-milestones";
 import {
@@ -43,7 +45,13 @@ export type RewildingAdminMilestone = {
   /** Calendar date (YYYY-MM-DD) this milestone is due for this grantee. */
   dueDate: string | null;
   isCustom: boolean;
-  payout: { tranche: number; amountUsd: number } | null;
+  /** The handbook payment for this milestone (tranche + amount), or null.
+   *  Constant per milestone; shown under the handbook split and used as the
+   *  starting amount when the admin switches to a custom split. */
+  defaultPayout: { tranche: number; amountUsd: number } | null;
+  /** This grantee's custom payment override in whole USD, or null when none
+   *  is set. Only takes effect under a custom split. */
+  payoutUsd: number | null;
   done: boolean;
   /** When the current state was set, when any event exists. */
   updatedAt: string | null;
@@ -70,6 +78,9 @@ export type RewildingAdminGrantee = {
   applicationText: string | null;
   /** When this organization was accepted into its slot. */
   enrolledAt: string;
+  /** True when this grantee's milestone payments follow a custom split rather
+   *  than the standard handbook one. */
+  customPayouts: boolean;
   milestones: RewildingAdminMilestone[];
   documents: RewildingAdminDocument[];
 };
@@ -80,14 +91,17 @@ export async function fetchRewildingAdminGrantees(): Promise<RewildingAdminGrant
   const enrolled = effectiveRewildingGrantees(enrollmentRecords);
   if (enrolled.length === 0) return [];
 
-  const [applicants, milestoneRecords, milestonePlanRecords, documentRecords] = await Promise.all([
-    fetchGrantApplicants().catch(() => []),
-    fetchRewildingMilestones().catch(() => []),
-    fetchRewildingMilestonePlans().catch(() => []),
-    listRewildingDocuments().catch(() => []),
-  ]);
+  const [applicants, milestoneRecords, milestonePlanRecords, payoutModeRecords, documentRecords] =
+    await Promise.all([
+      fetchGrantApplicants().catch(() => []),
+      fetchRewildingMilestones().catch(() => []),
+      fetchRewildingMilestonePlans().catch(() => []),
+      fetchRewildingPayoutModes().catch(() => []),
+      listRewildingDocuments().catch(() => []),
+    ]);
 
   const currentMilestones = effectiveRewildingMilestones(milestoneRecords);
+  const customPayoutDids = customPayoutGranteeDids(payoutModeRecords);
   const dids = enrolled.map((record) => record.subjectDid);
   const enrolledAtByDid = new Map(enrolled.map((record) => [record.subjectDid, record.createdAt]));
 
@@ -130,14 +144,18 @@ export async function fetchRewildingAdminGrantees(): Promise<RewildingAdminGrant
         hasGrantBadge: badges.get(did)?.has("rewilding-grant") ?? false,
         applicationText: applicant?.applicationText || null,
         enrolledAt: enrolledAtByDid.get(did) ?? "",
-        milestones: resolveRewildingMilestonePlan(milestonePlanRecords, did).map((resolved) => ({
+        customPayouts: customPayoutDids.has(did),
+        milestones: resolveRewildingMilestonePlan(milestonePlanRecords, did, {
+          customPayouts: customPayoutDids.has(did),
+        }).map((resolved) => ({
           id: resolved.id,
           code: resolved.code,
           title: resolved.title,
           description: resolved.description,
           dueDate: resolved.dueDate,
           isCustom: resolved.isCustom,
-          payout: resolved.payout,
+          defaultPayout: resolved.defaultPayout,
+          payoutUsd: resolved.payoutUsd,
           done: doneStates.get(resolved.id)?.done ?? false,
           updatedAt: doneStates.get(resolved.id)?.createdAt ?? null,
         })),

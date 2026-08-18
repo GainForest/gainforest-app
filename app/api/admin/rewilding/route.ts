@@ -6,6 +6,7 @@ import {
   setRewildingGrantee,
   setRewildingMilestone,
   setRewildingMilestonePlan,
+  setRewildingPayoutMode,
 } from "@/app/admin/_lib/rewilding-mutations";
 import {
   addRewildingDocument,
@@ -28,10 +29,13 @@ export const runtime = "nodejs";
  *   { action: "addGrantee", subjectDid }     — refused once all 10 slots are taken
  *   { action: "removeGrantee", subjectDid }
  *   { action: "setMilestone", subjectDid, milestoneId, done }
- *   { action: "setMilestonePlan", subjectDid, milestoneId?, title?, description?, dueDate?, removed? }
+ *   { action: "setMilestonePlan", subjectDid, milestoneId?, title?, description?, dueDate?, payoutUsd?, removed? }
  *       — omit milestoneId to add a custom milestone; on program milestones a
- *         blank title/description falls back to the program copy; removed
- *         retires a custom milestone
+ *         blank title/description falls back to the program copy; payoutUsd is
+ *         a per-grantee custom payment (whole USD, 0 allowed) that only takes
+ *         effect under a custom split; removed retires a custom milestone
+ *   { action: "setPayoutMode", subjectDid, custom }
+ *       — switch a grantee between the handbook split and a custom one
  *   { action: "addDocument", subjectDid, title, fileName, mimeType, dataBase64 }
  *   { action: "deleteDocument", id }
  */
@@ -88,6 +92,7 @@ export async function POST(request: Request) {
         title: typeof body.title === "string" ? body.title : null,
         description: typeof body.description === "string" ? body.description : null,
         dueDate: typeof body.dueDate === "string" && body.dueDate ? body.dueDate : null,
+        payoutUsd: typeof body.payoutUsd === "number" ? body.payoutUsd : null,
         removed: body.removed === true,
       });
       return Response.json(
@@ -97,9 +102,25 @@ export async function POST(request: Request) {
             title: plan.title,
             description: plan.description,
             dueDate: plan.dueDate,
+            payoutUsd: plan.payoutUsd,
             removed: plan.removed,
           },
         },
+        { headers: { "cache-control": "no-store" } },
+      );
+    }
+
+    if (body.action === "setPayoutMode") {
+      const headerList = await headers();
+      const cookie = getAuthForwardCookie(headerList.get("cookie"));
+      const mode = await setRewildingPayoutMode(
+        access.repoDid,
+        cookie,
+        str(body.subjectDid),
+        body.custom === true,
+      );
+      return Response.json(
+        { mode: { custom: mode.custom } },
         { headers: { "cache-control": "no-store" } },
       );
     }

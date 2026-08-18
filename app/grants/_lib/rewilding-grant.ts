@@ -29,6 +29,8 @@ import {
   doneRewildingMilestoneIds,
   fetchRewildingMilestonePlans,
   fetchRewildingMilestones,
+  fetchRewildingPayoutModes,
+  isRewildingPayoutCustom,
   resolveRewildingMilestonePlan,
 } from "@/app/_lib/rewilding-milestones";
 import { EMPTY_AUDIO_STATS, buildAudioPace, fetchGranteeAudioStats } from "./rewilding-audio";
@@ -54,15 +56,18 @@ export {
 export async function fetchGrantOverview(viewerDid: string | null): Promise<GrantOverview> {
   // Audio figures degrade to zero on indexer failure rather than breaking the
   // page — milestones are the load-bearing content here.
-  const [milestoneRecords, milestonePlanRecords, audio] = await Promise.all([
+  const [milestoneRecords, milestonePlanRecords, payoutModeRecords, audio] = await Promise.all([
     viewerDid ? fetchRewildingMilestones().catch(() => []) : Promise.resolve([]),
     viewerDid ? fetchRewildingMilestonePlans().catch(() => []) : Promise.resolve([]),
+    viewerDid ? fetchRewildingPayoutModes().catch(() => []) : Promise.resolve([]),
     viewerDid ? fetchGranteeAudioStats(viewerDid).catch(() => EMPTY_AUDIO_STATS) : Promise.resolve(EMPTY_AUDIO_STATS),
   ]);
   const done = viewerDid ? doneRewildingMilestoneIds(milestoneRecords, viewerDid) : new Set<string>();
   // The grantee's own plan: program milestones with any due dates the grant
-  // team set, plus milestones added just for them.
-  const plan = resolveRewildingMilestonePlan(milestonePlanRecords, viewerDid ?? "");
+  // team set, plus milestones added just for them, and the payments in force
+  // under their split (handbook or custom).
+  const customPayouts = viewerDid ? isRewildingPayoutCustom(payoutModeRecords, viewerDid) : false;
+  const plan = resolveRewildingMilestonePlan(milestonePlanRecords, viewerDid ?? "", { customPayouts });
 
   // One program-wide window, the same for every grantee.
   const audioPace = buildAudioPace({

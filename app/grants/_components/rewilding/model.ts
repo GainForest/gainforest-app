@@ -65,9 +65,11 @@ export type GrantMilestone = {
    *  set one for this grantee. */
   dueDate?: string | null;
   state: GrantMilestoneState;
-  /** The payment tranche this milestone releases, when it gates one. M3 shares
-   *  M2's tranche, so it carries no payout of its own. */
-  payout?: { tranche: number; amountUsd: number };
+  /** The payment this milestone releases, when it gates one. Under the
+   *  standard handbook split it carries the tranche number (M3 shares M2's
+   *  tranche, so it has no payout of its own); under a custom split it is
+   *  just an amount, with no tranche. */
+  payout?: { tranche?: number; amountUsd: number };
   /** Milestones about the devices link through to the "My recorders" page. */
   isRecorderInventory?: boolean;
 };

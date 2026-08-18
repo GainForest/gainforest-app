@@ -19,6 +19,10 @@ import {
 import { cn } from "@/lib/utils";
 import { formatRelative } from "@/app/_lib/format";
 import { REWILDING_GRANT_SLOTS } from "@/app/_lib/rewilding-grantees";
+import {
+  REWILDING_GRANT_AMOUNT_USD,
+  REWILDING_MAX_PAYOUT_USD,
+} from "@/app/_lib/rewilding-milestones";
 import { isDueDatePast } from "@/app/grants/_components/rewilding/model";
 import { accountPath } from "@/app/account/_lib/account-route";
 import type {
@@ -279,6 +283,7 @@ function GranteeCard({
   const [open, setOpen] = useState(false);
   const [milestones, setMilestones] = useState(grantee.milestones);
   const [documents, setDocuments] = useState(grantee.documents);
+  const [customPayouts, setCustomPayouts] = useState(grantee.customPayouts);
   const doneCount = milestones.filter((milestone) => milestone.done).length;
 
   /** Custom milestones are numbered on from the program's, in plan order —
@@ -339,12 +344,19 @@ function GranteeCard({
             <h4 className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
               {t("milestonesTitle")}
             </h4>
+            <PayoutSplitControl
+              subjectDid={grantee.did}
+              custom={customPayouts}
+              milestones={milestones}
+              onChange={setCustomPayouts}
+            />
             <ol className="flex flex-col gap-1.5">
               {milestones.map((milestone) => (
                 <MilestoneRow
                   key={milestone.id}
                   subjectDid={grantee.did}
                   milestone={milestone}
+                  customPayouts={customPayouts}
                   onChanged={(next) =>
                     setMilestones((current) =>
                       current.map((entry) => (entry.id === next.id ? next : entry)),
@@ -360,6 +372,7 @@ function GranteeCard({
             </ol>
             <AddMilestoneForm
               subjectDid={grantee.did}
+              customPayouts={customPayouts}
               onAdded={(milestone) => setMilestones((current) => renumberCustom([...current, milestone]))}
             />
           </section>
@@ -435,14 +448,106 @@ function RemoveGranteeButton({ grantee }: { grantee: RewildingAdminGrantee }) {
   );
 }
 
+/**
+ * The grantee's payout split: a checkbox that keeps the standard handbook
+ * payments (the default) or switches this grantee to a custom split. In
+ * custom mode it also shows the running total against the $1,000 grant, so an
+ * admin can see at a glance whether the amounts still add up. Toggling writes
+ * the mode through /api/admin/rewilding and updates the card optimistically;
+ * the per-milestone amounts appear on each row only while custom is on.
+ */
+function PayoutSplitControl({
+  subjectDid,
+  custom,
+  milestones,
+  onChange,
+}: {
+  subjectDid: string;
+  custom: boolean;
+  milestones: RewildingAdminMilestone[];
+  onChange: (custom: boolean) => void;
+}) {
+  const t = useTranslations("common.adminModeration.rewilding");
+  const format = useFormatter();
+  const [pending, setPending] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  const total = REWILDING_GRANT_AMOUNT_USD;
+  const allocated = milestones.reduce(
+    (sum, milestone) => sum + (milestone.payoutUsd ?? milestone.defaultPayout?.amountUsd ?? 0),
+    0,
+  );
+  const balanced = allocated === total;
+
+  const toggle = async (nextCustom: boolean) => {
+    if (pending) return;
+    setPending(true);
+    setFailed(false);
+    onChange(nextCustom);
+    try {
+      await postAction({ action: "setPayoutMode", subjectDid, custom: nextCustom });
+    } catch {
+      onChange(!nextCustom);
+      setFailed(true);
+    } finally {
+      setPending(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-1.5 rounded-xl border border-border bg-muted/20 px-3 py-2.5">
+      <label className="flex items-start gap-2">
+        <input
+          type="checkbox"
+          checked={!custom}
+          disabled={pending}
+          onChange={(event) => void toggle(!event.target.checked)}
+          className="mt-0.5 size-4 shrink-0 rounded border-border text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+        />
+        <span className="flex min-w-0 flex-col gap-0.5">
+          <span className="text-sm font-medium text-foreground">{t("payoutDefaultLabel")}</span>
+          <span className="text-[11px] leading-4 text-muted-foreground">
+            {t("payoutDefaultHint", { total: format.number(total) })}
+          </span>
+        </span>
+      </label>
+      {custom ? (
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 pl-6">
+          <span
+            className={cn(
+              "text-[11px] font-medium",
+              balanced ? "text-primary" : "text-amber-700 dark:text-amber-400",
+            )}
+          >
+            {t("payoutAllocated", {
+              allocated: format.number(allocated),
+              total: format.number(total),
+            })}
+          </span>
+          {!balanced ? (
+            <span className="text-[11px] text-muted-foreground">
+              {t("payoutMismatch", { total: format.number(total) })}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+      {failed ? <p className="pl-6 text-[11px] text-destructive">{t("error")}</p> : null}
+    </div>
+  );
+}
+
 function MilestoneRow({
   subjectDid,
   milestone,
+  customPayouts,
   onChanged,
   onRemoved,
 }: {
   subjectDid: string;
   milestone: RewildingAdminMilestone;
+  /** When true this grantee is on a custom split, so the row shows an editable
+   *  amount instead of the fixed handbook payout chip. */
+  customPayouts: boolean;
   onChanged: (milestone: RewildingAdminMilestone) => void;
   /** A custom milestone was removed from this grantee's plan. */
   onRemoved: (id: string) => void;
@@ -460,7 +565,19 @@ function MilestoneRow({
   const [editing, setEditing] = useState(false);
   const [titleDraft, setTitleDraft] = useState(milestone.title ?? "");
   const [descriptionDraft, setDescriptionDraft] = useState(milestone.description ?? "");
+  // The inline amount control, like the due date, saves on its own and keeps
+  // its own pending flag so it never mislabels the edit form's Save button.
+  const [amountPending, setAmountPending] = useState(false);
   const [failed, setFailed] = useState(false);
+
+  // The payment in force under a custom split: the grantee's override, falling
+  // back to the handbook amount (custom milestones start at zero). The draft
+  // resyncs whenever that changes so a save elsewhere is reflected here.
+  const effectivePayoutUsd = milestone.payoutUsd ?? milestone.defaultPayout?.amountUsd ?? 0;
+  const [amountDraft, setAmountDraft] = useState(String(effectivePayoutUsd));
+  useEffect(() => {
+    setAmountDraft(String(effectivePayoutUsd));
+  }, [effectivePayoutUsd]);
 
   const programTitle = milestone.isCustom ? "" : program(`${milestone.id}.title`);
   const programDescription = milestone.isCustom ? "" : program(`${milestone.id}.description`);
@@ -505,6 +622,8 @@ function MilestoneRow({
         title,
         description: nextDescription,
         dueDate: next.dueDate ?? "",
+        // Carry the current payment so editing the name never clears it.
+        payoutUsd: milestone.payoutUsd,
       });
       onChanged({
         ...milestone,
@@ -543,12 +662,50 @@ function MilestoneRow({
         title: milestone.title ?? "",
         description: milestone.description ?? "",
         dueDate: value ?? "",
+        // Carry the current payment so setting a date never clears it.
+        payoutUsd: milestone.payoutUsd,
       });
     } catch {
       onChanged(previous);
       setFailed(true);
     } finally {
       setDueDatePending(false);
+    }
+  };
+
+  /** Set this milestone's custom payment (whole USD). Like the due date it is
+   *  an inline control that saves on its own — on blur or Enter — carrying the
+   *  current name, description and due date so none of them is disturbed. An
+   *  empty box means zero. Shown only under a custom split. */
+  const saveAmount = async () => {
+    if (amountPending) return;
+    const parsed = Math.round(Number(amountDraft));
+    const value =
+      Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, REWILDING_MAX_PAYOUT_USD) : 0;
+    // Normalise what's shown (e.g. "05" → "5", "" → "0") and skip a no-op save
+    // when the amount already matches what is in force.
+    setAmountDraft(String(value));
+    if (value === effectivePayoutUsd) return;
+    const previous = milestone;
+    setAmountPending(true);
+    setFailed(false);
+    onChanged({ ...milestone, payoutUsd: value });
+    try {
+      await postAction({
+        action: "setMilestonePlan",
+        subjectDid,
+        milestoneId: milestone.id,
+        title: milestone.title ?? "",
+        description: milestone.description ?? "",
+        dueDate: milestone.dueDate ?? "",
+        payoutUsd: value,
+      });
+    } catch {
+      onChanged(previous);
+      setAmountDraft(String(effectivePayoutUsd));
+      setFailed(true);
+    } finally {
+      setAmountPending(false);
     }
   };
 
@@ -659,11 +816,11 @@ function MilestoneRow({
                   {t("overdue")}
                 </span>
               ) : null}
-              {milestone.payout ? (
+              {!customPayouts && milestone.defaultPayout ? (
                 <span className="rounded-full border border-border px-2 py-px text-[10px] font-medium text-muted-foreground">
                   {t("payout", {
-                    amount: format.number(milestone.payout.amountUsd),
-                    tranche: milestone.payout.tranche,
+                    amount: format.number(milestone.defaultPayout.amountUsd),
+                    tranche: milestone.defaultPayout.tranche,
                   })}
                 </span>
               ) : null}
@@ -681,11 +838,36 @@ function MilestoneRow({
         {failed ? <span className="text-[11px] text-destructive">{t("error")}</span> : null}
       </span>
       <span className="flex shrink-0 items-center gap-1.5">
+        {customPayouts ? (
+          <span className="flex items-center rounded-lg border border-border bg-background pl-2 focus-within:ring-2 focus-within:ring-ring">
+            <span className="text-xs text-muted-foreground" aria-hidden>
+              $
+            </span>
+            <input
+              type="number"
+              min={0}
+              step={1}
+              inputMode="numeric"
+              value={amountDraft}
+              onChange={(event) => setAmountDraft(event.target.value)}
+              onBlur={() => void saveAmount()}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  event.currentTarget.blur();
+                }
+              }}
+              disabled={planPending || dueDatePending || amountPending}
+              aria-label={t("payoutAmountLabel", { title: name })}
+              className="h-8 w-16 rounded-r-lg bg-transparent px-1.5 text-xs text-foreground focus-visible:outline-none disabled:opacity-50"
+            />
+          </span>
+        ) : null}
         <input
           type="date"
           value={milestone.dueDate ?? ""}
           onChange={(event) => void saveDueDate(event.target.value || null)}
-          disabled={planPending || dueDatePending}
+          disabled={planPending || dueDatePending || amountPending}
           aria-label={t("dueDateLabel", { title: name })}
           className="h-8 rounded-lg border border-border bg-background px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
         />
@@ -696,7 +878,7 @@ function MilestoneRow({
             setDescriptionDraft(milestone.description ?? "");
             setEditing((value) => !value);
           }}
-          disabled={planPending || dueDatePending}
+          disabled={planPending || dueDatePending || amountPending}
           aria-label={t("editMilestone", { title: name })}
           className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
         >
@@ -706,7 +888,7 @@ function MilestoneRow({
           <button
             type="button"
             onClick={remove}
-            disabled={planPending || dueDatePending}
+            disabled={planPending || dueDatePending || amountPending}
             aria-label={t("removeMilestone", { title: name })}
             className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-destructive disabled:pointer-events-none disabled:opacity-50"
           >
@@ -739,9 +921,13 @@ function MilestoneRow({
  */
 function AddMilestoneForm({
   subjectDid,
+  customPayouts,
   onAdded,
 }: {
   subjectDid: string;
+  /** When true the grantee is on a custom split, so the form offers a payment
+   *  amount for the new milestone. */
+  customPayouts: boolean;
   /** Receives the new row with a placeholder code — the list renumbers. */
   onAdded: (milestone: RewildingAdminMilestone) => void;
 }) {
@@ -749,6 +935,7 @@ function AddMilestoneForm({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [amount, setAmount] = useState("");
   const [pending, setPending] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -759,18 +946,27 @@ function AddMilestoneForm({
     setPending(true);
     setFailed(false);
     try {
+      // A payment only applies under a custom split; a positive amount becomes
+      // an override, anything else leaves the milestone unpaid.
+      const parsedAmount = Math.round(Number(amount));
+      const payoutUsd =
+        customPayouts && Number.isFinite(parsedAmount) && parsedAmount > 0
+          ? Math.min(parsedAmount, REWILDING_MAX_PAYOUT_USD)
+          : null;
       const result = await postAction({
         action: "setMilestonePlan",
         subjectDid,
         title: trimmed,
         description,
         dueDate,
+        payoutUsd,
       });
       const plan = result.plan as {
         milestoneId: string;
         title: string | null;
         description: string | null;
         dueDate: string | null;
+        payoutUsd: number | null;
       };
       onAdded({
         id: plan.milestoneId,
@@ -779,13 +975,15 @@ function AddMilestoneForm({
         description: plan.description,
         dueDate: plan.dueDate,
         isCustom: true,
-        payout: null,
+        defaultPayout: null,
+        payoutUsd: plan.payoutUsd,
         done: false,
         updatedAt: null,
       });
       setTitle("");
       setDescription("");
       setDueDate("");
+      setAmount("");
     } catch {
       setFailed(true);
     } finally {
@@ -812,6 +1010,24 @@ function AddMilestoneForm({
           aria-label={t("addMilestoneDueLabel")}
           className="h-8 rounded-lg border border-border bg-background px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
+        {customPayouts ? (
+          <span className="flex items-center rounded-lg border border-border bg-background pl-2 focus-within:ring-2 focus-within:ring-ring">
+            <span className="text-xs text-muted-foreground" aria-hidden>
+              $
+            </span>
+            <input
+              type="number"
+              min={0}
+              step={1}
+              inputMode="numeric"
+              value={amount}
+              onChange={(event) => setAmount(event.target.value)}
+              aria-label={t("payoutAmountNewLabel")}
+              placeholder="0"
+              className="h-8 w-16 rounded-r-lg bg-transparent px-1.5 text-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none"
+            />
+          </span>
+        ) : null}
         <button
           type="submit"
           disabled={pending || !title.trim()}

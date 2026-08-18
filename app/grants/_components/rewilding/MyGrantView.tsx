@@ -326,10 +326,12 @@ function MilestoneRow({
           ) : null}
           {milestone.payout ? (
             <span className="rounded-full border border-border px-2 py-px text-[10px] font-medium text-muted-foreground">
-              {t("payout", {
-                amount: format.number(milestone.payout.amountUsd),
-                tranche: milestone.payout.tranche,
-              })}
+              {milestone.payout.tranche !== undefined
+                ? t("payout", {
+                    amount: format.number(milestone.payout.amountUsd),
+                    tranche: milestone.payout.tranche,
+                  })
+                : t("payoutNoTranche", { amount: format.number(milestone.payout.amountUsd) })}
             </span>
           ) : null}
         </div>

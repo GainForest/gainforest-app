@@ -41,6 +41,15 @@ export const REWILDING_MILESTONE_COLLECTION = "app.gainforest.grant.rewilding.mi
  */
 export const REWILDING_MILESTONE_PLAN_COLLECTION = "app.gainforest.grant.rewilding.milestonePlan";
 
+/**
+ * Per-grantee payout-mode events: whether this grantee's milestone payments
+ * follow the standard handbook split or a custom one the admin set. Written
+ * from the admin panel only; newest event per grantee wins. Absent (or
+ * `custom: false`) means the handbook split, so an untouched grant pays out
+ * exactly like the handbook.
+ */
+export const REWILDING_PAYOUT_MODE_COLLECTION = "app.gainforest.grant.rewilding.payoutMode";
+
 /** Program constants from the handbook. */
 export const REWILDING_GRANT_AMOUNT_USD = 1000;
 export const REWILDING_AUDIO_TARGET_MINUTES = 7000;
@@ -84,6 +93,28 @@ export function isRewildingDueDate(value: unknown): value is string {
   const time = Date.parse(`${value}T00:00:00.000Z`);
   return Number.isFinite(time) && new Date(time).toISOString().slice(0, 10) === value;
 }
+
+/** The largest custom milestone payment the admin panel will store. Guards
+ *  against a stray keystroke turning into an absurd figure; the grant itself
+ *  is USD 1,000, but a single milestone could carry the whole of it. */
+export const REWILDING_MAX_PAYOUT_USD = 1_000_000;
+
+/** Custom milestone payments are whole US dollars, zero or more — zero is a
+ *  real choice (a milestone the admin deliberately attaches no payment to),
+ *  distinct from leaving the handbook split in place. */
+export function isRewildingPayoutUsd(value: unknown): value is number {
+  return (
+    typeof value === "number" &&
+    Number.isInteger(value) &&
+    value >= 0 &&
+    value <= REWILDING_MAX_PAYOUT_USD
+  );
+}
+
+/** A milestone's effective payment. In the handbook split it carries the
+ *  tranche number the handbook assigns; in a custom split there are no
+ *  tranches, so only the amount is set. */
+export type RewildingPayout = { tranche?: number; amountUsd: number };
 
 export type RewildingMilestoneDefinition = {
   id: RewildingMilestoneId;
@@ -275,6 +306,11 @@ export type RewildingMilestonePlanRecord = {
   description: string | null;
   /** Calendar date (YYYY-MM-DD) the milestone is due, or null for none. */
   dueDate: string | null;
+  /** Per-grantee custom payment for this milestone in whole USD, or null to
+   *  leave the handbook amount in place. Only takes effect when the grantee is
+   *  on a custom payout split; ignored under the handbook split. Zero is a
+   *  real override (no payment on this milestone), distinct from null. */
+  payoutUsd: number | null;
   /** True retires a custom milestone (append-only tombstone). */
   removed: boolean;
   createdAt: string;
@@ -310,6 +346,7 @@ export function parseRewildingMilestonePlanRecord(
     title,
     description: nonEmptyString(value.description),
     dueDate: isRewildingDueDate(value.dueDate) ? value.dueDate : null,
+    payoutUsd: isRewildingPayoutUsd(value.payoutUsd) ? value.payoutUsd : null,
     removed,
     createdAt,
   };
@@ -361,6 +398,92 @@ export function effectiveRewildingMilestonePlans(
   return current;
 }
 
+/* ------------------------------------------------------------------------ *
+ * Payout mode: whether a grantee follows the handbook split or a custom one.
+ * ------------------------------------------------------------------------ */
+
+const PAYOUT_MODE_CACHE_KEY = "rewilding-payout-modes:v1";
+
+export type RewildingPayoutModeRecord = {
+  rkey: string;
+  uri: string;
+  subjectDid: string;
+  /** True once the admin has switched this grantee to a custom split. */
+  custom: boolean;
+  createdAt: string;
+};
+
+/** Parse one public PDS payout-mode event, ignoring malformed values. */
+export function parseRewildingPayoutModeRecord(entry: unknown): RewildingPayoutModeRecord | null {
+  if (!isRecord(entry)) return null;
+  const uri = nonEmptyString(entry.uri);
+  const value = entry.value;
+  if (!uri || !isRecord(value)) return null;
+
+  const subjectDid = nonEmptyString(value.subject);
+  const createdAt = nonEmptyString(value.createdAt);
+  if (!subjectDid?.startsWith("did:") || !createdAt) return null;
+
+  return {
+    rkey: uri.split("/").pop() ?? "",
+    uri,
+    subjectDid,
+    custom: value.custom === true,
+    createdAt,
+  };
+}
+
+/** Read every payout-mode event directly from the moderation account's PDS. */
+export async function fetchRewildingPayoutModeRecords(
+  repoDid: string = GAINFOREST_MODERATION_REPO_DID,
+  signal?: AbortSignal,
+): Promise<RewildingPayoutModeRecord[]> {
+  const entries = await listModerationRecords(repoDid, REWILDING_PAYOUT_MODE_COLLECTION, signal);
+  return entries
+    .flatMap((entry) => {
+      const record = parseRewildingPayoutModeRecord(entry);
+      return record ? [record] : [];
+    })
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt) || b.uri.localeCompare(a.uri));
+}
+
+/** Briefly cached read for page renders. */
+export function fetchRewildingPayoutModes(
+  signal?: AbortSignal,
+): Promise<RewildingPayoutModeRecord[]> {
+  return cachedAsync(PAYOUT_MODE_CACHE_KEY, CACHE_MS, () => fetchRewildingPayoutModeRecords(), signal);
+}
+
+export function invalidateRewildingPayoutModesCache(): void {
+  invalidateCachedAsyncByPrefix(PAYOUT_MODE_CACHE_KEY);
+}
+
+/** The set of grantees currently on a custom payout split. Newest event per
+ *  grantee wins, mirroring milestone confirmations. */
+export function customPayoutGranteeDids(
+  records: readonly RewildingPayoutModeRecord[],
+): Set<string> {
+  const newestFirst = [...records].sort(
+    (a, b) => b.createdAt.localeCompare(a.createdAt) || b.uri.localeCompare(a.uri),
+  );
+  const seen = new Set<string>();
+  const custom = new Set<string>();
+  for (const record of newestFirst) {
+    if (seen.has(record.subjectDid)) continue;
+    seen.add(record.subjectDid);
+    if (record.custom) custom.add(record.subjectDid);
+  }
+  return custom;
+}
+
+/** Whether one grantee is on a custom payout split right now. */
+export function isRewildingPayoutCustom(
+  records: readonly RewildingPayoutModeRecord[],
+  subjectDid: string,
+): boolean {
+  return customPayoutGranteeDids(records).has(subjectDid);
+}
+
 /**
  * One grantee's full milestone list with the plan applied: the shared
  * program milestones (M1–M4, in program order, carrying any per-grantee due
@@ -381,29 +504,63 @@ export type ResolvedRewildingMilestone = {
   /** Calendar date (YYYY-MM-DD) this milestone is due, or null. */
   dueDate: string | null;
   isCustom: boolean;
-  payout: { tranche: number; amountUsd: number } | null;
+  /** The handbook payment for this milestone: the tranche and amount the
+   *  program assigns (program milestones), or null (custom milestones and
+   *  M2, which the handbook attaches no payment to). Constant per milestone,
+   *  independent of the grantee's split. */
+  defaultPayout: { tranche: number; amountUsd: number } | null;
+  /** The grantee's custom payment override in whole USD, or null when none is
+   *  set. Only meaningful on a custom split; carried so the admin panel can
+   *  tell an override from an untouched handbook amount. */
+  payoutUsd: number | null;
+  /** The payment actually in force given the grantee's split: the handbook
+   *  payout under the handbook split, or the amount (no tranche) under a
+   *  custom split. Null when the milestone releases nothing. */
+  payout: RewildingPayout | null;
   isRecorderInventory: boolean;
 };
+
+/** The payment in force for a milestone given the grantee's split. Under the
+ *  handbook split it is the program's payout (with its tranche); under a
+ *  custom split it is the override, falling back to the handbook amount so an
+ *  untouched custom split still totals the grant, and never a tranche. */
+function effectiveRewildingPayout(
+  defaultPayout: { tranche: number; amountUsd: number } | null,
+  payoutUsd: number | null,
+  customPayouts: boolean,
+): RewildingPayout | null {
+  if (!customPayouts) return defaultPayout;
+  const amount = payoutUsd ?? defaultPayout?.amountUsd ?? 0;
+  return amount > 0 ? { amountUsd: amount } : null;
+}
 
 export function resolveRewildingMilestonePlan(
   planRecords: readonly RewildingMilestonePlanRecord[],
   subjectDid: string,
+  options: { customPayouts?: boolean } = {},
 ): ResolvedRewildingMilestone[] {
+  const customPayouts = options.customPayouts ?? false;
   const current = effectiveRewildingMilestonePlans(planRecords).filter(
     (record) => record.subjectDid === subjectDid,
   );
   const byId = new Map(current.map((record) => [record.milestoneId, record]));
 
-  const program: ResolvedRewildingMilestone[] = REWILDING_MILESTONES.map((definition) => ({
-    id: definition.id,
-    code: definition.code,
-    title: byId.get(definition.id)?.title ?? null,
-    description: byId.get(definition.id)?.description ?? null,
-    dueDate: byId.get(definition.id)?.dueDate ?? null,
-    isCustom: false,
-    payout: definition.payout ?? null,
-    isRecorderInventory: definition.isRecorderInventory ?? false,
-  }));
+  const program: ResolvedRewildingMilestone[] = REWILDING_MILESTONES.map((definition) => {
+    const defaultPayout = definition.payout ?? null;
+    const payoutUsd = byId.get(definition.id)?.payoutUsd ?? null;
+    return {
+      id: definition.id,
+      code: definition.code,
+      title: byId.get(definition.id)?.title ?? null,
+      description: byId.get(definition.id)?.description ?? null,
+      dueDate: byId.get(definition.id)?.dueDate ?? null,
+      isCustom: false,
+      defaultPayout,
+      payoutUsd,
+      payout: effectiveRewildingPayout(defaultPayout, payoutUsd, customPayouts),
+      isRecorderInventory: definition.isRecorderInventory ?? false,
+    };
+  });
 
   // Position comes from the oldest event per custom milestone — the moment it
   // was added — so renames and due-date changes never reorder the list.
@@ -430,7 +587,11 @@ export function resolveRewildingMilestonePlan(
       description: record.description,
       dueDate: record.dueDate,
       isCustom: true,
-      payout: null,
+      // Custom milestones have no handbook payment; any payment on them comes
+      // from the grantee's custom split.
+      defaultPayout: null,
+      payoutUsd: record.payoutUsd,
+      payout: effectiveRewildingPayout(null, record.payoutUsd, customPayouts),
       isRecorderInventory: false,
     }));
 

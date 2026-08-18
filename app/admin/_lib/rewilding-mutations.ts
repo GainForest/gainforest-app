@@ -3,18 +3,24 @@ import { getAuthBaseUrl } from "@/app/_lib/auth";
 import {
   REWILDING_MILESTONE_COLLECTION,
   REWILDING_MILESTONE_PLAN_COLLECTION,
+  REWILDING_PAYOUT_MODE_COLLECTION,
   doneRewildingMilestoneIds,
   effectiveRewildingMilestonePlans,
   fetchRewildingMilestonePlanRecords,
   fetchRewildingMilestoneRecords,
+  fetchRewildingPayoutModeRecords,
   invalidateRewildingMilestonePlansCache,
   invalidateRewildingMilestonesCache,
+  invalidateRewildingPayoutModesCache,
   isCustomRewildingMilestoneId,
   isRewildingDueDate,
   isRewildingMilestoneId,
+  isRewildingPayoutCustom,
+  isRewildingPayoutUsd,
   newCustomRewildingMilestoneId,
   type RewildingMilestonePlanRecord,
   type RewildingMilestoneRecord,
+  type RewildingPayoutModeRecord,
 } from "@/app/_lib/rewilding-milestones";
 import {
   REWILDING_ENROLLMENT_COLLECTION,
@@ -153,6 +159,10 @@ export type RewildingMilestonePlanInput = {
   description?: string | null;
   /** Calendar date (YYYY-MM-DD) or null/omitted for no due date. */
   dueDate?: string | null;
+  /** Per-grantee custom payment in whole USD, or null/omitted for none. Zero
+   *  is a real value (a milestone with no payment under a custom split);
+   *  null leaves the handbook amount in place. */
+  payoutUsd?: number | null;
   /** True retires a custom milestone. Refused for program milestones. */
   removed?: boolean;
 };
@@ -175,6 +185,13 @@ export async function setRewildingMilestonePlan(
 
   const dueDate = input.dueDate ?? null;
   if (dueDate !== null && !isRewildingDueDate(dueDate)) {
+    throw new RewildingMutationError("invalid_request", 400);
+  }
+
+  // A removed custom milestone releases nothing, so any payment on it is
+  // dropped rather than stored on the tombstone.
+  const payoutUsd = input.removed === true ? null : input.payoutUsd ?? null;
+  if (payoutUsd !== null && !isRewildingPayoutUsd(payoutUsd)) {
     throw new RewildingMutationError("invalid_request", 400);
   }
 
@@ -223,10 +240,20 @@ export async function setRewildingMilestonePlan(
       current !== undefined &&
       current.removed === removed &&
       (current.dueDate ?? null) === dueDate &&
-      (removed || (current.title === title && current.description === description));
+      (removed ||
+        (current.title === title &&
+          current.description === description &&
+          (current.payoutUsd ?? null) === payoutUsd));
     if (matchesAlready && current) return current;
     // A program milestone with no plan yet and nothing to set: nothing to write.
-    if (isProgram && !current && dueDate === null && title === null && description === null) {
+    if (
+      isProgram &&
+      !current &&
+      dueDate === null &&
+      title === null &&
+      description === null &&
+      payoutUsd === null
+    ) {
       return {
         rkey: "",
         uri: "",
@@ -235,6 +262,7 @@ export async function setRewildingMilestonePlan(
         title: null,
         description: null,
         dueDate: null,
+        payoutUsd: null,
         removed: false,
         createdAt: new Date().toISOString(),
       };
@@ -252,6 +280,9 @@ export async function setRewildingMilestonePlan(
       ...(title ? { title } : {}),
       ...(description ? { description } : {}),
       ...(dueDate ? { dueDate } : {}),
+      // Written even when zero: an explicit 0 is a milestone the admin chose to
+      // leave unpaid under a custom split, distinct from no override at all.
+      ...(payoutUsd !== null ? { payoutUsd } : {}),
       ...(removed ? { removed: true } : {}),
       createdAt,
     },
@@ -267,7 +298,64 @@ export async function setRewildingMilestonePlan(
     title,
     description,
     dueDate,
+    payoutUsd,
     removed,
+    createdAt,
+  };
+}
+
+/**
+ * Switch one grantee between the standard handbook payout split and a custom
+ * one. Append-only and idempotent, mirroring milestone confirmations: the
+ * newest event per grantee wins, and nothing is written when the effective
+ * mode already matches. The per-milestone amounts themselves live on the
+ * milestone-plan records; this only decides whether they take effect.
+ */
+export async function setRewildingPayoutMode(
+  repoDid: string,
+  cookie: string | null,
+  subjectDid: string,
+  custom: boolean,
+): Promise<RewildingPayoutModeRecord> {
+  const did = subjectDid.trim();
+  if (!did.startsWith("did:")) throw new RewildingMutationError("invalid_request", 400);
+
+  const existing = await fetchRewildingPayoutModeRecords(repoDid);
+  if (isRewildingPayoutCustom(existing, did) === custom) {
+    const current = existing.find((record) => record.subjectDid === did);
+    if (current) return current;
+    // No event yet and the caller wants the default (handbook) mode: that is
+    // already the effective state, so there is nothing to write.
+    if (!custom) {
+      return {
+        rkey: "",
+        uri: "",
+        subjectDid: did,
+        custom: false,
+        createdAt: new Date().toISOString(),
+      };
+    }
+  }
+
+  const createdAt = new Date().toISOString();
+  const created = await cgsMutate(repoDid, cookie, {
+    operation: "createRecord",
+    collection: REWILDING_PAYOUT_MODE_COLLECTION,
+    record: {
+      $type: REWILDING_PAYOUT_MODE_COLLECTION,
+      subject: did,
+      custom,
+      createdAt,
+    },
+  });
+  if (!created.uri) throw new RewildingMutationError("save_failed", 502);
+
+  invalidateRewildingPayoutModesCache();
+  return {
+    rkey: created.uri.split("/").pop() ?? "",
+    uri: created.uri,
+    subjectDid: did,
+    custom,
     createdAt,
   };
 }
