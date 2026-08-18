@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { ChevronDownIcon, type SproutIcon } from "lucide-react";
+import { ChevronDownIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
  * first case. Starts collapsed unless `defaultOpen` is set.
  */
 export function AdminCollapsiblePanel({
-  Icon,
+  icon,
   title,
   description,
   count,
@@ -20,7 +20,9 @@ export function AdminCollapsiblePanel({
   defaultOpen = false,
   children,
 }: {
-  Icon: typeof SproutIcon;
+  /** Rendered element (not a component), so it stays passable from a Server
+   *  Component across the client boundary — same contract as AdminSectionTabs. */
+  icon: ReactNode;
   title: string;
   description: string;
   /** Optional so panels that load their own data lazily can omit the badge. */
@@ -39,7 +41,7 @@ export function AdminCollapsiblePanel({
         className="flex w-full items-start gap-2.5 px-4 py-4 text-left transition-colors hover:bg-muted/40 sm:px-6"
       >
         <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-primary/15 bg-primary/[0.08] text-primary">
-          <Icon className="size-4" />
+          {icon}
         </span>
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="flex items-center gap-2">

@@ -77,7 +77,7 @@ export default async function AdminGrantsPage({
                   />
                 </AdminPanel>
                 <AdminCollapsiblePanel
-                  Icon={SproutIcon}
+                  icon={<SproutIcon className="size-4" />}
                   title={t("grants.title")}
                   description={t("grants.description")}
                   count={grantApplicants.length}
