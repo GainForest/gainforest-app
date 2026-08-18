@@ -1,0 +1,121 @@
+{
+  "meta": {
+    "title": "Bumimic — perekam terbuka untuk mendengarkan alam",
+    "description": "Perekam akustik saku yang mendengarkan di atas jangkauan pendengaran manusia, mencatat cuaca, dan bertahan berbulan-bulan dengan tiga baterai AA."
+  },
+  "hero": {
+    "title": "Dengar apa yang",
+    "accent": "alam",
+    "titleEnd": "katakan",
+    "lede": "Perekam saku yang mendengarkan di atas jangkauan pendengaran manusia, mencatat cuaca di sekitarnya, dan bertahan berbulan-bulan dengan tiga baterai AA.",
+    "preOrder": "Pesan di muka",
+    "hearSample": "Dengar sampel",
+    "tagline": "Dirakit dan diuji. Hardware terbuka. Dikirim dari Zurich."
+  },
+  "forest": {
+    "title": "Sebagian besar suara hutan adalah frekuensi yang tidak akan pernah kamu dengar",
+    "body": "Kelelawar, belalang, dan sebagian besar kehidupan serangga berkomunikasi dalam ultrasonik. Menghitungnya berarti peralatan yang hanya bisa dibeli beberapa oleh tim lapangan — jadi sebagian besar lokasi tidak terdengar."
+  },
+  "board": {
+    "imageAlt": "Render papan sirkuit prototipe Bumimic, menunjukkan slot microSD, modul radio, dan sensor",
+    "caption": "Render papan — board-v0.3, tampak atas pada latar putih"
+  },
+  "features": {
+    "ultrasonic": {
+      "title": "Mendengarkan hingga 192 kHz",
+      "body": "Audio ultrasonik ditulis langsung ke kartu microSD, sesuai jadwal yang kamu atur atau saat pemicu aktif. Rekaman tidak pernah meninggalkan tanganmu."
+    },
+    "sensors": {
+      "title": "Membaca cuaca di sekitarnya",
+      "body": "Suhu, kelembapan, cahaya, tekanan, dan gerakan dicatat bersama audio, sehingga setiap deteksi tiba dengan kondisi yang menghasilkannya."
+    },
+    "alerts": {
+      "title": "Memberitahu saat sesuatu terjadi",
+      "body": "Peringatan kejadian berjalan melalui LoRaWAN ke siapa pun yang memantau lokasi. Hanya peringatan yang berjalan — audio tetap di kartu sampai kamu mengambilnya."
+    },
+    "battery": {
+      "title": "Tinggalkan di luar",
+      "body": "Beberapa mikroampere saat diam dan tiga baterai AA untuk daya. Penempatan diukur dalam bulan, dan toko mana pun yang menjual baterai dapat membuatnya terus berjalan."
+    }
+  },
+  "specs": {
+    "boardCaption": "Detail papan — mikrofon, sensor, microSD, radio"
+  },
+  "quickSpecs": {
+    "0": {
+      "title": "Mikrofon ultrasonik",
+      "body": "Disetel untuk kelelawar dan serangga, bukan ucapan."
+    },
+    "1": {
+      "title": "Lima sensor",
+      "body": "Suhu, kelembapan, cahaya, tekanan, gerakan."
+    },
+    "2": {
+      "title": "Radio LoRaWAN",
+      "body": "Pengaturan regional untuk Kenya, Brasil, Filipina."
+    },
+    "3": {
+      "title": "Penyimpanan microSD",
+      "body": "Hingga 512 GB rekaman dalam satu kartu."
+    }
+  },
+  "order": {
+    "title": "Konfigurasi pesananmu",
+    "subtitle": "Setiap pilihan untuk pesanan ada di sini — versi radio regional, wadah jika kamu mau, dan ke mana dikirim.",
+    "region": {
+      "label": "Versi regional",
+      "note": "Pengaturan radio ditetapkan saat pembuatan, jadi pilih negara tempat perangkat akan tinggal."
+    },
+    "addons": {
+      "label": "Tambahan — pilih mana saja, atau tidak sama sekali",
+      "waterproof": "Wadah tahan air",
+      "printed": "Wadah cetak 3D",
+      "note": "Wadah tahan air tertutup untuk penempatan musim hujan; wadah cetak lebih ringan dan filenya terbuka, jadi kamu bisa mencetak sendiri. Harga aksesori bersifat sementara."
+    },
+    "shipTo": {
+      "label": "Kirim ke",
+      "placeholder": "Pilih negara"
+    },
+    "units": {
+      "label": "Unit",
+      "decrease": "Kurangi jumlah",
+      "increase": "Tambah jumlah"
+    },
+    "total": "Total",
+    "preOrder": "Pesan di muka"
+  },
+  "specifications": {
+    "title": "Spesifikasi",
+    "subtitle": "Angka-angka, untuk mereka yang membutuhkannya. Semua di sini dari prototipe saat ini dan dapat berubah sebelum produksi pertama.",
+    "items": {
+      "audio": {
+        "title": "Audio",
+        "content": "Tangkapan ultrasonik hingga 192 kHz, 16-bit, ditulis ke microSD. Rekaman kontinu, terjadwal, atau berbasis pemicu."
+      },
+      "sensors": {
+        "title": "Sensor",
+        "content": "Suhu, kelembapan, cahaya, tekanan, dan gerakan. Setiap deteksi tiba dengan kondisi yang menghasilkannya."
+      },
+      "power": {
+        "title": "Daya",
+        "content": "Tiga baterai AA atau AAA dengan USB-C untuk pengaturan. Beberapa mikroampere saat diam berarti penempatan berbulan-bulan."
+      },
+      "radio": {
+        "title": "Radio dan versi regional",
+        "content": "Radio LoRaWAN disetel untuk setiap wilayah: Kenya (EU868), Brasil (AU915), Filipina (AS923). Pengaturan radio ditetapkan saat pembuatan."
+      },
+      "size": {
+        "title": "Ukuran dan wadah",
+        "content": "Papan 57 × 47 mm, empat lapis — sedikit lebih kecil dari AudioMoth di kedua arah. Wadah tahan air atau cetak 3D opsional."
+      },
+      "open": {
+        "title": "Hardware terbuka",
+        "content": "Skema, tata letak papan, file manufaktur, dan firmware semuanya dikembangkan secara publik. Bangun, perbaiki, dan sesuaikan sendiri."
+      }
+    }
+  },
+  "stickyBar": {
+    "boardOnly": "papan saja",
+    "preOrder": "Pesan di muka"
+  }
+}

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRightIcon, AudioLinesIcon, CalendarDaysIcon, FlaskConicalIcon, GlobeIcon, HeartHandshakeIcon, MailCheckIcon, PencilLineIcon, ShieldCheckIcon, SparklesIcon, TrophyIcon } from "lucide-react";
+import { ArrowRightIcon, AudioLinesIcon, CalendarDaysIcon, FlaskConicalIcon, GlobeIcon, HeartHandshakeIcon, MailCheckIcon, PencilLineIcon, RadioIcon, ShieldCheckIcon, SparklesIcon, TrophyIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -17,6 +17,7 @@ export default async function TestRegistryPage() {
   const invitationDelivery = await getTranslations("cart.testRegistry.invitationDelivery");
   const bioblitzNotifications = await getTranslations("cart.testRegistry.bioblitzNotifications");
   const rewildingDashboard = await getTranslations("cart.testRegistry.rewildingDashboard");
+  const shop = await getTranslations("cart.testRegistry.shop");
   const communityEvents = await getTranslations("cart.testRegistry.communityEvents");
   const projectUpdates = await getTranslations("cart.testRegistry.projectUpdates");
 
@@ -195,6 +196,26 @@ export default async function TestRegistryPage() {
               </div>
               <h3 className="mt-8 text-xl font-semibold text-foreground">{visibility("cardTitle")}</h3>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">{visibility("cardDescription")}</p>
+              <span className="mt-auto inline-flex items-center gap-1.5 pt-6 text-sm font-semibold text-primary">
+                {t("openExperience")}
+                <ArrowRightIcon className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
+              </span>
+            </Link>
+
+            <Link
+              href="/_test/shop"
+              className="group flex min-h-60 flex-col rounded-[2rem] border border-border-soft bg-surface p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary">
+                  <RadioIcon className="size-6" aria-hidden />
+                </div>
+                <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                  {shop("mockBadge")}
+                </span>
+              </div>
+              <h3 className="mt-8 text-xl font-semibold text-foreground">{shop("cardTitle")}</h3>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{shop("cardDescription")}</p>
               <span className="mt-auto inline-flex items-center gap-1.5 pt-6 text-sm font-semibold text-primary">
                 {t("openExperience")}
                 <ArrowRightIcon className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />

@@ -15,6 +15,7 @@ import enLegacy from "./en/legacy.json";
 import enPrivacy from "./en/privacy.json";
 import enChangelog from "./en/changelog.json";
 import enTainaGuide from "./en/tainaGuide.json";
+import enShop from "./en/shop.json";
 import enEvents from "./en/events.json";
 import esEvents from "./es/events.json";
 import ptEvents from "./pt/events.json";
@@ -32,6 +33,7 @@ import esLegacy from "./es/legacy.json";
 import esPrivacy from "./es/privacy.json";
 import esChangelog from "./es/changelog.json";
 import esTainaGuide from "./es/tainaGuide.json";
+import esShop from "./es/shop.json";
 import idAudioMothGuide from "./id/audiomothGuide.json";
 import idBumicert from "./id/bumicert.json";
 import idCart from "./id/cart.json";
@@ -44,6 +46,7 @@ import idLegacy from "./id/legacy.json";
 import idPrivacy from "./id/privacy.json";
 import idChangelog from "./id/changelog.json";
 import idTainaGuide from "./id/tainaGuide.json";
+import idShop from "./id/shop.json";
 import ptAudioMothGuide from "./pt/audiomothGuide.json";
 import ptBumicert from "./pt/bumicert.json";
 import ptCart from "./pt/cart.json";
@@ -56,6 +59,7 @@ import ptLegacy from "./pt/legacy.json";
 import ptPrivacy from "./pt/privacy.json";
 import ptChangelog from "./pt/changelog.json";
 import ptTainaGuide from "./pt/tainaGuide.json";
+import ptShop from "./pt/shop.json";
 import swAudioMothGuide from "./sw/audiomothGuide.json";
 import swBumicert from "./sw/bumicert.json";
 import swCart from "./sw/cart.json";
@@ -68,6 +72,7 @@ import swLegacy from "./sw/legacy.json";
 import swPrivacy from "./sw/privacy.json";
 import swChangelog from "./sw/changelog.json";
 import swTainaGuide from "./sw/tainaGuide.json";
+import swShop from "./sw/shop.json";
 import type { SupportedLanguageCode } from "@/lib/i18n/languages";
 
 export const messagesByLocale = {
@@ -85,6 +90,7 @@ export const messagesByLocale = {
     deleteAccount: enDeleteAccount,
     changelog: enChangelog,
     tainaGuide: enTainaGuide,
+    shop: enShop,
     events: enEvents,
   },
   es: {
@@ -101,6 +107,7 @@ export const messagesByLocale = {
     deleteAccount: esDeleteAccount,
     changelog: esChangelog,
     tainaGuide: esTainaGuide,
+    shop: esShop,
     events: esEvents,
   },
   pt: {
@@ -117,6 +124,7 @@ export const messagesByLocale = {
     deleteAccount: ptDeleteAccount,
     changelog: ptChangelog,
     tainaGuide: ptTainaGuide,
+    shop: ptShop,
     events: ptEvents,
   },
   sw: {
@@ -133,6 +141,7 @@ export const messagesByLocale = {
     deleteAccount: swDeleteAccount,
     changelog: swChangelog,
     tainaGuide: swTainaGuide,
+    shop: swShop,
     events: swEvents,
   },
   id: {
@@ -149,6 +158,7 @@ export const messagesByLocale = {
     deleteAccount: idDeleteAccount,
     changelog: idChangelog,
     tainaGuide: idTainaGuide,
+    shop: idShop,
     events: idEvents,
   },
 } satisfies Record<SupportedLanguageCode, object>;

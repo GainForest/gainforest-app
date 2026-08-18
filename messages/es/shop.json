@@ -1,0 +1,125 @@
+{
+  "meta": {
+    "title": "Bumimic — una grabadora abierta para escuchar la naturaleza",
+    "description": "Una grabadora acústica de bolsillo que escucha por encima de la audición humana, registra el clima y dura meses con tres pilas AA."
+  },
+  "hero": {
+    "title": "Escucha lo que",
+    "accent": "la naturaleza",
+    "titleEnd": "está diciendo",
+    "lede": "Una grabadora de bolsillo que escucha por encima del rango de audición humana, registra el clima a su alrededor y dura meses con tres pilas AA.",
+    "preOrder": "Pre-ordenar",
+    "hearSample": "Escuchar una muestra",
+    "tagline": "Ensamblada y probada. Hardware abierto. Envío desde Zurich."
+  },
+  "forest": {
+    "title": "La mayor parte de la voz de un bosque es una frecuencia que nunca escucharás",
+    "body": "Los murciélagos, los grillos de arbusto y gran parte de la vida de los insectos se comunican en ultrasonido. Contarlos ha significado equipos que un equipo de campo solo puede permitirse unos pocos — así que la mayoría de los sitios quedan sin escuchar."
+  },
+  "forest": {
+    "title": "La mayor parte de la voz de un bosque es una frecuencia que nunca escucharás",
+    "body": "Los murciélagos, los grillos de arbusto y gran parte de la vida de los insectos se comunican en ultrasonido. Contarlos ha significado equipos que un equipo de campo solo puede permitirse unos pocos — así que la mayoría de los sitios quedan sin escuchar."
+  },
+  "board": {
+    "imageAlt": "Render de la placa de circuito del prototipo Bumimic, mostrando la ranura microSD, el módulo de radio y los sensores",
+    "caption": "Render de la placa — board-v0.3, vista superior sobre blanco"
+  },
+  "features": {
+    "ultrasonic": {
+      "title": "Escucha hasta 192 kHz",
+      "body": "El audio ultrasónico se escribe directamente en una tarjeta microSD, según un horario que configures o cuando se active un disparador. Las grabaciones nunca salen de tus manos."
+    },
+    "sensors": {
+      "title": "Lee el clima a su alrededor",
+      "body": "Temperatura, humedad, luz, presión y movimiento se registran junto al audio, así cada detección llega con las condiciones que la produjeron."
+    },
+    "alerts": {
+      "title": "Te avisa cuando algo pasa",
+      "body": "Las alertas de eventos viajan por LoRaWAN a quien esté monitoreando el sitio. Solo viaja la alerta — el audio se queda en la tarjeta hasta que lo recojas."
+    },
+    "battery": {
+      "title": "Déjala afuera",
+      "body": "Pocos microamperios en reposo y tres pilas AA para alimentarse. Los despliegues se miden en meses, y cualquier tienda que venda pilas puede mantenerla funcionando."
+    }
+  },
+  "specs": {
+    "boardCaption": "Detalle de la placa — micrófono, sensores, microSD, radio"
+  },
+  "quickSpecs": {
+    "0": {
+      "title": "Micrófono ultrasónico",
+      "body": "Ajustado para murciélagos e insectos, no para habla."
+    },
+    "1": {
+      "title": "Cinco sensores",
+      "body": "Temperatura, humedad, luz, presión, movimiento."
+    },
+    "2": {
+      "title": "Radio LoRaWAN",
+      "body": "Configuración regional para Kenia, Brasil, Filipinas."
+    },
+    "3": {
+      "title": "Almacenamiento microSD",
+      "body": "Hasta 512 GB de grabaciones en una sola tarjeta."
+    }
+  },
+  "order": {
+    "title": "Configura tu pedido",
+    "subtitle": "Cada opción del pedido está aquí — la versión regional de radio, una carcasa si quieres, y a dónde se envía.",
+    "region": {
+      "label": "Versión regional",
+      "note": "La configuración de radio se fija en fabricación, así que elige el país donde vivirá el dispositivo."
+    },
+    "addons": {
+      "label": "Accesorios — elige cualquiera, o ninguno",
+      "waterproof": "Carcasa impermeable",
+      "printed": "Carcasa impresa en 3D",
+      "note": "La carcasa impermeable está sellada para despliegues en temporada húmeda; la impresa es más ligera y sus archivos son abiertos, así que puedes imprimir la tuya. Los precios de accesorios son provisionales."
+    },
+    "shipTo": {
+      "label": "Enviar a",
+      "placeholder": "Selecciona un país"
+    },
+    "units": {
+      "label": "Unidades",
+      "decrease": "Disminuir cantidad",
+      "increase": "Aumentar cantidad"
+    },
+    "total": "Total",
+    "preOrder": "Pre-ordenar"
+  },
+  "specifications": {
+    "title": "Especificaciones",
+    "subtitle": "Los números, para quienes los necesitan. Todo aquí es del prototipo actual y puede cambiar antes de la primera producción.",
+    "items": {
+      "audio": {
+        "title": "Audio",
+        "content": "Captura ultrasónica hasta 192 kHz, 16 bits, escrita a microSD. Grabación continua, programada o por disparador."
+      },
+      "sensors": {
+        "title": "Sensores",
+        "content": "Temperatura, humedad, luz, presión y movimiento. Cada detección llega con las condiciones que la produjeron."
+      },
+      "power": {
+        "title": "Energía",
+        "content": "Tres pilas AA o AAA con USB-C para configuración. Pocos microamperios en reposo significa despliegues de meses."
+      },
+      "radio": {
+        "title": "Radio y versiones regionales",
+        "content": "Radio LoRaWAN ajustada para cada región: Kenia (EU868), Brasil (AU915), Filipinas (AS923). La configuración de radio se fija en fabricación."
+      },
+      "size": {
+        "title": "Tamaño y carcasa",
+        "content": "Placa de 57 × 47 mm, cuatro capas — ligeramente más pequeña que un AudioMoth en ambas direcciones. Carcasa impermeable o impresa en 3D opcional."
+      },
+      "open": {
+        "title": "Hardware abierto",
+        "content": "Esquema, diseño de placa, archivos de fabricación y firmware son todos desarrollados en público. Constrúyelo, repáralo y adáptalo tú mismo."
+      }
+    }
+  },
+  "stickyBar": {
+    "boardOnly": "solo placa",
+    "preOrder": "Pre-ordenar"
+  }
+}

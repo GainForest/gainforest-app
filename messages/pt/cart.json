@@ -254,6 +254,13 @@
     },
     "myCardsTitle": "Galeria dos Meus Bumicerts",
     "myCardsDescription": "Veja uma prévia da galeria de Bumicerts colecionados com exemplos.",
+    "shop": {
+      "title": "Página da loja (Bumimic)",
+      "description": "A página do produto Bumimic, um gravador acústico aberto e de baixo custo.",
+      "mockBadge": "Página estática",
+      "cardTitle": "Página da loja Bumimic",
+      "cardDescription": "Prévia da página do produto para o protótipo de gravador acústico Bumimic."
+    },
     "rewildingDashboard": {
       "title": "Painel do subsídio Rewilding",
       "description": "A visão Meu subsídio e seu gráfico de ritmo de áudio, em cada estado possível da meta de gravação.",
