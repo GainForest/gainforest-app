@@ -144,6 +144,7 @@ for migration in "${migrations[@]}"; do
 done
 
 psql -X -q -v ON_ERROR_STOP=1 -f "$ROOT/tests/database/notification-outbox-contract.sql" >/dev/null
+psql -X -q -v ON_ERROR_STOP=1 -f "$ROOT/tests/database/organization-memberships-contract.sql" >/dev/null
 
 # Prove the migration also works when pgcrypto was previously installed in
 # public. CREATE EXTENSION IF NOT EXISTS does not relocate existing installs.
@@ -306,4 +307,4 @@ grep -q '^suppressed|t$' "$TMP/enqueue-second" || { echo "enqueue did not recove
 FINAL=$(psql -X -Atq -F '|' -v ON_ERROR_STOP=1 -c "select count(*),bool_and(status='suppressed' and template_key is null and payload is null and source_id is null and recipient_email is null and provider_idempotency_key is null) from public.notification_outbox;")
 [[ "$FINAL" == '1|t' ]] || { echo "enqueue-vs-suppress-first race did not retain exactly one redacted tombstone: $FINAL" >&2; exit 1; }
 
-echo "notification outbox database contracts passed (including deterministic claim and bidirectional suppression races)"
+echo "database contracts passed (organization memberships, notification transitions, and concurrency races)"
