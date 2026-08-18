@@ -1044,7 +1044,7 @@ function AuthenticatedMenu({
                   comes from a one-shot glare that sweeps across it when the
                   menu opens and again on hover. */}
               <Link
-                href="/cards"
+                href="/bumicerts"
                 onClick={() => setOpen(false)}
                 onMouseEnter={() => setGlareKey((key) => key + 1)}
                 className="relative flex items-center gap-2.5 overflow-hidden rounded-lg px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
