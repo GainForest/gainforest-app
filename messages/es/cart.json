@@ -1,0 +1,331 @@
+{
+  "header": {
+    "openCart": "{count, plural, =0 {Abrir carrito de donaciones} one {Abrir carrito de donaciones (# artículo)} other {Abrir carrito de donaciones (# artículos)}}"
+  },
+  "amountModal": {
+    "title": "Apoya este proyecto",
+    "amountLabel": "Monto de la donación",
+    "minimum": "Mínimo ${amount}",
+    "maximum": "Máximo ${amount}",
+    "directNote": "El 100% va directamente a la billetera verificada de {organization} — sin comisión de plataforma, y la tarifa de red está cubierta por ti.",
+    "publicNote": "Se registra como un recibo de donación público que cualquiera puede auditar.",
+    "addToCart": "Añadir al carrito",
+    "updateCart": "Actualizar carrito",
+    "cancel": "Cancelar"
+  },
+  "page": {
+    "title": "Carrito"
+  },
+  "cartPage": {
+    "title": "Carrito",
+    "projectCount": "{count, plural, one {# artículo} other {# artículos}}",
+    "emptyTitle": "Tu carrito está vacío",
+    "emptyDescription": "Encuentra un proyecto que te encante y añade una donación — todo lo que hay en tu carrito se paga junto al finalizar la compra.",
+    "exploreProjects": "Explorar proyectos",
+    "removeItem": "Quitar {title} del carrito",
+    "amountFor": "Monto de la donación para {title}",
+    "minimum": "Mínimo ${amount}",
+    "maximum": "Máximo ${amount}",
+    "invalidAmount": "Introduce un monto mayor que cero.",
+    "donations": "Donaciones",
+    "total": "Total",
+    "feesNote": "Sin comisiones de plataforma: el 100 % va a la billetera verificada de cada destinatario. Puedes añadir una propina opcional para GainForest al finalizar.",
+    "checkout": "Finalizar compra",
+    "fixAmounts": "Corrige los montos marcados para continuar."
+  },
+  "checkoutPage": {
+    "title": "Finalizar compra",
+    "backToCart": "Volver al carrito",
+    "encouragement": "¡Genial! Tu donación apoya la conservación liderada por las comunidades.",
+    "donorTitle": "Cómo aparece tu donación",
+    "anonymousLabel": "Donar de forma anónima",
+    "anonymousHint": "Las donaciones anónimas nunca aparecen públicamente con tu nombre — aún podrás verlas en tu propio perfil.",
+    "signedOutNote": "No has iniciado sesión, así que tus donaciones aparecerán como anónimas.",
+    "walletTitle": "Billetera de pago",
+    "walletHint": "Las donaciones se pagan en USDC en Ethereum. Conecta tu billetera para continuar — las tarifas de red están cubiertas por ti.",
+    "connectWallet": "Conectar billetera",
+    "connecting": "Conectando…",
+    "connectFailed": "La conexión de la billetera falló.",
+    "noWallet": "No se encontró una billetera compatible. Instala MetaMask u otra billetera compatible para continuar.",
+    "available": "Disponible: {amount}",
+    "balanceUnavailable": "Saldo no disponible",
+    "tipTitle": "Propina para GainForest (opcional)",
+    "tipDescription": "GainForest no cobra comisiones de plataforma y cubre las tarifas de red de cada donación. Las propinas de los donantes mantienen este servicio en funcionamiento.",
+    "tipSliderLabel": "Monto de la propina",
+    "tipNudgeTitle": "¿Puedes añadir una propina?",
+    "tipNudgeBody": "¡Las propinas ayudan a GainForest a apoyar a los guardianes de la tierra para cuidar la naturaleza!",
+    "tipNudgeSet": "Fijar propina en {percent}%",
+    "yourTip": "Tu propina:",
+    "tipLineLabel": "Propina para GainForest",
+    "summaryTitle": "Tu donación",
+    "donations": "Donaciones",
+    "total": "Total",
+    "insufficientBalance": "Tu billetera no tiene suficiente USDC para este total.",
+    "multiApprovalNote": "{count, plural, one {Tu billetera te pedirá aprobar # pago.} other {Tu billetera te pedirá aprobar # pagos, uno tras otro.}}",
+    "donateNow": "Donar {amount} ahora",
+    "footerNote": "El 100 % de tus {amount} en donaciones va a la billetera verificada de cada destinatario.",
+    "footerInfoLabel": "Qué incluye",
+    "footerInfoFees": "GainForest no cobra comisión de plataforma y paga las tarifas de red por ti.",
+    "footerInfoTip": "Tu propina de {tip} es aparte. Nunca se descuenta de tus donaciones.",
+    "processing": "Procesando…",
+    "doNotClose": "No cierres esta ventana.",
+    "tryAgain": "Intentar de nuevo",
+    "blockedItems": "Aún no pueden recibir donaciones, por lo que se excluyen de este pago: {titles}",
+    "errorProfile": "No pudimos vincular esta donación a tu perfil. Inicia sesión de nuevo o dona de forma anónima.",
+    "errorCannotReceive": "Esta cuenta aún no puede recibir donaciones.",
+    "errorAmount": "Revisa el monto de la donación e inténtalo de nuevo.",
+    "errorChanged": "Los detalles del pago cambiaron. Reinicia la donación.",
+    "errorGeneric": "El pago falló. Inténtalo de nuevo.",
+    "errorTimeout": "Este pago está tardando más de lo esperado y aún podría completarse. Revisa la actividad reciente de tu billetera antes de intentarlo de nuevo para no pagar dos veces.",
+    "tipFailed": "La propina no se pudo completar — tus donaciones no se vieron afectadas.",
+    "tipSkipped": "La propina se omitió porque ninguna donación se completó.",
+    "thankYou": "Gracias",
+    "successSummary": "Tus donaciones por {amount} se completaron con éxito.",
+    "recordedWithProfile": "Registrado con tu perfil de GainForest.",
+    "recordedAnonymous": "Registrado como anónimo.",
+    "paymentDetails": "Detalles del pago",
+    "shareTitle": "Comparte esto con otros",
+    "shareText": "Acabo de donar {amount} para apoyar proyectos de naturaleza en GainForest: {url}",
+    "shareOnX": "Compartir en X",
+    "shareOnBluesky": "Compartir en Bluesky",
+    "shareOnTelegram": "Compartir en Telegram",
+    "copyShareText": "Copiar texto para compartir",
+    "exploreMore": "Explorar más proyectos",
+    "emptyTitle": "Tu carrito está vacío",
+    "singleApprovalNote": "Tu billetera pedirá una sola aprobación por el total. Después, GainForest envía cada donación a su destinatario.",
+    "messageTitle": "Añade un mensaje (opcional)",
+    "messageHint": "Unas palabras de ánimo o por qué donaste. La persona destinataria lo verá.",
+    "messagePlaceholder": "Añade un mensaje (opcional)…",
+    "messageAnonymousNote": "Tu mensaje no se mostrará con tu nombre.",
+    "bioblitzAwardNote": "Este mensaje identifica el pago como premio de BioBlitz y no se puede cambiar.",
+    "tipNone": "Sin propina",
+    "cardsPreviewTitle": "Bumicerts que recibirás",
+    "cardsUnavailableNote": "Los Bumicerts solo están disponibles para donaciones a proyectos elegibles. Esta compra no incluye ninguno.",
+    "cardsCheckingNote": "Comprobando qué donaciones otorgarán Bumicerts…",
+    "receiptIssue": "Tu pago se completó, pero no se pudieron crear uno o más registros públicos de donación. Esas donaciones no aparecerán en Mis Bumicerts.",
+    "reward": {
+      "eyebrow": "Coleccionable desbloqueado",
+      "guardianOf": "Guardián de",
+      "personEyebrow": "En apoyo de",
+      "contributed": "Contribuido",
+      "moreProjects": "{count, plural, one {# proyecto más} other {# proyectos más}}",
+      "mint": "N.º {mint}",
+      "verified": "Verificado en la cadena",
+      "tiltHint": "Mueve el cursor sobre el Bumicert para captar la luz",
+      "tiers": {
+        "seedling": {
+          "name": "Brote",
+          "rarity": "Común"
+        },
+        "sapling": {
+          "name": "Retoño",
+          "rarity": "Poco común"
+        },
+        "grove": {
+          "name": "Arboleda",
+          "rarity": "Raro"
+        },
+        "canopy": {
+          "name": "Dosel",
+          "rarity": "Épico"
+        },
+        "oldGrowth": {
+          "name": "Bosque antiguo",
+          "rarity": "Legendario"
+        }
+      },
+      "overallEyebrow": "Contribución total",
+      "overallTitle": "Colección completa",
+      "overallSubtitle": "{count, plural, one {# proyecto apoyado} other {# proyectos apoyados}}",
+      "collect": "Coleccionar",
+      "collectAll": "Coleccionar todo ({count})",
+      "prevCard": "Bumicert anterior",
+      "nextCard": "Bumicert siguiente",
+      "deckHint": "Desliza para ver tus Bumicerts",
+      "cardPosition": "Bumicert {current} de {total}",
+      "collectedTitle": "¡Todo coleccionado!",
+      "collectedBody": "Tus Bumicerts verificados están listos en Mis Bumicerts.",
+      "viewMyCards": "Ver Mis Bumicerts"
+    }
+  },
+  "testRegistry": {
+    "eyebrow": "Experiencias de UI",
+    "title": "Registro de experiencias de UI",
+    "description": "Vistas previas seguras y reutilizables de flujos reales de GainForest, con datos simulados y efectos externos bloqueados.",
+    "availableTitle": "Experiencias disponibles",
+    "availableDescription": "Elige un flujo para abrir su vista previa segura y totalmente interactiva.",
+    "parityTitle": "Contrato de paridad",
+    "parityBody": "Desarrolladores y agentes de IA: cada experiencia debe renderizar el componente de producción. Simulen solo los datos y efectos externos; nunca copien ni separen la interfaz. Todo cambio de UI o UX debe afectar de la misma manera a la experiencia simulada y a la real.",
+    "indexingNote": "Esta ruta es pública, pero está excluida de los buscadores. Nunca incluyas secretos ni datos personales reales.",
+    "scenarioLabel": "Experiencia registrada",
+    "experienceTitle": "Flujo de donación",
+    "experienceDescription": "Recorre la experiencia actual de donación con datos de prueba seguros y sin pagos reales.",
+    "openExperience": "Abrir experiencia",
+    "backToRegistry": "Volver al registro",
+    "mockBadge": "Modo simulado · sin pagos",
+    "projectPrompt": "Prueba la experiencia de donación completa",
+    "projectPromptBody": "Elige un monto, revisa el carrito, conecta la billetera simulada y completa un pago de prueba seguro.",
+    "mockProjectTitle": "Corredor del bosque nuboso",
+    "mockOrganization": "Comunidad Canopy",
+    "mockObjectiveOne": "Restauración forestal",
+    "mockObjectiveTwo": "Cuidado comunitario",
+    "mockProjectDescription": "Restauración de un corredor vivo entre bosques comunitarios y hábitat protegido.",
+    "donate": "Donar",
+    "reset": "Reiniciar",
+    "stage": {
+      "project": "Proyecto",
+      "cart": "Carrito",
+      "checkout": "Pago"
+    },
+    "projectUpdates": {
+      "title": "Compositor de actualizaciones del proyecto",
+      "description": "El editor WYSIWYG para escribir actualizaciones del proyecto, y la línea de tiempo que las muestra, exactamente como aparecen en la página de un Cert.",
+      "mockNote": "Publicar una actualización crea un registro en una cuenta real, así que esta vista previa nunca lo hace. Las actualizaciones escritas aquí usan el compositor, la validación y la línea de tiempo de producción, pero se quedan en esta página y desaparecen al recargar.",
+      "mockBadge": "Modo de prueba · nada se publica",
+      "cardTitle": "Actualizaciones del proyecto",
+      "cardDescription": "Escriba una actualización con formato (negrita, títulos, listas, citas, enlaces) y véala en la línea de tiempo.",
+      "composerLabel": "Escribir una actualización",
+      "timelineLabel": "Actualizaciones publicadas",
+      "seedTitle": "Tercera semana de plantación: informe del dosel",
+      "seedHeading": "Informe del vivero",
+      "seedIntro": "Esta semana el equipo de campo plantó",
+      "seedIntroBold": "1.200 plántulas",
+      "seedIntroTail": "en el sitio de restauración del norte.",
+      "seedListOne": "La tasa de supervivencia se mantiene en 94%",
+      "seedListTwo": "Se sumaron dos nuevos voluntarios de la comunidad",
+      "seedQuote": "El bosque está volviendo más rápido de lo que cualquiera esperaba.",
+      "seedPlainTitle": "Las lluvias llegaron temprano",
+      "seedPlainBody": "Actualización breve en texto plano escrita antes de que existiera el formato. Debe mostrarse sin cambios."
+    },
+    "projectVisibility": {
+      "title": "Tarjeta de visibilidad del proyecto",
+      "description": "La tarjeta de Gestionar → Proyectos que indica a una cuenta qué es público y si aparece en las páginas de exploración, en cada uno de sus estados.",
+      "mockNote": "Añadir una cuenta a las páginas de exploración es un efecto real, así que esta vista previa nunca lo hace. Solo se sustituyen por datos de prueba las dos llamadas al servidor de la tarjeta.",
+      "mockBadge": "Modo de prueba · no se publica nada",
+      "cardTitle": "Visibilidad del proyecto",
+      "cardDescription": "Comprueba cómo la página de proyectos informa de lo que es público y de qué cambia aparecer en las páginas de exploración.",
+      "scenarios": {
+        "unlisted": {
+          "label": "Propietario · sin aparecer en las páginas de exploración",
+          "body": "La cuenta puede añadirse a las listas de exploración."
+        },
+        "listed": {
+          "label": "Propietario · aparece en las páginas de exploración",
+          "body": "Ya aparece, así que no se ofrece ninguna acción."
+        },
+        "member": {
+          "label": "Miembro · sin aparecer en las páginas de exploración",
+          "body": "Los miembros ven la situación de la cuenta, pero no pueden cambiarla."
+        },
+        "unavailable": {
+          "label": "Ahora mismo no se puede cambiar",
+          "body": "El estado sigue mostrándose; el botón se omite en lugar de quedar inservible."
+        },
+        "unknown": {
+          "label": "No se pudo leer el estado",
+          "body": "La tarjeta lo dice en lugar de afirmar que la cuenta no aparece."
+        }
+      }
+    },
+    "bioblitzNotifications": {
+      "title": "Estados del correo para ganadores de BioBlitz",
+      "description": "Las filas de estado de producción para correos de ganadores, incluido correo ausente y seguimiento manual.",
+      "mockBadge": "Modo simulado · sin correos",
+      "mockNote": "Todos los ganadores son ficticios. Marcar como gestionado solo cambia la memoria.",
+      "cardTitle": "Correos para ganadores de BioBlitz",
+      "cardDescription": "Previsualiza cada estado de entrega y contacto manual para moderadores.",
+      "fixtureLabel": "Correo del ganador"
+    },
+    "invitationDelivery": {
+      "title": "Estados de entrega de invitaciones",
+      "description": "La fila de invitación pendiente de producción para correos enviados, retrasados, enlaces manuales y acciones restringidas por rol.",
+      "mockBadge": "Modo simulado · sin correos",
+      "mockNote": "Todas las direcciones son de prueba. Reintentar, copiar y cancelar solo actualizan la memoria y nunca llaman a un servicio real.",
+      "cardTitle": "Entrega del correo de invitación",
+      "cardDescription": "Previsualiza el estado, el reintento seguro, copiar enlace y cancelar invitaciones de organización.",
+      "scenarios": {
+        "sent": "Propietario · correo enviado",
+        "delayed": "Propietario · problema temporal de entrega",
+        "manual": "Propietario · compartir el enlace directamente",
+        "admin": "Invitación de administrador · acciones restringidas"
+      },
+      "mockRetried": "Reintento simulado completado sin enviar correo.",
+      "mockCopied": "Enlace simulado copiado sin usar el portapapeles.",
+      "mockCanceled": "Invitación simulada eliminada de esta vista previa."
+    },
+    "myCardsTitle": "Galería de Mis Bumicerts",
+    "myCardsDescription": "Previsualiza la galería de Bumicerts coleccionados con coleccionables de muestra.",
+    "shop": {
+      "title": "Página de la tienda (Bumimic)",
+      "description": "La página del producto Bumimic, una grabadora acústica abierta y de bajo costo.",
+      "mockBadge": "Página estática",
+      "cardTitle": "Página de la tienda Bumimic",
+      "cardDescription": "Vista previa de la página del producto para el prototipo de grabadora acústica Bumimic."
+    },
+    "rewildingDashboard": {
+      "title": "Panel de la subvención Rewilding",
+      "description": "La vista Mi subvención y su gráfico de ritmo de audio, en cada estado posible de la meta de grabación.",
+      "safetyNote": "Solo datos de prueba. Esta ruta nunca lee el indexador, la inscripción de quien la visita ni las confirmaciones de hitos, y nada aquí puede cambiar una subvención.",
+      "behind": {
+        "title": "Por detrás del ritmo necesario",
+        "description": "Unos pocos minutos al día: aproximadamente donde está quien empieza frente a la meta de 7.000 minutos."
+      },
+      "ahead": {
+        "title": "Por delante del ritmo necesario",
+        "description": "Subidas que superan la línea que la subvención necesita."
+      },
+      "met": {
+        "title": "Meta alcanzada",
+        "description": "La meta de grabación está lograda, así que el gráfico deja de pedir un ritmo."
+      },
+      "noAudio": {
+        "title": "Aún sin audio",
+        "description": "No se ha subido nada, así que el gráfico de ritmo se omite en vez de dibujarse vacío."
+      },
+      "mockBadge": "Datos de prueba",
+      "cardTitle": "Panel de la subvención Rewilding",
+      "cardDescription": "Mi subvención con su gráfico de ritmo de audio, por detrás y por delante de la meta.",
+      "upcoming": {
+        "title": "Antes de que empiece la subvención",
+        "description": "El periodo aún no ha comenzado, así que el gráfico presenta cada subida como ventaja inicial: la línea requerida sigue plana hasta que abra."
+      }
+    },
+    "communityEvents": {
+      "title": "Eventos comunitarios",
+      "description": "El descubrimiento de eventos, la página del evento y el formulario de organización de producción con datos de prueba — confirmar, listas de espera, publicar y cancelar funcionan en memoria.",
+      "cardTitle": "Eventos comunitarios",
+      "cardDescription": "Explora, confirma, únete a una lista de espera y organiza un evento — componentes de producción con datos en memoria, incluido un modo sin sesión.",
+      "mockBadge": "Modo de prueba · sin escrituras",
+      "eyebrow": "Registro de experiencias de UI",
+      "tabDiscovery": "Descubrimiento",
+      "tabDetail": "Página del evento",
+      "tabHost": "Formulario de organización",
+      "signedInToggle": "Con sesión",
+      "signInPrompt": "Esta acción pediría iniciar sesión. Activa “Con sesión” para simular una sesión.",
+      "dismiss": "Descartar"
+    }
+  },
+  "myCards": {
+    "eyebrow": "Coleccionables",
+    "title": "Mis Bumicerts",
+    "description": "Cada Bumicert proviene de un recibo de donación verificado vinculado a tu cuenta.",
+    "count": "{count, plural, one {# Bumicert} other {# Bumicerts}}",
+    "emptyTitle": "Aún no hay Bumicerts",
+    "emptyBody": "Dona a un proyecto con la sesión iniciada y mostrando tu nombre para ganar tu primer Bumicert.",
+    "browseProjects": "Explorar proyectos",
+    "signedOutTitle": "Inicia sesión para ver tus Bumicerts",
+    "signedOutBody": "Los Bumicerts se vinculan a tu cuenta para que sigan disponibles en otros navegadores y dispositivos.",
+    "unavailableTitle": "No se pudieron cargar tus Bumicerts",
+    "unavailableBody": "Tus registros de donación están seguros. Intenta cargar tus Bumicerts de nuevo.",
+    "tryAgain": "Intentar de nuevo",
+    "partialBody": "No se pudieron cargar algunos registros de donación o detalles de proyectos. Los Bumicerts mostrados están verificados, pero tu colección podría estar incompleta.",
+    "fallbackProject": "Proyecto apoyado",
+    "fallbackOrganization": "Equipo del proyecto",
+    "fallbackRecipient": "Una persona de la comunidad",
+    "fallbackPersonContext": "Apoyo directo",
+    "verifiedDonation": "Donación verificada",
+    "viewProject": "Ver proyecto",
+    "viewProfile": "Ver perfil",
+    "viewPayment": "Ver pago"
+  }
+}

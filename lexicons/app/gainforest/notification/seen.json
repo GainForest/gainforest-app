@@ -1,0 +1,22 @@
+{
+  "lexicon": 1,
+  "id": "app.gainforest.notification.seen",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "Singleton (rkey \"self\") marking when the viewer last opened their notifications panel. Notifications themselves are derived projections over public engagement records (app.gainforest.feed.like + app.gainforest.feed.post reply-posts on the viewer's records) — nothing is stored. This record holds only the per-viewer `seenAt` timestamp used to compute the unread count: a notification is unread when its createdAt is newer than `seenAt`. Lives in the viewer's own repo and is read directly from their PDS (it is not indexed).",
+      "key": "literal:self",
+      "record": {
+        "type": "object",
+        "required": ["seenAt"],
+        "properties": {
+          "seenAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "When the viewer last marked their notifications as seen."
+          }
+        }
+      }
+    }
+  }
+}

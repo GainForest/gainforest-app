@@ -1,0 +1,30 @@
+{
+  "metadata": {
+    "title": "Novidades",
+    "description": "Cada mudança lançada no GainForest, visualizada ao longo do tempo."
+  },
+  "eyebrow": "Novidades",
+  "heading": "GainForest v{version}",
+  "intro": "Uma linha do tempo viva de tudo o que lançamos — novos recursos, melhorias e correções, agrupados por mês e codificados por cor conforme a área.",
+  "stats": {
+    "commits": "Mudanças",
+    "months": "Meses",
+    "range": "Período"
+  },
+  "filterLabel": "Filtrar por área",
+  "all": "Tudo",
+  "shipped": "{count, plural, one {# mudança} other {# mudanças}}",
+  "categories": {
+    "taina": "Tainá",
+    "dataJobs": "Lotes de dados",
+    "donations": "Doações",
+    "observations": "Observações",
+    "projects": "Projetos e organizações",
+    "auth": "Contas e login",
+    "admin": "Administração e revisão",
+    "i18n": "Idiomas",
+    "ui": "Design e interface",
+    "fix": "Correções",
+    "core": "Plataforma base"
+  }
+}

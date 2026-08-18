@@ -1,0 +1,733 @@
+{
+  "detail": {
+    "actions": {
+      "deleteBumicert": "Eliminar certificado",
+      "manage": "Gestionar",
+      "deleteHint": "Al eliminarlo, este certificado desaparece para todos.",
+      "deleteConfirmTitle": "¿Eliminar certificado?",
+      "deleteConfirmDescription": "Esto eliminará permanentemente «{title}». Esta acción no se puede deshacer.",
+      "deleteConfirmPrompt": "Para confirmar, escribe el nombre del certificado exactamente como se muestra:",
+      "deleteConfirmInputAria": "Escribe el nombre del certificado para confirmar la eliminación",
+      "deleteConfirmMismatch": "El nombre aún no coincide.",
+      "deleteConfirmCancel": "Cancelar",
+      "deleteConfirmConfirm": "Eliminar certificado",
+      "deleteError": "No se pudo eliminar este certificado. Inténtalo de nuevo."
+    },
+    "error": {
+      "loadTitle": "No se pudo cargar este certificado",
+      "loadDescription": "Tuvimos problemas para obtener los datos de este certificado. Inténtelo de nuevo o regrese a la página de inicio."
+    },
+    "timeline": {
+      "title": "Actualizaciones del proyecto",
+      "itemCount": "{count, plural, =0 {0 elementos} =1 {1 elemento} other {# elementos}}",
+      "linked": "vinculado {window}",
+      "linkedWindow": "Ventana vinculada: {window}",
+      "emptyFiltered": "Ninguna evidencia coincide con este filtro.",
+      "emptyTitle": "Aún no se han cargado pruebas",
+      "emptyDescription": "Los informes de evidencia, auditorías y notas de campo publicados por esta organización aparecerán aquí.",
+      "filters": {
+        "all": "Todos",
+        "tree": "Árboles",
+        "audio": "Sonidos",
+        "biodiversity": "Naturaleza",
+        "document": "Documento",
+        "file": "Archivos"
+      },
+      "ownerTools": "Herramientas del propietario",
+      "linkEvidenceTitle": "Vincular evidencia",
+      "linkEvidenceDescription": "Agrega evidencia guardada o archivos a {title}. Los elementos que agregues aparecerán en las actualizaciones públicas del proyecto abajo.",
+      "notTimelineYet": "Aún no forma parte de la cronología",
+      "linkedTitle": "Actualizaciones del proyecto vinculadas",
+      "linkedItemCount": "{count, plural, =0 {0 elementos vinculados a esta actividad de certificado} =1 {1 elemento vinculado a esta actividad de certificado} other {# elementos vinculados a esta actividad de certificado}}",
+      "linkedDescription": "Revisa los registros, archivos y capas del mapa que ya forman parte de las actualizaciones públicas del proyecto.",
+      "orgTitle": "Novedades de los proyectos de esta organización",
+      "orgItemCount": "{count, plural, =0 {0 novedades} =1 {1 novedad} other {# novedades}}",
+      "orgDescription": "Informes, archivos y notas de campo publicados en todos los proyectos de esta organización.",
+      "seeMore": "Ver {count} más",
+      "pageOf": "Página {current} de {total}",
+      "previousPage": "Página anterior",
+      "nextPage": "Página siguiente",
+      "timelineTools": "Herramientas de la línea de tiempo",
+      "linksUnavailable": "No se pudieron comprobar los enlaces existentes de la línea de tiempo. Actualiza antes de añadir grupos de árboles.",
+      "linkSuccess": "Vinculado a la línea de tiempo pública. Puede tardar un momento en aparecer para todos.",
+      "fallbacks": {
+        "linkedNatureDataGroup": "Grupo de datos de naturaleza vinculado",
+        "linkedNatureData": "Datos de naturaleza vinculados"
+      }
+    },
+    "evidenceAdder": {
+      "title": "Agregar actualización",
+      "composerDescription": "Escriba una breve actualización. Adjunte sonidos, observaciones, árboles o archivos si ayudan.",
+      "captionPlaceholder": "Comparta una actualización rápida del proyecto. Puede publicar solo texto o adjuntar evidencia abajo.",
+      "titlePlaceholder": "Título (opcional)",
+      "editor": {
+        "bold": "Negrita",
+        "italic": "Cursiva",
+        "underline": "Subrayado",
+        "strikethrough": "Tachado",
+        "heading": "Título",
+        "subheading": "Subtítulo",
+        "quote": "Cita",
+        "bulletedList": "Lista con viñetas",
+        "numberedList": "Lista numerada",
+        "addLink": "Agregar enlace",
+        "removeLink": "Quitar enlace",
+        "linkUrlPlaceholder": "https://example.org",
+        "applyLink": "Aplicar",
+        "cancelLink": "Cancelar"
+      },
+      "attachLabel": "Adjuntar evidencia opcional:",
+      "attachingType": "Adjuntando {type}",
+      "postUpdate": "Publicar actualización",
+      "chooseAttachment": "Elija algo para adjuntar",
+      "updateTitleFallback": "Actualización del proyecto",
+      "selectType": "Seleccione el tipo de evidencia a agregar.",
+      "selectEvidence": "Seleccione la evidencia a agregar.",
+      "addType": "Agregar {type}",
+      "tabs": {
+        "images": "Imágenes",
+        "audio": "Sonidos",
+        "soundscape": "Paisaje sonoro",
+        "trees": "Árboles",
+        "biodiversity": "Observaciones",
+        "files": "Archivos"
+      },
+      "linking": "Publicando…",
+      "loadingSources": "Cargando evidencia…",
+      "sourcesLoadError": "No se pudo cargar la evidencia disponible. Actualice e inténtelo de nuevo.",
+      "selectToLink": "Seleccione la evidencia para vincular",
+      "linkItems": "{count, plural, =1 {Vincular 1 elemento} other {Vincular # elementos}}",
+      "optionalNote": "Nota opcional",
+      "optionalNotePlaceholder": "Agregar contexto sobre esta evidencia...",
+      "authError": "Algo salió mal. Por favor actualice la página.",
+      "contentType": "Tipo de contenido",
+      "selectContentType": "Seleccione el tipo de contenido",
+      "addFilePlaceholder": "Agregar un archivo como evidencia",
+      "fileHelp": "Archivos de hasta {maxSize}.",
+      "addImagePlaceholder": "Suelte imágenes aquí o haga clic para subir",
+      "imageHelp": "Imágenes de hasta {maxSize}.",
+      "externalLink": "Enlace externo",
+      "externalLinkPlaceholder": "https://example.org/report",
+      "addLink": "Agregar",
+      "externalLinkHelp": "Vincule informes, sitios web, paneles o plataformas de evidencia externas.",
+      "invalidUrlProtocol": "Utilice una URL http o https.",
+      "invalidUrl": "Introduzca una URL válida.",
+      "remove": "Eliminar",
+      "removeFile": "Eliminar {name}",
+      "removeExternalLink": "Eliminar enlace externo",
+      "noFilesSelected": "Aún no se han seleccionado archivos ni enlaces.",
+      "contentTypes": {
+        "document": "Documento",
+        "report": "Informe",
+        "audit": "Auditoría",
+        "evidence": "Evidencia",
+        "testimonial": "Testimonio",
+        "methodology": "Metodología",
+        "photo": "Foto",
+        "video": "Video",
+        "dataset": "Conjunto de datos",
+        "certificate": "Certificado",
+        "audio": "Sonido",
+        "other": "Otros permisos",
+        "update": "Actualización",
+        "treeDataset": "Conjunto de datos de árbol",
+        "biodiversity": "Naturaleza",
+        "occurrence": "Árbol"
+      },
+      "emptyUploaded": "Aún no se ha subido ningún {type}.",
+      "uploadType": "Subir {type}",
+      "manage": "Administrar",
+      "untitledRecording": "Grabación sin título",
+      "untitledSoundscape": "Paisaje sonoro sin título",
+      "soundscapeHelp": "Elige un paisaje sonoro ya creado con las grabaciones de esta organización. Quien lea la actualización podrá escucharlo ahí mismo.",
+      "soundscapeEmpty": "Ahora mismo no se pudo leer ningún paisaje sonoro de esta organización.",
+      "unnamedTreeDataset": "Grupo de árboles sin nombre",
+      "unknownObservation": "Avistamiento de naturaleza desconocido",
+      "treeCount": "{count, plural, =1 {1 árbol} other {# árboles}}",
+      "speciesCount": "{count, plural, =1 {1 especie} other {# especies}}",
+      "siteContextLabel": "Lugar del proyecto: {siteName}",
+      "siteContextReady": "Lugar del proyecto listo",
+      "siteContextMixed": "Este grupo de árboles cubre más de un lugar del proyecto",
+      "siteContextIncomplete": "A algunos árboles les falta un lugar del proyecto",
+      "siteContextUnresolved": "No se pudo comprobar el lugar del proyecto",
+      "siteContextUnavailable": "Falta el lugar del proyecto",
+      "incompleteBumicertReference": "No se puede vincular evidencia porque la referencia del certificado está incompleta. Actualiza la página y vuelve a intentarlo.",
+      "partialLinkSuccess": "Se vincularon {createdCount, plural, =1 {1 adjunto} other {# adjuntos}}, pero no se completaron todos los {totalCount, plural, =1 {1 grupo} other {# grupos}}. {error}",
+      "emptyLabels": {
+        "audio": "grabaciones de sonido",
+        "trees": "grupos de árboles",
+        "biodiversity": "observaciones"
+      },
+      "attachmentTitles": {
+        "images": "Imágenes",
+        "audio": "Grabaciones de sonido",
+        "soundscape": "Paisaje sonoro",
+        "trees": "Grupo de árboles",
+        "biodiversity": "Observaciones"
+      },
+      "chooseEvidenceType": "Elige el tipo de evidencia",
+      "selectSourceToLink": "Selecciona una fuente para vincular evidencia existente a esta cronología.",
+      "linkType": "Vincular {type}",
+      "selectRecordsToLink": "Selecciona registros de evidencia para vincularlos a esta cronología.",
+      "backToEvidenceTypes": "Volver a los tipos de evidencia",
+      "alreadyLinkedDataset": "Ya está vinculado a esta cronología",
+      "checkingExistingLinks": "Comprobando los vínculos existentes de la cronología…",
+      "unableToVerifyExistingLinks": "No se pudieron comprobar los enlaces existentes. Actualiza antes de vincular grupos de árboles.",
+      "tabDescriptions": {
+        "images": "Sube fotos del proyecto.",
+        "audio": "Añade sonidos ya guardados por esta organización.",
+        "soundscape": "Añade el paisaje sonoro de 24 horas creado con las grabaciones de esta organización.",
+        "trees": "Añade información de árboles agrupada por lugar del proyecto.",
+        "biodiversity": "Filtra observaciones y agrega registros mostrados o grupos guardados.",
+        "files": "Añade informes, fotos, videos o páginas web."
+      },
+      "update": {
+        "heading": "Escribir una actualización",
+        "subheading": "Comparte el avance con tus propias palabras. Aparecerá en las actualizaciones públicas del proyecto.",
+        "titleLabel": "Título",
+        "titlePlaceholder": "¿Qué hay de nuevo?",
+        "bodyLabel": "Actualización",
+        "bodyPlaceholder": "Comparte avances, hitos o noticias desde el campo…",
+        "post": "Publicar actualización",
+        "posting": "Publicando…"
+      },
+      "permissions": {
+        "signIn": "Inicia sesión con una cuenta que pueda gestionar esta línea de tiempo.",
+        "notMember": "Cambia a una cuenta de organización que pueda gestionar esta línea de tiempo.",
+        "createDenied": "No puedes vincular evidencia a esta línea de tiempo.",
+        "deleteDenied": "No puedes eliminar evidencia de esta línea de tiempo."
+      },
+      "linkError": "No se pudo vincular esta evidencia. Inténtalo de nuevo.",
+      "manageType": "Gestionar {type}",
+      "biodiversity": {
+        "attachmentGroupTitle": "Grupo de naturaleza",
+        "attachmentObservationsTitle": "Observaciones",
+        "emptyLabel": "observaciones",
+        "searchLabel": "Buscar",
+        "searchPlaceholder": "Buscar naturaleza",
+        "recorderLabel": "Registrador",
+        "allRecorders": "Todos los registradores",
+        "recorderOptionFallback": "Registrador {number}",
+        "displayedTitle": "Observaciones mostradas",
+        "displayedSummary": "Se muestran {shown} de {total, plural, =1 {1 avistamiento} other {# avistamientos}}. Elige avistamientos de esta vista filtrada.",
+        "clearDisplayed": "Borrar mostrados",
+        "selectDisplayed": "Seleccionar mostrados",
+        "noDataMatches": "Ninguna observación coincide con estos filtros.",
+        "recordedBy": "Registrado por {name}",
+        "recorderFallback": "un registrador guardado",
+        "alreadyLinked": "Ya vinculado",
+        "coveredByGroup": "Cubierto por el grupo",
+        "groupsTitle": "Grupos de naturaleza",
+        "groupsDescription": "Los grupos usan los mismos filtros de registrador y búsqueda.",
+        "noGroupsMatch": "Ningún grupo de naturaleza coincide con estos filtros.",
+        "multipleRecorders": "{count, plural, =1 {1 registrador} other {# registradores}}",
+        "firstRecorderAndMore": "{name} + {count, plural, =1 {1 más} other {# más}}",
+        "shownCount": "{count} mostrados",
+        "totalCount": "{count} en total",
+        "speciesCount": "{count, plural, =1 {1 especie} other {# especies}}",
+        "groupStatus": "Datos agrupados",
+        "manageData": "Gestionar observaciones",
+        "groupedNatureDataFallback": "Datos de naturaleza agrupados",
+        "csvUpload": {
+          "title": "Subir una hoja de cálculo",
+          "description": "Agrega un CSV de observaciones (con cualquier columna de medición) como un solo archivo. Ideal para listas grandes.",
+          "choose": "Elegir un archivo CSV",
+          "hint": "Una hoja de cálculo guardada como .csv",
+          "notCsv": "Elige un archivo .csv.",
+          "tooLarge": "Este archivo es demasiado grande. Mantenlo por debajo de {maxSize}.",
+          "remove": "Quitar archivo"
+        }
+      },
+      "unableToVerifyTreeSiteContext": "No se pudieron comprobar todos los árboles. Actualiza antes de vincular grupos de árboles.",
+      "validation": {
+        "fileTooLarge": "Elige un archivo de hasta {maxSize}.",
+        "fileTypeNotAllowed": "Elige un tipo de archivo admitido.",
+        "tooManyItems": "Vincula menos elementos a la vez.",
+        "invalidContext": "Este grupo de árboles necesita un lugar del proyecto. Actualiza y vuelve a intentarlo."
+      }
+    },
+    "metadata": {
+      "notFound": "certificado no encontrado"
+    },
+    "timelineEntry": {
+      "kind": {
+        "tree": "Árboles",
+        "audio": "Sonidos",
+        "biodiversity": "Naturaleza",
+        "document": "Archivos",
+        "site": "Lugar del proyecto",
+        "update": "Actualización",
+        "other": "Actualización"
+      },
+      "notSpecified": "No especificado",
+      "resolvingDate": "Fecha de resolución de evidencia...",
+      "linked": "vinculado {date}",
+      "treeCount": "{count, plural, =1 {1 árbol} other {# árboles}}",
+      "speciesCount": "{count, plural, =1 {1 especie} other {# especies}}",
+      "observationCount": "{count, plural, =1 {1 avistamiento} other {# avistamientos}}",
+      "recordingCount": "{count, plural, =1 {1 grabación} other {# grabaciones}}",
+      "itemCount": "{count, plural, =1 {1 elemento} other {# elementos}}",
+      "dataGroupCount": "{count, plural, =1 {1 grupo de datos} other {# grupos de datos}}",
+      "linkedFile": "Archivo vinculado",
+      "previewKinds": {
+        "image": "Imagen",
+        "video": "Video",
+        "audio": "Sonido",
+        "pdf": "Archivo PDF",
+        "document": "Documento"
+      },
+      "linkedTreeInformation": "Información de árboles vinculada",
+      "linkedItem": "Evidencia vinculada",
+      "linkedProjectPlace": "Lugar del proyecto vinculado",
+      "linkedTreeGroup": "Grupo de árboles vinculado",
+      "linkedSound": "Sonido vinculado",
+      "linkedSoundscape": "Paisaje sonoro vinculado",
+      "groupedData": "Datos agrupados",
+      "openMap": "Abrir mapa",
+      "viewMap": "Ver mapa",
+      "openGreenGlobe": "Abrir en globo verde",
+      "removeEvidence": "Eliminar evidencia",
+      "collapseEvidence": "Contraer evidencia",
+      "expandEvidence": "Ampliar evidencia",
+      "resolvingRecords": "Resolución de registros de evidencia vinculados...",
+      "selectedObservations": "Avistamientos seleccionados",
+      "more": "+{count} más",
+      "viewGreenGlobe": "Ver en Green Globe",
+      "evidenceItem": "Elemento de evidencia",
+      "greenGlobePreview": "Vista previa de Green Globe",
+      "open": "Abierto",
+      "greenGlobeFallback": "Si la vista previa no se carga, abra Green Globe en una nueva pestaña. Detalles del impacto",
+      "sharedGreenGlobePreviewHint": "Usa el mapa compartido de Green Globe de arriba para ver capas de árboles.",
+      "greenGlobeMapTitle": "Mapa de Green Globe",
+      "resolvingSpatialLayers": "Cargando capas del mapa…",
+      "activeLayerCount": "{count, plural, =1 {1 capa activa} other {# capas activas}}",
+      "showOnMapHint": "Usa Mostrar en el mapa en las tarjetas de árboles para ver las capas aquí.",
+      "greenGlobeIframeTitle": "Vista previa del mapa de Green Globe",
+      "treeDatasetMapLayers": "Capas de árboles en el mapa",
+      "showDatasetOnGreenGlobeMap": "Mostrar {title} en el mapa",
+      "hideDatasetFromGreenGlobeMap": "Ocultar {title} del mapa",
+      "showOnMap": "Mostrar en el mapa",
+      "hideFromMap": "Ocultar del mapa",
+      "deleteConfirm": {
+        "title": "¿Eliminar evidencia?",
+        "body": "¿Quitar “{title}”? Esto no se puede deshacer.",
+        "removing": "Eliminando…",
+        "remove": "Eliminar",
+        "cancel": "Cancelar"
+      },
+      "activeHiddenLayerSummary": "{activeCount, plural, =1 {1 visible} other {# visibles}} · {hiddenCount, plural, =1 {1 oculta} other {# ocultas}}",
+      "activeHiddenLayerSummaryWithHint": "{activeCount, plural, =1 {1 visible} other {# visibles}} · {hiddenCount, plural, =1 {1 oculta} other {# ocultas}} — usa Mostrar capa en las tarjetas de árboles para ver las capas aquí.",
+      "showLayerHint": "Usa Mostrar capa en las tarjetas de árboles para ver las capas aquí.",
+      "activeLayerBadge": "{count, plural, =1 {1 visible} other {# visibles}}",
+      "hiddenLayerBadge": "{count, plural, =1 {1 oculta} other {# ocultas}}",
+      "activeLayersInPreview": "Visibles en el mapa",
+      "hiddenLayerPrefix": "Oculta: {title}",
+      "activeOnMap": "Visible en el mapa",
+      "hiddenFromMap": "Oculta del mapa",
+      "visibleLayerDescription": "Este grupo de árboles está visible en el mapa.",
+      "hiddenLayerDescription": "Este grupo de árboles está oculto ahora.",
+      "showLayer": "Mostrar capa",
+      "hideLayer": "Ocultar capa",
+      "deleteUnavailable": "No puedes eliminar esta evidencia.",
+      "deleteError": "No se pudo eliminar este elemento.",
+      "deleteAlreadyRemoved": "Esta evidencia ya fue eliminada. Actualiza la página.",
+      "displayedBiodiversityData": "Registros de naturaleza mostrados",
+      "natureObservationsFallback": "Avistamientos de naturaleza",
+      "openLinkedFile": "Abrir archivo vinculado",
+      "openFile": "Abrir archivo",
+      "downloadFile": "Descargar archivo",
+      "previewUnavailable": "Este archivo no se puede previsualizar aquí.",
+      "unresolvedReferenceBody": "Esta evidencia vinculada aún no se pudo cargar.",
+      "preparingFile": "Preparando…",
+      "documentPreviewLoading": "Cargando vista previa del archivo…",
+      "documentPreviewPdfError": "No se pudo preparar el PDF para la vista previa.",
+      "documentPreviewPdfUnavailable": "Este PDF se puede abrir o descargar, pero no se puede ver aquí.",
+      "documentPreviewEmpty": "{title} está vacío.",
+      "documentPreviewTruncated": "Vista previa acortada. Abra o descargue el archivo para ver todo.",
+      "documentPreviewTextError": "El texto del archivo no se pudo cargar aquí.",
+      "documentPreviewTextUnavailable": "Este archivo se puede abrir o descargar, pero no se puede ver aquí.",
+      "documentPreviewHtmlError": "El archivo de página web no se pudo cargar aquí.",
+      "documentPreviewHtmlUnavailable": "Este archivo de página web se puede abrir o descargar, pero no se puede ver aquí.",
+      "documentPreviewUnsupported": "Este tipo de archivo se reconoce, pero no se puede ver aquí. Abra o descargue el archivo para verlo.",
+      "documentFormats": {
+        "pdf": "Archivo PDF",
+        "text": "Archivo de texto",
+        "markdown": "Archivo Markdown",
+        "html": "Archivo de página web",
+        "rtf": "Archivo RTF",
+        "word": "Archivo Word",
+        "spreadsheet": "Hoja de cálculo",
+        "presentation": "Presentación",
+        "document": "Documento"
+      }
+    },
+    "reference": {
+      "linkedRecord": "Registro vinculado",
+      "linkedAudioRecord": "Registro de audio vinculado",
+      "audioEvidence": "Evidencia de audio",
+      "playRecording": "Reproducir grabación",
+      "linkedDataset": "Conjunto de datos vinculado",
+      "viewGreenGlobe": "Ver en Green Globe",
+      "linkedTreeRecord": "Registro de árbol vinculado",
+      "linkedSiteRecord": "Registro de sitio vinculado",
+      "siteEvidence": "Evidencia de sitio",
+      "openSiteMap": "Abrir mapa del sitio",
+      "recordCount": "{count, plural, =1 {1 registro} other {# registros}}",
+      "speciesCount": "{count, plural, =1 {1 especie} other {# especies}}",
+      "individualCount": "{count, plural, =1 {1 individuo} other {# individuos}}"
+    },
+    "overview": {
+      "aboutOrganization": "Acerca de la organización",
+      "aboutCreator": "Acerca del creador",
+      "profile": "Perfil",
+      "certifiedProfile": "Perfil certificado",
+      "moreFromCreator": "Más certificados de este creador",
+      "moreFromOrganization": "Más certificados de esta organización",
+      "viewAll": "Ver todo",
+      "ongoing": "en curso",
+      "noDescription": "No se proporcionó descripción.",
+      "projectDetails": "Detalles del proyecto",
+      "activityPeriod": "Periodo de actividad",
+      "published": "Publicado",
+      "firstSiteBoundary": "Primer límite del sitio",
+      "firstSiteBoundaryMap": "Mapa del primer límite del sitio",
+      "contributors": "Colaboradores",
+      "noLocationSet": "Sin ubicación establecida"
+    },
+    "headerTabs": {
+      "overview": "Resumen",
+      "siteBoundaries": "Límites del sitio",
+      "reviews": "Reseñas",
+      "donations": "Donaciones",
+      "timeline": "Cronología",
+      "share": "Compartir",
+      "copied": "¡Copiado!",
+      "donate": "Donar",
+      "goToOverview": "Ir a la pestaña de resumen"
+    },
+    "projectNav": {
+      "overview": "Resumen",
+      "sightings": "Avistamientos",
+      "places": "Lugares",
+      "updates": "Novedades",
+      "reviews": "Reseñas",
+      "support": "Apoyo"
+    },
+    "support": {
+      "title": "Apoyo",
+      "donations": "Donaciones",
+      "fromSupporters": "De {count, plural, one {# colaborador} other {# colaboradores}}",
+      "noDonationsYet": "Sé la primera persona en apoyar este proyecto.",
+      "donate": "Donar",
+      "donateAgain": "Donar de nuevo",
+      "donateOnMaEarth": "Donar en Ma Earth",
+      "round": "Ronda {round}",
+      "includesMaEarth": "El total incluye donaciones de GainForest y Ma Earth.",
+      "viaMaEarth": "Recaudado a través de la campaña de Ma Earth.",
+      "notAccepting": "Este proyecto aún no acepta donaciones. Sigue a {name} para recibir novedades.",
+      "messageQuote": "Mensaje del donante: «{message}»"
+    }
+  },
+  "create": {
+    "actions": {
+      "createBumicert": "Cree un certificado"
+    },
+    "landing": {
+      "hero": {
+        "titleLine1": "Crear impacto.",
+        "titleLine2": "Certificar cambio.",
+        "description": "Cree un certificado para mostrar su compromiso con la sostenibilidad e inspirar un cambio real."
+      },
+      "explainer": {
+        "title": "¿Qué es un certificado?",
+        "body1": "Un certificado es su historia de impacto: prueba de su contribución a las personas, las comunidades y el planeta.",
+        "body2": "Le ayuda a documentar, compartir y celebrar su impacto positivo con transparencia y credibilidad.",
+        "learnMore": "Obtenga más información"
+      }
+    },
+    "tabs": {
+      "ariaLabel": "Vistas de creación de certificado",
+      "recent": "certificados recientes",
+      "drafts": "Borradores"
+    },
+    "recent": {
+      "errorTitle": "No se pudo cargar certificados",
+      "errorFallback": "Inténtelo de nuevo en un momento.",
+      "emptyTitle": "Aún no hay certificados recientes",
+      "emptyLine1": "Aún no has creado ningún certificado.",
+      "emptyLine2": "Crea tu primer certificado para empezar.",
+      "createFirst": "Crea tu primer certificado"
+    },
+    "drafts": {
+      "untitledDraft": "Borrador sin título",
+      "signedOutTitle": "Inicie sesión para ver borradores",
+      "signedOutDescription": "Los borradores certificados se guardan en tu cuenta para que puedas continuar tu trabajo más tarde.",
+      "loadingTitle": "Cargando borradores",
+      "loadingDescription": "Estamos verificando si hay aplicaciones certificado guardadas.",
+      "errorTitle": "No se pudieron cargar borradores",
+      "errorFallback": "Error al cargar borradores. Por favor inténtalo de nuevo.",
+      "emptyTitle": "Aún no hay borradores",
+      "emptyDescription": "Inicie un nuevo certificado y guárdelo como borrador cuando desee volver más tarde.",
+      "deleteAria": "Eliminar {title}"
+    },
+    "draft": {
+      "actions": {
+        "tips": "Consejos",
+        "closeTips": "Cerrar sugerencias",
+        "saveAsDraft": "Guardar como borrador",
+        "continue": "Continuar"
+      },
+      "validation": {
+        "required": "Requerido",
+        "maxCharacters": "No se permiten más de {count} caracteres",
+        "descriptionRequired": "Se requiere descripción",
+        "contributorNameRequired": "Todos los contribuyentes deben tener un nombre",
+        "coverImageMaxSize": "La imagen de portada debe tener 4 MB o menos",
+        "coverImageType": "La imagen de portada debe ser JPG, PNG o WebP"
+      },
+      "sidebar": {
+        "previewTitle": "Vista previa de certificado",
+        "generatingPreview": "Generando metadatos de vista previa...",
+        "completeFirstStep": "Complete el primer paso para generar la vista previa.",
+        "tipsTitle": "Consejos para esta sección"
+      },
+      "steps": {
+        "cover": {
+          "title": "Detalles de portada",
+          "tips": {
+            "bullets": [
+              "Utilice un nombre corto y descriptivo para su certificado.",
+              "Incluya un sitio web o un enlace social a su certificado para facilitar el acceso."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        },
+        "impact": {
+          "title": "Detalles de impacto",
+          "tips": {
+            "pre": "Al escribir su historia de impacto, utilice este marco STAR:",
+            "bullets": [
+              "Situación: ¿Qué estaba sucediendo y quién o qué se vio afectado?",
+              "Tarea — ¿Cuál fue el papel de su organización, grupo o comunidad? ¿Quién más estuvo involucrado?",
+              "Acción: describa lo que hizo su organización o comunidad.",
+              "Resultado: ¿Qué sucedió como resultado? Incluya cifras si están disponibles y mencione resultados tangibles y no tangibles. Esto estará respaldado por los datos de impacto que proporcione más adelante."
+            ],
+            "post": "Escriba libremente. Se aceptan historias más largas."
+          }
+        },
+        "site": {
+          "title": "Detalles del sitio",
+          "tips": {
+            "bullets": [
+              "Agregue primero su propia comunidad u organización, luego otras personas o grupos que se unieron.",
+              "Asegúrese de que todos estén de acuerdo en ser incluidos.",
+              "Cargue el límite de su sitio en formato GeoJSON para que se muestre en el mapa."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        },
+        "review": {
+          "title": "Revisar",
+          "tips": {
+            "bullets": [
+              "Asegúrate de haber completado todos los pasos anteriores.",
+              "Revise el aspecto de su certificado antes de enviarlo."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        },
+        "submit": {
+          "title": "Enviar",
+          "tips": {
+            "bullets": [
+              "¡Has completado todos los pasos! No más consejos para esta sección."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        }
+      },
+      "stepForms": {
+        "cover": {
+          "heading": "Comparta su impacto de un vistazo.",
+          "coverImage": {
+            "label": "Imagen de portada",
+            "info": "Elige la imagen que mejor represente tu trabajo",
+            "placeholder": "Cargue o arrastre y suelte una imagen"
+          },
+          "title": {
+            "label": "Título de certificado",
+            "info": "Dale a tu certificado un título claro y descriptivo",
+            "placeholder": "Mi certificado increíble"
+          },
+          "dateRange": {
+            "label": "Rango de fechas de certificado",
+            "info": "Seleccione el período en el que tuvo lugar su trabajo e impacto",
+            "ongoing": "En curso",
+            "ongoingCheckbox": "Este trabajo aún está en curso"
+          },
+          "workType": {
+            "label": "¿Qué tipo de trabajo estás haciendo?",
+            "info": "Siéntase libre de elegir más de uno",
+            "options": {
+              "ecologicalRestoration": "Restauración Ecológica",
+              "agroforestry": "Agroforestería",
+              "climateAdaptation": "Adaptación climática",
+              "biodiversityMonitoring": "Monitoreo de naturaleza",
+              "environmentalEducation": "Educación ambiental",
+              "indigenousLocalKnowledge": "Conocimiento indígena y local",
+              "environmentalJustice": "Justicia ambiental"
+            }
+          }
+        },
+        "impact": {
+          "heading": "Comparte tu historia de impacto.",
+          "story": {
+            "label": "Tu historia de impacto",
+            "description": "Cuéntenos sobre su impacto: qué cambió, quiénes participaron y cómo está ayudando. Tome su tiempo. Tu historia ayuda a inspirar a otros y verificar tu trabajo.",
+            "info": "Cuéntanos qué hiciste y qué pasó como resultado",
+            "placeholder": "Describe tu historia de impacto..."
+          },
+          "shortDescription": {
+            "label": "Descripción breve",
+            "description": "Una breve descripción de su historia de impacto. Esto se utilizará como breve descripción del certificado.",
+            "info": "Resuma su trabajo y sus resultados en unas pocas líneas",
+            "placeholder": "Un breve resumen sobre este certificado.",
+            "generateTitle": "Generar una descripción breve con IA",
+            "generateDisabledTitle": "Escriba primero su historia de impacto"
+          }
+        },
+        "site": {
+          "heading": "Comparta sus colaboradores y sitios.",
+          "contributors": {
+            "label": "Lista de colaboradores",
+            "description": "Agregar a todos los involucrados en este certificado, incluida su propia comunidad u organización y sus colaboradores. Consejo: comience agregando su propio grupo antes de incluir a sus socios o seguidores.",
+            "info": "Enumere las personas u organizaciones que contribuyeron a este trabajo."
+          },
+          "boundaries": {
+            "label": "Límites del sitio",
+            "description": "Cargue los límites de su sitio en formato GeoJSON para que podamos visualizar su certificado en el mapa.",
+            "info": "Agregue los límites que mejor representen el lugar donde se llevó a cabo el trabajo.",
+            "selectHelp": "Seleccione los límites para este certificado o agregue otros nuevos.",
+            "manageSites": "Administrar sitios",
+            "loading": "Cargando sus sitios...",
+            "loadError": "No se pueden cargar los sitios.",
+            "empty": "No se encontró ningún sitio.",
+            "addSite": "Agregar un sitio",
+            "unnamedSite": "Sitio sin nombre",
+            "invalidLocation": "Ubicación no válida"
+          },
+          "permissions": {
+            "label": "Permisos",
+            "confirm": "Confirmo que todos los contribuyentes enumerados dieron su permiso para incluir su trabajo en este certificado.",
+            "terms": "Acepto los términos y condiciones."
+          }
+        },
+        "submit": {
+          "signedInRequired": "Debes iniciar sesión para publicar.",
+          "prepareError": "No se pudieron preparar los datos de publicación.",
+          "authenticatedTitle": "Autenticado",
+          "checkingAuth": "Estamos comprobando si está autenticado.",
+          "notSignedIn": "No ha iniciado sesión. Por favor, inicie sesión para continuar.",
+          "failedTitle": "No se pudo publicar.",
+          "publishingTitle": "Publicando su certificado",
+          "readyTitle": "Listo para publicar su certificado",
+          "publishingDescription": "Estamos publicando su certificado.",
+          "readyDescription": "Haga clic en el botón a continuación para publicar su certificado.",
+          "retry": "Reintentar",
+          "publishAction": "Publicar certificado",
+          "editDetails": "Editar detalles",
+          "successTitle": "¡Su certificado se publicó correctamente!",
+          "linkEvidenceNow": "Vincule evidencia ahora",
+          "viewBumicert": "Ver certificado",
+          "viewProject": "Ver proyecto",
+          "viewProjects": "Ver proyectos",
+          "setUpDonations": "Configurar donaciones",
+          "shareFeedback": "Compartir comentarios",
+          "createAnother": "Crear otro certificado"
+        }
+      },
+      "modals": {
+        "saveDraft": {
+          "title": "Guardar como borrador",
+          "description": "Guarde su progreso actual como borrador.",
+          "successDescription": "Su borrador se ha guardado correctamente.",
+          "saveProgressFor": "Guarda tu progreso para",
+          "untitledDraft": "Borrador sin título",
+          "saving": "Guardando...",
+          "saveAction": "Guardar borrador",
+          "savedBody": "Su borrador ha sido guardado. Puedes seguir trabajando en ello más tarde.",
+          "close": "Cerrar"
+        },
+        "deleteDraft": {
+          "title": "Eliminar borrador",
+          "description": "Confirme su selección para eliminar el borrador.",
+          "successDescription": "El borrador se ha eliminado correctamente.",
+          "missingDraftDescription": "No se puede determinar qué borrador eliminar.",
+          "confirmBody": "¿Está seguro de que desea <destructive>eliminar</destructive> el borrador, <strong>{title}?</strong><br></br>Esta acción no se puede deshacer.",
+          "untitledDraft": "Borrador sin título",
+          "cancel": "Cancelar",
+          "deleting": "Eliminando...",
+          "deleteAction": "Eliminar borrador",
+          "deletedBody": "El borrador se ha eliminado correctamente.",
+          "close": "Cerrar"
+        },
+        "uploadLogo": {
+          "title": "Cargar logotipo",
+          "description": "Cargar un logotipo para su cuenta.",
+          "placeholder": "Cargar un logotipo para su cuenta",
+          "authRequired": "El usuario no está autenticado",
+          "logoRequired": "Se requiere el logotipo",
+          "done": "Listo",
+          "uploading": "Subiendo...",
+          "upload": "Cargar"
+        }
+      },
+      "review": {
+        "heading": "Revisar la información.",
+        "uploaded": "Subido",
+        "notUploaded": "No cargado",
+        "dateRange": "De {start} a {end}",
+        "notSelected": "No seleccionado",
+        "impactStoryAdded": "Historia de impacto agregada",
+        "sitesSelected": "{count, plural, =1 {1 sitio seleccionado} other {# sitios seleccionados}}",
+        "yes": "Sí",
+        "no": "No",
+        "edit": "Editar",
+        "missingFields": "Faltan los siguientes campos:",
+        "fieldsWithErrors": "Los siguientes campos encontraron errores:",
+        "fixIssues": "Solucione estos problemas para continuar.",
+        "allFieldsCorrect": "Todos los campos están llenos correctamente.",
+        "fix": "Reparar",
+        "preview": {
+          "title": "Vista previa de su certificado",
+          "missingLogo": "Tu cuenta no tiene logotipo. ¿Quieres agregar uno?",
+          "generating": "Generando la vista previa...",
+          "completeFirstStep": "Complete el primer paso para obtener una vista previa de su certificado."
+        }
+      },
+      "hydration": {
+        "errorTitle": "Error",
+        "errorDescription": "No pudimos cargar los datos que guardaste. Ponte en contacto con soporte.",
+        "close": "Cerrar",
+        "back": "Atrás",
+        "coverImageTitle": "No se pudo cargar la imagen de portada",
+        "coverImageDescription": "Los datos de tu borrador se restauraron correctamente, pero no se pudo obtener la imagen de portada. Vuelve a subir la imagen de portada para continuar.",
+        "gotIt": "Entendido"
+      }
+    },
+    "auth": {
+      "signedOutTitle": "No ha iniciado sesión.",
+      "signedOutDescription": "Inicie sesión para crear un certificado.",
+      "accountErrorTitle": "No se pudo cargar su cuenta",
+      "accountErrorDescription": "Tuvimos problemas para cargar su cuenta. Por favor inténtalo de nuevo.",
+      "accountSetupTitle": "Su cuenta aún no está configurada.",
+      "accountSetupDescription": "Complete la información de su cuenta para crear un certificado.",
+      "manageAccount": "Administrar mi cuenta",
+      "pleaseWait": "Por favor espere..."
+    }
+  }
+}

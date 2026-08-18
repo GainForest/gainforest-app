@@ -1,0 +1,42 @@
+{
+  "lexicon": 1,
+  "id": "app.gainforest.organization.layerGroup",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "A named area an organization monitors over time (e.g. a mangrove plot that is re-flown by drone). The group holds no member list: layers join it by setting their `groupRef` to this record's AT-URI, so adding a new capture never edits the group. Clients derive semantics from the members — two or more distinct `capturedAt` days make the group a time series (time slider), and members sharing a capture day are products of the same survey (e.g. an orthomosaic plus its tree delineations) shown together at that stop.",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["name", "createdAt"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxGraphemes": 256,
+            "description": "Display name of the monitored area (e.g. 'Tumanan')"
+          },
+          "description": {
+            "type": "string",
+            "maxGraphemes": 2048,
+            "description": "What this area is and why it is monitored"
+          },
+          "siteRef": {
+            "type": "string",
+            "format": "at-uri",
+            "description": "AT-URI of the app.certified.location (project site) this area belongs to"
+          },
+          "bounds": {
+            "type": "string",
+            "maxGraphemes": 128,
+            "description": "Geographic footprint as 'west,south,east,north' in WGS84 decimal degrees. Optional — clients fall back to the union of member layer bounds."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "When this record was created"
+          }
+        }
+      }
+    }
+  }
+}

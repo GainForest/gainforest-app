@@ -1,0 +1,505 @@
+import { cache } from "react";
+import { notFound } from "next/navigation";
+import {
+  fetchAccountSummary,
+  fetchRecordDetail,
+  type AccountSummary,
+  type RecordDetail,
+} from "../../_lib/indexer";
+import { shortDid } from "../../_lib/format";
+import { preferredDidIdentifier } from "../../_lib/urls";
+import { fetchCertifiedLocationSummary } from "../../_lib/country-location";
+import { resolveBlobUrl, resolveDidHandle, resolvePdsHost } from "../../_lib/pds";
+
+export type AccountKind = "organization" | "user";
+
+export type AccountRouteData = {
+  did: string;
+  urlIdentifier: string;
+  displayName: string;
+  handle: string | null;
+  avatarUrl: string | null;
+  coverUrl: string | null;
+  description: string | null;
+  /** Long-form "about" text, read from the org record's `longDescription`. */
+  longDescription: string | null;
+  website: string | null;
+  country: string | null;
+  /** Name of the location record the org references ("where the org is
+   *  based") — the display value when the country can't be derived. */
+  locationName: string | null;
+  /** The saved location's coordinates — for an approximate location, the
+   *  published circle's center. Null when the record has none we can read. */
+  locationLatitude: number | null;
+  locationLongitude: number | null;
+  locationApproximate: boolean;
+  createdAt: string | null;
+  foundedDate: string | null;
+  visibility: "Public" | "Unlisted" | null;
+  /** Organization category (e.g. "Nonprofit"), read straight from the org record. */
+  orgType: string | null;
+  /** Social / website URLs stored on the org record's `urls` list. */
+  socialLinks: string[];
+  kind: AccountKind;
+  summary: AccountSummary;
+  detail: RecordDetail | null;
+};
+
+type DirectCertifiedProfile = {
+  displayName: string | null;
+  description: string | null;
+  website: string | null;
+  avatarUrl: string | null;
+  createdAt: string | null;
+};
+
+type DirectCertifiedOrganization = {
+  country: string | null;
+  locationName: string | null;
+  locationLatitude: number | null;
+  locationLongitude: number | null;
+  locationApproximate: boolean;
+  foundedDate: string | null;
+  visibility: "Public" | "Unlisted" | null;
+  createdAt: string | null;
+  orgType: string | null;
+  socialLinks: string[];
+  longDescription: string | null;
+};
+
+function encodeAccountSegment(value: string): string {
+  return encodeURIComponent(value);
+}
+
+export function accountPath(didOrHandle: string): string {
+  return `/account/${encodeAccountSegment(didOrHandle)}`;
+}
+
+export function accountBumicertsPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/certs`;
+}
+
+export function accountNewCertPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/certs/new`;
+}
+
+export function accountAddDataPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/add`;
+}
+
+export function accountProjectGalleryPath(didOrHandle: string, rkey: string): string {
+  return `${accountPath(didOrHandle)}/projects/${encodeURIComponent(rkey)}/gallery`;
+}
+
+export function accountProjectCertsPath(didOrHandle: string, rkey: string): string {
+  return `${accountPath(didOrHandle)}/projects/${encodeURIComponent(rkey)}/certs`;
+}
+
+export function accountProjectTimelinePath(didOrHandle: string, rkey: string): string {
+  return `${accountPath(didOrHandle)}/projects/${encodeURIComponent(rkey)}/timeline`;
+}
+
+export function accountProjectSitesPath(didOrHandle: string, rkey: string): string {
+  return `${accountPath(didOrHandle)}/projects/${encodeURIComponent(rkey)}/sites`;
+}
+
+export function accountDonationsPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/donations`;
+}
+
+export function accountObservationsPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/observations`;
+}
+
+/**
+ * Where the account's own sightings are managed — adding, editing, grouping.
+ * The profile's Observations tab is the public view of the same records, so
+ * managing them gets its own address instead of the tab quietly turning into an
+ * editor for whoever happens to own it.
+ */
+export function accountObservationsManagePath(didOrHandle: string): string {
+  return `${accountObservationsPath(didOrHandle)}/manage`;
+}
+
+export function accountFollowersPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/followers`;
+}
+
+export function accountFollowingPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/following`;
+}
+
+export function accountPostsPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/posts`;
+}
+
+export function accountRepliesPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/replies`;
+}
+
+export function accountLikesPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/likes`;
+}
+
+export function accountOrganizationsPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/organizations`;
+}
+
+export function accountEndorsementsGivenPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/endorsements-given`;
+}
+
+export function accountProjectsPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/projects`;
+}
+
+export function accountGalleryPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/gallery`;
+}
+
+export function accountAttachmentsPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/attachments`;
+}
+
+export function accountSettingsPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/settings`;
+}
+
+export function accountSitesPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/sites`;
+}
+
+export function accountAudioPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/audio`;
+}
+
+/**
+ * Where the account's own recordings are managed — uploading, renaming,
+ * deleting. Stands alongside the observations workspace; the profile's Audio
+ * tab is the listening view of the same recordings.
+ */
+export function accountAudioManagePath(didOrHandle: string): string {
+  return `${accountAudioPath(didOrHandle)}/manage`;
+}
+
+/**
+ * The Audio tab's Soundscapes view — the account's published 24-hour sound
+ * portraits, standing beside the raw recordings at the tab's own address.
+ */
+export function accountAudioSoundscapesPath(didOrHandle: string): string {
+  return `${accountAudioPath(didOrHandle)}/soundscapes`;
+}
+
+export function accountDronePath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/drone`;
+}
+
+export function accountTreesPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/trees`;
+}
+
+export function accountMembersPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/members`;
+}
+
+export function accountEquipmentPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/equipment`;
+}
+
+export function accountTainaPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/taina`;
+}
+
+export function accountWalletPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/wallet`;
+}
+
+export async function readOptionalAccountRouteParams(
+  params: Promise<{ did: string }>,
+): Promise<{ urlIdentifier: string; did: string } | null> {
+  const { did: encodedDid } = await params;
+  const urlIdentifier = safeDecode(encodedDid);
+  const did = await resolveIdentifierToDid(urlIdentifier);
+  return did?.startsWith("did:") ? { urlIdentifier, did } : null;
+}
+
+export async function readAccountRouteParams(
+  params: Promise<{ did: string }>,
+): Promise<{ urlIdentifier: string; did: string }> {
+  const routeParams = await readOptionalAccountRouteParams(params);
+  if (!routeParams) notFound();
+  return routeParams;
+}
+
+export const getAccountRouteData = cache(async (
+  did: string,
+  urlIdentifier = did,
+): Promise<AccountRouteData> => {
+  const [summaryResult, directCertifiedProfile, directCertifiedOrganization] = await Promise.all([
+    fetchAccountSummary(did).catch((error) => {
+      console.warn("[account] Failed to read indexer account summary", did, error);
+      return null;
+    }),
+    fetchDirectCertifiedProfile(did).catch(() => null),
+    fetchDirectCertifiedOrganization(did).catch(() => null),
+  ]);
+
+  const fallbackSummary: AccountSummary = {
+    did,
+    handle: null,
+    displayName: null,
+    avatarUrl: null,
+    bio: null,
+    website: null,
+    country: null,
+    locationName: null,
+    createdAt: null,
+    foundedDate: null,
+    visibility: null,
+    hasCertifiedProfile: false,
+    hasCertifiedOrg: false,
+    certOrgType: null,
+    bumicertCount: 0,
+    observationCount: 0,
+  };
+
+  const baseSummary = summaryResult ?? fallbackSummary;
+  const summary = {
+    ...baseSummary,
+    displayName: directCertifiedProfile?.displayName ?? baseSummary.displayName ?? null,
+    avatarUrl: directCertifiedProfile?.avatarUrl ?? baseSummary.avatarUrl ?? null,
+    bio: directCertifiedProfile?.description ?? baseSummary.bio ?? null,
+    website: directCertifiedProfile?.website ?? baseSummary.website ?? null,
+    country: directCertifiedOrganization ? directCertifiedOrganization.country : baseSummary.country ?? null,
+    locationName: directCertifiedOrganization ? directCertifiedOrganization.locationName : baseSummary.locationName ?? null,
+    createdAt: directCertifiedOrganization?.createdAt ?? directCertifiedProfile?.createdAt ?? baseSummary.createdAt ?? null,
+    foundedDate: directCertifiedOrganization?.foundedDate ?? baseSummary.foundedDate ?? null,
+    visibility: directCertifiedOrganization?.visibility ?? baseSummary.visibility ?? null,
+    hasCertifiedProfile: baseSummary.hasCertifiedProfile || Boolean(directCertifiedProfile),
+    hasCertifiedOrg: baseSummary.hasCertifiedOrg || Boolean(directCertifiedOrganization),
+  };
+  const kind: AccountKind = summary.hasCertifiedOrg ? "organization" : "user";
+  const detail = await readBestAccountDetail(did, summary);
+  const displayName =
+    summary.displayName?.trim() ||
+    summary.handle ||
+    shortDid(did);
+
+  return {
+    did,
+    urlIdentifier: preferredDidIdentifier(did, summary.handle ?? (urlIdentifier === did ? null : urlIdentifier)),
+    displayName,
+    handle: summary.handle ?? null,
+    avatarUrl: summary.avatarUrl ?? null,
+    coverUrl: null,
+    description: summary.bio ?? null,
+    longDescription: directCertifiedOrganization?.longDescription ?? null,
+    website: summary.website,
+    country: summary.country,
+    locationName: summary.locationName,
+    locationLatitude: directCertifiedOrganization?.locationLatitude ?? null,
+    locationLongitude: directCertifiedOrganization?.locationLongitude ?? null,
+    locationApproximate: directCertifiedOrganization?.locationApproximate ?? false,
+    createdAt: summary.createdAt,
+    foundedDate: summary.foundedDate,
+    visibility: summary.visibility,
+    orgType: directCertifiedOrganization?.orgType ?? summary.certOrgType ?? null,
+    socialLinks: directCertifiedOrganization?.socialLinks ?? [],
+    kind,
+    summary,
+    detail,
+  };
+});
+
+/**
+ * Slim profile card for a DID: profile copy + avatar read straight from
+ * `app.certified.actor.profile`, plus the account's handle from its DID
+ * document (handles live at the identity layer, not in the record — the
+ * DID-document fetch is shared with avatar/PDS resolution, so it's free).
+ * Used by account pickers/cards.
+ */
+export const getCertifiedProfileCard = cache(
+  async (did: string): Promise<{ displayName: string | null; description: string | null; avatarUrl: string | null; handle: string | null }> => {
+    if (!did.startsWith("did:")) return { displayName: null, description: null, avatarUrl: null, handle: null };
+    const [profile, handle] = await Promise.all([
+      fetchDirectCertifiedProfile(did).catch(() => null),
+      resolveDidHandle(did).catch(() => null),
+    ]);
+    return {
+      displayName: profile?.displayName ?? null,
+      description: profile?.description ?? null,
+      avatarUrl: profile?.avatarUrl ?? null,
+      handle,
+    };
+  },
+);
+
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+export async function resolveIdentifierToDid(identifier: string): Promise<string | null> {
+  const normalized = identifier.trim().replace(/^@+/, "").toLowerCase();
+  if (normalized.startsWith("did:")) return normalized;
+
+  const wellKnownDid = await resolveHandleWithWellKnown(normalized).catch(() => null);
+  if (wellKnownDid?.startsWith("did:")) return wellKnownDid;
+
+  const dnsDid = await resolveHandleWithDns(normalized).catch(() => null);
+  if (dnsDid?.startsWith("did:")) return dnsDid;
+
+  const plcDid = await resolveHandleWithPlc(normalized).catch(() => null);
+  return plcDid?.startsWith("did:") ? plcDid : null;
+}
+
+function asDid(value: string | null | undefined): string | null {
+  const did = value?.trim();
+  return did?.startsWith("did:") ? did : null;
+}
+
+async function resolveHandleWithWellKnown(handle: string): Promise<string | null> {
+  if (!handle || handle.includes("/") || handle.includes(":")) return null;
+  const response = await fetch(`https://${handle}/.well-known/atproto-did`, {
+    headers: { accept: "text/plain" },
+    next: { revalidate: 300 },
+    signal: AbortSignal.timeout(5000),
+  });
+  if (!response.ok) return null;
+  return asDid(await response.text());
+}
+
+async function resolveHandleWithDns(handle: string): Promise<string | null> {
+  if (!handle || handle.includes("/") || handle.includes(":")) return null;
+  const params = new URLSearchParams({ name: `_atproto.${handle}`, type: "TXT" });
+  const response = await fetch(`https://cloudflare-dns.com/dns-query?${params.toString()}`, {
+    headers: { accept: "application/dns-json" },
+    next: { revalidate: 300 },
+    signal: AbortSignal.timeout(5000),
+  });
+  if (!response.ok) return null;
+  const payload = (await response.json().catch(() => null)) as { Answer?: Array<{ data?: unknown }> } | null;
+  for (const answer of payload?.Answer ?? []) {
+    const value = typeof answer.data === "string" ? answer.data.replace(/^"|"$/g, "").trim() : "";
+    const did = value.startsWith("did=") ? value.slice(4) : value;
+    const normalized = asDid(did);
+    if (normalized) return normalized;
+  }
+  return null;
+}
+
+async function fetchDirectRecordValue(did: string, collection: string): Promise<Record<string, unknown> | null> {
+  const host = await resolvePdsHost(did);
+  if (!host) return null;
+  const params = new URLSearchParams({ repo: did, collection, rkey: "self" });
+  const response = await fetch(`https://${host}/xrpc/com.atproto.repo.getRecord?${params.toString()}`, {
+    cache: "no-store",
+  });
+  if (!response.ok) return null;
+  const data = (await response.json()) as { value?: Record<string, unknown> };
+  return data.value ?? null;
+}
+
+async function fetchDirectCertifiedProfile(did: string): Promise<DirectCertifiedProfile | null> {
+  const value = await fetchDirectRecordValue(did, "app.certified.actor.profile");
+  if (!value) return null;
+
+  const avatar = value.avatar;
+  const avatarRef = typeof avatar === "object" && avatar !== null && "image" in avatar
+    ? blobRef((avatar as { image?: unknown }).image)
+    : null;
+
+  return {
+    displayName: typeof value.displayName === "string" && value.displayName.trim() ? value.displayName.trim() : null,
+    description: typeof value.description === "string" ? value.description : null,
+    website: typeof value.website === "string" ? value.website : null,
+    avatarUrl: await resolveBlobUrl(did, avatarRef),
+    createdAt: typeof value.createdAt === "string" ? value.createdAt : null,
+  };
+}
+
+function blobRef(value: unknown): string | null {
+  if (typeof value === "string") return value;
+  if (typeof value !== "object" || value === null) return null;
+  const ref = (value as { ref?: unknown }).ref;
+  if (typeof ref === "string") return ref;
+  if (typeof ref === "object" && ref !== null && "$link" in ref) {
+    const link = (ref as { $link?: unknown }).$link;
+    return typeof link === "string" ? link : null;
+  }
+  return null;
+}
+
+async function fetchDirectCertifiedOrganization(did: string): Promise<DirectCertifiedOrganization | null> {
+  const value = await fetchDirectRecordValue(did, "app.certified.actor.organization");
+  if (!value) return null;
+  const rawVisibility = typeof value.visibility === "string" ? value.visibility : null;
+  const location = value.location;
+  const locationUri = typeof location === "object" && location !== null && "uri" in location
+    ? typeof location.uri === "string" ? location.uri : null
+    : null;
+  const orgTypes = Array.isArray(value.organizationType)
+    ? value.organizationType.filter((t): t is string => typeof t === "string" && t.trim().length > 0)
+    : [];
+  const socialLinks = Array.isArray(value.urls)
+    ? value.urls
+        .map((entry) => (typeof entry === "object" && entry !== null && "url" in entry ? (entry as { url?: unknown }).url : null))
+        .filter((url): url is string => typeof url === "string" && url.trim().length > 0)
+    : [];
+  const longDescription = typeof value.longDescription === "object" && value.longDescription !== null && "value" in value.longDescription
+    ? typeof (value.longDescription as { value?: unknown }).value === "string"
+      ? (value.longDescription as { value: string }).value.trim() || null
+      : null
+    : null;
+  const locationSummary = await fetchCertifiedLocationSummary(locationUri);
+  return {
+    country: locationSummary?.country ?? null,
+    locationName: locationSummary?.name ?? null,
+    locationLatitude: locationSummary?.latitude ?? null,
+    locationLongitude: locationSummary?.longitude ?? null,
+    locationApproximate: locationSummary?.approximate ?? false,
+    foundedDate: typeof value.foundedDate === "string" ? value.foundedDate : null,
+    visibility: rawVisibility === "unlisted" || rawVisibility === "Unlisted" ? "Unlisted" : rawVisibility ? "Public" : null,
+    createdAt: typeof value.createdAt === "string" ? value.createdAt : null,
+    orgType: orgTypes.length ? orgTypes.join(", ") : null,
+    socialLinks,
+    longDescription,
+  };
+}
+
+async function resolveHandleWithPlc(handle: string): Promise<string | null> {
+  const response = await fetch(
+    `https://plc.directory/resolve?handle=${encodeURIComponent(handle)}`,
+    { next: { revalidate: 300 } },
+  );
+  if (!response.ok) return null;
+  const text = await response.text();
+  try {
+    const json = JSON.parse(text) as { did?: string; id?: string };
+    return json.did ?? json.id ?? null;
+  } catch {
+    return text.trim();
+  }
+}
+
+async function readBestAccountDetail(
+  did: string,
+  summary: AccountSummary,
+): Promise<RecordDetail | null> {
+  const uris = [
+    summary.hasCertifiedOrg ? `at://${did}/app.certified.actor.organization/self` : null,
+  ].filter((uri): uri is string => Boolean(uri));
+
+  for (const uri of uris) {
+    const detail = await fetchRecordDetail(uri).catch((error) => {
+      console.warn("[account] Failed to read account detail", uri, error);
+      return null;
+    });
+    if (detail) return detail;
+  }
+
+  return null;
+}

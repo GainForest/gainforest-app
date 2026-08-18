@@ -1,0 +1,61 @@
+{
+  "lexicon": 1,
+  "id": "app.gainforest.dwc.identification",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "A proposed taxonomic identification of a GainForest occurrence. The record lives in the identifier's repository and points to the exact occurrence version it evaluates. Observation owners review proposals separately; publishing this record does not overwrite the occurrence.",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "scientificName", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "The occurrence version being identified."
+          },
+          "scientificName": {
+            "type": "string",
+            "maxLength": 512,
+            "maxGraphemes": 160,
+            "description": "The proposed scientific name."
+          },
+          "vernacularName": {
+            "type": "string",
+            "maxLength": 512,
+            "maxGraphemes": 160,
+            "description": "An optional common name for the proposed taxon."
+          },
+          "taxonID": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "An optional stable taxon identifier or URI from an external taxonomy."
+          },
+          "taxonRank": {
+            "type": "string",
+            "knownValues": ["kingdom", "phylum", "class", "order", "family", "genus", "species", "subspecies", "variety", "form"],
+            "description": "The taxonomic rank of the proposal when known."
+          },
+          "confidence": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Optional identifier confidence from 0 to 100."
+          },
+          "identificationRemarks": {
+            "type": "string",
+            "maxLength": 3000,
+            "maxGraphemes": 800,
+            "description": "Visible traits, context, or other evidence supporting the proposal."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "When the identification was proposed."
+          }
+        }
+      }
+    }
+  }
+}

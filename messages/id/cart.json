@@ -1,0 +1,331 @@
+{
+  "header": {
+    "openCart": "{count, plural, =0 {Buka keranjang donasi} other {Buka keranjang donasi (# item)}}"
+  },
+  "amountModal": {
+    "title": "Dukung proyek ini",
+    "amountLabel": "Jumlah donasi",
+    "minimum": "Minimal ${amount}",
+    "maximum": "Maksimum ${amount}",
+    "directNote": "100% langsung masuk ke dompet terverifikasi {organization} — tanpa biaya platform, dan biaya jaringan ditanggung untuk Anda.",
+    "publicNote": "Dicatat sebagai bukti donasi publik yang dapat diaudit siapa saja.",
+    "addToCart": "Tambahkan ke keranjang",
+    "updateCart": "Perbarui keranjang",
+    "cancel": "Batal"
+  },
+  "page": {
+    "title": "Keranjang"
+  },
+  "cartPage": {
+    "title": "Keranjang",
+    "projectCount": "{count, plural, other {# item}}",
+    "emptyTitle": "Keranjang Anda kosong",
+    "emptyDescription": "Temukan proyek yang Anda sukai dan tambahkan donasi — semua isi keranjang dibayar bersama saat checkout.",
+    "exploreProjects": "Jelajahi proyek",
+    "removeItem": "Hapus {title} dari keranjang",
+    "amountFor": "Jumlah donasi untuk {title}",
+    "minimum": "Minimal ${amount}",
+    "maximum": "Maksimum ${amount}",
+    "invalidAmount": "Masukkan jumlah di atas nol.",
+    "donations": "Donasi",
+    "total": "Total",
+    "feesNote": "Tanpa biaya platform — 100% masuk ke dompet terverifikasi setiap penerima. Anda dapat menambahkan tip opsional untuk GainForest saat checkout.",
+    "checkout": "Checkout",
+    "fixAmounts": "Perbaiki jumlah yang ditandai untuk melanjutkan."
+  },
+  "checkoutPage": {
+    "title": "Pembayaran",
+    "backToCart": "Kembali ke keranjang",
+    "encouragement": "Keren! Donasi Anda mendukung konservasi yang dipimpin komunitas.",
+    "donorTitle": "Bagaimana donasi Anda ditampilkan",
+    "anonymousLabel": "Donasi secara anonim",
+    "anonymousHint": "Donasi anonim tidak pernah muncul secara publik atas nama Anda — Anda tetap dapat melihatnya di profil Anda sendiri.",
+    "signedOutNote": "Anda belum masuk, jadi donasi Anda akan ditampilkan sebagai anonim.",
+    "walletTitle": "Dompet pembayaran",
+    "walletHint": "Donasi dibayar dalam USDC di Ethereum. Hubungkan dompet Anda untuk melanjutkan — biaya jaringan ditanggung untuk Anda.",
+    "connectWallet": "Hubungkan dompet",
+    "connecting": "Menghubungkan…",
+    "connectFailed": "Koneksi dompet gagal.",
+    "noWallet": "Tidak ditemukan dompet yang didukung. Pasang MetaMask atau dompet lain yang kompatibel untuk melanjutkan.",
+    "available": "Tersedia: {amount}",
+    "balanceUnavailable": "Saldo tidak tersedia",
+    "tipTitle": "Tip untuk GainForest (opsional)",
+    "tipDescription": "GainForest tidak mengenakan biaya platform dan menanggung biaya jaringan untuk setiap donasi. Tip dari donatur menjaga layanan ini tetap berjalan.",
+    "tipSliderLabel": "Jumlah tip",
+    "tipNudgeTitle": "Bisakah Anda menambahkan tip?",
+    "tipNudgeBody": "Tip membantu GainForest mendukung para penjaga lahan untuk menjaga alam!",
+    "tipNudgeSet": "Atur tip ke {percent}%",
+    "yourTip": "Tip Anda:",
+    "tipLineLabel": "Tip untuk GainForest",
+    "summaryTitle": "Donasi Anda",
+    "donations": "Donasi",
+    "total": "Total",
+    "insufficientBalance": "Dompet Anda tidak memiliki cukup USDC untuk total ini.",
+    "multiApprovalNote": "{count, plural, other {Dompet Anda akan meminta persetujuan # pembayaran, satu per satu.}}",
+    "donateNow": "Donasi {amount} sekarang",
+    "footerNote": "100% dari {amount} donasi Anda masuk ke dompet terverifikasi setiap penerima.",
+    "footerInfoLabel": "Apa saja yang tercakup",
+    "footerInfoFees": "GainForest tidak memungut biaya platform dan menanggung biaya jaringan untuk Anda.",
+    "footerInfoTip": "Tip {tip} Anda terpisah. Tip tidak pernah diambil dari donasi Anda.",
+    "processing": "Memproses…",
+    "doNotClose": "Jangan tutup jendela ini.",
+    "tryAgain": "Coba lagi",
+    "blockedItems": "Belum siap menerima donasi, jadi dikecualikan dari pembayaran ini: {titles}",
+    "errorProfile": "Kami tidak dapat menautkan donasi ini ke profil Anda. Masuk lagi atau donasi secara anonim.",
+    "errorCannotReceive": "Akun ini belum dapat menerima donasi.",
+    "errorAmount": "Periksa jumlah donasi dan coba lagi.",
+    "errorChanged": "Detail pembayaran berubah. Mulai ulang donasi.",
+    "errorGeneric": "Pembayaran gagal. Silakan coba lagi.",
+    "errorTimeout": "Pembayaran ini memakan waktu lebih lama dari perkiraan dan mungkin masih berhasil. Periksa aktivitas terbaru dompet Anda sebelum mencoba lagi agar tidak membayar dua kali.",
+    "tipFailed": "Tip tidak dapat diselesaikan — donasi Anda tidak terpengaruh.",
+    "tipSkipped": "Tip dilewati karena tidak ada donasi yang selesai.",
+    "thankYou": "Terima kasih",
+    "successSummary": "Donasi Anda sebesar {amount} berhasil diselesaikan.",
+    "recordedWithProfile": "Dicatat dengan profil GainForest Anda.",
+    "recordedAnonymous": "Dicatat sebagai anonim.",
+    "paymentDetails": "Detail pembayaran",
+    "shareTitle": "Bagikan kepada orang lain",
+    "shareText": "Saya baru saja berdonasi {amount} untuk mendukung proyek alam di GainForest: {url}",
+    "shareOnX": "Bagikan di X",
+    "shareOnBluesky": "Bagikan di Bluesky",
+    "shareOnTelegram": "Bagikan di Telegram",
+    "copyShareText": "Salin teks berbagi",
+    "exploreMore": "Jelajahi proyek lainnya",
+    "emptyTitle": "Keranjang Anda kosong",
+    "singleApprovalNote": "Dompet Anda akan meminta satu persetujuan untuk seluruh total. GainForest kemudian meneruskan setiap donasi kepada penerimanya.",
+    "messageTitle": "Tambahkan pesan (opsional)",
+    "messageHint": "Kata penyemangat, atau alasan Anda berdonasi. Penerima akan melihatnya.",
+    "messagePlaceholder": "Tambahkan pesan (opsional)…",
+    "messageAnonymousNote": "Pesan Anda tidak akan ditampilkan atas nama Anda.",
+    "bioblitzAwardNote": "Pesan ini mengidentifikasi pembayaran sebagai hadiah BioBlitz dan tidak dapat diubah.",
+    "tipNone": "Tanpa tip",
+    "cardsPreviewTitle": "Bumicerts yang akan Anda terima",
+    "cardsUnavailableNote": "Bumicerts hanya tersedia untuk donasi proyek yang memenuhi syarat. Pembayaran ini tidak menyertakannya.",
+    "cardsCheckingNote": "Memeriksa donasi mana yang akan menghasilkan Bumicerts…",
+    "receiptIssue": "Pembayaran Anda selesai, tetapi satu atau beberapa catatan donasi publik tidak dapat dibuat. Donasi tersebut tidak akan muncul di Bumicerts Saya.",
+    "reward": {
+      "eyebrow": "Koleksi terbuka",
+      "guardianOf": "Penjaga",
+      "personEyebrow": "Untuk mendukung",
+      "contributed": "Disumbangkan",
+      "moreProjects": "{count, plural, other {# proyek lainnya}}",
+      "mint": "Nomor {mint}",
+      "verified": "Terverifikasi on-chain",
+      "tiltHint": "Gerakkan kursor di atas Bumicert untuk menangkap cahaya",
+      "tiers": {
+        "seedling": {
+          "name": "Tunas",
+          "rarity": "Umum"
+        },
+        "sapling": {
+          "name": "Semai",
+          "rarity": "Tidak umum"
+        },
+        "grove": {
+          "name": "Rumpun",
+          "rarity": "Langka"
+        },
+        "canopy": {
+          "name": "Kanopi",
+          "rarity": "Epik"
+        },
+        "oldGrowth": {
+          "name": "Hutan Tua",
+          "rarity": "Legendaris"
+        }
+      },
+      "overallEyebrow": "Total kontribusi",
+      "overallTitle": "Koleksi lengkap",
+      "overallSubtitle": "{count, plural, one {# proyek didukung} other {# proyek didukung}}",
+      "collect": "Kumpulkan",
+      "collectAll": "Kumpulkan semua ({count})",
+      "prevCard": "Bumicert sebelumnya",
+      "nextCard": "Bumicert berikutnya",
+      "deckHint": "Geser untuk melihat Bumicerts Anda",
+      "cardPosition": "Bumicert {current} dari {total}",
+      "collectedTitle": "Semua sudah dikumpulkan!",
+      "collectedBody": "Bumicerts terverifikasi Anda siap di Bumicerts Saya.",
+      "viewMyCards": "Lihat Bumicerts Saya"
+    }
+  },
+  "testRegistry": {
+    "eyebrow": "Pengalaman UI",
+    "title": "Registri pengalaman UI",
+    "description": "Pratinjau aman dan dapat digunakan kembali dari alur GainForest yang nyata, dengan data simulasi dan efek eksternal yang diblokir.",
+    "availableTitle": "Pengalaman yang tersedia",
+    "availableDescription": "Pilih alur untuk membuka pratinjau yang aman dan sepenuhnya interaktif.",
+    "parityTitle": "Kontrak kesetaraan",
+    "parityBody": "Pengembang dan agen AI: setiap pengalaman di sini harus merender komponen produksi itu sendiri. Simulasikan hanya data dan efek eksternal; jangan menyalin atau memisahkan antarmuka. Setiap perubahan UI atau UX harus memengaruhi pengalaman simulasi dan nyata dengan cara yang sama.",
+    "indexingNote": "Rute ini bersifat publik tetapi dikecualikan dari mesin pencari. Jangan pernah menaruh rahasia atau data pribadi nyata di sini.",
+    "scenarioLabel": "Pengalaman terdaftar",
+    "experienceTitle": "Alur donasi",
+    "experienceDescription": "Ikuti pengalaman donasi produksi saat ini dengan data uji yang aman dan tanpa pembayaran nyata.",
+    "openExperience": "Buka pengalaman",
+    "backToRegistry": "Kembali ke registri",
+    "mockBadge": "Mode simulasi · tanpa pembayaran",
+    "projectPrompt": "Coba pengalaman donasi lengkap",
+    "projectPromptBody": "Pilih jumlah, tinjau keranjang, hubungkan dompet simulasi, lalu selesaikan pembayaran pratinjau yang aman.",
+    "mockProjectTitle": "Koridor hutan awan",
+    "mockOrganization": "Komunitas Canopy",
+    "mockObjectiveOne": "Restorasi hutan",
+    "mockObjectiveTwo": "Penjagaan komunitas",
+    "mockProjectDescription": "Memulihkan koridor hidup antara hutan komunitas dan habitat yang dilindungi.",
+    "donate": "Donasi",
+    "reset": "Atur ulang",
+    "stage": {
+      "project": "Proyek",
+      "cart": "Keranjang",
+      "checkout": "Pembayaran"
+    },
+    "projectUpdates": {
+      "title": "Penyusun pembaruan proyek",
+      "description": "Editor WYSIWYG untuk menulis pembaruan proyek, dan linimasa yang menampilkannya — persis seperti di halaman Cert.",
+      "mockNote": "Memposting pembaruan menerbitkan catatan di akun sungguhan, jadi pratinjau ini tidak pernah melakukannya. Pembaruan yang ditulis di sini menjalankan penyusun, validasi, dan tampilan linimasa produksi, tetapi tetap di halaman ini dan hilang saat dimuat ulang.",
+      "mockBadge": "Mode uji · tidak ada yang diterbitkan",
+      "cardTitle": "Pembaruan proyek",
+      "cardDescription": "Tulis pembaruan berformat — tebal, judul, daftar, kutipan, tautan — dan lihat tampilannya di linimasa.",
+      "composerLabel": "Tulis pembaruan",
+      "timelineLabel": "Pembaruan yang diterbitkan",
+      "seedTitle": "Minggu ketiga penanaman — laporan tajuk",
+      "seedHeading": "Laporan pembibitan",
+      "seedIntro": "Minggu ini tim lapangan menanam",
+      "seedIntroBold": "1.200 bibit",
+      "seedIntroTail": "di lokasi restorasi utara.",
+      "seedListOne": "Tingkat kelangsungan hidup bertahan di 94%",
+      "seedListTwo": "Dua relawan komunitas baru bergabung",
+      "seedQuote": "Hutan kembali lebih cepat dari yang kami duga.",
+      "seedPlainTitle": "Hujan datang lebih awal",
+      "seedPlainBody": "Pembaruan teks biasa singkat yang ditulis sebelum ada pemformatan. Harus tampil tanpa perubahan."
+    },
+    "projectVisibility": {
+      "title": "Kartu visibilitas proyek",
+      "description": "Kartu di Kelola → Proyek yang memberi tahu akun apa yang bersifat publik dan apakah akun tampil di halaman jelajah, dalam setiap keadaannya.",
+      "mockNote": "Menambahkan akun ke halaman jelajah adalah efek nyata, jadi pratinjau ini tidak pernah melakukannya. Hanya dua panggilan server kartu ini yang diganti dengan data contoh.",
+      "mockBadge": "Mode contoh · tidak ada yang ditampilkan",
+      "cardTitle": "Visibilitas proyek",
+      "cardDescription": "Lihat bagaimana halaman proyek menjelaskan apa yang publik dan apa yang berubah saat tampil di halaman jelajah.",
+      "scenarios": {
+        "unlisted": {
+          "label": "Pemilik · belum tampil di halaman jelajah",
+          "body": "Akun dapat menambahkan dirinya ke daftar jelajah."
+        },
+        "listed": {
+          "label": "Pemilik · tampil di halaman jelajah",
+          "body": "Sudah tampil, jadi tidak ada tindakan yang ditawarkan."
+        },
+        "member": {
+          "label": "Anggota · belum tampil di halaman jelajah",
+          "body": "Anggota melihat keadaan akun, tetapi tidak dapat mengubahnya."
+        },
+        "unavailable": {
+          "label": "Tidak dapat diubah saat ini",
+          "body": "Keadaannya tetap terlihat; tombol dihilangkan alih-alih dibiarkan mati."
+        },
+        "unknown": {
+          "label": "Keadaan tidak dapat dibaca",
+          "body": "Kartu menyatakannya, bukan mengklaim akun tidak tampil."
+        }
+      }
+    },
+    "bioblitzNotifications": {
+      "title": "Status email pemenang BioBlitz",
+      "description": "Baris status produksi untuk email pemenang, termasuk email akun yang hilang dan tindak lanjut manual.",
+      "mockBadge": "Mode contoh · tanpa email",
+      "mockNote": "Semua pemenang adalah data contoh. Menandai selesai hanya mengubah memori.",
+      "cardTitle": "Email pemenang BioBlitz",
+      "cardDescription": "Pratinjau setiap status pengiriman dan kontak manual untuk moderator.",
+      "fixtureLabel": "Email pemenang"
+    },
+    "invitationDelivery": {
+      "title": "Status pengiriman undangan",
+      "description": "Baris undangan tertunda produksi untuk email terkirim, tertunda, tautan manual, dan tindakan yang dibatasi peran.",
+      "mockBadge": "Mode contoh · tanpa email",
+      "mockNote": "Semua alamat adalah data contoh. Coba lagi, salin, dan batal hanya memperbarui memori tanpa memanggil layanan nyata.",
+      "cardTitle": "Pengiriman email undangan",
+      "cardDescription": "Pratinjau status, percobaan ulang aman, salin tautan, dan pembatalan undangan organisasi.",
+      "scenarios": {
+        "sent": "Pemilik · email terkirim",
+        "delayed": "Pemilik · masalah pengiriman sementara",
+        "manual": "Pemilik · bagikan tautan langsung",
+        "admin": "Undangan admin · tindakan dibatasi"
+      },
+      "mockRetried": "Percobaan ulang contoh selesai tanpa mengirim email.",
+      "mockCopied": "Tautan contoh disalin tanpa menggunakan papan klip.",
+      "mockCanceled": "Undangan contoh dihapus dari pratinjau ini."
+    },
+    "myCardsTitle": "Galeri Bumicerts Saya",
+    "myCardsDescription": "Pratinjau galeri Bumicerts yang telah dikumpulkan dengan contoh koleksi.",
+    "shop": {
+      "title": "Halaman toko (Bumimic)",
+      "description": "Halaman produk Bumimic, perekam akustik terbuka dan berbiaya rendah.",
+      "mockBadge": "Halaman statis",
+      "cardTitle": "Halaman toko Bumimic",
+      "cardDescription": "Pratinjau halaman produk untuk prototipe perekam akustik Bumimic."
+    },
+    "rewildingDashboard": {
+      "title": "Dasbor hibah Rewilding",
+      "description": "Ikhtisar Hibah saya dan grafik laju audionya, dalam setiap keadaan target perekaman.",
+      "safetyNote": "Hanya data contoh. Rute ini tidak pernah membaca pengindeks, pendaftaran pengunjung, atau konfirmasi tonggak, dan tidak ada di sini yang dapat mengubah hibah.",
+      "behind": {
+        "title": "Di belakang laju yang dibutuhkan",
+        "description": "Beberapa menit sehari — kira-kira posisi penerima baru terhadap target 7.000 menit."
+      },
+      "ahead": {
+        "title": "Di depan laju yang dibutuhkan",
+        "description": "Unggahan melampaui garis yang dibutuhkan hibah."
+      },
+      "met": {
+        "title": "Target tercapai",
+        "description": "Target perekaman tercapai, jadi grafik berhenti meminta laju."
+      },
+      "noAudio": {
+        "title": "Belum ada audio",
+        "description": "Belum ada yang diunggah, jadi grafik laju dihilangkan alih-alih digambar kosong."
+      },
+      "mockBadge": "Data contoh",
+      "cardTitle": "Dasbor hibah Rewilding",
+      "cardDescription": "Hibah saya dengan grafik laju audionya, di belakang dan di depan target.",
+      "upcoming": {
+        "title": "Sebelum hibah dimulai",
+        "description": "Periode belum dimulai, jadi grafik menampilkan setiap unggahan sebagai keunggulan awal — garis yang dibutuhkan tetap datar sampai dibuka."
+      }
+    },
+    "communityEvents": {
+      "title": "Acara komunitas",
+      "description": "Penemuan acara, halaman acara, dan formulir penyelenggara produksi dengan data contoh — daftar hadir, daftar tunggu, penerbitan, dan pembatalan semuanya bekerja di memori.",
+      "cardTitle": "Acara komunitas",
+      "cardDescription": "Jelajahi, daftar hadir, masuk daftar tunggu, dan adakan acara — komponen produksi dengan data di memori, termasuk mode tanpa masuk.",
+      "mockBadge": "Mode uji · tanpa penulisan",
+      "eyebrow": "Registri pengalaman UI",
+      "tabDiscovery": "Penemuan",
+      "tabDetail": "Halaman acara",
+      "tabHost": "Formulir penyelenggara",
+      "signedInToggle": "Sudah masuk",
+      "signInPrompt": "Tindakan ini akan meminta masuk. Aktifkan “Sudah masuk” untuk mensimulasikan sesi.",
+      "dismiss": "Tutup"
+    }
+  },
+  "myCards": {
+    "eyebrow": "Koleksi",
+    "title": "Bumicerts Saya",
+    "description": "Setiap Bumicert berasal dari tanda terima donasi proyek terverifikasi yang terhubung ke akun Anda.",
+    "count": "{count, plural, one {# Bumicert} other {# Bumicerts}}",
+    "emptyTitle": "Belum ada Bumicerts",
+    "emptyBody": "Berdonasilah ke proyek saat masuk dan menampilkan nama Anda untuk mendapatkan Bumicert pertama.",
+    "browseProjects": "Jelajahi proyek",
+    "signedOutTitle": "Masuk untuk melihat Bumicerts Anda",
+    "signedOutBody": "Bumicerts terhubung ke akun Anda agar tetap tersedia di berbagai peramban dan perangkat.",
+    "unavailableTitle": "Bumicerts Anda tidak dapat dimuat",
+    "unavailableBody": "Catatan donasi Anda aman. Coba muat Bumicerts Anda lagi.",
+    "tryAgain": "Coba lagi",
+    "partialBody": "Beberapa catatan donasi atau detail proyek tidak dapat dimuat. Bumicerts yang ditampilkan telah diverifikasi, tetapi koleksi Anda mungkin belum lengkap.",
+    "fallbackProject": "Proyek yang didukung",
+    "fallbackOrganization": "Tim proyek",
+    "fallbackRecipient": "Anggota komunitas",
+    "fallbackPersonContext": "Dukungan langsung",
+    "verifiedDonation": "Donasi terverifikasi",
+    "viewProject": "Lihat proyek",
+    "viewProfile": "Lihat profil",
+    "viewPayment": "Lihat pembayaran"
+  }
+}

@@ -1,0 +1,363 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { CheckIcon, FolderPlusIcon, Layers2Icon, Loader2Icon, SearchIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { ModalContent, ModalDescription, ModalFooter, ModalTitle } from "@/components/ui/modal/modal";
+import { useModal } from "@/components/ui/modal/context";
+import { cn } from "@/lib/utils";
+import type { ManageTarget } from "@/lib/links";
+import type { OccurrenceRecord } from "@/app/_lib/indexer";
+import {
+  attachObservationsToDataset,
+  createObservationDataset,
+  nestDatasetUnderProject,
+  type AttachObservationsResult,
+} from "./observation-dataset-mutations";
+import { attachObservationsToProject } from "./observation-project-mutations";
+
+export type ObservationDatasetGroup = {
+  datasetUri: string;
+  datasetRkey: string;
+  name: string;
+  description: string | null;
+  count: number;
+  createdAt: string | null;
+  uris: string[];
+  parentRkeys: string[];
+  /** AT-URI of the project this dataset is nested under, if any. */
+  projectUri?: string | null;
+  /** Title of that project, for display. */
+  projectName?: string | null;
+};
+
+export type GroupObservationsDoneSummary = {
+  datasetUri: string;
+  datasetName: string;
+  result: AttachObservationsResult;
+};
+
+type Mode = "new" | "existing";
+
+function datasetSearchText(dataset: ObservationDatasetGroup): string {
+  return [dataset.name, dataset.description, String(dataset.count)]
+    .filter((value): value is string => typeof value === "string" && value.length > 0)
+    .join(" ")
+    .toLowerCase();
+}
+
+export function GroupObservationsDatasetModal({
+  target,
+  observations,
+  datasets,
+  projectUri = null,
+  projectName = null,
+  onDone,
+}: {
+  target: ManageTarget;
+  observations: OccurrenceRecord[];
+  datasets: ObservationDatasetGroup[];
+  /** When set, the dataset is also referenced by this project. */
+  projectUri?: string | null;
+  projectName?: string | null;
+  onDone: (summary: GroupObservationsDoneSummary) => void;
+}) {
+  const t = useTranslations("upload.observations.dataset");
+  const { hide, popModal, stack } = useModal();
+
+  const selectableDatasets = useMemo(
+    () => datasets.filter((dataset) => dataset.datasetUri.length > 0 && dataset.datasetRkey.length > 0),
+    [datasets],
+  );
+  const [mode, setMode] = useState<Mode>(selectableDatasets.length > 0 ? "existing" : "new");
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [selectedUri, setSelectedUri] = useState("");
+  const [search, setSearch] = useState("");
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Sightings already in another dataset are moved, not skipped — the hint says
+  // how many will change dataset so the count lines up with what happens.
+  const fromOtherDataset = useMemo(
+    () => observations.filter((record) => Boolean(record.datasetRef) && record.datasetRef !== selectedUri),
+    [observations, selectedUri],
+  );
+  const alreadyHere = useMemo(
+    () => observations.filter((record) => Boolean(selectedUri) && record.datasetRef === selectedUri),
+    [observations, selectedUri],
+  );
+  const movable = observations.length - alreadyHere.length;
+
+  const repoOptions = target.kind === "group" ? { repo: target.did } : undefined;
+  const filteredDatasets = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return selectableDatasets;
+    return selectableDatasets.filter((dataset) => datasetSearchText(dataset).includes(query));
+  }, [search, selectableDatasets]);
+  const selectedDataset = selectableDatasets.find((dataset) => dataset.datasetUri === selectedUri) ?? null;
+
+  const closeModal = async () => {
+    if (stack.length === 1) {
+      await hide();
+      popModal();
+      return;
+    }
+    popModal();
+  };
+
+  const handleConfirm = async () => {
+    if (movable === 0) {
+      setError(t("allAlreadyHere"));
+      return;
+    }
+    if (mode === "new" && name.trim().length === 0) {
+      setError(t("nameRequired"));
+      return;
+    }
+    if (mode === "existing" && !selectedDataset) {
+      setError(t("pickDataset"));
+      return;
+    }
+
+    setIsPending(true);
+    setError(null);
+    try {
+      const dataset =
+        mode === "new"
+          ? await createObservationDataset({ name, description }, repoOptions)
+          : { uri: selectedDataset!.datasetUri, name: selectedDataset!.name, cid: null as string | null };
+
+      const result = await attachObservationsToDataset(
+        {
+          datasetUri: dataset.uri,
+          datasetName: dataset.name,
+          occurrences: observations.map((record) => ({ rkey: record.rkey, datasetRef: record.datasetRef })),
+        },
+        repoOptions,
+      );
+
+      if (result.attached.length === 0 && result.errors.length > 0) {
+        setError(result.errors[0]?.error ?? t("attachFailed"));
+        setIsPending(false);
+        return;
+      }
+
+      // Nest the dataset under the active project (project becomes a collection
+      // of Certs + datasets). Best-effort: the grouping already succeeded.
+      if (projectUri) {
+        try {
+          await nestDatasetUnderProject({ projectUri, datasetUri: dataset.uri, datasetCid: dataset.cid }, repoOptions);
+        } catch {
+          // Non-fatal — observations are grouped even if nesting fails.
+        }
+        try {
+          // Listing the dataset on the project is not enough: counts, galleries
+          // and filters all read `projectRef` off each sighting, so stamp it
+          // too or the dataset joins the project while its sightings don't.
+          await attachObservationsToProject(
+            {
+              projectUri,
+              occurrences: observations.map((record) => ({
+                rkey: record.rkey,
+                projectRef: record.projectRef,
+                siteRef: record.siteRef,
+              })),
+            },
+            repoOptions,
+          );
+        } catch {
+          // Non-fatal — the grouping itself already succeeded.
+        }
+      }
+
+      const activeElement = document.activeElement;
+      if (activeElement instanceof HTMLElement) activeElement.blur();
+      onDone({ datasetUri: dataset.uri, datasetName: dataset.name, result });
+      await closeModal();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : t("attachFailed"));
+      setIsPending(false);
+    }
+  };
+
+  const canToggle = selectableDatasets.length > 0;
+
+  return (
+    <ModalContent dismissible={!isPending}>
+      <div className="space-y-4">
+        <div className="space-y-1.5">
+          <ModalTitle>{t("title", { count: movable })}</ModalTitle>
+          <ModalDescription>{t("description")}</ModalDescription>
+        </div>
+
+        {canToggle ? (
+          <div role="tablist" aria-label={t("modeLabel")} className="grid grid-cols-2 gap-1 rounded-xl bg-muted p-1">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === "existing"}
+              onClick={() => {
+                setMode("existing");
+                setError(null);
+              }}
+              disabled={isPending}
+              className={cn(
+                "flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+                mode === "existing" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <Layers2Icon className="size-4" />
+              {t("tabExisting")}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === "new"}
+              onClick={() => {
+                setMode("new");
+                setError(null);
+              }}
+              disabled={isPending}
+              className={cn(
+                "flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+                mode === "new" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <FolderPlusIcon className="size-4" />
+              {t("tabNew")}
+            </button>
+          </div>
+        ) : null}
+
+        {mode === "new" ? (
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <label htmlFor="observation-dataset-name" className="text-sm font-medium text-foreground">
+                {t("nameLabel")}
+              </label>
+              <Input
+                id="observation-dataset-name"
+                value={name}
+                onChange={(event) => {
+                  setName(event.target.value);
+                  setError(null);
+                }}
+                placeholder={t("namePlaceholder")}
+                disabled={isPending}
+                autoFocus
+                maxLength={256}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label htmlFor="observation-dataset-description" className="text-sm font-medium text-foreground">
+                {t("descriptionLabel")}
+              </label>
+              <Textarea
+                id="observation-dataset-description"
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                placeholder={t("descriptionPlaceholder")}
+                disabled={isPending}
+                rows={3}
+                maxLength={2048}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="relative">
+              <label htmlFor="observation-dataset-search" className="sr-only">
+                {t("searchLabel")}
+              </label>
+              <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="observation-dataset-search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder={t("searchPlaceholder")}
+                disabled={isPending}
+                className="pl-9"
+              />
+            </div>
+
+            <div className="max-h-64 overflow-y-auto rounded-xl border border-border">
+              {filteredDatasets.length === 0 ? (
+                <div className="px-4 py-8 text-center text-sm text-muted-foreground">{t("noMatches")}</div>
+              ) : (
+                <div role="radiogroup" aria-label={t("datasetsLabel")} className="divide-y divide-border">
+                  {filteredDatasets.map((dataset) => {
+                    const isSelected = selectedUri === dataset.datasetUri;
+                    return (
+                      <button
+                        key={dataset.datasetUri}
+                        type="button"
+                        role="radio"
+                        aria-checked={isSelected}
+                        onClick={() => {
+                          setSelectedUri(dataset.datasetUri);
+                          setError(null);
+                        }}
+                        disabled={isPending}
+                        className={cn(
+                          "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/35 disabled:cursor-not-allowed disabled:opacity-60",
+                          isSelected ? "bg-primary/5" : "bg-background",
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border",
+                            isSelected ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/40",
+                          )}
+                          aria-hidden="true"
+                        >
+                          {isSelected ? <CheckIcon className="size-3" /> : null}
+                        </span>
+                        <span className="min-w-0 flex-1 space-y-1">
+                          <span className="block truncate text-sm font-medium text-foreground">{dataset.name}</span>
+                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Layers2Icon className="size-3" />
+                            {t("datasetMeta", { count: dataset.count })}
+                          </span>
+                          {dataset.description ? (
+                            <span className="line-clamp-2 block text-xs text-muted-foreground">{dataset.description}</span>
+                          ) : null}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {projectUri && projectName ? (
+          <p className="text-xs text-muted-foreground">{t("addsToProject", { project: projectName })}</p>
+        ) : null}
+
+        {fromOtherDataset.length > 0 ? (
+          <p className="text-xs text-muted-foreground">{t("someWillMove", { count: fromOtherDataset.length })}</p>
+        ) : null}
+        {alreadyHere.length > 0 ? (
+          <p className="text-xs text-muted-foreground">{t("someAlreadyHere", { count: alreadyHere.length })}</p>
+        ) : null}
+
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      </div>
+
+      <ModalFooter className="mt-5">
+        <Button variant="outline" onClick={() => void closeModal()} disabled={isPending}>
+          {t("cancel")}
+        </Button>
+        <Button onClick={() => void handleConfirm()} disabled={isPending || movable === 0}>
+          {isPending ? <Loader2Icon className="animate-spin" /> : <FolderPlusIcon className="size-4" />}
+          {mode === "new" ? t("confirmNew") : t("confirmExisting")}
+        </Button>
+      </ModalFooter>
+    </ModalContent>
+  );
+}

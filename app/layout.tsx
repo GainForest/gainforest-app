@@ -1,19 +1,45 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Instrument_Serif, Inter } from "next/font/google";
+import { Cormorant_Garamond, Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Suspense } from "react";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { Analytics } from "@vercel/analytics/next";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
+import { DomTranslationFallback } from "@/components/i18n/DomTranslationFallback";
 import "./globals.css";
-import { LocaleProvider } from "./_components/LocaleProvider";
-import { FloatingTaina } from "./_components/FloatingTaina";
+import { ChromeGate } from "./_components/ChromeGate";
+import { ClientErrorListener } from "./_components/ClientErrorListener";
+import { AccountDrawerProvider } from "./_components/AccountDrawer";
+import { AppCartProvider } from "./_components/cart/AppCartProvider";
+import { UploadTray } from "./_components/upload-tray/UploadTray";
+import { UploadTrayProvider } from "./_components/upload-tray/upload-tray-context";
+import { LinkPrefetcher } from "./_components/LinkPrefetcher";
+import { RouteChangeIndicator } from "./_components/RouteChangeIndicator";
+import { ViewTransitionNavigationSync } from "./_components/ViewTransitionRouter";
+import { ModalHost, ModalProvider } from "@/components/ui/modal/context";
+import { WagmiProvider } from "@/components/providers/WagmiProvider";
+import { resolveSupportedLanguage } from "@/lib/i18n/languages";
+import { getCanonicalPathname, getSeoLocalizedPathnames, withLocalePrefix } from "@/lib/i18n/routing";
+import { fetchAuthSession } from "./_lib/auth-server";
+import { getRequestOrigin } from "./_lib/request-origin";
+import { scheduleUserEmailSync } from "./_lib/user-emails";
 
-const inter = Inter({
+const geistSans = Geist({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-geist-sans",
+  display: "swap",
+});
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
   display: "swap",
 });
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-garamond",
+  variable: "--font-garamond-var",
   display: "swap",
 });
 
@@ -21,242 +47,219 @@ const instrument = Instrument_Serif({
   subsets: ["latin"],
   weight: ["400"],
   style: ["normal", "italic"],
-  variable: "--font-instrument",
+  variable: "--font-instrument-serif-var",
   display: "swap",
 });
 
-// `NEXT_PUBLIC_BASE_URL` is used by the OAuth flow; reuse it here so all the
-// canonical / OG URLs point at the same origin. Falls back to the production
-// landing URL for prod builds where the env isn't set.
-//
-// IMPORTANT: when Vercel auto-injects `NEXT_PUBLIC_BASE_URL=https://gainforest-app.vercel.app`
-// (or any other `*.vercel.app` preview domain) the OG / og:url / metadataBase
-// would point at the preview origin, which makes Telegram + Twitter previews
-// look broken (image fetches fine, but the canonical URL it advertises
-// disagrees with the shared link, and chat apps occasionally refuse the
-// preview). When we detect a vercel.app value we ignore it and fall back
-// to the canonical production hostname instead.
-// July 2026: gainforest.app now belongs to the merged product app
-// (green_globe + Bumicerts → "the GainForest app"); this landing moved
-// to the gainforest.earth domain.
-const CANONICAL_SITE_URL = "https://gainforest.earth";
-const RAW_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL?.trim();
-const SITE_URL = (
-  RAW_BASE_URL && !/\.vercel\.app(?::\d+)?\/?$/.test(RAW_BASE_URL)
-    ? RAW_BASE_URL
-    : CANONICAL_SITE_URL
-).replace(/\/$/, "");
-
 const SITE_NAME = "GainForest";
-// Version the social image path whenever the artwork changes. Telegram
-// and several chat apps cache OG images aggressively by URL, so changing
-// only the bytes behind `/og/landing.png` is not enough to refresh an
-// already-shared preview.
-//
-// The 2026-05-20 OG was rendered with headless Chrome from
-// `scripts/og-template.html` (cream half + real mangrove-fieldwork
-// photo half) so the share card matches the post-redesign hero
-// exactly — same curved brush stroke under "Open", same Cormorant
-// Garamond + Instrument Serif headline, same cream/sage palette. The
-// previous 2026-05-19 OG still used the pre-redesign straight-bar
-// underline and decorative leaves PNG, which clashed with the live
-// site after we stripped illustrated decoration.
-const OG_IMAGE_PATH = "/og/landing-2026-05-20.png";
-// Tagline mirrors the on-page hero (`hero.title.before` + `hero.title.italic`
-// in app/_lib/i18n.ts). Keep these two in sync — the tagline drives the
-// browser tab title, OG / Twitter card title, and JSON-LD WebPage name.
-const SITE_TAGLINE = "Open tools for regenerative intelligence";
-const SITE_TITLE = `${SITE_NAME}: ${SITE_TAGLINE}`;
-const SITE_DESCRIPTION =
-  "Explore nature projects around the world, back community-led restoration, and mint Certs; verifiable proof-of-impact records signed on ATProto.";
+// Versioned filename: social platforms (X/Telegram/Facebook) cache OG previews
+// by URL, so bump this suffix whenever the art changes to force a re-fetch.
+const OG_IMAGE = "/og/gainforest-og-2.png";
+const OG_ALT =
+  "GainForest — certified impact for nature stewards. Upload field observations and certify your environmental work, beside an aerial photo of humpback whales in turquoise water.";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default: SITE_TITLE,
-    template: `%s · ${SITE_NAME}`,
-  },
-  description: SITE_DESCRIPTION,
-  applicationName: SITE_NAME,
-  authors: [{ name: "GainForest", url: "https://www.gainforest.earth" }],
-  creator: "GainForest",
-  publisher: "GainForest",
-  keywords: [
-    "GainForest",
-    "GainForest app",
-    "Certs",
-    "regenerative",
-    "rainforest",
-    "biodiversity",
-    "ATProto",
-    "AT Protocol",
-    "ecological impact",
-    "verified impact",
-    "nature stewardship",
-    "carbon credits",
-    "impact certification",
-    "decentralized identity",
-    "PDS",
-  ],
-  category: "sustainability",
-  alternates: {
-    canonical: "/",
-  },
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    siteName: SITE_NAME,
-    title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
-    url: SITE_URL,
-    images: [
-      {
-        url: OG_IMAGE_PATH,
-        secureUrl: `${SITE_URL}${OG_IMAGE_PATH}`,
-        width: 1200,
-        height: 630,
-        alt:
-          "GainForest: Open tools for regenerative intelligence. The serif headline sits on a cream editorial background; on the right, three conservationists stand waist-deep in a mangrove channel doing fieldwork, one pointing into the canopy while the others record audio and gear in waterproof bags.",
-        type: "image/png",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
-    images: [OG_IMAGE_PATH],
-    creator: "@gainforest",
-    site: "@gainforest",
-  },
-  icons: {
-    icon: [
-      { url: "/icons/icon-32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icons/icon-48.png", sizes: "48x48", type: "image/png" },
-      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
-    ],
-    shortcut: ["/icons/favicon.ico"],
-    apple: [
-      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-    ],
-  },
-  manifest: "/icons/site.webmanifest",
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-      "max-video-preview": -1,
-    },
-  },
-  formatDetection: {
-    telephone: false,
-    email: false,
-    address: false,
-  },
+const PUBLIC_NAVIGATION_ROUTES = [
+  { key: "projects", pathname: "/projects" },
+  { key: "observations", pathname: "/observations" },
+  { key: "organizations", pathname: "/organizations" },
+  { key: "bioblitz", pathname: "/bioblitz" },
+] as const;
+
+type StructuredNavigationItem = {
+  name: string;
+  url: string;
 };
+
+function buildHomeStructuredData(
+  origin: string,
+  description: string,
+  language: string,
+  navigationItems: StructuredNavigationItem[],
+) {
+  const siteUrl = new URL("/", origin).toString();
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${siteUrl}#organization`,
+        name: SITE_NAME,
+        alternateName: ["GainForest App", "GainForest Explorer"],
+        url: siteUrl,
+        logo: new URL("/icons/icon-512.png", origin).toString(),
+        sameAs: [
+          "https://gainforest.earth",
+          "https://bsky.app/profile/gainforest.earth",
+          "https://github.com/GainForest/gainforest-explorer",
+        ],
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${siteUrl}#website`,
+        name: SITE_NAME,
+        alternateName: ["GainForest App", "GainForest Explorer"],
+        url: siteUrl,
+        description,
+        publisher: { "@id": `${siteUrl}#organization` },
+        inLanguage: language,
+      },
+      ...navigationItems.map((item, index) => ({
+        "@type": "SiteNavigationElement",
+        "@id": `${item.url}#site-navigation`,
+        position: index + 1,
+        name: item.name,
+        url: item.url,
+      })),
+    ],
+  };
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = resolveSupportedLanguage(await getLocale());
+  const t = await getTranslations("common.seo");
+  const title = t("title");
+  const description = t("description");
+  const origin = await getRequestOrigin();
+
+  const languages = { ...getSeoLocalizedPathnames("/"), "x-default": "/" };
+
+  return {
+    metadataBase: new URL(origin),
+    title: {
+      default: title,
+      template: `%s · ${SITE_NAME}`,
+    },
+    description,
+    applicationName: SITE_NAME,
+    authors: [{ name: "GainForest", url: "https://www.gainforest.earth" }],
+    creator: "GainForest",
+    publisher: "GainForest",
+    keywords: [
+      "GainForest",
+      "biodiversity observations",
+      "nature projects",
+      "field evidence",
+      "environmental records",
+      "impact certification",
+    ],
+    category: "sustainability",
+    alternates: { canonical: getCanonicalPathname("/", locale), languages },
+    openGraph: {
+      type: "website",
+      locale,
+      siteName: SITE_NAME,
+      title,
+      description,
+      url: origin,
+      images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: OG_ALT }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      creator: "@gainforest",
+      site: "@gainforest",
+      images: [{ url: OG_IMAGE, alt: OG_ALT }],
+    },
+    icons: {
+      icon: [
+        { url: "/icons/icon-32.png", sizes: "32x32", type: "image/png" },
+        { url: "/icons/icon-48.png", sizes: "48x48", type: "image/png" },
+        { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+        { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+      ],
+      shortcut: ["/icons/favicon.ico"],
+      apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    },
+    manifest: "/icons/site.webmanifest",
+    appleWebApp: { title: SITE_NAME, capable: true },
+    robots: { index: true, follow: true },
+    formatDetection: { telephone: false, email: false, address: false },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: [
-    // Matches the bumicerts-clean-rewrite surfaces: white / near-black.
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#141414" },
+    { media: "(prefers-color-scheme: light)", color: "#f4efe4" },
+    { media: "(prefers-color-scheme: dark)", color: "#141413" },
   ],
   colorScheme: "light dark",
 };
 
-// Set the theme class before first paint so there's no light/dark flash.
-// Reads the saved choice, else falls back to the OS preference. Ported from
-// gainforest-explorer's THEME_INIT (storage key swapped to `gainforest-theme`).
-const THEME_INIT = `(function(){try{var t=localStorage.getItem('gainforest-theme');var m=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(t!=='light'&&m)){document.documentElement.classList.add('dark');}}catch(e){}})();`;
+// Set the theme class before first paint so there's no light/dark flash. Reads
+// the saved choice, else falls back to the OS preference.
+const THEME_INIT = `(function(){try{var t=localStorage.getItem('bumicerts-theme');var m=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(t!=='light'&&m)){document.documentElement.classList.add('dark');}}catch(e){}})();`;
 
-// JSON-LD structured data — helps Google, Bing, and Bluesky-style scrapers
-// understand what this site is and which other surfaces it fronts. Inlined
-// rather than fetched so it's available on the first byte.
-const JSON_LD = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Organization",
-      "@id": `${SITE_URL}/#organization`,
-      name: SITE_NAME,
-      url: SITE_URL,
-      logo: `${SITE_URL}/icons/icon-512.png`,
-      sameAs: [
-        // The merged GainForest app (formerly data.gainforest.app +
-        // certs.gainforest.app; both legacy hosts redirect into it).
-        "https://gainforest.app",
-        "https://github.com/GainForest",
-        "https://twitter.com/gainforest",
-      ],
-    },
-    {
-      "@type": "WebSite",
-      "@id": `${SITE_URL}/#website`,
-      url: SITE_URL,
-      name: SITE_NAME,
-      description: SITE_DESCRIPTION,
-      publisher: { "@id": `${SITE_URL}/#organization` },
-      inLanguage: "en-US",
-    },
-    {
-      "@type": "WebPage",
-      "@id": `${SITE_URL}/#webpage`,
-      url: SITE_URL,
-      name: SITE_TITLE,
-      isPartOf: { "@id": `${SITE_URL}/#website` },
-      primaryImageOfPage: `${SITE_URL}${OG_IMAGE_PATH}`,
-      about: { "@id": `${SITE_URL}/#organization` },
-      description: SITE_DESCRIPTION,
-      inLanguage: "en-US",
-    },
-  ],
-};
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // The session is resolved server-side (in parallel with i18n setup) so the
+  // shell renders with the real signed-in state on first paint — no
+  // signed-out flash, no client-side session fetch waterfall.
+  const [locale, messages, authSession, origin, seoT, navT] = await Promise.all([
+    getLocale(),
+    getMessages(),
+    fetchAuthSession(),
+    getRequestOrigin(),
+    getTranslations("common.seo"),
+    getTranslations("landing.nav"),
+  ]);
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+  const supportedLocale = resolveSupportedLanguage(locale);
+  // A DID's first successful email sync marks its first authenticated use of
+  // GainForest. Existing identities remain portable regardless of account age.
+  scheduleUserEmailSync(authSession, supportedLocale);
+
+  const navigationItems = PUBLIC_NAVIGATION_ROUTES.map((item) => ({
+    name: navT(item.key),
+    url: new URL(withLocalePrefix(item.pathname, supportedLocale), origin).toString(),
+  }));
+  const structuredData = buildHomeStructuredData(origin, seoT("description"), locale, navigationItems);
+
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        {/* No-FOUC theme bootstrap: add `.dark` to <html> before first
-            paint based on the saved choice / OS preference. Must run
-            before the body renders. */}
+    <html lang={locale} suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${instrument.variable} antialiased`}
+      >
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
-        {/* JSON-LD structured data for richer search/SERP previews. */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-      </head>
-      <body
-        className={`${inter.variable} ${cormorant.variable} ${instrument.variable} antialiased`}
-      >
-        {/* Client-side locale state. Defaults to English; reads the
-            visitor's saved choice (or browser language) on hydration
-            and re-renders every translated component with the right
-            strings. Also exposes the locale to <FloatingTaina /> so
-            her chat replies match the active language. */}
-        {/* <FloatingTaina /> is the floating Simocracy-sim companion
-            in the corner — same widget shape as the earlier
-            FloatingCapybara, swapped to point at the Taina sim
-            (see `app/_lib/taina-sim.ts` for the binding). The team's
-            verdict on the previous version: "I liked the floating
-            companion but didn't like that it was a capybara — use
-            Taina instead". Taina's an actual GainForest-built AI
-            assistant born from co-design with Indigenous communities
-            around Manaus, so the pixel-art tone now matches the
-            content tone of the page. */}
-        <LocaleProvider>
-          {children}
-          <FloatingTaina />
-        </LocaleProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <ClientErrorListener />
+          <DomTranslationFallback />
+          <Suspense fallback={null}>
+            <RouteChangeIndicator />
+            <LinkPrefetcher />
+            <ViewTransitionNavigationSync />
+          </Suspense>
+          <NuqsAdapter>
+            <WagmiProvider>
+              <ModalProvider>
+                <AccountDrawerProvider>
+                  <AppCartProvider>
+                    {/* Recording uploads run above the router so they keep
+                        going while people navigate the app; the tray is the
+                        visible part of that queue. Both always mount — the
+                        panel renders nothing while the queue is empty — so
+                        both the "Add observations" modal and the AudioMoth
+                        Upload tab can hand batches over from anywhere. */}
+                    <UploadTrayProvider>
+                      <ChromeGate authSession={authSession}>{children}</ChromeGate>
+                      <UploadTray />
+                      {/* The modal chrome mounts at the bottom of the provider
+                          tree — inside UploadTrayProvider — so inline modal
+                          content pushed via pushModal keeps access to the
+                          app-level contexts above this line (e.g. the
+                          AddObservationsModal's useUploadTray). */}
+                      <ModalHost />
+                    </UploadTrayProvider>
+                  </AppCartProvider>
+                </AccountDrawerProvider>
+              </ModalProvider>
+            </WagmiProvider>
+          </NuqsAdapter>
+        </NextIntlClientProvider>
+        <Analytics />
       </body>
     </html>
   );

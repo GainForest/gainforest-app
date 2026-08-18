@@ -1,35 +1,26 @@
-# Next.js build output
-/.next/
-/out/
-
-# Dependencies
-/node_modules/
-
-# Env / local secrets
-.env*.local
-
-# Vercel
-/.vercel/
-
-# OS / editor
+/node_modules
+/.next
+/out
+/build
 .DS_Store
-.idea/
-.vscode/
-
-# Iteration scratch (autoresearch shots, etc.)
-/.shots/
-/diff.png
-/screenshot.png
-/target.png
-/target_canonical.png
-/autoresearch.*
-
-# TypeScript incremental cache
-tsconfig.tsbuildinfo
-
-# Sibling deck workspaces (their own git repos; not part of this app)
-/decks/
-
-# Logs
-*.log
+*.pem
+.env*.local
 .vercel
+/e2e/.env
+/e2e/.auth
+/reports
+/artifacts
+/test-results
+/playwright-report
+*.tsbuildinfo
+next-env.d.ts.bak
+
+# Local agent state
+.claude/
+.pi-subagents/
+
+# Supabase CLI local state
+supabase/.branches/
+
+# Raw landing video downloads (trimmed/encoded into the same folder)
+public/assets/media/video/_raw/

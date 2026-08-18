@@ -1,0 +1,64 @@
+{
+  "lexicon": 1,
+  "id": "app.gainforest.wallet.pendingSend",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "A transfer from the account's donation wallet (app.gainforest.wallet.primary) that still needs more passkey approvals. Multi-approval wallets (threshold > 1) collect approvals asynchronously: the initiator stores the exact unsigned ERC-4337 UserOperation here together with their own approval, remaining passkey holders approve from their own devices, and the final approver signs the full userOp hash which submits the operation on-chain and deletes this record. Every stored approval is a WebAuthn assertion over the operation's LIGHT hash (the SmartVault scheme where all but the last signer sign a gas-bounded subset of the operation). Approvals are verified off-chain before being stored and re-verified before submission, so a hand-crafted record cannot forge or brick a transfer. Fixed rkey `self`: one pending transfer per wallet at a time.",
+      "key": "literal:self",
+      "record": {
+        "type": "object",
+        "required": ["token", "to", "amountUnits", "userOp", "hash", "lightHash", "threshold", "approvals", "createdBy", "createdAt"],
+        "properties": {
+          "token": { "type": "string", "enum": ["ETH", "USDC", "USDT"], "description": "What is being sent." },
+          "to": { "type": "string", "description": "Recipient address (0x…, 20 bytes). Redundant with callData, for display; the server re-derives it from the operation." },
+          "amountUnits": { "type": "string", "description": "Raw token units as a decimal string. Redundant with callData, for display." },
+          "userOp": { "type": "ref", "ref": "#userOp" },
+          "hash": { "type": "string", "description": "Full EntryPoint v0.7 userOp hash — signed by the final approver." },
+          "lightHash": { "type": "string", "description": "SmartVault light userOp hash — signed by every earlier approver." },
+          "threshold": { "type": "integer", "minimum": 2, "maximum": 255, "description": "Approval requirement of the wallet when this transfer was started; a mismatch with the current wallet invalidates the transfer." },
+          "approvals": {
+            "type": "array",
+            "items": { "type": "ref", "ref": "#approval" },
+            "description": "Light-hash approvals collected so far, in signing order (at most threshold − 1; the final approval is never stored)."
+          },
+          "createdBy": { "type": "string", "format": "did", "description": "DID of the signed-in account that started the transfer." },
+          "createdAt": { "type": "string", "format": "datetime" }
+        }
+      }
+    },
+    "userOp": {
+      "type": "object",
+      "description": "The unsigned ERC-4337 v0.7 UserOperation, exactly as it will be submitted. Gas and fee fields are decimal strings.",
+      "required": ["sender", "nonce", "callData", "callGasLimit", "verificationGasLimit", "preVerificationGas", "maxFeePerGas", "maxPriorityFeePerGas"],
+      "properties": {
+        "sender": { "type": "string", "description": "The wallet's vault address." },
+        "nonce": { "type": "string", "description": "EntryPoint nonce at preparation time; consumed nonces invalidate the transfer." },
+        "factory": { "type": "string", "description": "SmartVaultFactory address — present only while the vault is undeployed." },
+        "factoryData": { "type": "string", "description": "createAccount calldata deploying the vault on first send." },
+        "callData": { "type": "string", "description": "vault.execute(...) calldata — exactly one ETH/USDC/USDT transfer." },
+        "callGasLimit": { "type": "string" },
+        "verificationGasLimit": { "type": "string" },
+        "preVerificationGas": { "type": "string" },
+        "maxFeePerGas": { "type": "string" },
+        "maxPriorityFeePerGas": { "type": "string" }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "description": "A WebAuthn assertion over the light userOp hash by one enrolled passkey signer.",
+      "required": ["credentialId", "authenticatorData", "clientDataJSON", "challengeIndex", "typeIndex", "r", "s", "addedBy", "addedAt"],
+      "properties": {
+        "credentialId": { "type": "string", "description": "WebAuthn credential id of the enrolled signer that approved." },
+        "authenticatorData": { "type": "string", "description": "Authenticator data of the assertion, hex." },
+        "clientDataJSON": { "type": "string", "description": "Client data JSON of the assertion." },
+        "challengeIndex": { "type": "integer", "description": "Index of \"challenge\" in clientDataJSON." },
+        "typeIndex": { "type": "integer", "description": "Index of \"type\" in clientDataJSON." },
+        "r": { "type": "string", "description": "secp256r1 signature r, decimal string." },
+        "s": { "type": "string", "description": "secp256r1 signature s (low-s), decimal string." },
+        "addedBy": { "type": "string", "format": "did", "description": "DID of the signed-in account that added this approval." },
+        "addedAt": { "type": "string", "format": "datetime" }
+      }
+    }
+  }
+}

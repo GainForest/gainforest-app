@@ -1,0 +1,149 @@
+{
+  "landing": {
+    "nav": {
+      "home": "Home",
+      "explore": "Explore",
+      "organizations": "Organizations",
+      "create": "Create",
+      "launchApp": "Launch App",
+      "signIn": "Sign in",
+      "menu": "Menu",
+      "navigation": "Navigation",
+      "close": "Close",
+      "theme": "Theme",
+      "projects": "Projects",
+      "observations": "Observations",
+      "bioblitz": "BioBlitz"
+    },
+    "hero": {
+      "imageAlt": "Misty rainforest valley",
+      "headingUnderlined": "Certified",
+      "headingRest": "impact for nature stewards",
+      "description": "Upload observations from the field and certify the work you've done. Your photos, species, and locations become permanent, verifiable records of real environmental impact.",
+      "cta": "Explore Projects",
+      "androidCta": "Get the Android app"
+    },
+    "paths": {
+      "title": "Choose Your Path",
+      "description": "Whether you're here to explore field evidence or showcase your work, there's a place for you.",
+      "cards": {
+        "funders": {
+          "label": "For Explorers",
+          "title": "I want to explore",
+          "emphasis": "field evidence",
+          "description": "Browse verified records of real environmental work — the exact moments of restoration, as they happened on the ground.",
+          "cta": "Explore records",
+          "alt": "River winding through rainforest"
+        },
+        "organizations": {
+          "label": "For Organizations",
+          "title": "I am a nature",
+          "emphasis": "steward",
+          "description": "Showcase your regenerative work and the evidence behind it.",
+          "cta": "Manage my Organization",
+          "alt": "Waterfall in a tropical forest"
+        }
+      }
+    },
+    "explainer": {
+      "eyebrow": "Watch the explainer",
+      "titlePrefix": "A new way to",
+      "titleEmphasis": "document nature",
+      "description": "In two minutes, see how Bumicerts turn real fieldwork into verifiable records for local nature stewards.",
+      "play": "Play video",
+      "videoTitle": "Bumicerts: verifiable nature records for local nature stewards"
+    },
+    "certificate": {
+      "eyebrow": "The Certificate",
+      "titleLine1": "What exactly is",
+      "titleLine2": "a Cert?",
+      "faqItems": {
+        "digitalCertificate": {
+          "id": "1",
+          "question": "A digital certificate of impact",
+          "answer": "A Cert records a specific environmental action — giving it a permanent, verifiable identity on an open, decentralized network (the same technology that powers Bluesky)."
+        },
+        "evidence": {
+          "id": "2",
+          "question": "Backed by real evidence",
+          "answer": "Photos, geolocation, timestamps, monitoring data. Every claim is verifiable. This isn't a promise of future impact — it's proof of work already done."
+        },
+        "communities": {
+          "id": "3",
+          "question": "A shared record with communities",
+          "answer": "Each Cert connects field evidence, project context, and the people or organizations doing the work, so the record is easy to review and share."
+        },
+        "story": {
+          "id": "4",
+          "question": "Your claim to the story",
+          "answer": "Owning a Cert means you're part of that moment. A tree planted. A reef restored. An ecosystem revived. It's yours to share, hold, or gift."
+        }
+      },
+      "previewTitle": "Reforestation of Mount Halimun",
+      "previewDescription": "Community-led restoration of native forest in West Java, Indonesia. 5,000 trees planted across 12 hectares.",
+      "objectives": {
+        "primary": "Reforestation",
+        "secondary": "Biodiversity"
+      }
+    },
+    "footer": {
+      "tagline": "Connecting communities through trusted field evidence.",
+      "infrastructure": "Open infrastructure. Built with GainForest.",
+      "documentation": "Documentation",
+      "copyright": "Open source, community-powered."
+    },
+    "maEarthBanner": {
+      "label": "Ma Earth Funding Round 3",
+      "deadline": "Open till May 31st",
+      "title": "Apply for the Ma Earth Funding Round 3",
+      "description": "GainForest communities can use their verified project stories, evidence, and impact records while applying on Ma Earth’s community-backed funding round.",
+      "highlights": {
+        "matchingPool": "$500k matching pool",
+        "projects": "Nature-based projects",
+        "record": "Prepare your impact record"
+      },
+      "actions": {
+        "apply": "Apply on Ma Earth",
+        "learn": "Learn about the round"
+      }
+    },
+    "brand": {
+      "alt": "GainForest app icon"
+    },
+    "stats": {
+      "liveLabel": "Live impact",
+      "bumicertsShared": "Records shared",
+      "organizationProfiles": "organization profiles",
+      "natureSightingsShared": "nature sightings shared",
+      "raisedForProjects": "raised for projects"
+    },
+    "openNetwork": {
+      "titlePrefix": "Built on an",
+      "titleEmphasis": "open network",
+      "description": "Your records are portable — impact data that can travel across apps, communities, and funding tools, not a closed database. Support for Silvi and other platforms is coming soon.",
+      "protocol": {
+        "name": "Certified",
+        "description": "portable social data",
+        "poweredBy": "Powered by Certified"
+      },
+      "youBadge": "You",
+      "apps": {
+        "maEarth": {
+          "blurb": "Communities can use their verified evidence when applying for community-backed funding rounds."
+        },
+        "gainforest": {
+          "blurb": "GainForest helps communities and organizations publish field observations, biodiversity records, places, and project stories."
+        },
+        "hypercerts": {
+          "blurb": "Open impact claims can connect with broader Hypercerts tooling and public-good funding ecosystems."
+        }
+      },
+      "points": {
+        "portable": "Portable across apps",
+        "owned": "Owned by communities",
+        "shared": "Shared proof of impact"
+      },
+      "storageNote": "When stewards upload observations, the records are saved under their GainForest account — or the organization account they manage — so it is clear where the data lives."
+    }
+  }
+}

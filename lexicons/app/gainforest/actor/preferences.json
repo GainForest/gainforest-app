@@ -1,0 +1,26 @@
+{
+  "lexicon": 1,
+  "id": "app.gainforest.actor.preferences",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "Singleton (rkey \"self\") holding per-account GainForest app preferences. Currently carries the Bluesky cross-posting opt-in: when `blueskyCrosspost` is true, top-level feed posts (app.gainforest.feed.post) are ALSO written to the same repo as app.bsky.feed.post records with the same rkey, so they surface on the wider Bluesky network. `blueskyConsentAt` records when the account explicitly consented to cross-posting for the first time (the consent modal is only shown while this is absent). Lives in the account's own repo and is read directly from their PDS (it is not indexed) — same pattern as app.gainforest.notification.seen.",
+      "key": "literal:self",
+      "record": {
+        "type": "object",
+        "required": ["blueskyCrosspost"],
+        "properties": {
+          "blueskyCrosspost": {
+            "type": "boolean",
+            "description": "Whether new top-level feed posts are cross-posted to Bluesky (app.bsky.feed.post twins with the same rkey)."
+          },
+          "blueskyConsentAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "When the account first consented to Bluesky cross-posting via the consent modal."
+          }
+        }
+      }
+    }
+  }
+}

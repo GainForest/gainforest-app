@@ -1,0 +1,331 @@
+{
+  "header": {
+    "openCart": "{count, plural, =0 {Fungua kikapu cha michango} one {Fungua kikapu cha michango (bidhaa #)} other {Fungua kikapu cha michango (bidhaa #)}}"
+  },
+  "amountModal": {
+    "title": "Unga mkono mradi huu",
+    "amountLabel": "Kiasi cha mchango",
+    "minimum": "Kima cha chini ${amount}",
+    "maximum": "Kima cha juu ${amount}",
+    "directNote": "Asilimia 100 huenda moja kwa moja kwenye pochi iliyothibitishwa ya {organization} — hakuna ada ya jukwaa, na ada ya mtandao inalipiwa kwa niaba yako.",
+    "publicNote": "Hurekodiwa kama risiti ya mchango ya umma ambayo mtu yeyote anaweza kukagua.",
+    "addToCart": "Ongeza kwenye kikapu",
+    "updateCart": "Sasisha kikapu",
+    "cancel": "Ghairi"
+  },
+  "page": {
+    "title": "Kikapu"
+  },
+  "cartPage": {
+    "title": "Kikapu",
+    "projectCount": "{count, plural, one {bidhaa #} other {bidhaa #}}",
+    "emptyTitle": "Kikapu chako ni tupu",
+    "emptyDescription": "Tafuta mradi unaoupenda na uongeze mchango — kila kitu kilichomo kwenye kikapu chako hulipwa pamoja wakati wa kulipa.",
+    "exploreProjects": "Chunguza miradi",
+    "removeItem": "Ondoa {title} kwenye kikapu",
+    "amountFor": "Kiasi cha mchango kwa {title}",
+    "minimum": "Kima cha chini ${amount}",
+    "maximum": "Kima cha juu ${amount}",
+    "invalidAmount": "Weka kiasi zaidi ya sifuri.",
+    "donations": "Michango",
+    "total": "Jumla",
+    "feesNote": "Hakuna ada za jukwaa — asilimia 100 huenda kwenye pochi iliyothibitishwa ya kila mpokeaji. Unaweza kuongeza bahashishi ya hiari kwa GainForest wakati wa kulipa.",
+    "checkout": "Lipa",
+    "fixAmounts": "Rekebisha viasi vilivyowekwa alama ili kuendelea."
+  },
+  "checkoutPage": {
+    "title": "Kulipa",
+    "backToCart": "Rudi kwenye kikapu",
+    "encouragement": "Vizuri! Mchango wako unaunga mkono uhifadhi unaoongozwa na jamii.",
+    "donorTitle": "Jinsi mchango wako unavyoonekana",
+    "anonymousLabel": "Changia bila kutajwa jina",
+    "anonymousHint": "Michango isiyo na jina haionekani kamwe hadharani kwa jina lako — bado utaiona kwenye wasifu wako mwenyewe.",
+    "signedOutNote": "Hujaingia, kwa hivyo michango yako itaonekana kama isiyojulikana.",
+    "walletTitle": "Pochi ya malipo",
+    "walletHint": "Michango hulipwa kwa USDC kwenye Ethereum. Unganisha pochi yako ili kuendelea — ada za mtandao zinalipiwa kwa niaba yako.",
+    "connectWallet": "Unganisha pochi",
+    "connecting": "Inaunganisha…",
+    "connectFailed": "Muunganisho wa pochi umeshindikana.",
+    "noWallet": "Hakuna pochi inayotumika iliyopatikana. Sakinisha MetaMask au pochi nyingine inayooana ili kuendelea.",
+    "available": "Inapatikana: {amount}",
+    "balanceUnavailable": "Salio halipatikani",
+    "tipTitle": "Bahashishi kwa GainForest (hiari)",
+    "tipDescription": "GainForest haitozi ada za jukwaa na hulipa ada za mtandao kwa kila mchango. Bahashishi kutoka kwa wachangiaji huweka huduma hii ikiendelea.",
+    "tipSliderLabel": "Kiasi cha bahashishi",
+    "tipNudgeTitle": "Je, unaweza kuongeza bahashishi?",
+    "tipNudgeBody": "Bahashishi husaidia GainForest kuwaunga mkono walinzi wa ardhi kutunza asili!",
+    "tipNudgeSet": "Weka bahashishi kuwa {percent}%",
+    "yourTip": "Bahashishi yako:",
+    "tipLineLabel": "Bahashishi kwa GainForest",
+    "summaryTitle": "Mchango wako",
+    "donations": "Michango",
+    "total": "Jumla",
+    "insufficientBalance": "Pochi yako haina USDC ya kutosha kwa jumla hii.",
+    "multiApprovalNote": "{count, plural, one {Pochi yako itakuomba uidhinishe malipo #.} other {Pochi yako itakuomba uidhinishe malipo #, moja baada ya nyingine.}}",
+    "donateNow": "Changia {amount} sasa",
+    "footerNote": "Asilimia 100 ya {amount} ya michango yako huenda kwenye pochi iliyothibitishwa ya kila mpokeaji.",
+    "footerInfoLabel": "Hii inahusu nini",
+    "footerInfoFees": "GainForest haitozi ada ya jukwaa na inalipa ada za mtandao kwa niaba yako.",
+    "footerInfoTip": "Bahashishi yako ya {tip} ni tofauti. Haitolewi kamwe kutoka kwa michango yako.",
+    "processing": "Inachakata…",
+    "doNotClose": "Usifunge dirisha hili.",
+    "tryAgain": "Jaribu tena",
+    "blockedItems": "Bado hawajawa tayari kupokea michango, kwa hivyo wameondolewa kwenye malipo haya: {titles}",
+    "errorProfile": "Hatukuweza kuunganisha mchango huu na wasifu wako. Ingia tena au changia bila kutajwa jina.",
+    "errorCannotReceive": "Akaunti hii bado haiwezi kupokea michango.",
+    "errorAmount": "Kagua kiasi cha mchango kisha ujaribu tena.",
+    "errorChanged": "Maelezo ya malipo yamebadilika. Tafadhali anza mchango upya.",
+    "errorGeneric": "Malipo yameshindikana. Tafadhali jaribu tena.",
+    "errorTimeout": "Malipo haya yanachukua muda mrefu kuliko ilivyotarajiwa na huenda bado yakakamilika. Angalia shughuli za hivi karibuni za pochi yako kabla ya kujaribu tena ili usilipe mara mbili.",
+    "tipFailed": "Bahashishi haikuweza kukamilika — michango yako haikuathiriwa.",
+    "tipSkipped": "Bahashishi iliruka kwa sababu hakuna mchango uliokamilika.",
+    "thankYou": "Asante",
+    "successSummary": "Michango yako ya {amount} imekamilika kwa mafanikio.",
+    "recordedWithProfile": "Imerekodiwa na wasifu wako wa GainForest.",
+    "recordedAnonymous": "Imerekodiwa kama isiyojulikana.",
+    "paymentDetails": "Maelezo ya malipo",
+    "shareTitle": "Shiriki hii na wengine",
+    "shareText": "Nimetoa mchango wa {amount} kuunga mkono miradi ya asili kwenye GainForest: {url}",
+    "shareOnX": "Shiriki kwenye X",
+    "shareOnBluesky": "Shiriki kwenye Bluesky",
+    "shareOnTelegram": "Shiriki kwenye Telegram",
+    "copyShareText": "Nakili maandishi ya kushiriki",
+    "exploreMore": "Chunguza miradi zaidi",
+    "emptyTitle": "Kikapu chako ni tupu",
+    "singleApprovalNote": "Pochi yako itaomba idhini moja tu kwa jumla yote. Kisha GainForest hupeleka kila mchango kwa mpokeaji wake.",
+    "messageTitle": "Ongeza ujumbe (hiari)",
+    "messageHint": "Neno la kutia moyo, au sababu ya kutoa. Mpokeaji ataliona.",
+    "messagePlaceholder": "Ongeza ujumbe (hiari)…",
+    "messageAnonymousNote": "Ujumbe wako hautaonyeshwa kwa jina lako.",
+    "bioblitzAwardNote": "Ujumbe huu unatambua malipo kama tuzo ya BioBlitz na hauwezi kubadilishwa.",
+    "tipNone": "Hakuna bahashishi",
+    "cardsPreviewTitle": "Bumicerts utakazopokea",
+    "cardsUnavailableNote": "Bumicerts hupatikana tu kwa michango ya miradi inayostahiki. Malipo haya hayana mchango kama huo.",
+    "cardsCheckingNote": "Tunaangalia ni michango ipi itakayokupa Bumicerts…",
+    "receiptIssue": "Malipo yako yamekamilika, lakini rekodi moja au zaidi za umma za mchango hazikuweza kuundwa. Michango hiyo haitaonekana kwenye Bumicerts Zangu.",
+    "reward": {
+      "eyebrow": "Mkusanyiko umefunguliwa",
+      "guardianOf": "Mlinzi wa",
+      "personEyebrow": "Kwa kumsaidia",
+      "contributed": "Umechangia",
+      "moreProjects": "{count, plural, one {mradi # zaidi} other {miradi # zaidi}}",
+      "mint": "Na. {mint}",
+      "verified": "Imethibitishwa kwenye blockchain",
+      "tiltHint": "Sogeza kishale juu ya Bumicert ili kunasa mwanga",
+      "tiers": {
+        "seedling": {
+          "name": "Mche",
+          "rarity": "Kawaida"
+        },
+        "sapling": {
+          "name": "Mmea",
+          "rarity": "Si kawaida"
+        },
+        "grove": {
+          "name": "Kichaka",
+          "rarity": "Nadra"
+        },
+        "canopy": {
+          "name": "Dari",
+          "rarity": "Adhimu"
+        },
+        "oldGrowth": {
+          "name": "Msitu wa Kale",
+          "rarity": "Hadithi"
+        }
+      },
+      "overallEyebrow": "Jumla ya mchango",
+      "overallTitle": "Mkusanyiko kamili",
+      "overallSubtitle": "{count, plural, one {mradi # ulioungwa mkono} other {miradi # iliyoungwa mkono}}",
+      "collect": "Kusanya",
+      "collectAll": "Kusanya zote ({count})",
+      "prevCard": "Bumicert iliyotangulia",
+      "nextCard": "Bumicert inayofuata",
+      "deckHint": "Telezesha ili kuona Bumicerts zako",
+      "cardPosition": "Bumicert ya {current} kati ya {total}",
+      "collectedTitle": "Zote zimekusanywa!",
+      "collectedBody": "Bumicerts zako zilizothibitishwa ziko tayari kwenye Bumicerts Zangu.",
+      "viewMyCards": "Tazama Bumicerts Zangu"
+    }
+  },
+  "testRegistry": {
+    "eyebrow": "Majaribio ya kiolesura",
+    "title": "Daftari la majaribio ya kiolesura",
+    "description": "Maonyesho salama yanayotumika tena ya hatua halisi za GainForest, kwa data ya majaribio na vitendo vya nje vilivyozuiwa.",
+    "availableTitle": "Majaribio yanayopatikana",
+    "availableDescription": "Chagua mtiririko ili kufungua onyesho lake salama na shirikishi kikamilifu.",
+    "parityTitle": "Ahadi ya ulinganifu",
+    "parityBody": "Wasanidi programu na mawakala wa AI: kila jaribio hapa lazima litumie sehemu halisi ya uzalishaji. Iga data na vitendo vya nje pekee; usinakili wala kutenganisha kiolesura. Kila mabadiliko ya UI au UX lazima yaathiri jaribio na uzoefu halisi kwa njia sawa.",
+    "indexingNote": "Njia hii ni ya umma lakini imeondolewa kwenye injini za utafutaji. Usiweke siri au data halisi ya watu hapa.",
+    "scenarioLabel": "Jaribio lililosajiliwa",
+    "experienceTitle": "Mtiririko wa mchango",
+    "experienceDescription": "Pitia uzoefu wa sasa wa mchango kwa data salama ya majaribio bila malipo halisi.",
+    "openExperience": "Fungua jaribio",
+    "backToRegistry": "Rudi kwenye daftari",
+    "mockBadge": "Hali ya majaribio · hakuna malipo",
+    "projectPrompt": "Jaribu safari kamili ya mchango",
+    "projectPromptBody": "Chagua kiasi, kagua kikapu, unganisha pochi ya majaribio, kisha kamilisha malipo salama ya majaribio.",
+    "mockProjectTitle": "Ukanda wa msitu wa mawingu",
+    "mockOrganization": "Jumuiya ya Canopy",
+    "mockObjectiveOne": "Urejeshaji wa misitu",
+    "mockObjectiveTwo": "Utunzaji wa jamii",
+    "mockProjectDescription": "Kurejesha ukanda hai kati ya misitu ya jamii na makazi yaliyohifadhiwa.",
+    "donate": "Changia",
+    "reset": "Anza upya",
+    "stage": {
+      "project": "Mradi",
+      "cart": "Kikapu",
+      "checkout": "Malipo"
+    },
+    "projectUpdates": {
+      "title": "Kitunga cha masasisho ya mradi",
+      "description": "Kihariri cha WYSIWYG cha kuandika masasisho ya mradi, na ratiba inayoyaonyesha — sawasawa na yanavyoonekana kwenye ukurasa wa Cert.",
+      "mockNote": "Kuchapisha sasisho huweka rekodi kwenye akaunti halisi, kwa hivyo onyesho hili la awali halifanyi hivyo kamwe. Masasisho yaliyoandikwa hapa hutumia kitunga, uthibitishaji na ratiba za uzalishaji, lakini hubaki kwenye ukurasa huu na hupotea ukipakia upya.",
+      "mockBadge": "Hali ya majaribio · hakuna kinachochapishwa",
+      "cardTitle": "Masasisho ya mradi",
+      "cardDescription": "Andika sasisho lenye muundo — herufi nzito, vichwa, orodha, nukuu, viungo — kisha ulione kwenye ratiba.",
+      "composerLabel": "Andika sasisho",
+      "timelineLabel": "Masasisho yaliyochapishwa",
+      "seedTitle": "Wiki ya tatu ya upandaji — ripoti ya mwavuli wa miti",
+      "seedHeading": "Ripoti ya kitalu",
+      "seedIntro": "Wiki hii timu ya uwandani ilipanda",
+      "seedIntroBold": "miche 1,200",
+      "seedIntroTail": "katika eneo la urejeshaji la kaskazini.",
+      "seedListOne": "Kiwango cha kuishi kimebaki 94%",
+      "seedListTwo": "Wajitolea wapya wawili wa jamii walijiunga",
+      "seedQuote": "Msitu unarudi haraka kuliko yeyote kati yetu alivyotarajia.",
+      "seedPlainTitle": "Mvua zilifika mapema",
+      "seedPlainBody": "Sasisho fupi la maandishi wazi lililoandikwa kabla ya muundo kuwepo. Lazima lionekane bila mabadiliko."
+    },
+    "projectVisibility": {
+      "title": "Kadi ya mwonekano wa mradi",
+      "description": "Kadi iliyo kwenye Dhibiti → Miradi inayoieleza akaunti kilicho cha hadhara na kama inaonyeshwa kwenye kurasa za uchunguzi, katika kila hali yake.",
+      "mockNote": "Kuongeza akaunti kwenye kurasa za uchunguzi ni tendo halisi, hivyo onyesho hili halifanyi hivyo kamwe. Ni miito miwili ya seva ya kadi hii pekee inayobadilishwa na data ya mfano.",
+      "mockBadge": "Hali ya majaribio · hakuna kinachoonyeshwa",
+      "cardTitle": "Mwonekano wa mradi",
+      "cardDescription": "Ona jinsi ukurasa wa miradi unavyoeleza kilicho cha hadhara na kinachobadilika unapoonyeshwa kwenye kurasa za uchunguzi.",
+      "scenarios": {
+        "unlisted": {
+          "label": "Mmiliki · haionyeshwi kwenye kurasa za uchunguzi",
+          "body": "Akaunti inaweza kujiongeza kwenye orodha za uchunguzi."
+        },
+        "listed": {
+          "label": "Mmiliki · inaonyeshwa kwenye kurasa za uchunguzi",
+          "body": "Tayari inaonyeshwa, hivyo hakuna hatua inayotolewa."
+        },
+        "member": {
+          "label": "Mwanachama · haionyeshwi kwenye kurasa za uchunguzi",
+          "body": "Wanachama huona hali ya akaunti, lakini hawawezi kuibadilisha."
+        },
+        "unavailable": {
+          "label": "Haiwezi kubadilishwa kwa sasa",
+          "body": "Hali bado inaonyeshwa; kitufe kinaachwa badala ya kuwekwa bila kazi."
+        },
+        "unknown": {
+          "label": "Hali haikuweza kusomwa",
+          "body": "Kadi inasema hivyo badala ya kudai akaunti haionyeshwi."
+        }
+      }
+    },
+    "bioblitzNotifications": {
+      "title": "Hali za barua pepe za washindi wa BioBlitz",
+      "description": "Mistari halisi ya hali ya barua pepe za washindi, ikijumuisha barua pepe inayokosekana na ufuatiliaji wa mtu.",
+      "mockBadge": "Hali ya mfano · hakuna barua pepe",
+      "mockNote": "Washindi wote ni wa mfano. Kuweka alama hubadilisha kumbukumbu pekee.",
+      "cardTitle": "Barua pepe za washindi wa BioBlitz",
+      "cardDescription": "Hakiki kila hali ya uwasilishaji na mawasiliano ya mtu kwa wasimamizi.",
+      "fixtureLabel": "Barua pepe ya mshindi"
+    },
+    "invitationDelivery": {
+      "title": "Hali za uwasilishaji wa mwaliko",
+      "description": "Mstari halisi wa mwaliko unaosubiri kwa barua pepe iliyotumwa, iliyochelewa, kiungo cha moja kwa moja na vitendo vinavyozuiwa kwa jukumu.",
+      "mockBadge": "Hali ya mfano · hakuna barua pepe",
+      "mockNote": "Anwani zote ni za mfano. Kujaribu tena, kunakili na kughairi hubadilisha kumbukumbu pekee bila kuita huduma halisi.",
+      "cardTitle": "Uwasilishaji wa barua pepe ya mwaliko",
+      "cardDescription": "Hakiki hali, jaribio salama, kunakili kiungo na kughairi mialiko ya shirika.",
+      "scenarios": {
+        "sent": "Mmiliki · barua pepe imetumwa",
+        "delayed": "Mmiliki · tatizo la muda la uwasilishaji",
+        "manual": "Mmiliki · shiriki kiungo moja kwa moja",
+        "admin": "Mwaliko wa msimamizi · vitendo vimezuiwa"
+      },
+      "mockRetried": "Jaribio la mfano limekamilika bila kutuma barua pepe.",
+      "mockCopied": "Kiungo cha mfano kimenakiliwa bila kutumia ubao wa kunakili.",
+      "mockCanceled": "Mwaliko wa mfano umeondolewa kwenye hakiki hii."
+    },
+    "myCardsTitle": "Matunzio ya Bumicerts Zangu",
+    "myCardsDescription": "Hakiki matunzio ya Bumicerts zilizokusanywa yenye mifano ya Bumicerts.",
+    "shop": {
+      "title": "Ukurasa wa duka (Bumimic)",
+      "description": "Ukurasa wa bidhaa ya Bumimic, kirekodi cha sauti huria na cha gharama nafuu.",
+      "mockBadge": "Ukurasa tuli",
+      "cardTitle": "Ukurasa wa duka la Bumimic",
+      "cardDescription": "Onyesho la ukurasa wa bidhaa kwa mfano wa kirekodi cha sauti cha Bumimic."
+    },
+    "rewildingDashboard": {
+      "title": "Dashibodi ya ruzuku ya Rewilding",
+      "description": "Muhtasari wa Ruzuku yangu na chati yake ya mwendo wa sauti, katika kila hali ambayo lengo la kurekodi linaweza kuwa.",
+      "safetyNote": "Data ya majaribio pekee. Njia hii kamwe haisomi kiashiria, usajili wa mtazamaji, wala uthibitisho wa hatua muhimu, na hakuna kitu hapa kinachoweza kubadilisha ruzuku.",
+      "behind": {
+        "title": "Nyuma ya mwendo unaohitajika",
+        "description": "Dakika chache kwa siku — takriban mahali alipo mwanzilishi dhidi ya lengo la dakika 7,000."
+      },
+      "ahead": {
+        "title": "Mbele ya mwendo unaohitajika",
+        "description": "Upakiaji unaozidi mstari ambao ruzuku inahitaji."
+      },
+      "met": {
+        "title": "Lengo limefikiwa",
+        "description": "Lengo la kurekodi limefikiwa, hivyo chati inaacha kuomba mwendo."
+      },
+      "noAudio": {
+        "title": "Bado hakuna sauti",
+        "description": "Hakuna kilichopakiwa, hivyo chati ya mwendo inaachwa badala ya kuchorwa tupu."
+      },
+      "mockBadge": "Data ya majaribio",
+      "cardTitle": "Dashibodi ya ruzuku ya Rewilding",
+      "cardDescription": "Ruzuku yangu na chati yake ya mwendo wa sauti, nyuma na mbele ya lengo.",
+      "upcoming": {
+        "title": "Kabla ruzuku haijaanza",
+        "description": "Kipindi bado hakijaanza, hivyo chati inaonyesha kila upakiaji kama mwanzo mzuri — mstari unaohitajika unabaki tambarare hadi kifunguke."
+      }
+    },
+    "communityEvents": {
+      "title": "Matukio ya jamii",
+      "description": "Ugunduzi wa matukio, ukurasa wa tukio na fomu ya kuandaa ya uzalishaji kwa data ya majaribio — kuthibitisha, orodha za kusubiri, kuchapisha na kughairi vyote vinafanya kazi kwenye kumbukumbu.",
+      "cardTitle": "Matukio ya jamii",
+      "cardDescription": "Vinjari, thibitisha, jiunge na orodha ya kusubiri, na andaa tukio — vipengele vya uzalishaji kwa data ya kumbukumbu, pamoja na hali ya kutokuwa na akaunti.",
+      "mockBadge": "Hali ya majaribio · hakuna maandishi",
+      "eyebrow": "Sajili ya uzoefu wa UI",
+      "tabDiscovery": "Ugunduzi",
+      "tabDetail": "Ukurasa wa tukio",
+      "tabHost": "Fomu ya kuandaa",
+      "signedInToggle": "Umeingia",
+      "signInPrompt": "Kitendo hiki kingekuomba uingie. Washa “Umeingia” kuiga kikao.",
+      "dismiss": "Ondoa"
+    }
+  },
+  "myCards": {
+    "eyebrow": "Bumicerts za kukusanya",
+    "title": "Bumicerts Zangu",
+    "description": "Kila Bumicert hutokana na risiti ya mchango wa mradi iliyothibitishwa na kuunganishwa na akaunti yako.",
+    "count": "{count, plural, one {Bumicert #} other {Bumicerts #}}",
+    "emptyTitle": "Bado hakuna Bumicerts",
+    "emptyBody": "Changia mradi ukiwa umeingia na ukionyesha jina lako ili kupata Bumicert yako ya kwanza.",
+    "browseProjects": "Vinjari miradi",
+    "signedOutTitle": "Ingia ili kuona Bumicerts zako",
+    "signedOutBody": "Bumicerts huunganishwa na akaunti yako ili zipatikane katika vivinjari na vifaa tofauti.",
+    "unavailableTitle": "Bumicerts zako hazikuweza kupakiwa",
+    "unavailableBody": "Rekodi zako za michango ziko salama. Tafadhali jaribu kupakia Bumicerts zako tena.",
+    "tryAgain": "Jaribu tena",
+    "partialBody": "Baadhi ya rekodi za michango au maelezo ya miradi hayakuweza kupakiwa. Bumicerts zinazoonyeshwa zimethibitishwa, lakini mkusanyiko wako unaweza kutokamilika.",
+    "fallbackProject": "Mradi uliosaidiwa",
+    "fallbackOrganization": "Timu ya mradi",
+    "fallbackRecipient": "Mwanajamii",
+    "fallbackPersonContext": "Msaada wa moja kwa moja",
+    "verifiedDonation": "Mchango uliothibitishwa",
+    "viewProject": "Tazama mradi",
+    "viewProfile": "Tazama wasifu",
+    "viewPayment": "Tazama malipo"
+  }
+}

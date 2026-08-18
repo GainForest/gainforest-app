@@ -1,0 +1,129 @@
+{
+  "metadata": {
+    "title": "Política de privacidad",
+    "description": "Cómo GainForest gestiona la información en gainforest.app, Taina Field y servicios relacionados."
+  },
+  "title": "Política de privacidad",
+  "effectiveDate": "Fecha de entrada en vigor: 2 de julio de 2026",
+  "lastUpdated": "Última actualización: 2 de julio de 2026",
+  "intro": {
+    "p1": "Esta Política de privacidad explica cómo GainForest (\"GainForest\", \"nosotros\", \"nos\" o \"nuestro\") recopila, utiliza, comparte y protege información cuando utilizas gainforest.app, la aplicación móvil Taina Field y servicios relacionados (en conjunto, los \"Servicios\").",
+    "p2": "GainForest es una organización sin ánimo de lucro que crea tecnología abierta para el ambiente: herramientas para medir, verificar y recompensar la custodia de ecosistemas, a menudo en colaboración con comunidades locales e indígenas. Proteger a las personas y los lugares detrás de los datos que manejamos forma parte de nuestra misión, no es algo secundario."
+  },
+  "sections": {
+    "whoWeAre": {
+      "title": "1. Quiénes somos",
+      "paragraphs": {
+        "p1": "GainForest es GainForest e.V., una asociación sin ánimo de lucro exenta de impuestos registrada en Suiza (UID: CHE-181.901.605), con domicilio registrado en Schwandenacker 35, 8052 Zúrich, Suiza.",
+        "p2": "Para cualquier pregunta sobre privacidad, o para ejercer tus derechos, contáctanos en team@gainforest.net."
+      }
+    },
+    "scope": {
+      "title": "2. Alcance",
+      "paragraphs": {
+        "p1": "Esta política cubre:",
+        "p2": "gainforest.app: nuestra aplicación web, paneles y servicios asociados, que también operan sobre el AT Protocol (ATProto).",
+        "p3": "Taina Field: nuestra aplicación móvil para la recolección de datos de campo, que opera mediante el AT Protocol (ATProto) y almacenamiento local (en el dispositivo).",
+        "p4": "No cubre sitios web, protocolos ni servicios de terceros a los que enlazamos o con los que interoperamos, que tienen sus propias políticas (consulta la Sección 11)."
+      }
+    },
+    "informationWeCollect": {
+      "title": "3. Información que recopilamos",
+      "paragraphs": {
+        "p1": "Información que proporcionas directamente. Datos de la cuenta, como tu nombre, dirección de correo electrónico, organización y cualquier información de perfil; contenido que envías; y mensajes que nos mandas.",
+        "p2": "Datos ambientales y de campo (Taina Field). El propósito principal de Taina Field es recopilar datos ecológicos y de conservación. Esto puede incluir geolocalización y coordenadas GPS, marcas de tiempo, fotografías, grabaciones de audio, observaciones de especies y biodiversidad, notas de hábitat y mediciones de campo similares. Algunos de estos datos se recopilan intencionalmente para compartirse como datos ambientales abiertos (consulta la Sección 6).",
+        "p3": "Datos almacenados localmente en tu dispositivo. Taina Field está diseñado para funcionar sin conexión y con un enfoque local primero. Una parte significativa de los datos que recopilas se almacena en tu dispositivo y permanece bajo tu control hasta que decides sincronizarla o publicarla. Los datos que permanecen locales no son accesibles para nosotros.",
+        "p4": "Datos publicados a través del AT Protocol. Cuando decides sincronizar o publicar, los registros pueden escribirse en tu repositorio de AT Protocol y propagarse por la red ATProto. Lee atentamente la Sección 5: la naturaleza de esta red afecta qué tan públicos y qué tan permanentes son tus datos.",
+        "p5": "Datos técnicos y de uso. Tipo de dispositivo, sistema operativo, versión de la aplicación, dirección IP, configuración de idioma e información básica de uso o diagnóstico, que nos ayudan a mantener los Servicios funcionando y seguros.",
+        "p6": "Procuramos minimizar los datos personales y recopilar solo lo que los Servicios realmente necesitan."
+      }
+    },
+    "howWeUse": {
+      "title": "4. Cómo usamos la información",
+      "paragraphs": {
+        "p1": "Usamos la información para operar, mantener y mejorar los Servicios; permitir la recopilación, verificación y publicación abierta de datos ambientales; comunicarnos contigo; garantizar la seguridad y prevenir abusos; realizar y apoyar investigación de conservación; y cumplir obligaciones legales. No vendemos tu información personal."
+      }
+    },
+    "atProtocolDeletion": {
+      "title": "5. AT Protocol, federación y qué puede y no puede significar \"eliminar\"",
+      "paragraphs": {
+        "p1": "Tanto gainforest.app como Taina Field están construidos sobre el AT Protocol, un protocolo abierto y federado en el que eres dueño de tus propios datos. Tus registros viven en tu repositorio personal, alojado en un Personal Data Server (PDS), y tú los controlas. Entender cómo funciona esto importa:",
+        "p2": "Tú conservas tus datos. Los registros que creas se almacenan en tu propio repositorio de AT Protocol, identificado por tu cuenta (DID). GainForest opera como una aplicación sobre esta red; leemos e indexamos los registros que publicas, pero la copia autorizada está en tu repositorio, bajo tu control.",
+        "p3": "Los datos pueden ser públicos. Los registros publicados en la red suelen ser, por diseño, legibles públicamente. Cualquier persona, no solo GainForest, puede acceder a ellos, indexarlos o almacenarlos.",
+        "p4": "Los datos se replican. El protocolo distribuye registros entre relés, servidores, generadores de feeds y aplicaciones independientes. Una vez que un registro entra en la red, pueden existir copias en infraestructura que GainForest no opera ni controla.",
+        "p5": "La eliminación la inicias tú. Como eres dueño de tu repositorio, eliminar un registro —o eliminar tu cuenta— es una acción que realizas en el origen (a través de tu PDS/cuenta). Esa eliminación emite una señal por la red, y se espera que los relés y servicios conformes eliminen los datos correspondientes. GainForest eliminará o quitará de sus índices los datos de los sistemas que controlamos cuando recibamos u observemos dicha eliminación.",
+        "p6": "La eliminación no puede garantizarse por completo. Al tratarse de una red abierta y federada, GainForest no puede garantizar que se borren todas las copias posteriores en manos de terceros independientes. Esta es una propiedad del protocolo, no una limitación que hayamos elegido.",
+        "p7": "Para obtener detalles autorizados sobre cómo el protocolo gestiona los datos y la eliminación, consulta la documentación del AT Protocol en https://atproto.com/.",
+        "p8": "Te lo explicamos claramente para que puedas tomar decisiones informadas sobre lo que publicas. La información sensible —incluidas ubicaciones precisas de sitios protegidos, especies vulnerables o miembros identificables de una comunidad— debe publicarse solo con el cuidado y el consentimiento adecuados."
+      }
+    },
+    "openDataSharing": {
+      "title": "6. Datos abiertos e intercambio",
+      "paragraphs": {
+        "p1": "La misión de GainForest implica poner ciertos datos ambientales a disposición abierta para la conservación, la transparencia y la investigación. Cuando los datos se designan como abiertos, pueden publicarse, compartirse con socios de investigación y conservación, y hacerse accesibles al público.",
+        "p2": "Compartimos información personal solo: con tu consentimiento; con proveedores de servicios que actúan en nuestro nombre bajo obligaciones de confidencialidad; con socios de investigación o conservación cuando sea apropiado y legal; cuando la ley lo exija; o para proteger derechos, la seguridad y la integridad de los Servicios.",
+        "p3": "Los datos agregados o desidentificados pueden compartirse para investigación e informes."
+      }
+    },
+    "communitySensitiveData": {
+      "title": "7. Datos comunitarios, indígenas y de ubicación sensible",
+      "paragraphs": {
+        "p1": "Gran parte de nuestro trabajo de campo ocurre con comunidades locales e indígenas, o cerca de ellas, y en áreas ecológicamente sensibles. Estamos comprometidos con respetar la soberanía de los datos y obtener el consentimiento adecuado. Cuando los datos se refieren a personas identificables, conocimiento comunitario o la ubicación de ecosistemas o especies vulnerables, aplicamos mayor cuidado y apoyamos controles de acceso, ofuscación de coordenadas sensibles o publicación restringida cuando corresponda. Si recopilas estos datos mediante Taina Field, eres responsable de obtener los consentimientos requeridos en tu contexto."
+      }
+    },
+    "legalBases": {
+      "title": "8. Bases legales para el tratamiento (LPD suiza / RGPD)",
+      "paragraphs": {
+        "p1": "Nos basamos en: tu consentimiento; la ejecución de un contrato contigo; nuestros intereses legítimos en operar y mejorar los Servicios y avanzar nuestra misión de conservación (equilibrados con tus derechos); y el cumplimiento de obligaciones legales. Cuando el tratamiento se base en el consentimiento, puedes retirarlo en cualquier momento."
+      }
+    },
+    "retention": {
+      "title": "9. Conservación de datos",
+      "paragraphs": {
+        "p1": "Conservamos la información personal solo durante el tiempo necesario para los fines descritos aquí, y luego la eliminamos o desidentificamos, sujeto a los límites de federación descritos en la Sección 5 y a cualquier requisito legal de conservación. Los datos almacenados localmente permanecen en tu dispositivo hasta que los elimines o desinstales la aplicación."
+      }
+    },
+    "rights": {
+      "title": "10. Tus derechos",
+      "paragraphs": {
+        "p1": "Según dónde vivas, puedes tener derecho a acceder, corregir, eliminar, restringir u oponerte al tratamiento de tu información personal; a la portabilidad de los datos; y a retirar tu consentimiento. También puedes presentar una reclamación ante tu autoridad de protección de datos (en Suiza, el FDPIC). Para ejercer cualquiera de estos derechos, contacta a team@gainforest.net. Ten en cuenta que, para los datos publicados mediante el AT Protocol, la eliminación se realiza desde tu propio repositorio y cuenta; consulta la Sección 5 para saber cómo funciona y cuáles son sus límites. Responderemos dentro del plazo exigido por la ley aplicable."
+      }
+    },
+    "thirdParties": {
+      "title": "11. Servicios y enlaces de terceros",
+      "paragraphs": {
+        "p1": "Los Servicios interoperan con la red AT Protocol y pueden depender de proveedores externos (por ejemplo, alojamiento, analítica o infraestructura) y enlazar a sitios externos. Estos se rigen por sus propias políticas de privacidad, que te animamos a revisar."
+      }
+    },
+    "children": {
+      "title": "12. Privacidad de menores",
+      "paragraphs": {
+        "p1": "Los Servicios no están dirigidos a menores de 16 años y no recopilamos conscientemente su información personal. Si crees que un menor nos ha proporcionado datos, contáctanos y tomaremos las medidas apropiadas para eliminarlos."
+      }
+    },
+    "security": {
+      "title": "13. Seguridad",
+      "paragraphs": {
+        "p1": "Usamos medidas técnicas y organizativas razonables para proteger la información, incluido el cifrado en tránsito cuando sea viable. Ningún sistema es perfectamente seguro; el almacenamiento local primero significa que gran parte de la seguridad de tus datos también depende de la seguridad de tu propio dispositivo."
+      }
+    },
+    "internationalTransfers": {
+      "title": "14. Transferencias internacionales de datos",
+      "paragraphs": {
+        "p1": "GainForest opera internacionalmente y, especialmente por la naturaleza federada de ATProto, los datos pueden procesarse en países distintos del tuyo. Cuando sea necesario, recurrimos a salvaguardas adecuadas para esas transferencias."
+      }
+    },
+    "changes": {
+      "title": "15. Cambios en esta política",
+      "paragraphs": {
+        "p1": "Podemos actualizar esta política de vez en cuando. Publicaremos aquí la versión revisada y actualizaremos la fecha de \"Última actualización\", y daremos un aviso más destacado cuando haya cambios materiales."
+      }
+    },
+    "contact": {
+      "title": "16. Contáctanos",
+      "paragraphs": {
+        "p1": "Preguntas o solicitudes: team@gainforest.net GainForest e.V. Schwandenacker 35, 8052 Zúrich, Suiza UID: CHE-181.901.605"
+      }
+    }
+  }
+}

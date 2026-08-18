@@ -1,0 +1,733 @@
+{
+  "detail": {
+    "actions": {
+      "deleteBumicert": "Delete Cert",
+      "manage": "Manage",
+      "deleteHint": "Deleting removes this Cert for everyone.",
+      "deleteConfirmTitle": "Delete Cert?",
+      "deleteConfirmDescription": "This permanently removes “{title}”. This action cannot be undone.",
+      "deleteConfirmPrompt": "To confirm, type the Cert name exactly as shown:",
+      "deleteConfirmInputAria": "Type the Cert name to confirm deletion",
+      "deleteConfirmMismatch": "The name doesn’t match yet.",
+      "deleteConfirmCancel": "Cancel",
+      "deleteConfirmConfirm": "Delete Cert",
+      "deleteError": "This Cert could not be deleted. Please try again."
+    },
+    "error": {
+      "loadTitle": "Couldn't load this cert",
+      "loadDescription": "We had trouble fetching this cert's data. Please try again or go back to the homepage."
+    },
+    "timeline": {
+      "title": "Project Updates",
+      "itemCount": "{count, plural, =0 {0 items} =1 {1 item} other {# items}}",
+      "linked": "linked {window}",
+      "linkedWindow": "Linked window: {window}",
+      "emptyFiltered": "No evidence matches this filter.",
+      "emptyTitle": "No evidence uploaded yet",
+      "emptyDescription": "Evidence reports, audits, and field notes published by this organization will appear here.",
+      "filters": {
+        "all": "All",
+        "tree": "Trees",
+        "audio": "Sounds",
+        "biodiversity": "Nature",
+        "document": "Document",
+        "file": "Files"
+      },
+      "ownerTools": "Owner tools",
+      "linkEvidenceTitle": "Link evidence",
+      "linkEvidenceDescription": "Add saved evidence or files to {title}. Items you add will appear in the public project updates below.",
+      "notTimelineYet": "Not part of the timeline yet",
+      "linkedTitle": "Linked project updates",
+      "linkedItemCount": "{count, plural, =0 {0 items linked to this cert activity} =1 {1 item linked to this cert activity} other {# items linked to this cert activity}}",
+      "linkedDescription": "Review the records, files, and map layers that are already part of the public project updates.",
+      "orgTitle": "Updates from this organization's projects",
+      "orgItemCount": "{count, plural, =0 {0 updates} =1 {1 update} other {# updates}}",
+      "orgDescription": "Reports, files, and field notes published across every project this organization runs.",
+      "seeMore": "See {count} more",
+      "pageOf": "Page {current} of {total}",
+      "previousPage": "Previous page",
+      "nextPage": "Next page",
+      "timelineTools": "Timeline tools",
+      "linksUnavailable": "Existing timeline links could not be checked. Refresh before adding tree groups.",
+      "linkSuccess": "Linked to the public timeline. It may take a moment to appear for everyone.",
+      "fallbacks": {
+        "linkedNatureDataGroup": "Linked nature data group",
+        "linkedNatureData": "Linked nature data"
+      }
+    },
+    "evidenceAdder": {
+      "title": "Add update",
+      "composerDescription": "Write a short update. Attach sounds, observations, trees, or files if they help.",
+      "captionPlaceholder": "Share a quick project update. You can post text only or attach evidence below.",
+      "titlePlaceholder": "Title (optional)",
+      "editor": {
+        "bold": "Bold",
+        "italic": "Italic",
+        "underline": "Underline",
+        "strikethrough": "Strikethrough",
+        "heading": "Heading",
+        "subheading": "Subheading",
+        "quote": "Quote",
+        "bulletedList": "Bulleted list",
+        "numberedList": "Numbered list",
+        "addLink": "Add link",
+        "removeLink": "Remove link",
+        "linkUrlPlaceholder": "https://example.org",
+        "applyLink": "Apply",
+        "cancelLink": "Cancel"
+      },
+      "attachLabel": "Attach optional evidence:",
+      "attachingType": "Attaching {type}",
+      "postUpdate": "Post update",
+      "chooseAttachment": "Choose something to attach",
+      "updateTitleFallback": "Project update",
+      "selectType": "Select the type of evidence to add.",
+      "selectEvidence": "Select the evidence to add.",
+      "addType": "Add {type}",
+      "tabs": {
+        "images": "Images",
+        "audio": "Sounds",
+        "soundscape": "Soundscape",
+        "trees": "Trees",
+        "biodiversity": "Observations",
+        "files": "Files"
+      },
+      "linking": "Posting…",
+      "loadingSources": "Loading evidence…",
+      "sourcesLoadError": "Could not load available evidence. Refresh and try again.",
+      "selectToLink": "Select evidence to link",
+      "linkItems": "{count, plural, =1 {Link 1 item} other {Link # items}}",
+      "optionalNote": "Optional Note",
+      "optionalNotePlaceholder": "Add context about this evidence…",
+      "authError": "Something went wrong. Please refresh the page.",
+      "contentType": "Content type",
+      "selectContentType": "Select content type",
+      "addFilePlaceholder": "Add a file as evidence",
+      "fileHelp": "Files up to {maxSize}.",
+      "addImagePlaceholder": "Drop images here or click to upload",
+      "imageHelp": "Images up to {maxSize}.",
+      "externalLink": "External link",
+      "externalLinkPlaceholder": "https://example.org/report",
+      "addLink": "Add",
+      "externalLinkHelp": "Link reports, websites, dashboards, or external evidence platforms.",
+      "invalidUrlProtocol": "Use an http or https URL.",
+      "invalidUrl": "Enter a valid URL.",
+      "remove": "Remove",
+      "removeFile": "Remove {name}",
+      "removeExternalLink": "Remove external link",
+      "noFilesSelected": "No files or links selected yet.",
+      "contentTypes": {
+        "document": "Document",
+        "report": "Report",
+        "audit": "Audit",
+        "evidence": "Evidence",
+        "testimonial": "Testimonial",
+        "methodology": "Methodology",
+        "photo": "Photo",
+        "video": "Video",
+        "dataset": "Dataset",
+        "certificate": "Certificate",
+        "audio": "Sound",
+        "other": "Other",
+        "update": "Update",
+        "treeDataset": "Tree dataset",
+        "biodiversity": "Nature",
+        "occurrence": "Tree"
+      },
+      "emptyUploaded": "No {type} uploaded yet.",
+      "uploadType": "Upload {type}",
+      "manage": "Manage",
+      "untitledRecording": "Untitled recording",
+      "untitledSoundscape": "Untitled soundscape",
+      "soundscapeHelp": "Pick a soundscape already built from this organization's recordings. Readers can play it from the update.",
+      "soundscapeEmpty": "No soundscape could be read from this organization right now.",
+      "unnamedTreeDataset": "Unnamed tree group",
+      "unknownObservation": "Unknown nature sighting",
+      "treeCount": "{count, plural, =1 {1 tree} other {# trees}}",
+      "speciesCount": "{count, plural, =1 {1 species} other {# species}}",
+      "siteContextLabel": "Project place: {siteName}",
+      "siteContextReady": "Project place ready",
+      "siteContextMixed": "This tree group covers more than one project place",
+      "siteContextIncomplete": "Some trees are missing a project place",
+      "siteContextUnresolved": "Project place could not be checked",
+      "siteContextUnavailable": "Project place is missing",
+      "incompleteBumicertReference": "Cannot link evidence because the cert reference is incomplete. Refresh the page and try again.",
+      "partialLinkSuccess": "{createdCount, plural, =1 {1 attachment} other {# attachments}} linked, but not all {totalCount, plural, =1 {1 group} other {# groups}} completed. {error}",
+      "emptyLabels": {
+        "audio": "sound recordings",
+        "trees": "tree groups",
+        "biodiversity": "observations"
+      },
+      "attachmentTitles": {
+        "images": "Images",
+        "audio": "Sound recordings",
+        "soundscape": "Soundscape",
+        "trees": "Tree group",
+        "biodiversity": "Observations"
+      },
+      "chooseEvidenceType": "Choose evidence type",
+      "selectSourceToLink": "Select a source to link existing evidence to this timeline.",
+      "linkType": "Link {type}",
+      "selectRecordsToLink": "Select evidence records to link to this timeline.",
+      "backToEvidenceTypes": "Back to evidence types",
+      "alreadyLinkedDataset": "Already linked to this timeline",
+      "checkingExistingLinks": "Checking existing timeline links…",
+      "unableToVerifyExistingLinks": "Existing links could not be checked. Refresh before linking tree groups.",
+      "tabDescriptions": {
+        "images": "Upload project photos.",
+        "audio": "Add sounds already saved by this organization.",
+        "soundscape": "Add the 24-hour soundscape built from this organization's recordings.",
+        "trees": "Add tree information grouped by project place.",
+        "biodiversity": "Filter observations and add displayed records or saved groups.",
+        "files": "Add reports, photos, videos, or web pages."
+      },
+      "update": {
+        "heading": "Write an update",
+        "subheading": "Share progress in your own words. It will appear in the public project updates.",
+        "titleLabel": "Title",
+        "titlePlaceholder": "What's new?",
+        "bodyLabel": "Update",
+        "bodyPlaceholder": "Share progress, milestones, or news from the field…",
+        "post": "Post update",
+        "posting": "Posting…"
+      },
+      "permissions": {
+        "signIn": "Sign in with an account that can manage this timeline.",
+        "notMember": "Switch to an organization account that can manage this timeline.",
+        "createDenied": "You cannot link evidence for this timeline.",
+        "deleteDenied": "You cannot remove evidence from this timeline."
+      },
+      "linkError": "Unable to link this evidence. Please try again.",
+      "manageType": "Manage {type}",
+      "biodiversity": {
+        "attachmentGroupTitle": "Nature group",
+        "attachmentObservationsTitle": "Observations",
+        "emptyLabel": "observations",
+        "searchLabel": "Search",
+        "searchPlaceholder": "Search nature",
+        "recorderLabel": "Recorder",
+        "allRecorders": "All recorders",
+        "recorderOptionFallback": "Recorder {number}",
+        "displayedTitle": "Displayed observations",
+        "displayedSummary": "{shown} of {total, plural, =1 {1 sighting} other {# sightings}} shown. Choose sightings from this filtered view.",
+        "clearDisplayed": "Clear displayed",
+        "selectDisplayed": "Select displayed",
+        "noDataMatches": "No observations match these filters.",
+        "recordedBy": "Recorded by {name}",
+        "recorderFallback": "a saved recorder",
+        "alreadyLinked": "Already linked",
+        "coveredByGroup": "Covered by group",
+        "groupsTitle": "Nature groups",
+        "groupsDescription": "Groups use the same recorder and search filters.",
+        "noGroupsMatch": "No nature groups match these filters.",
+        "multipleRecorders": "{count, plural, =1 {1 recorder} other {# recorders}}",
+        "firstRecorderAndMore": "{name} + {count, plural, =1 {1 more} other {# more}}",
+        "shownCount": "{count} shown",
+        "totalCount": "{count} total",
+        "speciesCount": "{count, plural, =1 {1 species} other {# species}}",
+        "groupStatus": "Grouped data",
+        "manageData": "Manage Observations",
+        "groupedNatureDataFallback": "Grouped nature data",
+        "csvUpload": {
+          "title": "Upload a spreadsheet",
+          "description": "Add a CSV of observations (with any measurement columns) as a single file. Best for large lists.",
+          "choose": "Choose a CSV file",
+          "hint": "A spreadsheet saved as .csv",
+          "notCsv": "Please choose a .csv file.",
+          "tooLarge": "This file is too large. Keep it under {maxSize}.",
+          "remove": "Remove file"
+        }
+      },
+      "unableToVerifyTreeSiteContext": "Could not check all trees. Refresh before linking tree groups.",
+      "validation": {
+        "fileTooLarge": "Choose a file up to {maxSize}.",
+        "fileTypeNotAllowed": "Choose a supported file type.",
+        "tooManyItems": "Link fewer items at a time.",
+        "invalidContext": "This tree group needs a project place. Refresh and try again."
+      }
+    },
+    "metadata": {
+      "notFound": "Cert Not Found"
+    },
+    "timelineEntry": {
+      "kind": {
+        "tree": "Trees",
+        "audio": "Sounds",
+        "biodiversity": "Nature",
+        "document": "Files",
+        "site": "Project place",
+        "update": "Update",
+        "other": "Update"
+      },
+      "notSpecified": "Not specified",
+      "resolvingDate": "Resolving evidence date…",
+      "linked": "linked {date}",
+      "treeCount": "{count, plural, =1 {1 tree} other {# trees}}",
+      "speciesCount": "{count, plural, =1 {1 species} other {# species}}",
+      "observationCount": "{count, plural, =1 {1 sighting} other {# sightings}}",
+      "recordingCount": "{count, plural, =1 {1 recording} other {# recordings}}",
+      "itemCount": "{count, plural, =1 {1 item} other {# items}}",
+      "dataGroupCount": "{count, plural, =1 {1 data group} other {# data groups}}",
+      "linkedFile": "Linked file",
+      "previewKinds": {
+        "image": "Image",
+        "video": "Video",
+        "audio": "Sound",
+        "pdf": "PDF",
+        "document": "Document"
+      },
+      "linkedTreeInformation": "Linked tree information",
+      "linkedItem": "Linked evidence",
+      "linkedProjectPlace": "Linked project place",
+      "linkedTreeGroup": "Linked tree group",
+      "linkedSound": "Linked sound",
+      "linkedSoundscape": "Linked soundscape",
+      "groupedData": "Grouped data",
+      "openMap": "Open map",
+      "viewMap": "View map",
+      "openGreenGlobe": "Open in Green Globe",
+      "removeEvidence": "Remove evidence",
+      "collapseEvidence": "Collapse evidence",
+      "expandEvidence": "Expand evidence",
+      "resolvingRecords": "Resolving linked evidence records…",
+      "selectedObservations": "Selected sightings",
+      "more": "+{count} more",
+      "viewGreenGlobe": "View on Green Globe",
+      "evidenceItem": "Evidence item",
+      "greenGlobePreview": "Green Globe preview",
+      "open": "Open",
+      "greenGlobeFallback": "If the preview does not load, open Green Globe in a new tab.",
+      "sharedGreenGlobePreviewHint": "Use the shared Green Globe map above to preview tree layers.",
+      "greenGlobeMapTitle": "Green Globe map",
+      "resolvingSpatialLayers": "Loading map layers…",
+      "activeLayerCount": "{count, plural, =1 {1 active layer} other {# active layers}}",
+      "showOnMapHint": "Use Show on map on tree cards to preview layers here.",
+      "greenGlobeIframeTitle": "Green Globe map preview",
+      "treeDatasetMapLayers": "Tree map layers",
+      "showDatasetOnGreenGlobeMap": "Show {title} on the map",
+      "hideDatasetFromGreenGlobeMap": "Hide {title} from the map",
+      "showOnMap": "Show on map",
+      "hideFromMap": "Hide from map",
+      "deleteConfirm": {
+        "title": "Remove evidence?",
+        "body": "Remove “{title}”? This cannot be undone.",
+        "removing": "Removing…",
+        "remove": "Remove",
+        "cancel": "Cancel"
+      },
+      "activeHiddenLayerSummary": "{activeCount} shown · {hiddenCount} hidden",
+      "activeHiddenLayerSummaryWithHint": "{activeCount} shown · {hiddenCount} hidden — use Show layer on tree cards to preview layers here.",
+      "showLayerHint": "Use Show layer on tree cards to preview layers here.",
+      "activeLayerBadge": "{count} shown",
+      "hiddenLayerBadge": "{count} hidden",
+      "activeLayersInPreview": "Shown on the map",
+      "hiddenLayerPrefix": "Hidden: {title}",
+      "activeOnMap": "Shown on map",
+      "hiddenFromMap": "Hidden from map",
+      "visibleLayerDescription": "This tree group is visible on the map.",
+      "hiddenLayerDescription": "This tree group is hidden right now.",
+      "showLayer": "Show layer",
+      "hideLayer": "Hide layer",
+      "deleteUnavailable": "You cannot remove this evidence.",
+      "deleteError": "Unable to remove this item.",
+      "deleteAlreadyRemoved": "This evidence was already removed. Refresh the page.",
+      "displayedBiodiversityData": "Displayed nature records",
+      "natureObservationsFallback": "Nature sightings",
+      "openLinkedFile": "Open linked file",
+      "openFile": "Open file",
+      "downloadFile": "Download file",
+      "previewUnavailable": "This file cannot be previewed here.",
+      "unresolvedReferenceBody": "This linked evidence could not be loaded yet.",
+      "preparingFile": "Preparing…",
+      "documentPreviewLoading": "Loading file preview…",
+      "documentPreviewPdfError": "The PDF could not be prepared for preview.",
+      "documentPreviewPdfUnavailable": "This PDF can be opened or downloaded, but it cannot be previewed here.",
+      "documentPreviewEmpty": "{title} is empty.",
+      "documentPreviewTruncated": "Preview shortened. Open or download the file to see everything.",
+      "documentPreviewTextError": "The file text could not be loaded here.",
+      "documentPreviewTextUnavailable": "This file can be opened or downloaded, but it cannot be previewed here.",
+      "documentPreviewHtmlError": "The web page file could not be loaded here.",
+      "documentPreviewHtmlUnavailable": "This web page file can be opened or downloaded, but it cannot be previewed here.",
+      "documentPreviewUnsupported": "This file type is recognized, but it cannot be previewed here. Open or download the file to view it.",
+      "documentFormats": {
+        "pdf": "PDF file",
+        "text": "Text file",
+        "markdown": "Markdown file",
+        "html": "Web page file",
+        "rtf": "RTF file",
+        "word": "Word file",
+        "spreadsheet": "Spreadsheet",
+        "presentation": "Presentation",
+        "document": "Document"
+      }
+    },
+    "reference": {
+      "linkedRecord": "Linked record",
+      "linkedAudioRecord": "Linked audio record",
+      "audioEvidence": "Audio evidence",
+      "playRecording": "Play recording",
+      "linkedDataset": "Linked dataset",
+      "viewGreenGlobe": "View in Green Globe",
+      "linkedTreeRecord": "Linked tree record",
+      "linkedSiteRecord": "Linked site record",
+      "siteEvidence": "Site evidence",
+      "openSiteMap": "Open site map",
+      "recordCount": "{count, plural, =1 {1 record} other {# records}}",
+      "speciesCount": "{count, plural, =1 {1 species} other {# species}}",
+      "individualCount": "{count, plural, =1 {1 individual} other {# individuals}}"
+    },
+    "overview": {
+      "aboutOrganization": "About Organization",
+      "aboutCreator": "About Creator",
+      "profile": "Profile",
+      "certifiedProfile": "Certified profile",
+      "moreFromCreator": "More Certs from this creator",
+      "moreFromOrganization": "More Certs from this organization",
+      "viewAll": "View all",
+      "ongoing": "ongoing",
+      "noDescription": "No description provided.",
+      "projectDetails": "Project details",
+      "activityPeriod": "Activity period",
+      "published": "Published",
+      "firstSiteBoundary": "First site boundary",
+      "firstSiteBoundaryMap": "First site boundary map",
+      "contributors": "Contributors",
+      "noLocationSet": "No location set"
+    },
+    "headerTabs": {
+      "overview": "Overview",
+      "siteBoundaries": "Site Boundaries",
+      "reviews": "Reviews",
+      "donations": "Donations",
+      "timeline": "Timeline",
+      "share": "Share",
+      "copied": "Copied!",
+      "donate": "Donate",
+      "goToOverview": "Go to overview tab"
+    },
+    "projectNav": {
+      "overview": "Overview",
+      "sightings": "Sightings",
+      "places": "Places",
+      "updates": "Updates",
+      "reviews": "Reviews",
+      "support": "Support"
+    },
+    "support": {
+      "title": "Support",
+      "donations": "Donations",
+      "fromSupporters": "From {count, plural, one {# supporter} other {# supporters}}",
+      "noDonationsYet": "Be the first to support this project.",
+      "donate": "Donate",
+      "donateAgain": "Donate again",
+      "donateOnMaEarth": "Donate on Ma Earth",
+      "round": "Round {round}",
+      "includesMaEarth": "Total includes GainForest and Ma Earth donations.",
+      "viaMaEarth": "Raised through the Ma Earth campaign.",
+      "notAccepting": "This project is not accepting donations yet. Follow {name} for updates.",
+      "messageQuote": "Donor message: “{message}”"
+    }
+  },
+  "create": {
+    "actions": {
+      "createBumicert": "Create a Cert"
+    },
+    "landing": {
+      "hero": {
+        "titleLine1": "Create impact.",
+        "titleLine2": "Certify change.",
+        "description": "Create a Cert to showcase your commitment to sustainability and inspire real change."
+      },
+      "explainer": {
+        "title": "What is a Cert?",
+        "body1": "A Cert is your impact story—proof of your contribution to people, communities, and the planet.",
+        "body2": "It helps you document, share, and celebrate your positive impact with transparency and credibility.",
+        "learnMore": "Learn more"
+      }
+    },
+    "tabs": {
+      "ariaLabel": "Cert creation views",
+      "recent": "Recent Certs",
+      "drafts": "Drafts"
+    },
+    "recent": {
+      "errorTitle": "Couldn't load Certs",
+      "errorFallback": "Please try again in a moment.",
+      "emptyTitle": "No recent Certs yet",
+      "emptyLine1": "You haven't created any Certs yet.",
+      "emptyLine2": "Create your first Cert to get started.",
+      "createFirst": "Create your first Cert"
+    },
+    "drafts": {
+      "untitledDraft": "Untitled Draft",
+      "signedOutTitle": "Sign in to view drafts",
+      "signedOutDescription": "Draft Certs are saved to your account so you can continue your work later.",
+      "loadingTitle": "Loading drafts",
+      "loadingDescription": "We are checking for saved Cert applications.",
+      "errorTitle": "Couldn't load drafts",
+      "errorFallback": "Failed to load drafts. Please try again.",
+      "emptyTitle": "No drafts yet",
+      "emptyDescription": "Start a new Cert and save it as a draft when you want to return later.",
+      "deleteAria": "Delete {title}"
+    },
+    "draft": {
+      "actions": {
+        "tips": "Tips",
+        "closeTips": "Close tips",
+        "saveAsDraft": "Save as Draft",
+        "continue": "Continue"
+      },
+      "validation": {
+        "required": "Required",
+        "maxCharacters": "No more than {count} characters allowed",
+        "descriptionRequired": "Description is required",
+        "contributorNameRequired": "All contributors must have a name",
+        "coverImageMaxSize": "Cover image must be 4MB or smaller",
+        "coverImageType": "Cover image must be JPG, PNG, or WebP"
+      },
+      "sidebar": {
+        "previewTitle": "Preview Cert",
+        "generatingPreview": "Generating preview metadata...",
+        "completeFirstStep": "Please complete the first step to generate the preview.",
+        "tipsTitle": "Tips for this section"
+      },
+      "steps": {
+        "cover": {
+          "title": "Cover Details",
+          "tips": {
+            "bullets": [
+              "Use a short and descriptive name for your cert.",
+              "Include a website or social link to your cert for easy access."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        },
+        "impact": {
+          "title": "Impact Details",
+          "tips": {
+            "pre": "When writing your impact story, use this STAR framework:",
+            "bullets": [
+              "Situation — What was happening and who or what was affected?",
+              "Task — What was the role of your organization, group, or community? Who else was involved?",
+              "Action — Describe what your organization or community did.",
+              "Result — What happened as a result? Include numbers if available, and mention both tangible and non-tangible outcomes. This will be supported by the impact data you provide later."
+            ],
+            "post": "Write freely. Longer stories are welcome."
+          }
+        },
+        "site": {
+          "title": "Site Details",
+          "tips": {
+            "bullets": [
+              "Add your own community or organization first, then other people or groups who joined.",
+              "Make sure everyone agrees to be included.",
+              "Upload your site boundary in GeoJSON format so it shows on the map."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        },
+        "review": {
+          "title": "Review",
+          "tips": {
+            "bullets": [
+              "Make sure you have completed all the previous steps.",
+              "Review the look of your cert before submitting."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        },
+        "submit": {
+          "title": "Submit",
+          "tips": {
+            "bullets": [
+              "You have completed all the steps! No more tips for this section."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        }
+      },
+      "stepForms": {
+        "cover": {
+          "heading": "Share your impact at a glance.",
+          "coverImage": {
+            "label": "Cover Image",
+            "info": "Choose an image that best represents your work",
+            "placeholder": "Upload or drag and drop an image"
+          },
+          "title": {
+            "label": "Cert Title",
+            "info": "Give your cert a clear, descriptive title",
+            "placeholder": "My Awesome Cert"
+          },
+          "dateRange": {
+            "label": "Cert Date Range",
+            "info": "Select the period when your work and impact took place",
+            "ongoing": "Ongoing",
+            "ongoingCheckbox": "This work is still ongoing"
+          },
+          "workType": {
+            "label": "What kind of work are you doing?",
+            "info": "Feel free to choose more than one",
+            "options": {
+              "ecologicalRestoration": "Ecological Restoration",
+              "agroforestry": "Agroforestry",
+              "climateAdaptation": "Climate Adaptation",
+              "biodiversityMonitoring": "Nature Monitoring",
+              "environmentalEducation": "Environmental Education",
+              "indigenousLocalKnowledge": "Indigenous & Local Knowledge",
+              "environmentalJustice": "Environmental Justice"
+            }
+          }
+        },
+        "impact": {
+          "heading": "Share your impact story.",
+          "story": {
+            "label": "Your Impact Story",
+            "description": "Tell us about your impact — what changed, who was involved, and how it's helping. Take your time. Your story helps inspire others and verify your work.",
+            "info": "Tell us what you did and what happened as a result",
+            "placeholder": "Describe your impact story..."
+          },
+          "shortDescription": {
+            "label": "Short Description",
+            "description": "A short description of your impact story. This will be used as the short description of the cert.",
+            "info": "Summarize your work and its results in a few lines",
+            "placeholder": "A quick summary about this cert.",
+            "generateTitle": "Generate short description with AI",
+            "generateDisabledTitle": "Write your impact story first"
+          }
+        },
+        "site": {
+          "heading": "Share your contributors and sites.",
+          "contributors": {
+            "label": "List of Contributors",
+            "description": "Add everyone involved in this cert — including your own community or organization and any collaborators. Tip: Start by adding your own group first before listing your partners or supporters.",
+            "info": "List any individuals or organizations that contributed to this work."
+          },
+          "boundaries": {
+            "label": "Site Boundaries",
+            "description": "Please upload your site boundary in GeoJSON format so we can visualize your cert on the map.",
+            "info": "Add the boundaries that best represent where the work took place.",
+            "selectHelp": "Select the boundaries for this cert, or add new ones.",
+            "manageSites": "Manage sites",
+            "loading": "Loading your sites...",
+            "loadError": "Unable to load sites.",
+            "empty": "No site found.",
+            "addSite": "Add a site",
+            "unnamedSite": "Unnamed Site",
+            "invalidLocation": "Invalid location"
+          },
+          "permissions": {
+            "label": "Permissions",
+            "confirm": "I confirm that all listed contributors gave their permission to include their work in this Cert.",
+            "terms": "I agree to the Terms & Conditions."
+          }
+        },
+        "submit": {
+          "signedInRequired": "You must be signed in to publish.",
+          "prepareError": "Failed to prepare publish data.",
+          "authenticatedTitle": "Authenticated",
+          "checkingAuth": "We are checking if you are authenticated.",
+          "notSignedIn": "You are not signed in. Please sign in to continue.",
+          "failedTitle": "Failed to publish.",
+          "publishingTitle": "Publishing your cert",
+          "readyTitle": "Ready to publish your cert",
+          "publishingDescription": "We are publishing your cert.",
+          "readyDescription": "Please click the button below to publish your cert.",
+          "retry": "Retry",
+          "publishAction": "Publish Cert",
+          "editDetails": "Edit details",
+          "successTitle": "Your Cert was published successfully!",
+          "linkEvidenceNow": "Link evidence now",
+          "viewBumicert": "View Cert",
+          "viewProject": "View Project",
+          "viewProjects": "View Projects",
+          "setUpDonations": "Set Up Donations",
+          "shareFeedback": "Share Feedback",
+          "createAnother": "Create another cert"
+        }
+      },
+      "modals": {
+        "saveDraft": {
+          "title": "Save as Draft",
+          "description": "Save your current progress as a draft.",
+          "successDescription": "Your draft has been saved successfully.",
+          "saveProgressFor": "Save your progress for",
+          "untitledDraft": "Untitled Draft",
+          "saving": "Saving...",
+          "saveAction": "Save Draft",
+          "savedBody": "Your draft has been saved. You can continue working on it later.",
+          "close": "Close"
+        },
+        "deleteDraft": {
+          "title": "Delete Draft",
+          "description": "Confirm your selection to delete the draft.",
+          "successDescription": "Draft has been deleted successfully.",
+          "missingDraftDescription": "Unable to determine which draft to delete.",
+          "confirmBody": "Are you sure that you want to <destructive>delete</destructive> the draft, <strong>{title}?</strong><br></br>This action cannot be undone.",
+          "untitledDraft": "Untitled Draft",
+          "cancel": "Cancel",
+          "deleting": "Deleting...",
+          "deleteAction": "Delete Draft",
+          "deletedBody": "The draft has been deleted successfully.",
+          "close": "Close"
+        },
+        "uploadLogo": {
+          "title": "Upload Logo",
+          "description": "Upload a logo for your account.",
+          "placeholder": "Upload a logo for your account",
+          "authRequired": "User is not authenticated",
+          "logoRequired": "Logo is required",
+          "done": "Done",
+          "uploading": "Uploading...",
+          "upload": "Upload"
+        }
+      },
+      "review": {
+        "heading": "Review the information.",
+        "uploaded": "Uploaded",
+        "notUploaded": "Not Uploaded",
+        "dateRange": "From {start} to {end}",
+        "notSelected": "Not Selected",
+        "impactStoryAdded": "Impact story added",
+        "sitesSelected": "{count, plural, =1 {1 site selected} other {# sites selected}}",
+        "yes": "Yes",
+        "no": "No",
+        "edit": "Edit",
+        "missingFields": "The following fields are missing:",
+        "fieldsWithErrors": "The following fields encountered errors:",
+        "fixIssues": "Please fix these issues to continue.",
+        "allFieldsCorrect": "All the fields are filled correctly.",
+        "fix": "Fix",
+        "preview": {
+          "title": "Preview your cert",
+          "missingLogo": "Your account doesn't have a logo. Do you want to add one?",
+          "generating": "Generating the preview...",
+          "completeFirstStep": "Complete the first step to preview your cert."
+        }
+      },
+      "hydration": {
+        "errorTitle": "Error",
+        "errorDescription": "We were unable to load the data you saved. Please reach out to support.",
+        "close": "Close",
+        "back": "Back",
+        "coverImageTitle": "Cover image couldn't be loaded",
+        "coverImageDescription": "Your draft data has been restored successfully, but the cover image couldn't be fetched. Please re-upload your cover image to continue.",
+        "gotIt": "Got it"
+      }
+    },
+    "auth": {
+      "signedOutTitle": "You are not signed in.",
+      "signedOutDescription": "Please sign in to create a cert.",
+      "accountErrorTitle": "Couldn't load your account",
+      "accountErrorDescription": "We had trouble loading your account. Please try again.",
+      "accountSetupTitle": "Your account is not set up yet.",
+      "accountSetupDescription": "Please complete your account information to create a cert.",
+      "manageAccount": "Manage my account",
+      "pleaseWait": "Please wait..."
+    }
+  }
+}

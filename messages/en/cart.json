@@ -1,0 +1,331 @@
+{
+  "header": {
+    "openCart": "{count, plural, =0 {Open donation cart} one {Open donation cart (# item)} other {Open donation cart (# items)}}"
+  },
+  "amountModal": {
+    "title": "Support this project",
+    "amountLabel": "Donation amount",
+    "minimum": "Minimum ${amount}",
+    "maximum": "Maximum ${amount}",
+    "directNote": "100% goes directly to {organization}’s verified wallet — no platform fee, and the network fee is covered for you.",
+    "publicNote": "Recorded as a public donation receipt anyone can audit.",
+    "addToCart": "Add to cart",
+    "updateCart": "Update cart",
+    "cancel": "Cancel"
+  },
+  "page": {
+    "title": "Cart"
+  },
+  "cartPage": {
+    "title": "Cart",
+    "projectCount": "{count, plural, one {# item} other {# items}}",
+    "emptyTitle": "Your cart is empty",
+    "emptyDescription": "Find a project you love and add a donation — everything in your cart is paid together at checkout.",
+    "exploreProjects": "Explore projects",
+    "removeItem": "Remove {title} from cart",
+    "amountFor": "Donation amount for {title}",
+    "minimum": "Minimum ${amount}",
+    "maximum": "Maximum ${amount}",
+    "invalidAmount": "Enter an amount above zero.",
+    "donations": "Donations",
+    "total": "Total",
+    "feesNote": "No platform fees — 100% goes to each recipient’s verified wallet. You can add an optional tip for GainForest at checkout.",
+    "checkout": "Check out",
+    "fixAmounts": "Fix the highlighted amounts to continue."
+  },
+  "checkoutPage": {
+    "title": "Checkout",
+    "backToCart": "Back to cart",
+    "encouragement": "Nice! Your donation supports community-led conservation.",
+    "donorTitle": "How your donation appears",
+    "anonymousLabel": "Donate anonymously",
+    "anonymousHint": "Anonymous donations never appear publicly under your name — you can still see them on your own profile.",
+    "signedOutNote": "You are not signed in, so your donations will appear as anonymous.",
+    "walletTitle": "Payment wallet",
+    "walletHint": "Donations are paid in USDC on Ethereum. Connect your wallet to continue — network fees are covered for you.",
+    "connectWallet": "Connect wallet",
+    "connecting": "Connecting…",
+    "connectFailed": "Wallet connection failed.",
+    "noWallet": "No supported wallet was found. Install MetaMask or another compatible wallet to continue.",
+    "available": "Available: {amount}",
+    "balanceUnavailable": "Balance unavailable",
+    "tipTitle": "Tip GainForest (optional)",
+    "tipDescription": "GainForest charges no platform fees and covers the network fees for every donation. Tips from donors keep this service running.",
+    "tipSliderLabel": "Tip amount",
+    "tipNudgeTitle": "Can you add a tip?",
+    "tipNudgeBody": "Tips support GainForest to support land stewards to support nature!",
+    "tipNudgeSet": "Set tip to {percent}%",
+    "yourTip": "Your tip:",
+    "tipLineLabel": "Tip for GainForest",
+    "summaryTitle": "Your donation",
+    "donations": "Donations",
+    "total": "Total",
+    "insufficientBalance": "Your wallet does not have enough USDC for this total.",
+    "multiApprovalNote": "{count, plural, one {Your wallet will ask you to approve # payment.} other {Your wallet will ask you to approve # payments, one after another.}}",
+    "donateNow": "Donate {amount} now",
+    "footerNote": "100% of your {amount} in donations goes to each recipient’s verified wallet.",
+    "footerInfoLabel": "What this covers",
+    "footerInfoFees": "GainForest charges no platform fee and pays the network fees for you.",
+    "footerInfoTip": "Your {tip} tip is separate. It is never taken out of your donations.",
+    "processing": "Processing…",
+    "doNotClose": "Do not close this window.",
+    "tryAgain": "Try again",
+    "blockedItems": "Not ready to receive donations yet, so excluded from this payment: {titles}",
+    "errorProfile": "We couldn’t link this donation to your profile. Sign in again or donate anonymously.",
+    "errorCannotReceive": "This account cannot receive donations yet.",
+    "errorAmount": "Check the donation amount and try again.",
+    "errorChanged": "The payment details changed. Please restart the donation.",
+    "errorGeneric": "Payment failed. Please try again.",
+    "errorTimeout": "This payment is taking longer than expected and may still complete. Check your wallet’s recent activity before trying again so you don’t pay twice.",
+    "tipFailed": "The tip could not be completed — your donations were not affected.",
+    "tipSkipped": "The tip was skipped because no donation completed.",
+    "thankYou": "Thank you",
+    "successSummary": "Your {amount} in donations was completed successfully.",
+    "recordedWithProfile": "Recorded with your GainForest profile.",
+    "recordedAnonymous": "Recorded as anonymous.",
+    "paymentDetails": "Payment details",
+    "shareTitle": "Share this with others",
+    "shareText": "I just donated {amount} to support nature projects on GainForest: {url}",
+    "shareOnX": "Share on X",
+    "shareOnBluesky": "Share on Bluesky",
+    "shareOnTelegram": "Share on Telegram",
+    "copyShareText": "Copy share text",
+    "exploreMore": "Explore more projects",
+    "emptyTitle": "Your cart is empty",
+    "singleApprovalNote": "Your wallet will ask for a single approval covering the whole total. GainForest then forwards each donation to its recipient.",
+    "messageTitle": "Add a message (optional)",
+    "messageHint": "A word of encouragement, or why you gave. The recipient will see it.",
+    "messagePlaceholder": "Add a message (optional)…",
+    "messageAnonymousNote": "Your message won't be shown under your name.",
+    "bioblitzAwardNote": "This message identifies the payment as a BioBlitz prize and cannot be changed.",
+    "tipNone": "No tip",
+    "cardsPreviewTitle": "Bumicerts you’ll receive",
+    "cardsUnavailableNote": "Bumicerts are only available for eligible project donations. This checkout does not include one.",
+    "cardsCheckingNote": "Checking which donations will earn Bumicerts…",
+    "receiptIssue": "Your payment completed, but one or more public donation records could not be created. Those donations will not appear in My Bumicerts.",
+    "reward": {
+      "eyebrow": "Collectible unlocked",
+      "guardianOf": "Guardian of",
+      "personEyebrow": "In support of",
+      "contributed": "Contributed",
+      "moreProjects": "{count, plural, one {# more project} other {# more projects}}",
+      "mint": "No. {mint}",
+      "verified": "Verified on-chain",
+      "tiltHint": "Move over the Bumicert to catch the light",
+      "tiers": {
+        "seedling": {
+          "name": "Seedling",
+          "rarity": "Common"
+        },
+        "sapling": {
+          "name": "Sapling",
+          "rarity": "Uncommon"
+        },
+        "grove": {
+          "name": "Grove",
+          "rarity": "Rare"
+        },
+        "canopy": {
+          "name": "Canopy",
+          "rarity": "Epic"
+        },
+        "oldGrowth": {
+          "name": "Old-Growth",
+          "rarity": "Legendary"
+        }
+      },
+      "overallEyebrow": "Total contribution",
+      "overallTitle": "Full collection",
+      "overallSubtitle": "{count, plural, one {# project backed} other {# projects backed}}",
+      "collect": "Collect",
+      "collectAll": "Collect all ({count})",
+      "prevCard": "Previous Bumicert",
+      "nextCard": "Next Bumicert",
+      "deckHint": "Flick through your Bumicerts",
+      "cardPosition": "Bumicert {current} of {total}",
+      "collectedTitle": "All collected!",
+      "collectedBody": "Your verified Bumicerts are ready in My Bumicerts.",
+      "viewMyCards": "View My Bumicerts"
+    }
+  },
+  "testRegistry": {
+    "eyebrow": "UI experiences",
+    "title": "UI experience registry",
+    "description": "Safe, reusable previews of real GainForest flows, powered by mock data and blocked side effects.",
+    "availableTitle": "Available experiences",
+    "availableDescription": "Choose a flow to open its safe, fully interactive preview.",
+    "parityTitle": "Parity contract",
+    "parityBody": "Developers and AI agents: every experience here must render the production component itself. Mock only data and side effects—never copy or fork the interface. Any UI or UX change must affect the mock and live experience in the same way.",
+    "indexingNote": "This route is public but excluded from search engines. Never place secrets or real personal data here.",
+    "scenarioLabel": "Registered experience",
+    "experienceTitle": "Donation flow",
+    "experienceDescription": "Walk through the current production donation experience with safe fixture data and no real payment.",
+    "openExperience": "Open experience",
+    "backToRegistry": "Back to registry",
+    "mockBadge": "Mock mode · no payments",
+    "projectPrompt": "Try the complete donation experience",
+    "projectPromptBody": "Choose an amount, review the cart, connect the simulated wallet, and complete a safe preview payment.",
+    "mockProjectTitle": "Cloud Forest Corridor",
+    "mockOrganization": "Canopy Commons",
+    "mockObjectiveOne": "Forest restoration",
+    "mockObjectiveTwo": "Community stewardship",
+    "mockProjectDescription": "Restoring a living corridor between community forests and protected habitat.",
+    "donate": "Donate",
+    "reset": "Reset",
+    "stage": {
+      "project": "Project",
+      "cart": "Cart",
+      "checkout": "Checkout"
+    },
+    "projectUpdates": {
+      "title": "Project update composer",
+      "description": "The WYSIWYG editor used to write project updates, and the timeline that renders them — exactly as they appear on a Cert page.",
+      "mockNote": "Posting an update publishes a record on a real account, so this preview never does. Updates written here run the production composer, validation, and timeline display, but stay on this page and disappear on reload.",
+      "mockBadge": "Mock mode · nothing is published",
+      "cardTitle": "Project updates",
+      "cardDescription": "Write a formatted update — bold, headings, lists, quotes, links — and see it rendered on the timeline.",
+      "composerLabel": "Write an update",
+      "timelineLabel": "Published updates",
+      "seedTitle": "Planting week three — canopy update",
+      "seedHeading": "Nursery report",
+      "seedIntro": "This week the field team planted",
+      "seedIntroBold": "1,200 saplings",
+      "seedIntroTail": "across the northern restoration site.",
+      "seedListOne": "Survival rate holding at 94%",
+      "seedListTwo": "Two new community volunteers joined",
+      "seedQuote": "The forest is coming back faster than any of us expected.",
+      "seedPlainTitle": "Rains arrived early",
+      "seedPlainBody": "Short plain-text update written before formatting existed. It must render unchanged."
+    },
+    "projectVisibility": {
+      "title": "Project visibility card",
+      "description": "The card on Manage → Projects that tells an account what is public and whether it shows on the explore pages, in each state it can be in.",
+      "mockNote": "Listing an account on the explore pages is a real side effect, so this preview never performs one. Only the card's two server calls are replaced by fixtures.",
+      "mockBadge": "Mock mode · nothing is listed",
+      "cardTitle": "Project visibility",
+      "cardDescription": "See how the projects page reports what is public and what listing on the explore pages changes.",
+      "scenarios": {
+        "unlisted": {
+          "label": "Owner · not on the explore pages",
+          "body": "The account can add itself to the explore lists."
+        },
+        "listed": {
+          "label": "Owner · on the explore pages",
+          "body": "Already listed, so no action is offered."
+        },
+        "member": {
+          "label": "Member · not on the explore pages",
+          "body": "Members see where the account stands, but cannot change it."
+        },
+        "unavailable": {
+          "label": "Listing cannot be changed right now",
+          "body": "The status still shows; the button is left out instead of being rendered dead."
+        },
+        "unknown": {
+          "label": "Listing status could not be read",
+          "body": "The card says so rather than claiming the account is not listed."
+        }
+      }
+    },
+    "bioblitzNotifications": {
+      "title": "BioBlitz winner email states",
+      "description": "The production moderator status rows for winner emails, including missing account email and manual follow-up.",
+      "mockBadge": "Mock mode · no email",
+      "mockNote": "All winners are fixtures. Marking a row handled changes memory only and never writes an award or notification.",
+      "cardTitle": "BioBlitz winner emails",
+      "cardDescription": "Preview every moderator-facing delivery and manual-contact state.",
+      "fixtureLabel": "Winner email"
+    },
+    "invitationDelivery": {
+      "title": "Invitation delivery states",
+      "description": "The production pending-invitation row for sent, delayed, manual-link, and role-restricted email states.",
+      "mockBadge": "Mock mode · no email",
+      "mockNote": "All addresses are fixtures. Retry, copy, and cancel update memory only and never call a live service.",
+      "cardTitle": "Invitation email delivery",
+      "cardDescription": "Preview delivery status, safe retry, copy-link, and cancel actions for organization invitations.",
+      "scenarios": {
+        "sent": "Owner · email sent",
+        "delayed": "Owner · temporary delivery problem",
+        "manual": "Owner · share the link directly",
+        "admin": "Admin invite · actions restricted"
+      },
+      "mockRetried": "Mock retry completed without sending an email.",
+      "mockCopied": "Mock invitation link copied without using the clipboard.",
+      "mockCanceled": "Mock invitation removed from this preview."
+    },
+    "myCardsTitle": "My Bumicerts gallery",
+    "myCardsDescription": "Preview the collected Bumicerts gallery, populated with sample collectibles.",
+    "shop": {
+      "title": "Shop page (Bumimic)",
+      "description": "The product page for Bumimic, a low-cost open acoustic recorder.",
+      "mockBadge": "Static page",
+      "cardTitle": "Bumimic shop page",
+      "cardDescription": "Preview the product page for the Bumimic acoustic recorder prototype."
+    },
+    "rewildingDashboard": {
+      "title": "Rewilding grant dashboard",
+      "description": "The My grant overview and its audio pace chart, in each state the recording target can be in.",
+      "safetyNote": "Fixture grant data only. This route never reads the indexer, a viewer's enrollment, or milestone confirmations, and nothing here can change a grant.",
+      "behind": {
+        "title": "Behind the pace needed",
+        "description": "A few minutes a day — roughly where a grantee starting out sits against the 7,000-minute target."
+      },
+      "ahead": {
+        "title": "Ahead of the pace needed",
+        "description": "Uploads running past the line the grant needs."
+      },
+      "met": {
+        "title": "Target met",
+        "description": "The recording target is reached, so the chart stops asking for a pace."
+      },
+      "noAudio": {
+        "title": "No audio yet",
+        "description": "Nothing uploaded, so the pace chart is omitted rather than drawn empty."
+      },
+      "mockBadge": "Mock data",
+      "cardTitle": "Rewilding grant dashboard",
+      "cardDescription": "My grant with its audio pace chart, behind and ahead of the target.",
+      "upcoming": {
+        "title": "Before the grant opens",
+        "description": "The window has not started, so the chart presents every upload as a head start — the required line stays flat until it opens."
+      }
+    },
+    "communityEvents": {
+      "title": "Community events",
+      "description": "The production events discovery, event page and host form on fixture data — RSVP, waitlists, publishing and cancelling all work in memory.",
+      "cardTitle": "Community events",
+      "cardDescription": "Browse, RSVP, join a waitlist, and host an event — production components on in-memory fixtures, with a signed-out mode.",
+      "mockBadge": "Mock mode · no writes",
+      "eyebrow": "UI experience registry",
+      "tabDiscovery": "Discovery",
+      "tabDetail": "Event page",
+      "tabHost": "Host form",
+      "signedInToggle": "Signed in",
+      "signInPrompt": "This action would ask you to sign in. Toggle “Signed in” to simulate a session.",
+      "dismiss": "Dismiss"
+    }
+  },
+  "myCards": {
+    "eyebrow": "Collectibles",
+    "title": "My Bumicerts",
+    "description": "Every Bumicert comes from a verified project donation receipt linked to your account.",
+    "count": "{count, plural, one {# Bumicert} other {# Bumicerts}}",
+    "emptyTitle": "No Bumicerts yet",
+    "emptyBody": "Donate to a project while signed in and showing your name to earn your first Bumicert.",
+    "browseProjects": "Browse projects",
+    "signedOutTitle": "Sign in to see your Bumicerts",
+    "signedOutBody": "Bumicerts are linked to your account so they stay available across browsers and devices.",
+    "unavailableTitle": "Your Bumicerts couldn't be loaded",
+    "unavailableBody": "Your donation records are safe. Please try loading your Bumicerts again.",
+    "tryAgain": "Try again",
+    "partialBody": "Some donation records or project details could not be loaded. The Bumicerts shown here are verified, but your collection may be incomplete.",
+    "fallbackProject": "Supported project",
+    "fallbackOrganization": "Project team",
+    "fallbackRecipient": "A community member",
+    "fallbackPersonContext": "Direct support",
+    "verifiedDonation": "Verified donation",
+    "viewProject": "View project",
+    "viewProfile": "View profile",
+    "viewPayment": "View payment"
+  }
+}

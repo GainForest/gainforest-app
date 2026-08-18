@@ -1,0 +1,733 @@
+{
+  "detail": {
+    "actions": {
+      "deleteBumicert": "Futa cheti",
+      "manage": "Dhibiti",
+      "deleteHint": "Kufuta huondoa cheti hiki kwa kila mtu.",
+      "deleteConfirmTitle": "Futa cheti?",
+      "deleteConfirmDescription": "Hii itaondoa “{title}” kabisa. Kitendo hiki hakiwezi kutenduliwa.",
+      "deleteConfirmPrompt": "Ili kuthibitisha, andika jina la cheti kama lilivyoonyeshwa:",
+      "deleteConfirmInputAria": "Andika jina la cheti ili kuthibitisha kufuta",
+      "deleteConfirmMismatch": "Jina bado halilingani.",
+      "deleteConfirmCancel": "Ghairi",
+      "deleteConfirmConfirm": "Futa cheti",
+      "deleteError": "Cheti hiki hakikuweza kufutwa. Tafadhali jaribu tena."
+    },
+    "error": {
+      "loadTitle": "Haikuweza kupakia cheti hii",
+      "loadDescription": "Tulikuwa na tatizo la kuleta data ya cheti hii. Tafadhali jaribu tena au rudi kwenye ukurasa wa nyumbani."
+    },
+    "timeline": {
+      "title": "Masasisho ya mradi",
+      "itemCount": "{count, plural, =0 {vipengee 0} =1 {kipengee 1} other {vipengee #}}",
+      "linked": "iliyounganishwa {window}",
+      "linkedWindow": "Dirisha lililounganishwa: {window}",
+      "emptyFiltered": "Hakuna ushahidi unaolingana na kichujio hiki.",
+      "emptyTitle": "Bado hakuna ushahidi uliopakiwa",
+      "emptyDescription": "Ripoti za ushahidi, ukaguzi na vidokezo vilivyochapishwa na shirika hili vitaonekana hapa.",
+      "filters": {
+        "all": "Wote",
+        "tree": "Miti",
+        "audio": "Sauti",
+        "biodiversity": "Asili",
+        "document": "Hati",
+        "file": "Faili"
+      },
+      "ownerTools": "Zana za mmiliki",
+      "linkEvidenceTitle": "Unganisha ushahidi",
+      "linkEvidenceDescription": "Ongeza ushahidi uliohifadhiwa au faili kwenye {title}. Vipengee utakavyoongeza vitaonekana kwenye masasisho ya mradi ya umma hapa chini.",
+      "notTimelineYet": "Bado si sehemu ya ratiba",
+      "linkedTitle": "Masasisho ya mradi yaliyounganishwa",
+      "linkedItemCount": "{count, plural, =0 {vipengee 0 vilivyounganishwa na shughuli hii ya cheti} =1 {kipengee 1 kimeunganishwa na shughuli hii ya cheti} other {vipengee # vimeunganishwa na shughuli hii ya cheti}}",
+      "linkedDescription": "Kagua rekodi, faili na tabaka za ramani ambazo tayari ni sehemu ya masasisho ya mradi ya umma.",
+      "orgTitle": "Masasisho kutoka miradi ya shirika hili",
+      "orgItemCount": "{count, plural, =0 {masasisho 0} =1 {sasisho 1} other {masasisho #}}",
+      "orgDescription": "Ripoti, faili na maelezo ya uga yaliyochapishwa katika kila mradi unaoendeshwa na shirika hili.",
+      "seeMore": "Ona {count} zaidi",
+      "pageOf": "Ukurasa {current} kati ya {total}",
+      "previousPage": "Ukurasa uliopita",
+      "nextPage": "Ukurasa unaofuata",
+      "timelineTools": "Zana za mstari wa wakati",
+      "linksUnavailable": "Viungo vilivyopo vya mstari wa wakati havikuweza kukaguliwa. Onyesha upya kabla ya kuongeza vikundi vya miti.",
+      "linkSuccess": "Imeunganishwa kwenye mstari wa wakati wa umma. Inaweza kuchukua muda kuonekana kwa kila mtu.",
+      "fallbacks": {
+        "linkedNatureDataGroup": "Kikundi cha data ya asili kilichounganishwa",
+        "linkedNatureData": "Data ya asili iliyounganishwa"
+      }
+    },
+    "evidenceAdder": {
+      "title": "Ongeza sasisho",
+      "composerDescription": "Andika sasisho fupi. Ambatisha sauti, uchunguzi, miti au faili ikiwa zitasaidia.",
+      "captionPlaceholder": "Shiriki sasisho fupi la mradi. Unaweza kuchapisha maandishi pekee au kuambatisha ushahidi hapa chini.",
+      "titlePlaceholder": "Kichwa (hiari)",
+      "editor": {
+        "bold": "Herufi nzito",
+        "italic": "Mlazo",
+        "underline": "Kupigia mstari",
+        "strikethrough": "Kufuta kwa mstari",
+        "heading": "Kichwa",
+        "subheading": "Kichwa kidogo",
+        "quote": "Nukuu",
+        "bulletedList": "Orodha ya vitone",
+        "numberedList": "Orodha ya nambari",
+        "addLink": "Ongeza kiungo",
+        "removeLink": "Ondoa kiungo",
+        "linkUrlPlaceholder": "https://example.org",
+        "applyLink": "Tumia",
+        "cancelLink": "Ghairi"
+      },
+      "attachLabel": "Ambatisha ushahidi wa hiari:",
+      "attachingType": "Inaambatisha {type}",
+      "postUpdate": "Chapisha sasisho",
+      "chooseAttachment": "Chagua kitu cha kuambatisha",
+      "updateTitleFallback": "Sasisho la mradi",
+      "selectType": "Chagua aina ya ushahidi wa kuongeza.",
+      "selectEvidence": "Chagua ushahidi wa kuongeza.",
+      "addType": "Ongeza {type}",
+      "tabs": {
+        "images": "Picha",
+        "audio": "Sauti",
+        "soundscape": "Mandhari ya sauti",
+        "trees": "Miti",
+        "biodiversity": "Uchunguzi",
+        "files": "Faili"
+      },
+      "linking": "Inachapisha...",
+      "loadingSources": "Inapakia ushahidi...",
+      "sourcesLoadError": "Haikuweza kupakia ushahidi uliopo. Onyesha upya na ujaribu tena.",
+      "selectToLink": "Chagua ushahidi wa kuunganisha",
+      "linkItems": "{count, plural, =1 {Unganisha kipengee 1} other {Unganisha vipengee #}}",
+      "optionalNote": "Dokezo la Hiari",
+      "optionalNotePlaceholder": "Ongeza muktadha kuhusu ushahidi huu...",
+      "authError": "Hitilafu fulani imetokea. Tafadhali onyesha upya ukurasa.",
+      "contentType": "Aina ya maudhui",
+      "selectContentType": "Chagua aina ya maudhui",
+      "addFilePlaceholder": "Ongeza faili kama ushahidi",
+      "fileHelp": "Faili hadi {maxSize}.",
+      "addImagePlaceholder": "Dondosha picha hapa au bofya ili kupakia",
+      "imageHelp": "Picha hadi {maxSize}.",
+      "externalLink": "Kiungo cha nje",
+      "externalLinkPlaceholder": "https://example.org/report",
+      "addLink": "Ongeza",
+      "externalLinkHelp": "Unganisha ripoti, tovuti, dashibodi au mifumo ya ushahidi wa nje.",
+      "invalidUrlProtocol": "Tumia URL ya http au https.",
+      "invalidUrl": "Weka URL halali.",
+      "remove": "Ondoa",
+      "removeFile": "Ondoa {name}",
+      "removeExternalLink": "Ondoa kiungo cha nje",
+      "noFilesSelected": "Bado hakuna faili au viungo vilivyochaguliwa.",
+      "contentTypes": {
+        "document": "Hati",
+        "report": "Ripoti",
+        "audit": "Ukaguzi",
+        "evidence": "Ushahidi",
+        "testimonial": "Ushuhuda",
+        "methodology": "Mbinu",
+        "photo": "Picha",
+        "video": "Video ya ushahidi",
+        "dataset": "Seti ya data",
+        "certificate": "Cheti",
+        "audio": "Sauti",
+        "other": "Nyingine",
+        "update": "Taarifa",
+        "treeDataset": "Seti ya data ya mti",
+        "biodiversity": "Asili",
+        "occurrence": "Mti"
+      },
+      "emptyUploaded": "Bado hakuna {type} iliyopakiwa.",
+      "uploadType": "Pakia {type}",
+      "manage": "Dhibiti",
+      "untitledRecording": "Kurekodi bila jina",
+      "untitledSoundscape": "Mandhari ya sauti isiyo na jina",
+      "soundscapeHelp": "Chagua mandhari ya sauti iliyoundwa tayari kutoka rekodi za shirika hili. Wasomaji wanaweza kuisikiliza hapo hapo kwenye taarifa.",
+      "soundscapeEmpty": "Hakuna mandhari ya sauti ya shirika hili inayoweza kusomwa kwa sasa.",
+      "unnamedTreeDataset": "Kikundi cha miti kisicho na jina",
+      "unknownObservation": "Mwonekano wa asili usiojulikana",
+      "treeCount": "{count, plural, =1 {mti 1} other {miti #}}",
+      "speciesCount": "{count, plural, =1 {spishi 1} other {spishi #}}",
+      "siteContextLabel": "Eneo la mradi: {siteName}",
+      "siteContextReady": "Eneo la mradi liko tayari",
+      "siteContextMixed": "Kikundi hiki cha miti kinahusu zaidi ya eneo moja la mradi",
+      "siteContextIncomplete": "Baadhi ya miti haina eneo la mradi",
+      "siteContextUnresolved": "Eneo la mradi halikuweza kukaguliwa",
+      "siteContextUnavailable": "Eneo la mradi halipo",
+      "incompleteBumicertReference": "Haiwezi kuunganisha ushahidi kwa sababu rejeleo la cheti halijakamilika. Onyesha upya ukurasa na ujaribu tena.",
+      "partialLinkSuccess": "{createdCount, plural, =1 {Kiambatisho 1 kimeunganishwa} other {Viambatisho # vimeunganishwa}}, lakini si {totalCount, plural, =1 {kundi 1 lote} other {makundi # yote}} yaliyokamilika. {error}",
+      "emptyLabels": {
+        "audio": "rekodi za sauti",
+        "trees": "vikundi vya miti",
+        "biodiversity": "uchunguzi"
+      },
+      "attachmentTitles": {
+        "images": "Picha",
+        "audio": "Rekodi za sauti",
+        "soundscape": "Mandhari ya sauti",
+        "trees": "Kikundi cha miti",
+        "biodiversity": "Uchunguzi"
+      },
+      "chooseEvidenceType": "Chagua aina ya ushahidi",
+      "selectSourceToLink": "Chagua chanzo ili kuunganisha ushahidi uliopo kwenye ratiba hii.",
+      "linkType": "Unganisha {type}",
+      "selectRecordsToLink": "Chagua rekodi za ushahidi za kuunganisha kwenye ratiba hii.",
+      "backToEvidenceTypes": "Rudi kwenye aina za ushahidi",
+      "alreadyLinkedDataset": "Tayari imeunganishwa kwenye ratiba hii",
+      "checkingExistingLinks": "Inakagua viungo vilivyopo vya ratiba…",
+      "unableToVerifyExistingLinks": "Viungo vilivyopo havikuweza kukaguliwa. Onyesha upya kabla ya kuunganisha vikundi vya miti.",
+      "tabDescriptions": {
+        "images": "Pakia picha za mradi.",
+        "audio": "Ongeza sauti ambazo tayari zimehifadhiwa na shirika hili.",
+        "soundscape": "Ongeza mandhari ya sauti ya saa 24 iliyoundwa kutoka rekodi za shirika hili.",
+        "trees": "Ongeza taarifa za miti zilizopangwa kwa eneo la mradi.",
+        "biodiversity": "Chuja uchunguzi na uongeze rekodi zinazoonyeshwa au vikundi vilivyohifadhiwa.",
+        "files": "Ongeza ripoti, picha, video, au kurasa za wavuti."
+      },
+      "update": {
+        "heading": "Andika taarifa",
+        "subheading": "Shiriki maendeleo kwa maneno yako mwenyewe. Itaonekana kwenye taarifa za mradi za umma.",
+        "titleLabel": "Kichwa",
+        "titlePlaceholder": "Kuna jipya gani?",
+        "bodyLabel": "Taarifa",
+        "bodyPlaceholder": "Shiriki maendeleo, hatua muhimu au habari kutoka uwandani…",
+        "post": "Chapisha taarifa",
+        "posting": "Inachapisha…"
+      },
+      "permissions": {
+        "signIn": "Ingia kwa akaunti inayoweza kusimamia mstari huu wa wakati.",
+        "notMember": "Badili kwenda akaunti ya shirika inayoweza kusimamia mstari huu wa wakati.",
+        "createDenied": "Huwezi kuunganisha ushahidi kwenye mstari huu wa wakati.",
+        "deleteDenied": "Huwezi kuondoa ushahidi kwenye mstari huu wa wakati."
+      },
+      "linkError": "Imeshindikana kuunganisha ushahidi huu. Tafadhali jaribu tena.",
+      "manageType": "Simamia {type}",
+      "biodiversity": {
+        "attachmentGroupTitle": "Kikundi cha asili",
+        "attachmentObservationsTitle": "Uchunguzi",
+        "emptyLabel": "uchunguzi",
+        "searchLabel": "Tafuta",
+        "searchPlaceholder": "Tafuta asili",
+        "recorderLabel": "Mrekodi",
+        "allRecorders": "Warekodi wote",
+        "recorderOptionFallback": "Mrekodi {number}",
+        "displayedTitle": "Uchunguzi unaoonyeshwa",
+        "displayedSummary": "{shown} kati ya {total, plural, =1 {mwonekano 1} other {mionekano #}} zinaonyeshwa. Chagua mionekano kutoka mwonekano huu uliochujwa.",
+        "clearDisplayed": "Futa zinazoonyeshwa",
+        "selectDisplayed": "Chagua zinazoonyeshwa",
+        "noDataMatches": "Hakuna uchunguzi unaolingana na vichujio hivi.",
+        "recordedBy": "Imerekodiwa na {name}",
+        "recorderFallback": "mrekodi aliyehifadhiwa",
+        "alreadyLinked": "Tayari imeunganishwa",
+        "coveredByGroup": "Imejumuishwa kwenye kikundi",
+        "groupsTitle": "Vikundi vya asili",
+        "groupsDescription": "Vikundi hutumia vichujio vilevile vya mrekodi na utafutaji.",
+        "noGroupsMatch": "Hakuna vikundi vya asili vinavyolingana na vichujio hivi.",
+        "multipleRecorders": "{count, plural, =1 {mrekodi 1} other {warekodi #}}",
+        "firstRecorderAndMore": "{name} + {count, plural, =1 {mwingine 1} other {wengine #}}",
+        "shownCount": "{count} zinaonyeshwa",
+        "totalCount": "jumla {count}",
+        "speciesCount": "{count, plural, =1 {spishi 1} other {spishi #}}",
+        "groupStatus": "Data iliyopangwa",
+        "manageData": "Dhibiti uchunguzi",
+        "groupedNatureDataFallback": "Data ya asili iliyopangwa pamoja",
+        "csvUpload": {
+          "title": "Pakia lahajedwali",
+          "description": "Ongeza CSV ya uchunguzi (pamoja na safu wima zozote za vipimo) kama faili moja. Bora kwa orodha kubwa.",
+          "choose": "Chagua faili la CSV",
+          "hint": "Lahajedwali iliyohifadhiwa kama .csv",
+          "notCsv": "Tafadhali chagua faili la .csv.",
+          "tooLarge": "Faili hili ni kubwa mno. Liwe chini ya {maxSize}.",
+          "remove": "Ondoa faili"
+        }
+      },
+      "unableToVerifyTreeSiteContext": "Haikuwezekana kukagua miti yote. Onyesha upya kabla ya kuunganisha vikundi vya miti.",
+      "validation": {
+        "fileTooLarge": "Chagua faili isiyozidi {maxSize}.",
+        "fileTypeNotAllowed": "Chagua aina ya faili inayokubalika.",
+        "tooManyItems": "Unganisha vipengee vichache kwa wakati mmoja.",
+        "invalidContext": "Kikundi hiki cha miti kinahitaji eneo la mradi. Onyesha upya na ujaribu tena."
+      }
+    },
+    "metadata": {
+      "notFound": "cheti Haijapatikana"
+    },
+    "timelineEntry": {
+      "kind": {
+        "tree": "Miti",
+        "audio": "Sauti",
+        "biodiversity": "Asili",
+        "document": "Faili",
+        "site": "Eneo la mradi",
+        "update": "Sasisho",
+        "other": "Sasisho"
+      },
+      "notSpecified": "Haijabainishwa",
+      "resolvingDate": "Inatatua tarehe ya ushahidi...",
+      "linked": "iliyounganishwa {date}",
+      "treeCount": "{count, plural, =1 {mti 1} other {miti #}}",
+      "speciesCount": "{count, plural, =1 {spishi 1} other {spishi #}}",
+      "observationCount": "{count, plural, =1 {mwonekano 1} other {mionekano #}}",
+      "recordingCount": "{count, plural, =1 {rekodi 1} other {rekodi #}}",
+      "itemCount": "{count, plural, =1 {kipengee 1} other {vipengee #}}",
+      "dataGroupCount": "{count, plural, =1 {kikundi 1 cha data} other {vikundi # vya data}}",
+      "linkedFile": "Faili iliyounganishwa",
+      "previewKinds": {
+        "image": "Picha",
+        "video": "Video",
+        "audio": "Sauti",
+        "pdf": "Faili ya PDF",
+        "document": "Hati"
+      },
+      "linkedTreeInformation": "Taarifa za miti zilizounganishwa",
+      "linkedItem": "Ushahidi uliounganishwa",
+      "linkedProjectPlace": "Eneo la mradi lililounganishwa",
+      "linkedTreeGroup": "Kikundi cha miti kilichounganishwa",
+      "linkedSound": "Sauti iliyounganishwa",
+      "linkedSoundscape": "Mandhari ya sauti iliyounganishwa",
+      "groupedData": "Data iliyopangwa",
+      "openMap": "Fungua ramani",
+      "viewMap": "Tazama ramani",
+      "openGreenGlobe": "Fungua katika Green Globe",
+      "removeEvidence": "Ondoa ushahidi",
+      "collapseEvidence": "Kunja ushahidi",
+      "expandEvidence": "Panua ushahidi",
+      "resolvingRecords": "Inatatua rekodi za ushahidi zilizounganishwa...",
+      "selectedObservations": "Mionekano iliyochaguliwa",
+      "more": "+{count} zaidi",
+      "viewGreenGlobe": "Tazama kwenye Green Globe",
+      "evidenceItem": "Kipengee cha ushahidi",
+      "greenGlobePreview": "Onyesho la kukagua Green Globe",
+      "open": "Fungua",
+      "greenGlobeFallback": "Ikiwa onyesho la kuchungulia halipakii, fungua Green Globe kwenye kichupo kipya.",
+      "sharedGreenGlobePreviewHint": "Tumia ramani ya pamoja ya Green Globe hapo juu kuona tabaka za miti.",
+      "greenGlobeMapTitle": "Ramani ya Green Globe",
+      "resolvingSpatialLayers": "Inapakia tabaka za ramani…",
+      "activeLayerCount": "{count, plural, =1 {tabaka 1 linalotumika} other {tabaka # zinazotumika}}",
+      "showOnMapHint": "Tumia Onyesha kwenye ramani kwenye kadi za miti kuona tabaka hapa.",
+      "greenGlobeIframeTitle": "Hakikisho la ramani ya Green Globe",
+      "treeDatasetMapLayers": "Tabaka za miti kwenye ramani",
+      "showDatasetOnGreenGlobeMap": "Onyesha {title} kwenye ramani",
+      "hideDatasetFromGreenGlobeMap": "Ficha {title} kutoka kwenye ramani",
+      "showOnMap": "Onyesha kwenye ramani",
+      "hideFromMap": "Ficha kutoka kwenye ramani",
+      "deleteConfirm": {
+        "title": "Ondoa ushahidi?",
+        "body": "Ungependa kuondoa \"{title}\"? Hili haliwezi kutenduliwa.",
+        "removing": "Inaondoa...",
+        "remove": "Ondoa",
+        "cancel": "Ghairi"
+      },
+      "activeHiddenLayerSummary": "{activeCount} zinaonyeshwa · {hiddenCount} zimefichwa",
+      "activeHiddenLayerSummaryWithHint": "{activeCount} zinaonyeshwa · {hiddenCount} zimefichwa — tumia Onyesha tabaka kwenye kadi za miti kuona tabaka hapa.",
+      "showLayerHint": "Tumia Onyesha tabaka kwenye kadi za miti kuona tabaka hapa.",
+      "activeLayerBadge": "{count} zinaonyeshwa",
+      "hiddenLayerBadge": "{count} zimefichwa",
+      "activeLayersInPreview": "Zinaonyeshwa kwenye ramani",
+      "hiddenLayerPrefix": "Imefichwa: {title}",
+      "activeOnMap": "Inaonyeshwa kwenye ramani",
+      "hiddenFromMap": "Imefichwa kwenye ramani",
+      "visibleLayerDescription": "Kikundi hiki cha miti kinaonekana kwenye ramani.",
+      "hiddenLayerDescription": "Kikundi hiki cha miti kimefichwa sasa.",
+      "showLayer": "Onyesha tabaka",
+      "hideLayer": "Ficha tabaka",
+      "deleteUnavailable": "Huwezi kuondoa ushahidi huu.",
+      "deleteError": "Imeshindikana kuondoa kipengee hiki.",
+      "deleteAlreadyRemoved": "Ushahidi huu tayari umeondolewa. Onyesha upya ukurasa.",
+      "displayedBiodiversityData": "Rekodi za asili zinazoonyeshwa",
+      "natureObservationsFallback": "Mionekano ya asili",
+      "openLinkedFile": "Fungua faili iliyounganishwa",
+      "openFile": "Fungua faili",
+      "downloadFile": "Pakua faili",
+      "previewUnavailable": "Faili hii haiwezi kuhakikiwa hapa.",
+      "unresolvedReferenceBody": "Ushahidi huu uliounganishwa haukuweza kupakiwa bado.",
+      "preparingFile": "Inaandaa…",
+      "documentPreviewLoading": "Inapakia hakikisho la faili…",
+      "documentPreviewPdfError": "PDF haikuweza kutayarishwa kwa hakikisho.",
+      "documentPreviewPdfUnavailable": "PDF hii inaweza kufunguliwa au kupakuliwa, lakini haiwezi kuhakikiwa hapa.",
+      "documentPreviewEmpty": "{title} haina maudhui.",
+      "documentPreviewTruncated": "Hakikisho limefupishwa. Fungua au pakua faili kuona yote.",
+      "documentPreviewTextError": "Maandishi ya faili hayakuweza kupakiwa hapa.",
+      "documentPreviewTextUnavailable": "Faili hii inaweza kufunguliwa au kupakuliwa, lakini haiwezi kuhakikiwa hapa.",
+      "documentPreviewHtmlError": "Faili ya ukurasa wa wavuti haikuweza kupakiwa hapa.",
+      "documentPreviewHtmlUnavailable": "Faili hii ya ukurasa wa wavuti inaweza kufunguliwa au kupakuliwa, lakini haiwezi kuhakikiwa hapa.",
+      "documentPreviewUnsupported": "Aina hii ya faili inatambulika, lakini haiwezi kuhakikiwa hapa. Fungua au pakua faili ili kuitazama.",
+      "documentFormats": {
+        "pdf": "Faili ya PDF",
+        "text": "Faili ya maandishi",
+        "markdown": "Faili ya Markdown",
+        "html": "Faili ya ukurasa wa wavuti",
+        "rtf": "Faili ya RTF",
+        "word": "Faili ya Word",
+        "spreadsheet": "Lahajedwali",
+        "presentation": "Wasilisho",
+        "document": "Hati"
+      }
+    },
+    "reference": {
+      "linkedRecord": "Rekodi iliyounganishwa",
+      "linkedAudioRecord": "Rekodi ya sauti iliyounganishwa",
+      "audioEvidence": "Ushahidi wa sauti",
+      "playRecording": "Cheza rekodi",
+      "linkedDataset": "Seti ya data iliyounganishwa",
+      "viewGreenGlobe": "Tazama kwenye Green Globe",
+      "linkedTreeRecord": "Rekodi ya mti iliyounganishwa",
+      "linkedSiteRecord": "Rekodi ya eneo iliyounganishwa",
+      "siteEvidence": "Ushahidi wa eneo",
+      "openSiteMap": "Fungua ramani ya eneo",
+      "recordCount": "{count, plural, =1 {rekodi 1} other {rekodi #}}",
+      "speciesCount": "{count, plural, =1 {spishi 1} other {spishi #}}",
+      "individualCount": "{count, plural, =1 {mtu mmoja} other {watu #}}"
+    },
+    "overview": {
+      "aboutOrganization": "Kuhusu Shirika",
+      "aboutCreator": "Kuhusu Muundaji",
+      "profile": "Wasifu",
+      "certifiedProfile": "Wasifu uliothibitishwa",
+      "moreFromCreator": "vyeti zaidi kutoka kwa muundaji huyu",
+      "moreFromOrganization": "vyeti zaidi kutoka kwa shirika hili",
+      "viewAll": "Tazama zote",
+      "ongoing": "inaendelea",
+      "noDescription": "Hakuna maelezo yaliyotolewa.",
+      "projectDetails": "Maelezo ya mradi",
+      "activityPeriod": "Kipindi cha shughuli",
+      "published": "Imechapishwa",
+      "firstSiteBoundary": "Mpaka wa kwanza wa tovuti",
+      "firstSiteBoundaryMap": "Ramani ya mpaka wa kwanza wa tovuti",
+      "contributors": "Wachangiaji",
+      "noLocationSet": "Hakuna eneo lililowekwa"
+    },
+    "headerTabs": {
+      "overview": "Muhtasari",
+      "siteBoundaries": "Mipaka ya tovuti",
+      "reviews": "Maoni",
+      "donations": "Michango",
+      "timeline": "Ratiba",
+      "share": "Shiriki",
+      "copied": "Imenakiliwa!",
+      "donate": "Changia",
+      "goToOverview": "Nenda kwenye kichupo cha muhtasari"
+    },
+    "projectNav": {
+      "overview": "Muhtasari",
+      "sightings": "Uchunguzi",
+      "places": "Maeneo",
+      "updates": "Masasisho",
+      "reviews": "Maoni",
+      "support": "Msaada"
+    },
+    "support": {
+      "title": "Usaidizi",
+      "donations": "Michango",
+      "fromSupporters": "Kutoka kwa {count, plural, one {mfadhili #} other {wafadhili #}}",
+      "noDonationsYet": "Kuwa wa kwanza kuunga mkono mradi huu.",
+      "donate": "Changia",
+      "donateAgain": "Changia tena",
+      "donateOnMaEarth": "Changia kwenye Ma Earth",
+      "round": "Duru ya {round}",
+      "includesMaEarth": "Jumla inajumuisha michango ya GainForest na Ma Earth.",
+      "viaMaEarth": "Imekusanywa kupitia kampeni ya Ma Earth.",
+      "notAccepting": "Mradi huu bado haupokei michango. Fuata {name} kupata habari mpya.",
+      "messageQuote": "Ujumbe wa mfadhili: “{message}”"
+    }
+  },
+  "create": {
+    "actions": {
+      "createBumicert": "Unda cheti"
+    },
+    "landing": {
+      "hero": {
+        "titleLine1": "Unda athari.",
+        "titleLine2": "Thibitisha mabadiliko.",
+        "description": "Unda cheti ili kuonyesha kujitolea kwako kwa uendelevu na kuhamasisha mabadiliko ya kweli."
+      },
+      "explainer": {
+        "title": "cheti ni nini?",
+        "body1": "cheti ni hadithi yako ya athari—uthibitisho wa mchango wako kwa watu, jumuiya na sayari.",
+        "body2": "Inakusaidia kuandika, kushiriki na kusherehekea athari yako nzuri kwa uwazi na uaminifu.",
+        "learnMore": "Jifunze zaidi"
+      }
+    },
+    "tabs": {
+      "ariaLabel": "Mionekano ya uundaji wa cheti",
+      "recent": "vyeti za hivi karibuni",
+      "drafts": "Rasimu"
+    },
+    "recent": {
+      "errorTitle": "Haikuweza kupakia vyeti",
+      "errorFallback": "Tafadhali jaribu tena baada ya muda mfupi.",
+      "emptyTitle": "Bado hakuna vyeti za hivi majuzi",
+      "emptyLine1": "Bado hujaunda vyeti zozote.",
+      "emptyLine2": "Unda cheti yako ya kwanza ili kuanza.",
+      "createFirst": "Unda cheti yako ya kwanza"
+    },
+    "drafts": {
+      "untitledDraft": "Rasimu Isiyo na Kichwa",
+      "signedOutTitle": "Ingia ili kutazama rasimu",
+      "signedOutDescription": "Rasimu ya vyeti huhifadhiwa kwenye akaunti yako ili uweze kuendelea na kazi yako baadaye.",
+      "loadingTitle": "Inapakia rasimu",
+      "loadingDescription": "Tunatafuta programu zilizohifadhiwa za cheti.",
+      "errorTitle": "Haikuweza kupakia rasimu",
+      "errorFallback": "Imeshindwa kupakia rasimu. Tafadhali jaribu tena.",
+      "emptyTitle": "Bado hakuna rasimu",
+      "emptyDescription": "Anzisha cheti mpya na uihifadhi kama rasimu unapotaka kurejea baadaye.",
+      "deleteAria": "Futa {title}"
+    },
+    "draft": {
+      "actions": {
+        "tips": "Vidokezo",
+        "closeTips": "Funga vidokezo",
+        "saveAsDraft": "Hifadhi kama Rasimu",
+        "continue": "Endelea"
+      },
+      "validation": {
+        "required": "Inahitajika",
+        "maxCharacters": "Hairuhusiwi zaidi ya vibambo vya {count}",
+        "descriptionRequired": "Maelezo inahitajika",
+        "contributorNameRequired": "Wachangiaji wote lazima wawe na jina",
+        "coverImageMaxSize": "Picha ya jalada lazima iwe 4MB au ndogo zaidi",
+        "coverImageType": "Picha ya jalada lazima iwe JPG, PNG, au WebP"
+      },
+      "sidebar": {
+        "previewTitle": "Hakiki cheti",
+        "generatingPreview": "Inazalisha metadata ya onyesho la kukagua...",
+        "completeFirstStep": "Tafadhali kamilisha hatua ya kwanza ili kutoa onyesho la kukagua.",
+        "tipsTitle": "Vidokezo vya sehemu hii"
+      },
+      "steps": {
+        "cover": {
+          "title": "Maelezo ya Jalada",
+          "tips": {
+            "bullets": [
+              "Tumia jina fupi na la ufafanuzi kwa cheti yako.",
+              "Jumuisha tovuti au kiungo cha kijamii kwa cheti yako kwa ufikiaji rahisi."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        },
+        "impact": {
+          "title": "Maelezo ya Athari",
+          "tips": {
+            "pre": "Unapoandika hadithi yako ya athari, tumia mfumo huu wa STAR:",
+            "bullets": [
+              "Hali - Ni nini kilikuwa kinatokea na ni nani au ni nini kiliathiriwa?",
+              "Kazi - Je, jukumu la shirika lako, kikundi au jumuiya yako lilikuwa gani? Nani mwingine alihusika?",
+              "Kitendo - Eleza kile ambacho shirika au jumuiya yako ilifanya.",
+              "Matokeo - Nini kilitokea kama matokeo? Jumuisha nambari kama zinapatikana, na utaje matokeo yanayoonekana na yasiyoonekana. Hii itaauniwa na data ya athari utakayotoa baadaye."
+            ],
+            "post": "Andika kwa uhuru. Hadithi ndefu zaidi zinakaribishwa."
+          }
+        },
+        "site": {
+          "title": "Maelezo ya Tovuti",
+          "tips": {
+            "bullets": [
+              "Ongeza jumuiya au shirika lako kwanza, kisha watu au vikundi vingine vilivyojiunga.",
+              "Hakikisha kila mtu anakubali kujumuishwa.",
+              "Pakia mpaka wa tovuti yako katika umbizo la GeoJSON ili ionekane kwenye ramani."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        },
+        "review": {
+          "title": "Kagua",
+          "tips": {
+            "bullets": [
+              "Hakikisha umekamilisha hatua zote za awali.",
+              "Kagua mwonekano wa cheti yako kabla ya kuwasilisha."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        },
+        "submit": {
+          "title": "Wasilisha",
+          "tips": {
+            "bullets": [
+              "Umekamilisha hatua zote! Hakuna vidokezo zaidi vya sehemu hii."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        }
+      },
+      "stepForms": {
+        "cover": {
+          "heading": "Shiriki athari yako kwa muhtasari.",
+          "coverImage": {
+            "label": "Picha ya Jalada",
+            "info": "Chagua picha inayowakilisha vyema kazi yako",
+            "placeholder": "Pakia au buruta na udondoshe picha"
+          },
+          "title": {
+            "label": "Kichwa cha cheti",
+            "info": "Mpe cheti yako mada iliyo wazi na yenye maelezo",
+            "placeholder": "cheti Yangu ya Kushangaza"
+          },
+          "dateRange": {
+            "label": "Muda wa Tarehe ya cheti",
+            "info": "Chagua kipindi ambacho kazi yako na athari zilifanyika",
+            "ongoing": "Inaendelea",
+            "ongoingCheckbox": "Kazi hii bado inaendelea"
+          },
+          "workType": {
+            "label": "Unafanya kazi gani?",
+            "info": "Jisikie huru kuchagua zaidi ya moja",
+            "options": {
+              "ecologicalRestoration": "Urejesho wa Kiikolojia",
+              "agroforestry": "Kilimo mseto",
+              "climateAdaptation": "Kukabiliana na Hali ya Hewa",
+              "biodiversityMonitoring": "Ufuatiliaji wa asili",
+              "environmentalEducation": "Elimu ya Mazingira",
+              "indigenousLocalKnowledge": "Maarifa Asilia na Mitaa",
+              "environmentalJustice": "Haki ya Mazingira"
+            }
+          }
+        },
+        "impact": {
+          "heading": "Shiriki hadithi yako ya athari.",
+          "story": {
+            "label": "Hadithi Yako ya Athari",
+            "description": "Tuambie kuhusu athari yako - nini kilibadilika, ni nani aliyehusika na jinsi inavyosaidia. Chukua wakati wako. Hadithi yako husaidia kuhamasisha wengine na kuthibitisha kazi yako.",
+            "info": "Tuambie ulifanya nini na matokeo yake ni nini",
+            "placeholder": "Eleza hadithi yako ya athari..."
+          },
+          "shortDescription": {
+            "label": "Maelezo Fupi",
+            "description": "Maelezo mafupi ya hadithi yako ya athari. Hii itatumika kama maelezo mafupi ya cheti.",
+            "info": "Fanya muhtasari wa kazi yako na matokeo yake katika mistari michache",
+            "placeholder": "Muhtasari wa haraka kuhusu cheti hii.",
+            "generateTitle": "Tengeneza maelezo mafupi na AI",
+            "generateDisabledTitle": "Andika hadithi yako ya athari kwanza"
+          }
+        },
+        "site": {
+          "heading": "Shiriki wachangiaji na tovuti zako.",
+          "contributors": {
+            "label": "Orodha ya Wachangiaji",
+            "description": "Ongeza kila mtu anayehusika katika cheti hii - ikijumuisha jumuiya au shirika lako na washirika wowote. Kidokezo: Anza kwa kuongeza kikundi chako kwanza kabla ya kuorodhesha washirika au wafuasi wako.",
+            "info": "Orodhesha watu binafsi au mashirika yoyote yaliyochangia kazi hii."
+          },
+          "boundaries": {
+            "label": "Mipaka ya tovuti",
+            "description": "Tafadhali pakia mpaka wa tovuti yako katika umbizo la GeoJSON ili tuweze kuona taswira cheti yako kwenye ramani.",
+            "info": "Ongeza mipaka inayowakilisha vyema zaidi mahali kazi ilifanyika.",
+            "selectHelp": "Chagua mipaka ya cheti hii, au ongeza mpya.",
+            "manageSites": "Dhibiti tovuti",
+            "loading": "Inapakia tovuti zako...",
+            "loadError": "Imeshindwa kupakia tovuti.",
+            "empty": "Hakuna tovuti iliyopatikana.",
+            "addSite": "Ongeza tovuti",
+            "unnamedSite": "Tovuti isiyo na jina",
+            "invalidLocation": "Mahali si sahihi"
+          },
+          "permissions": {
+            "label": "Ruhusa",
+            "confirm": "Ninathibitisha kuwa wachangiaji wote walioorodheshwa walitoa idhini yao ya kujumuisha kazi zao kwenye cheti hii.",
+            "terms": "Ninakubali Sheria na Masharti."
+          }
+        },
+        "submit": {
+          "signedInRequired": "Lazima uwe umeingia ili kuchapisha.",
+          "prepareError": "Imeshindwa kuandaa data ya uchapishaji.",
+          "authenticatedTitle": "Imethibitishwa",
+          "checkingAuth": "Tunaangalia ikiwa umeidhinishwa.",
+          "notSignedIn": "Hujaingia. Tafadhali ingia ili kuendelea.",
+          "failedTitle": "Imeshindwa kuchapisha.",
+          "publishingTitle": "Kuchapisha cheti yako",
+          "readyTitle": "Tayari kuchapisha cheti yako",
+          "publishingDescription": "Tunachapisha cheti yako.",
+          "readyDescription": "Tafadhali bofya kitufe kilicho hapa chini ili kuchapisha cheti yako.",
+          "retry": "Jaribu tena",
+          "publishAction": "Chapisha cheti",
+          "editDetails": "Hariri maelezo",
+          "successTitle": "cheti yako imechapishwa!",
+          "linkEvidenceNow": "Unganisha ushahidi sasa",
+          "viewBumicert": "Tazama cheti",
+          "viewProject": "Tazama Mradi",
+          "viewProjects": "Tazama Miradi",
+          "setUpDonations": "Weka Michango",
+          "shareFeedback": "Shiriki Maoni",
+          "createAnother": "Unda cheti nyingine"
+        }
+      },
+      "modals": {
+        "saveDraft": {
+          "title": "Hifadhi kama Rasimu",
+          "description": "Hifadhi maendeleo yako ya sasa kama rasimu.",
+          "successDescription": "Rasimu yako imehifadhiwa.",
+          "saveProgressFor": "Hifadhi maendeleo yako kwa",
+          "untitledDraft": "Rasimu Isiyo na Kichwa",
+          "saving": "Inahifadhi...",
+          "saveAction": "Hifadhi Rasimu",
+          "savedBody": "Rasimu yako imehifadhiwa. Unaweza kuendelea kulifanyia kazi baadaye.",
+          "close": "Funga"
+        },
+        "deleteDraft": {
+          "title": "Futa Rasimu",
+          "description": "Thibitisha uteuzi wako ili kufuta rasimu.",
+          "successDescription": "Rasimu imefutwa.",
+          "missingDraftDescription": "Imeshindwa kubainisha ni rasimu ipi ya kufuta.",
+          "confirmBody": "Je, una uhakika kwamba unataka <destructive>kufuta</destructive> rasimu, <strong>{title}?</strong><br></br>Kitendo hiki hakiwezi kutenduliwa.",
+          "untitledDraft": "Rasimu Isiyo na Kichwa",
+          "cancel": "Ghairi",
+          "deleting": "Inafuta...",
+          "deleteAction": "Futa Rasimu",
+          "deletedBody": "Rasimu imefutwa.",
+          "close": "Funga"
+        },
+        "uploadLogo": {
+          "title": "Pakia Nembo",
+          "description": "Pakia nembo ya akaunti yako.",
+          "placeholder": "Pakia nembo ya akaunti yako",
+          "authRequired": "Mtumiaji hajaidhinishwa",
+          "logoRequired": "Nembo inahitajika",
+          "done": "Imekamilika",
+          "uploading": "Inapakia...",
+          "upload": "Pakia"
+        }
+      },
+      "review": {
+        "heading": "Kagua habari.",
+        "uploaded": "Imepakiwa",
+        "notUploaded": "Haijapakiwa",
+        "dateRange": "Kutoka {start} hadi {end}",
+        "notSelected": "Haijachaguliwa",
+        "impactStoryAdded": "Hadithi ya athari imeongezwa",
+        "sitesSelected": "{count, plural, =1 {eneo 1 limechaguliwa} other {maeneo # yamechaguliwa}}",
+        "yes": "Ndiyo",
+        "no": "Hapana",
+        "edit": "Hariri",
+        "missingFields": "Sehemu zifuatazo hazipo:",
+        "fieldsWithErrors": "Sehemu zifuatazo zilipata hitilafu:",
+        "fixIssues": "Tafadhali rekebisha matatizo haya ili kuendelea.",
+        "allFieldsCorrect": "Mashamba yote yamejazwa kwa usahihi.",
+        "fix": "Rekebisha",
+        "preview": {
+          "title": "Hakiki cheti yako",
+          "missingLogo": "Akaunti yako haina nembo. Je, ungependa kuongeza moja?",
+          "generating": "Inazalisha onyesho la kukagua...",
+          "completeFirstStep": "Kamilisha hatua ya kwanza ili kuhakiki cheti yako."
+        }
+      },
+      "hydration": {
+        "errorTitle": "Hitilafu",
+        "errorDescription": "Hatukuweza kupakia data uliyohifadhi. Tafadhali wasiliana na usaidizi.",
+        "close": "Funga",
+        "back": "Rudi",
+        "coverImageTitle": "Picha ya jalada haikuweza kupakiwa",
+        "coverImageDescription": "Data ya rasimu yako imerejeshwa kwa mafanikio, lakini picha ya jalada haikuweza kupatikana. Tafadhali pakia tena picha ya jalada ili kuendelea.",
+        "gotIt": "Nimeelewa"
+      }
+    },
+    "auth": {
+      "signedOutTitle": "Hujaingia.",
+      "signedOutDescription": "Tafadhali ingia ili kuunda cheti.",
+      "accountErrorTitle": "Haikuweza kupakia akaunti yako",
+      "accountErrorDescription": "Tulikuwa na tatizo la kupakia akaunti yako. Tafadhali jaribu tena.",
+      "accountSetupTitle": "Akaunti yako bado haijawekwa.",
+      "accountSetupDescription": "Tafadhali kamilisha maelezo ya akaunti yako ili kuunda cheti.",
+      "manageAccount": "Dhibiti akaunti yangu",
+      "pleaseWait": "Tafadhali subiri..."
+    }
+  }
+}

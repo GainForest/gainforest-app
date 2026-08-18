@@ -1,0 +1,30 @@
+{
+  "metadata": {
+    "title": "Mabadiliko Mapya",
+    "description": "Kila mabadiliko yaliyotolewa kwa GainForest, yakionyeshwa kwa muda."
+  },
+  "eyebrow": "Mapya",
+  "heading": "GainForest v{version}",
+  "intro": "Ratiba hai ya kila kitu tulichotoa — vipengele vipya, maboresho, na marekebisho, vikipangwa kwa mwezi na kupewa rangi kulingana na eneo.",
+  "stats": {
+    "commits": "Mabadiliko",
+    "months": "Miezi",
+    "range": "Kipindi"
+  },
+  "filterLabel": "Chuja kwa eneo",
+  "all": "Vyote",
+  "shipped": "{count, plural, one {mabadiliko #} other {mabadiliko #}}",
+  "categories": {
+    "taina": "Tainá",
+    "dataJobs": "Makundi ya data",
+    "donations": "Michango",
+    "observations": "Uchunguzi",
+    "projects": "Miradi na mashirika",
+    "auth": "Akaunti na kuingia",
+    "admin": "Usimamizi na ukaguzi",
+    "i18n": "Lugha",
+    "ui": "Muundo na kiolesura",
+    "fix": "Marekebisho",
+    "core": "Jukwaa kuu"
+  }
+}

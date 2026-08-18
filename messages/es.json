@@ -1,0 +1,149 @@
+{
+  "landing": {
+    "nav": {
+      "home": "Inicio",
+      "explore": "Explorar",
+      "organizations": "Organizaciones",
+      "create": "Crear",
+      "launchApp": "Abrir app",
+      "signIn": "Iniciar sesión",
+      "menu": "Menú",
+      "navigation": "Navegación",
+      "close": "Cerrar",
+      "theme": "Tema",
+      "projects": "Proyectos",
+      "observations": "Observaciones",
+      "bioblitz": "BioBlitz"
+    },
+    "hero": {
+      "imageAlt": "Valle de selva tropical con neblina",
+      "headingUnderlined": "Certificado",
+      "headingRest": "impacto para guardianes de la naturaleza",
+      "description": "Sube observaciones desde el terreno y certifica el trabajo que has hecho. Tus fotos, especies y ubicaciones se convierten en registros permanentes y verificables de impacto ambiental real.",
+      "cta": "Explorar proyectos",
+      "androidCta": "Descargar la app para Android"
+    },
+    "paths": {
+      "title": "Elige tu camino",
+      "description": "Ya sea que vengas a explorar evidencia de campo o a mostrar tu trabajo, hay un lugar para ti.",
+      "cards": {
+        "funders": {
+          "label": "Para exploradores",
+          "title": "Quiero explorar",
+          "emphasis": "evidencia de campo",
+          "description": "Explora registros verificados de trabajo ambiental real: los momentos exactos de la restauración, tal como ocurrieron en el terreno.",
+          "cta": "Explorar registros",
+          "alt": "Río serpenteando por la selva tropical"
+        },
+        "organizations": {
+          "label": "Para organizaciones",
+          "title": "Soy una persona",
+          "emphasis": "guardiana de la naturaleza",
+          "description": "Muestra tu trabajo regenerativo y la evidencia que lo respalda.",
+          "cta": "Gestionar mi organización",
+          "alt": "Cascada en un bosque tropical"
+        }
+      }
+    },
+    "explainer": {
+      "eyebrow": "Mira la explicación",
+      "titlePrefix": "Una nueva forma de",
+      "titleEmphasis": "documentar la naturaleza",
+      "description": "En dos minutos, descubre cómo los Bumicerts convierten el trabajo de campo real en registros verificables para guardianes locales de la naturaleza.",
+      "play": "Reproducir vídeo",
+      "videoTitle": "Bumicerts: registros verificables de naturaleza para guardianes locales"
+    },
+    "certificate": {
+      "eyebrow": "El certificado",
+      "titleLine1": "¿Qué es exactamente",
+      "titleLine2": "un certificado?",
+      "faqItems": {
+        "digitalCertificate": {
+          "id": "1",
+          "question": "Un certificado digital de impacto",
+          "answer": "Un certificado registra una acción ambiental específica y le da una identidad permanente y verificable en una red abierta y descentralizada."
+        },
+        "evidence": {
+          "id": "2",
+          "question": "Respaldado por evidencia real",
+          "answer": "Fotos, geolocalización, marcas de tiempo y datos de monitoreo. Cada afirmación es verificable: no es una promesa futura, es prueba de trabajo realizado."
+        },
+        "communities": {
+          "id": "3",
+          "question": "Un registro compartido con las comunidades",
+          "answer": "Cada certificado conecta evidencia de campo, contexto del proyecto y a las personas u organizaciones que hacen el trabajo, para que el registro sea fácil de revisar y compartir."
+        },
+        "story": {
+          "id": "4",
+          "question": "Tu vínculo con la historia",
+          "answer": "Tener un certificado significa formar parte de ese momento: un árbol plantado, un arrecife restaurado, un ecosistema revivido. Puedes compartirlo, conservarlo o regalarlo."
+        }
+      },
+      "previewTitle": "Reforestación del monte Halimun",
+      "previewDescription": "Restauración comunitaria de bosque nativo en Java Occidental, Indonesia. 5.000 árboles plantados en 12 hectáreas.",
+      "objectives": {
+        "primary": "Reforestación",
+        "secondary": "Biodiversidad"
+      }
+    },
+    "footer": {
+      "tagline": "Conectando comunidades mediante evidencia de campo confiable.",
+      "infrastructure": "Infraestructura abierta. Construido con GainForest.",
+      "documentation": "Documentación",
+      "copyright": "Código abierto, impulsado por la comunidad."
+    },
+    "maEarthBanner": {
+      "label": "Ronda de financiación 3 de Ma Earth",
+      "deadline": "Abierta hasta el 31 de mayo",
+      "title": "Postula a la Ronda de financiación 3 de Ma Earth",
+      "description": "Las comunidades de GainForest pueden usar sus historias de proyecto verificadas, evidencia y registros de impacto al postular en la ronda de financiación respaldada por la comunidad de Ma Earth.",
+      "highlights": {
+        "matchingPool": "Fondo de contrapartida de $500k",
+        "projects": "Proyectos basados en la naturaleza",
+        "record": "Prepara tu registro de impacto"
+      },
+      "actions": {
+        "apply": "Postular en Ma Earth",
+        "learn": "Conocer la ronda"
+      }
+    },
+    "brand": {
+      "alt": "Ícono de la app GainForest"
+    },
+    "stats": {
+      "liveLabel": "Impacto en vivo",
+      "bumicertsShared": "registros compartidos",
+      "organizationProfiles": "perfiles de organizaciones",
+      "natureSightingsShared": "avistamientos de naturaleza compartidos",
+      "raisedForProjects": "recaudados para proyectos"
+    },
+    "openNetwork": {
+      "titlePrefix": "Construido sobre una",
+      "titleEmphasis": "red abierta",
+      "description": "Tus registros son portátiles: datos de impacto que pueden viajar entre aplicaciones, comunidades y herramientas de financiación, no una base de datos cerrada. Pronto habrá compatibilidad con Silvi y otras plataformas.",
+      "protocol": {
+        "name": "Certified",
+        "description": "datos sociales portátiles",
+        "poweredBy": "Impulsado por Certified"
+      },
+      "youBadge": "Tú",
+      "apps": {
+        "maEarth": {
+          "blurb": "Las comunidades pueden usar su evidencia verificada al postular a rondas de financiación respaldadas por la comunidad."
+        },
+        "gainforest": {
+          "blurb": "GainForest ayuda a comunidades y organizaciones a publicar observaciones de campo, registros de biodiversidad, lugares e historias de proyectos."
+        },
+        "hypercerts": {
+          "blurb": "Las declaraciones abiertas de impacto pueden conectarse con herramientas de Hypercerts y ecosistemas de financiación de bienes públicos."
+        }
+      },
+      "points": {
+        "portable": "Portátil entre apps",
+        "owned": "Propiedad de las comunidades",
+        "shared": "Prueba compartida de impacto"
+      },
+      "storageNote": "Cuando los guardianes suben observaciones, los registros se guardan en su cuenta de GainForest — o en la cuenta de la organización que gestionan — para que quede claro dónde viven los datos."
+    }
+  }
+}

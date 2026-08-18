@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "title": "Eliminar tu cuenta",
+    "description": "Cómo eliminar tu cuenta de GainForest, qué datos se borran y qué hacer si necesitas ayuda."
+  },
+  "title": "Eliminar tu cuenta",
+  "lastUpdated": "Última actualización: 14 de julio de 2026",
+  "intro": {
+    "p1": "Tu cuenta de GainForest se usa tanto en gainforest.app como en la aplicación móvil Taina Field. Puedes eliminarla en cualquier momento, directamente desde la aplicación web: la eliminación es inmediata, permanente e irreversible."
+  },
+  "sections": {
+    "howTo": {
+      "title": "Cómo eliminar tu cuenta",
+      "steps": {
+        "s1": "Inicia sesión en gainforest.app.",
+        "s2": "Abre la configuración de tu cuenta en gainforest.app/settings.",
+        "s3": "Despliega la sección \"Advanced\" (avanzado) al final de la página y localiza la \"Danger zone\" (zona de peligro).",
+        "s4": "Pulsa \"Delete account…\" (eliminar cuenta). Verás un resumen de todo lo que se va a eliminar.",
+        "s5": "Escribe la frase de confirmación y confirma. Tus datos se eliminan de inmediato y tu sesión se cierra."
+      },
+      "p1": "No hay periodo de gracia ni opción de recuperación: una vez confirmada la eliminación, los datos borrados no se pueden restaurar."
+    },
+    "whatIsDeleted": {
+      "title": "Qué se elimina",
+      "paragraphs": {
+        "p1": "Se eliminan de forma permanente todos los registros que GainForest guardó en tu repositorio personal de datos: tu perfil de GainForest, proyectos y sitios, observaciones de biodiversidad, certs y colecciones, publicaciones y \"me gusta\" del feed, insignias y firmas, registros de audio y multimedia, y los vínculos con tus billeteras."
+      }
+    },
+    "whatIsNotDeleted": {
+      "title": "Qué no se elimina",
+      "paragraphs": {
+        "p1": "GainForest está construido sobre el AT Protocol, donde tu identidad y tu repositorio de datos te pertenecen a ti, no a nosotros. Al eliminar tu cuenta de GainForest se borra todo lo que GainForest escribió en tu repositorio, pero tu identidad de AT Protocol (tu handle y tu DID) y tu acceso se conservan, al igual que los datos creados por otras aplicaciones.",
+        "p2": "Si tienes organizaciones a tu nombre en GainForest, quedarán sin propietario; se te pedirá aceptarlo antes de ejecutar la eliminación.",
+        "p3": "Los datos que Taina Field guarda localmente en tu dispositivo permanecen allí hasta que borres la aplicación o sus datos.",
+        "p4": "Como el AT Protocol es una red abierta y federada, pueden existir copias de los registros que publicaste en servidores de terceros. La eliminación borra los registros en el origen e indica a los servicios que cumplen el protocolo que eliminen sus copias. Encontrarás más detalles en nuestra política de privacidad en gainforest.app/privacy."
+      }
+    },
+    "help": {
+      "title": "¿No puedes iniciar sesión o necesitas ayuda?",
+      "paragraphs": {
+        "p1": "Escríbenos a team@gainforest.net desde el correo asociado a tu cuenta con el asunto \"Eliminar mi cuenta\". Puede que necesitemos verificar tu identidad, y atenderemos tu solicitud dentro del plazo que exija la ley aplicable. También puedes usar esa dirección para cualquier otra solicitud relacionada con tus datos."
+      }
+    }
+  }
+}

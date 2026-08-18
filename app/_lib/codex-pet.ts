@@ -1,8 +1,8 @@
 // Codex-pet sprite-sheet animator.
 //
-// Direct port of `simocracy-v2/lib/sprites/codex-pet.ts` and
-// `codex-pet-rows.ts`, collapsed into one file because we only consume it
-// from `FloatingTaina` and don't need the validation helpers.
+// Ported from gainforest-app's `app/_lib/codex-pet.ts` (itself a port of
+// simocracy-v2's sprite animator), collapsed into one file because we only
+// consume it from `FloatingTainá` and don't need the validation helpers.
 //
 // Source format (from the OpenAI hatch-pet skill):
 //   - 1536×1872 PNG or WebP, transparent
@@ -20,10 +20,8 @@ export type CodexPetState =
   | "running"
   | "review";
 
-export const CODEX_PET_SHEET_W = 1536;
-export const CODEX_PET_SHEET_H = 1872;
-export const CODEX_PET_CELL_W = 192;
-export const CODEX_PET_CELL_H = 208;
+const CODEX_PET_CELL_W = 192;
+const CODEX_PET_CELL_H = 208;
 
 interface CodexPetRow {
   row: number;

@@ -1,0 +1,2309 @@
+{
+  "map": {
+    "play": "Cheza ratiba ya muda",
+    "pause": "Simamisha ratiba ya muda",
+    "from": "Kuanzia",
+    "to": "Hadi",
+    "shown": "{count} zimeonyeshwa",
+    "dragHint": "Buruta vishikizo kuchagua kipindi",
+    "startAria": "Tarehe ya kuanza — {date}",
+    "endAria": "Tarehe ya mwisho — {date}",
+    "unidentified": "Haijatambuliwa",
+    "finding": "Inatafuta maeneo kwenye ramani…",
+    "mappedItems": "Vipengele {count} vyenye eneo kwenye ramani",
+    "mappedSites": "Tovuti {count} zenye eneo kwenye ramani",
+    "noLocations": "Hakuna kipengele kilichoonyeshwa chenye eneo kwenye ramani bado.",
+    "speed": "Kasi ya kucheza"
+  },
+  "explore": {
+    "metadata": {
+      "title": "Gundua vyeti",
+      "description": "Vinjari rekodi za mazingira kutoka kwa walezi wa asili duniani kote, zikiwa na picha, maeneo, na ushahidi nyuma ya kila cheti."
+    },
+    "structuredData": {
+      "name": "Chunguza vyeti",
+      "description": "Vyeti vilivyothibitishwa vya athari za mazingira kutoka kwa walinda mazingira duniani kote."
+    },
+    "hero": {
+      "eyebrow": "Gundua vyeti",
+      "titlePrefix": "Gundua",
+      "titleEmphasis": "Athari endelevu",
+      "description": "Vinjari vyeti kutoka jamii na mashirika yanayorejesha mifumo ya ikolojia, kuimarisha maisha, na kujenga mustakabali imara zaidi."
+    },
+    "actions": {
+      "createBumicert": "Unda cheti",
+      "allProjects": "Miradi yote",
+      "allFilters": "Vichujio vyote",
+      "clearAll": "Futa yote",
+      "applyFilters": "Tumia vichujio",
+      "applyFiltersWithCount": "Tumia vichujio ({count})",
+      "clearCategory": "Futa {category}"
+    },
+    "filters": {
+      "allTitle": "Panga na chuja",
+      "sortLabel": "Panga",
+      "description": "Onyesha Certs kwa beji ya chanzo, picha, maeneo ya mradi, watu waliotajwa, tarehe za kazi, au michango.",
+      "sightingsDescription": "Onyesha uoni kwa chanzo, aina ya media, au kundi la asili.",
+      "organization": "Shirika",
+      "bioregion": "Eneo la kibaolojia",
+      "country": "Nchi",
+      "impactArea": "Eneo la athari",
+      "allBumicerts": "vyeti zote",
+      "allFilters": "Panga na chuja",
+      "allFiltersAria": "Panga na chuja",
+      "updateHint": "Vichujio husasishwa unapochagua.",
+      "images": "Huonyesha picha",
+      "locations": "Huonyesha maeneo ya mradi",
+      "contributors": "Huonyesha watu waliotajwa",
+      "active": "Huonyesha tarehe za kazi",
+      "donations": "Hupokea michango",
+      "badges": {
+        "all": "Zote",
+        "gainforest": "GainForest",
+        "maearth": "Kwenye jukwaa la Ma Earth",
+        "maearthRound1": "Ma Earth Raundi 1",
+        "maearthRound2": "Ma Earth Raundi 2"
+      }
+    },
+    "sort": {
+      "newest": "Mpya zaidi",
+      "oldest": "Za zamani zaidi",
+      "az": "A → Z",
+      "za": "Z → A"
+    },
+    "search": {
+      "ariaLabel": "Tafuta vyeti",
+      "placeholder": "Tafuta vyeti kwa jina au maelezo",
+      "sortAriaLabel": "Panga miradi"
+    },
+    "empty": {
+      "eyebrow": "Hakuna matokeo",
+      "title": "Hakuna vyeti zilizopatikana",
+      "description": "Jaribu kubadilisha utafutaji au vichujio ili kupata hadithi zaidi za miradi."
+    },
+    "resultsFound": "{count, plural, one {mradi # umepatikana} other {miradi # imepatikana}}",
+    "view": {
+      "cards": "Kadi",
+      "list": "Orodha",
+      "map": "Ramani"
+    },
+    "stats": {
+      "published": "vyeti zilizochapishwa",
+      "withLocations": "vyeti zenye maeneo",
+      "contributors": "Wachangiaji katika vyeti",
+      "withCover": "vyeti zenye picha ya jalada"
+    },
+    "footer": {
+      "showing": "Inaonyesha vyeti {shown} kati ya {total}.",
+      "showMore": "Onyesha zaidi",
+      "end": "Umefika mwisho."
+    },
+    "card": {
+      "open": "Fungua mradi: {title}",
+      "noCover": "Hakuna picha ya jalada",
+      "showDetails": "Onyesha maelezo",
+      "missingImage": "Picha haipo",
+      "projectSteward": "Msimamizi wa mradi",
+      "peopleNamed": "{count, plural, one {mtu # ametajwa} other {watu # wametajwa}}",
+      "projectPlaces": "{count, plural, one {eneo # la mradi} other {maeneo # ya mradi}}",
+      "natureSightings": "{count, plural, one {uonekano # wa asili} other {mionekano # ya asili}}",
+      "natureSightingsShared": "{count, plural, one {uonekano # wa asili ulioshirikiwa na shirika hili} other {mionekano # ya asili iliyoshirikiwa na shirika hili}}",
+      "datesAdded": "Tarehe za mradi zimeongezwa",
+      "raised": "{amount} imekusanywa",
+      "donations": "Michango",
+      "acceptingDonations": "Inapokea michango",
+      "acceptingDonationsRaised": "Inapokea michango — {amount} imekusanywa hadi sasa"
+    }
+  },
+  "organizations": {
+    "metadata": {
+      "title": "Mashirika",
+      "description": "Vinjari mashirika ya walezi wa asili yanayoshiriki uchunguzi wa uwandani, miradi, na ushahidi kupitia GainForest."
+    },
+    "hero": {
+      "imageAltLight": "Msitu wa milimani wenye ukungu wakati wa macheo",
+      "imageAltDark": "Msitu wa milimani wenye ukungu wakati wa jioni",
+      "eyebrow": "Mashirika",
+      "titleAriaLabel": "Walinda mazingira",
+      "titleFirst": "Mazingira",
+      "titleSecond": "Walinda",
+      "description": "Gundua mashirika yanayoongoza utunzaji wa mazingira na mabadiliko yanayoendeshwa na jamii."
+    },
+    "search": {
+      "placeholder": "Tafuta mashirika",
+      "sortAriaLabel": "Panga"
+    },
+    "sort": {
+      "bumicerts": "vyeti nyingi zaidi",
+      "alpha": "Kwa alfabeti",
+      "newest": "Mpya zaidi kwanza",
+      "oldest": "Za zamani zaidi kwanza",
+      "az": "A → Z",
+      "za": "Z → A"
+    },
+    "empty": {
+      "title": "Hakuna mashirika yaliyopatikana",
+      "description": "Jaribu kubadilisha utafutaji au vichujio."
+    },
+    "error": {
+      "title": "Hitilafu imetokea",
+      "description": "Hatukuweza kupakia mashirika. Tafadhali jaribu kuonyesha upya ukurasa."
+    },
+    "view": {
+      "cards": "Kadi",
+      "list": "Orodha",
+      "map": "Ramani"
+    },
+    "list": {
+      "colOrganization": "Shirika",
+      "colType": "Aina",
+      "colPlace": "Eneo",
+      "colJoined": "Alijiunga"
+    },
+    "filters": {
+      "description": "Onyesha mashirika kwa chanzo, michango, uchunguzi, kategoria, au nchi."
+    },
+    "quickFilters": {
+      "observations": "Ina uchunguzi",
+      "donations": "Hupokea michango",
+      "donationsGainforest": "Michango ya GainForest",
+      "donationsMaearth": "Michango ya Ma Earth"
+    },
+    "facets": {
+      "category": "Kategoria",
+      "country": "Nchi"
+    },
+    "stats": {
+      "profiles": "Wasifu wa mashirika ya umma",
+      "withBumicerts": "Mashirika yenye hadithi za miradi",
+      "withObservations": "Mashirika yenye mionekano ya asili",
+      "locations": "Maeneo katika mashirika"
+    },
+    "actions": {
+      "clear": "Futa",
+      "clearFilters": "Futa vichujio",
+      "showMore": "Onyesha zaidi"
+    },
+    "footer": {
+      "showing": "Inaonyesha mashirika {shown} kati ya {total}.",
+      "end": "Umefika mwisho."
+    },
+    "card": {
+      "joined": "Alijiunga {year}",
+      "publicProfile": "Wasifu wa umma",
+      "showDetails": "Onyesha maelezo",
+      "descriptionWithType": "{types} inayokuza utunzaji wa mazingira unaoongozwa na jamii{where}.",
+      "descriptionDefault": "Mlezi wa asili anayelinda na kurejesha mifumo ikolojia ya eneo{where}.",
+      "where": " nchini {country}"
+    },
+    "loading": "Inapakia mashirika"
+  },
+  "leaderboard": {
+    "metadata": {
+      "title": "Ubao wa wanaoongoza — GainForest",
+      "description": "Waone wafadhili wakuu wanaoleta athari kwenye GainForest. Mabingwa wetu wa Athari hupangwa kulingana na jumla ya michango yao ya ufadhili."
+    },
+    "hero": {
+      "eyebrow": "Bao la wanaoongoza",
+      "titlePrefix": "Athari",
+      "titleEmphasis": "Mabingwa",
+      "description": "Tunawasherehekea wachangiaji wakarimu wanaoendesha mabadiliko endelevu kwa jamii na sayari."
+    },
+    "periods": {
+      "all": "Wakati wote",
+      "month": "Mwezi huu",
+      "week": "Wiki hii"
+    },
+    "donorFilters": {
+      "all": "Wachangiaji wote",
+      "anonymous": "Wasiojulikana pekee",
+      "known": "Wanaojulikana pekee"
+    },
+    "sort": {
+      "label": "Panga kwa",
+      "totalRaised": "Jumla iliyokusanywa",
+      "donationCount": "Idadi ya michango",
+      "recentDonation": "Mchango wa hivi karibuni"
+    },
+    "stats": {
+      "totalRaised": "Jumla iliyokusanywa",
+      "totalRaisedDetail": "Wakati wote kwenye jukwaa",
+      "totalDonors": "Jumla ya wachangiaji",
+      "totalDonorsDetail": "Mabingwa wakarimu wa athari",
+      "projectsSupported": "Miradi iliyosaidiwa",
+      "projectsSupportedDetail": "Kurejesha mifumo ikolojia na riziki",
+      "uniqueDonors": "Wafadhili wa kipekee",
+      "bumicertsFunded": "vyeti zilizofadhiliwa",
+      "donationCount": "Idadi ya michango"
+    },
+    "empty": {
+      "title": "Bado hakuna michango",
+      "description": "Kuwa wa kwanza kuleta athari."
+    },
+    "card": {
+      "rankAriaLabel": "Nafasi {rank}",
+      "anonymous": "Asiyejulikana ({address})",
+      "donationSummary": "{count, plural, one {mchango #} other {michango #}}",
+      "lastDonation": "Mchango wa mwisho {relativeTime}",
+      "topDonor": "Mchangiaji mkuu",
+      "natureChampion": "Bingwa wa mazingira",
+      "consistentGiver": "Mtoaji wa kudumu",
+      "risingSupporter": "Msaidizi anayechipukia",
+      "openWallet": "Fungua {wallet} kwenye Etherscan",
+      "openAccount": "Fungua akaunti ya mchangiaji kwenye kichupo kipya",
+      "anonymousSupporter": "Muungaji mkono asiyejulikana",
+      "donationSummaryWithTime": "{count, plural, one {mchango #} other {michango #}} · Mchango wa mwisho {relativeTime}",
+      "openPayment": "Fungua maelezo ya malipo",
+      "openSupporter": "Fungua wasifu wa muungaji mkono kwenye kichupo kipya"
+    },
+    "donorFiltersShort": {
+      "all": "Wote",
+      "anonymous": "Wasiojulikana",
+      "known": "Wanaojulikana"
+    },
+    "error": {
+      "title": "Haikuweza kupakia ubao wa wanaoongoza",
+      "description": "Tafadhali jaribu tena baada ya muda mfupi."
+    }
+  },
+  "bioblitz": {
+    "metadata": {
+      "title": "Changamoto ya kila wiki ya BioBlitz",
+      "description": "Toka nje upige picha za bioanuwai ya porini. Kila uchunguzi halali lazima uwe na picha iliyopakiwa; watu na mimea ya vyungu hazihesabiki."
+    },
+    "banner": {
+      "message": "Changamoto ya BioBlitz ya Wiki inaendelea. Piga picha asili na ushinde zawadi.",
+      "cta": "Jifunze zaidi",
+      "dismiss": "Ondoa tangazo hili",
+      "close": "Funga"
+    },
+    "hero": {
+      "eyebrow": "Changamoto ya BioBlitz ya Wiki",
+      "titlePrefix": "Changamoto ya",
+      "titleEmphasis": "BioBlitz",
+      "description": "Mashindano ya kirafiki ya kila wiki ya kurekodi bioanuwai ya nje kwa picha ulizopakia mwenyewe. Kuanzia Raundi 8, picha za wanyama zina pointi 2, picha za mimea pointi 1, na kutaja spishi kunaongeza pointi 0.5 za ziada. Watu na mimea ya vyungu hazihesabiki.",
+      "program": "Sehemu ya programu ya Klarna AI for Climate Resilience, pamoja na GainForest."
+    },
+    "rsvp": {
+      "button": "Jisajili ili kushiriki",
+      "note": "Jisajili ili tuweze kufuatilia michango yako na kukutumia zawadi ukishinda.",
+      "registering": "Inasajili…",
+      "registered": "Umesajiliwa",
+      "registeredNote": "Tutafuatilia michango yako na kukutumia zawadi ukishinda.",
+      "error": "Imeshindikana kusajili sasa. Tafadhali jaribu tena.",
+      "postText": "Najiunga na Changamoto ya BioBlitz ya Wiki — {label}! Naenda nje kupiga picha za maumbile kwa ajili ya bayoanuwai. 🌿🔭 #BioBlitz",
+      "legalConsent": "Kwa kujisajili, unakubali <terms>Masharti ya BioBlitz</terms> na unatambua <privacy>Notisi ya Faragha</privacy>."
+    },
+    "legal": {
+      "programLabel": "Changamoto ya BioBlitz",
+      "back": "Rudi BioBlitz",
+      "links": {
+        "terms": "Masharti ya BioBlitz",
+        "privacy": "Notisi ya Faragha ya BioBlitz",
+        "generalPrivacy": "Sera ya Faragha ya GainForest"
+      },
+      "terms": {
+        "metadata": {
+          "title": "Masharti ya BioBlitz",
+          "description": "Ustahiki, ushiriki, mawasilisho, zawadi na sheria nyingine za Changamoto ya BioBlitz ya GainForest."
+        },
+        "title": "Masharti ya BioBlitz",
+        "effectiveDate": "Yanaanza kutumika tarehe 18 Julai 2026",
+        "intro": {
+          "p1": "Masharti haya yanaongoza ushiriki katika Changamoto ya BioBlitz ya GainForest. Kwa kujisajili katika raundi, unakubali masharti haya.",
+          "p2": "GainForest e.V., shirika lisilo la faida la Uswisi, linaendesha changamoto. Hakuna ununuzi au malipo yanayohitajika ili kushiriki."
+        },
+        "sections": {
+          "eligibility": {
+            "title": "1. Ustahiki na nchi zinazokubaliwa",
+            "paragraphs": {
+              "p1": "BioBlitz iko wazi kwa watu wenye umri wa miaka 18 au zaidi duniani kote ambako ushiriki na kupokea zawadi kunaruhusiwa na sheria za eneo. Watu wenye miaka 16 au 17 wanaweza kushiriki tu kwa idhini ya mzazi au mlezi wa kisheria. Changamoto hii haijaelekezwa kwa watoto walio chini ya miaka 16.",
+              "p2": "Nchi au eneo linakubaliwa pale GainForest na watoa huduma wake wa malipo wanaweza kisheria kutoa changamoto na kupeleka zawadi huko. Hustahiki kupokea zawadi ikiwa unaishi au kwa kawaida unaishi katika nchi au eneo lililo chini ya vikwazo vya jumla au marufuku kulingana na hatua husika za Uswisi, Umoja wa Mataifa au Umoja wa Ulaya, au ambako ushiriki au upelekaji wa zawadi umepigwa marufuku na sheria au kanuni za mtoa huduma wa malipo.",
+              "p3": "Jina lako halipaswi kuwa kwenye orodha husika ya vikwazo, watu waliozuiliwa au wahusika waliokataliwa. Kwa kuwa sheria hizi hubadilika, GainForest inaweza kuthibitisha ustahiki kabla ya kutuma zawadi na inaweza kuzuia au kufuta zawadi inapohitajika kisheria."
+            }
+          },
+          "participation": {
+            "title": "2. Jinsi ya kushiriki",
+            "paragraphs": {
+              "p1": "Unahitaji akaunti ya GainForest na lazima ujisajili kwa kila raundi. Uchunguzi halali lazima uongezwe ndani ya tarehe zilizoonyeshwa, uonyeshe bioanuwai ya nje, na uwe na picha iliyopakiwa moja kwa moja pamoja na uchunguzi. Watu na mimea ya vyungu hazihesabiki.",
+              "p2": "Kila mtu anaweza kutumia akaunti moja. Mawasilisho ya kiotomatiki, yaliyorudiwa, yaliyobadilishwa, yaliyopewa tarehe ya nyuma, yanayopotosha au ya udanganyifu yanaweza kuondolewa kwenye changamoto."
+            }
+          },
+          "submissions": {
+            "title": "3. Mawasilisho yako",
+            "paragraphs": {
+              "p1": "Lazima umiliki picha na maudhui mengine unayowasilisha, au uwe na ruhusa ya kuyatumia na kuyachapisha. Unaendelea kumiliki maudhui yako.",
+              "p2": "Unaipa GainForest ruhusa ya kuonyesha, kuorodhesha, kukagua na kushiriki mawasilisho yako kwa ajili ya kuendesha na kutangaza BioBlitz na dhamira ya mazingira ya GainForest, pamoja na kutaja chanzo pale inapowezekana.",
+              "p3": "Usisumbue wanyamapori, kuharibu makazi, kuingia bila ruhusa au kumweka mtu yeyote hatarini ili kufanya wasilisho. Epuka kuchapisha maeneo sahihi ya spishi zilizo hatarini, mifumo nyeti ya ikolojia au maeneo ambako ufichuzi unaweza kusababisha madhara."
+            }
+          },
+          "winners": {
+            "title": "4. Uchaguzi wa washindi",
+            "paragraphs": {
+              "p1": "Kuanzia Raundi 8, Zawadi ya Pointi za Juu Zaidi inategemea jumla ya alama za juu zaidi za uchunguzi halali katika raundi: kila picha halali ya mnyama ina pointi 2, kila picha halali ya mmea ina pointi 1, na yoyote hupata pointi 0.5 za ziada wakati spishi imetambuliwa badala ya kuachwa bila kutambuliwa. Katika raundi za awali, zawadi hii ilitegemea idadi kubwa zaidi ya uchunguzi halali. Zawadi ya Picha Bora inachaguliwa kwa vigezo vilivyoelezwa kwenye ukurasa wa BioBlitz, ikiwemo ubora wa picha, mada na ushiriki wa jamii inapofaa.",
+              "p2": "GainForest inaweza kukagua mawasilisho, kutatua sare, kurekebisha makosa ya kuhesabu na kuondoa mawasilisho yasiyo halali. Maamuzi ni ya mwisho kwa kiwango kinachoruhusiwa na sheria."
+            }
+          },
+          "prizes": {
+            "title": "5. Zawadi",
+            "paragraphs": {
+              "p1": "Thamani za zawadi zinaonyeshwa kwenye ukurasa wa BioBlitz. Mshindi lazima ajibu GainForest na kutoa taarifa zinazohitajika kwa kiasi kinachofaa ili kuthibitisha ustahiki na kupeleka zawadi. Ikiwa mshindi hatajibu ndani ya siku 14, hastahiki au hawezi kisheria kupokea zawadi, GainForest inaweza kuchagua mshindi mwingine.",
+              "p2": "Washindi wanawajibika kwa kodi, ada na wajibu wa kuripoti unaowahusu. Zawadi haziwezi kuhamishwa, na fedha taslimu au njia ya malipo inaweza kubadilishwa inapohitajika kwa sababu inayofaa."
+            }
+          },
+          "conduct": {
+            "title": "6. Ushiriki wa haki",
+            "paragraphs": {
+              "p1": "GainForest inaweza kuondoa mawasilisho au akaunti zinazohusisha udanganyifu, unyanyasaji, maudhui hatari, ukiukaji wa haki, kuingilia huduma au tabia inayoharibu changamoto ya haki na salama."
+            }
+          },
+          "publicContent": {
+            "title": "7. Maudhui ya umma na faragha",
+            "paragraphs": {
+              "p1": "Usajili unatengeneza chapisho la umma la BioBlitz kwenye akaunti yako ya GainForest. Uchunguzi unaochapisha unaweza kujumuisha jina la wasifu, picha, taarifa za spishi, tarehe na data ya eneo, na unaweza kupatikana hadharani kupitia mtandao wa Itifaki ya AT.",
+              "p2": "Notisi ya Faragha ya BioBlitz inaeleza jinsi data ya changamoto inavyotumiwa. Sera ya jumla ya Faragha ya GainForest pia inatumika."
+            }
+          },
+          "changes": {
+            "title": "8. Mabadiliko, kusimamishwa au kufutwa",
+            "paragraphs": {
+              "p1": "GainForest inaweza kubadilisha, kusimamisha au kufuta raundi ikiwa hitilafu za kiufundi, masuala ya usalama, matakwa ya kisheria, udanganyifu au hali zilizo nje ya udhibiti wetu wa kawaida zinazuia uendeshaji wa haki. Tutatangaza mabadiliko muhimu kwenye ukurasa wa BioBlitz inapowezekana."
+            }
+          },
+          "liability": {
+            "title": "9. Wajibu",
+            "paragraphs": {
+              "p1": "Unashiriki kwa hiari na unawajibika kufuata sheria za eneo na kufanya maamuzi salama uwandani. Kwa kiwango kinachoruhusiwa na sheria, GainForest haiwajibiki kwa jeraha, hasara au uharibifu unaosababishwa na shughuli zisizo salama uwandani, huduma za wahusika wengine au matukio yaliyo nje ya udhibiti wetu wa kawaida. Masharti haya hayaondoi wajibu ambao hauwezi kuondolewa kisheria."
+            }
+          },
+          "law": {
+            "title": "10. Sheria inayotumika",
+            "paragraphs": {
+              "p1": "Masharti haya yanaongozwa na sheria ya Uswisi. Mahakama za Zurich, Uswisi zina mamlaka, kwa kuzingatia haki za lazima za watumiaji au ulinzi wa eneo unaokuhusu."
+            }
+          },
+          "contact": {
+            "title": "11. Mawasiliano",
+            "paragraphs": {
+              "p1": "Maswali kuhusu masharti haya au ustahiki wa zawadi yanaweza kutumwa kwa team@gainforest.net."
+            }
+          }
+        }
+      },
+      "privacy": {
+        "metadata": {
+          "title": "Notisi ya Faragha ya BioBlitz",
+          "description": "Jinsi GainForest inavyoshughulikia usajili, uchunguzi, taarifa za washindi na taarifa nyingine za Changamoto ya BioBlitz."
+        },
+        "title": "Notisi ya Faragha ya BioBlitz",
+        "effectiveDate": "Inaanza kutumika tarehe 18 Julai 2026",
+        "intro": {
+          "p1": "Notisi hii inaeleza jinsi GainForest inavyotumia taarifa binafsi kwa Changamoto ya BioBlitz. Inaongezea Sera ya jumla ya Faragha ya GainForest.",
+          "p2": "GainForest e.V. inawajibika kuendesha changamoto. Wasiliana na team@gainforest.net kwa maswali au maombi ya faragha."
+        },
+        "sections": {
+          "data": {
+            "title": "1. Taarifa zinazotumiwa kwa changamoto",
+            "paragraphs": {
+              "p1": "Tunatumia kitambulisho cha akaunti yako, jina na picha ya wasifu, lugha na chapisho la umma la usajili wa BioBlitz kuthibitisha kuwa umejiunga na raundi.",
+              "p2": "Tunatumia uchunguzi uliowasilishwa wakati wa raundi, ikiwemo picha au vyombo vingine, taarifa za spishi, muda, data ya eneo, maelezo na ushiriki unaohusiana kama vipendwa, kuendesha ubao na kuchagua washindi.",
+              "p3": "Ukishinda, tunaweza kuomba jina lako, mawasiliano, nchi unakoishi, uthibitisho wa umri au mlezi, taarifa za ukaguzi wa vikwazo inapohitajika kisheria na maelezo ya malipo yanayohitajika kupeleka zawadi."
+            }
+          },
+          "use": {
+            "title": "2. Kwa nini tunazitumia",
+            "paragraphs": {
+              "p1": "Tunatumia taarifa hizi kusajili washiriki, kuthibitisha mawasilisho, kuendesha mbao, kuchagua na kuwasiliana na washindi, kupeleka zawadi, kuzuia udanganyifu, kuweka changamoto salama, kujibu maswali na kushiriki matokeo na vivutio vya BioBlitz."
+            }
+          },
+          "public": {
+            "title": "3. Taarifa za umma",
+            "paragraphs": {
+              "p1": "Chapisho lako la usajili, wasifu na uchunguzi uliochapishwa ni wa umma. Unaweza kuonekana kwenye kurasa, ramani, maghala, mbao na matangazo ya washindi ya GainForest.",
+              "p2": "GainForest inatumia Itifaki ya AT iliyo wazi na iliyosambazwa. Rekodi za umma zinaweza kunakiliwa au kuorodheshwa na huduma huru ambazo GainForest haidhibiti. Kufuta rekodi chanzo kunaziashiria huduma zinazofuata kanuni kuiondoa, lakini kuondolewa kwa kila nakala ya wahusika wengine hakuwezi kuhakikishwa."
+            }
+          },
+          "location": {
+            "title": "4. Eneo na data nyeti ya asili",
+            "paragraphs": {
+              "p1": "Maeneo ya uchunguzi yanaweza kuonyeshwa hadharani. Tumia vidhibiti vya eneo la kukadiria inapohitajika na usichapishe maeneo sahihi ya spishi zilizo hatarini, makazi nyeti au jamii bila ruhusa inayofaa."
+            }
+          },
+          "prizes": {
+            "title": "5. Washindi na watoa huduma",
+            "paragraphs": {
+              "p1": "Tunaweza kushiriki taarifa za kiwango cha chini kinachohitajika na watoa huduma za malipo, utambulisho, uzingatiaji wa sheria, uhifadhi na mawasiliano wanaotusaidia kuendesha changamoto na kupeleka zawadi.",
+              "p2": "Tunaweza kuchapisha jina na picha ya wasifu wa mshindi, maudhui yaliyoshinda, aina ya zawadi na idadi ya uchunguzi. Tutaomba ruhusa kabla ya kutumia taarifa nyingine binafsi za maisha."
+            }
+          },
+          "legalBases": {
+            "title": "6. Misingi ya kisheria",
+            "paragraphs": {
+              "p1": "Tunachakata taarifa za changamoto kutekeleza makubaliano yetu nawe, kwa idhini yako inapohitajika, kwa maslahi yetu halali ya kuendesha changamoto ya uhifadhi yenye haki na kutimiza wajibu wa kisheria. Unaweza kuondoa idhini pale uchakataji unapoitegemea bila kuathiri uchakataji halali wa awali."
+            }
+          },
+          "retention": {
+            "title": "7. Uhifadhi",
+            "paragraphs": {
+              "p1": "Tunahifadhi rekodi binafsi za uwasilishaji na ustahiki wa zawadi kwa muda unaohitajika tu kwa malipo, uhasibu, kuzuia udanganyifu na wajibu wa kisheria. Uchunguzi na machapisho ya usajili ya umma yanabaki kwenye akaunti yako hadi uyafute, kwa kuzingatia mipaka ya mtandao uliosambazwa."
+            }
+          },
+          "rights": {
+            "title": "8. Chaguo na haki zako",
+            "paragraphs": {
+              "p1": "Kulingana na unakoishi, unaweza kuomba kufikia, kusahihisha, kufuta, kuzuia au kupinga matumizi ya taarifa zako binafsi, kuomba zihamishwe au kuondoa idhini. Wasiliana na team@gainforest.net. Unaweza kusimamia au kufuta rekodi za umma kutoka akaunti yako ya GainForest."
+            }
+          },
+          "children": {
+            "title": "9. Washiriki wenye umri mdogo",
+            "paragraphs": {
+              "p1": "Changamoto haijaelekezwa kwa watoto walio chini ya miaka 16. Washiriki wenye miaka 16 au 17 wanahitaji idhini ya mzazi au mlezi wa kisheria. Tukigundua kuwa taarifa iliwasilishwa na mtoto bila idhini inayofaa, tutachukua hatua zinazofaa kuiondoa."
+            }
+          },
+          "changes": {
+            "title": "10. Mabadiliko ya notisi hii",
+            "paragraphs": {
+              "p1": "Tunaweza kusasisha notisi hii na tutaweka tarehe iliyorekebishwa hapa. Tutatoa taarifa inayoonekana zaidi mabadiliko yanapowaathiri washiriki kwa kiasi kikubwa."
+            }
+          },
+          "contact": {
+            "title": "11. Mawasiliano",
+            "paragraphs": {
+              "p1": "Maswali na maombi ya faragha yanaweza kutumwa kwa team@gainforest.net au GainForest e.V., Schwandenacker 35, 8052 Zurich, Uswisi."
+            }
+          }
+        }
+      }
+    },
+    "help": {
+      "prompt": "Una maswali?",
+      "officeHours": "Jiunge na saa za maswali",
+      "community": "Uliza kwenye gumzo la kikundi"
+    },
+    "status": {
+      "live": "Inaendelea",
+      "upcoming": "Inaanza hivi karibuni",
+      "ended": "Imekamilika"
+    },
+    "rounds": {
+      "title": "Raundi",
+      "current": "Sasa"
+    },
+    "round": {
+      "startsIn": "Inaanza baada ya",
+      "endsIn": "Inaisha baada ya",
+      "ended": "Raundi imekamilika",
+      "days": "{count, plural, one {siku #} other {siku #}}",
+      "hours": "{count, plural, one {saa #} other {saa #}}",
+      "minutes": "{count, plural, one {dakika #} other {dakika #}}"
+    },
+    "prizes": {
+      "title": "Zawadi kila raundi",
+      "badgeNote": "Pamoja na beji ya kudumu ya mshindi kwenye wasifu wako.",
+      "mostObservations": {
+        "title": "Uoni mwingi zaidi",
+        "blurb": "Kwa mkusanyaji mwenye uoni halali mwingi zaidi katika raundi."
+      },
+      "highestPoints": {
+        "title": "Pointi za juu zaidi",
+        "blurb": "Kwa mkusanyaji mwenye alama za juu zaidi katika raundi: pointi 2 kwa picha ya mnyama, 1 kwa picha ya mmea, +0.5 ukitaja spishi."
+      },
+      "bestPicture": {
+        "title": "Picha bora",
+        "blurb": "Kwa picha ya asili inayovutia zaidi ya wiki, iliyochaguliwa na timu."
+      }
+    },
+    "how": {
+      "title": "Jinsi inavyofanya kazi",
+      "steps": {
+        "outside": {
+          "title": "Toka nje",
+          "blurb": "Rekodi bioanuwai ya nje. Watu na mimea ya vyungu hazihesabiki."
+        },
+        "upload": {
+          "title": "Pakia picha zako",
+          "blurb": "Kila uchunguzi unahitaji picha yake iliyopakiwa. Uongeze kwenye Uchunguzi wangu au kwa Tainá."
+        },
+        "review": {
+          "title": "Angalia jina la spishi",
+          "blurb": "Thibitisha au sahihisha jina lililopendekezwa — kuanzia Raundi 8, spishi iliyotajwa hupata pointi 0.5 za ziada."
+        }
+      },
+      "proof": {
+        "title": "Data yako inafanya zaidi ya kushinda zawadi",
+        "intro": "Kila uchunguzi unaotuma huhifadhiwa kwenye akaunti yako, kwa hivyo unaweza kuutumia baadaye kama ushahidi kwa miradi yako mwenyewe.",
+        "uses": "Unaweza kutoa taarifa kwa watoa ufadhili ukiwa na kumbukumbu wazi ya kazi yako. Pia unaweza kuonyesha washirika na wadau kwamba unachofanya kinaleta mabadiliko.",
+        "outro": "Hakuna kazi ya ziada — endelea tu kuchunguza. Baada ya muda, hii hujenga ushahidi halisi unaoweza kuutumia wakati wowote unapohitaji."
+      }
+    },
+    "board": {
+      "title": "Ubao wa raundi hii",
+      "live": "Moja kwa moja",
+      "subtitleLive": "Nani anaongoza kwa uchunguzi halali wenye picha sasa hivi.",
+      "subtitleLivePoints": "Nani anaongoza kwa pointi kwa uchunguzi halali wenye picha sasa hivi.",
+      "subtitleEnded": "Matokeo ya mwisho ya raundi hii.",
+      "subtitleUpcoming": "Kuwa wa kwanza kwenye ubao raundi itakapoanza.",
+      "subtitleAll": "Uchunguzi halali wenye picha mwingi zaidi katika changamoto nzima.",
+      "scope": {
+        "round": "Raundi hii",
+        "all": "Wakati wote"
+      },
+      "leader": "Anaongoza",
+      "observations": "{count, plural, one {# uoni} other {# uoni}}",
+      "points": "pointi {points}",
+      "pointsFull": "pointi {points}",
+      "openCollector": "Fungua wasifu wa mkusanyaji katika kichupo kipya",
+      "rankAriaLabel": "Nafasi ya {rank}",
+      "org": {
+        "label": "Shirika",
+        "account": "Akaunti binafsi",
+        "members": "{count, plural, one {mwanachama #} other {wanachama #}}",
+        "types": {
+          "nonprofit": "Isiyo ya faida",
+          "business": "Biashara",
+          "company": "Kampuni",
+          "community": "Kikundi cha jamii",
+          "government": "Serikali",
+          "academic": "Kitaaluma"
+        }
+      },
+      "stats": {
+        "observations": "Uoni katika raundi hii",
+        "observationsAll": "Uoni (wakati wote)",
+        "animals": "Wanyama",
+        "plants": "Mimea",
+        "named": "Spishi zilizotajwa",
+        "collectors": "Wakusanyaji",
+        "timeLeft": "Muda uliosalia"
+      },
+      "eligibility": {
+        "title": "Picha zilizokaguliwa",
+        "eligibleOnly": "Picha halali pekee huhesabiwa",
+        "wildlife": "Wanyamapori",
+        "plants": "Mimea ya nje",
+        "people": "Watu",
+        "potted": "Mimea ya vyungu",
+        "other": "Nyingine zilizoondolewa",
+        "explainer": "Uchunguzi wazi wa wanyamapori au mimea ya nje wenye picha iliyopakiwa moja kwa moja pekee huhesabiwa. Watu, mimea ya vyungu au ya ndani, mada zisizoeleweka na uchunguzi usio na picha iliyopakiwa huondolewa."
+      },
+      "empty": {
+        "title": "Bado hakuna uoni",
+        "description": "Kuwa wa kwanza kuongeza uoni katika raundi hii."
+      },
+      "error": {
+        "title": "Haikuweza kupakia ubao",
+        "description": "Tafadhali jaribu tena baada ya muda mfupi."
+      },
+      "cta": "Ongeza uoni wako",
+      "pointsGuide": {
+        "title": "Jinsi pointi zinavyokokotolewa",
+        "animalValue": "pointi 2",
+        "animalLabel": "Kwa picha ya mnyama",
+        "plantValue": "pointi 1",
+        "plantLabel": "Kwa picha ya mmea",
+        "namedValue": "+pointi 0.5",
+        "namedLabel": "Spishi imetajwa",
+        "note": "Pointi zilianza katika Raundi 8. Jumla ya mkusanyaji ni picha za wanyama × 2, pamoja na picha za mimea × 1, pamoja na 0.5 kwa kila spishi iliyotajwa. Gusa safu kwenye ubao kuona hesabu ya mkusanyaji huyo."
+      },
+      "breakdown": {
+        "toggle": "Jinsi pointi zilivyokokotolewa",
+        "animals": "{count, plural, one {picha # ya mnyama} other {picha # za wanyama}} × 2",
+        "plants": "{count, plural, one {picha # ya mmea} other {picha # za mimea}} × 1",
+        "labeled": "{count, plural, one {spishi # iliyotajwa} other {spishi # zilizotajwa}} × 0.5",
+        "ineligible": "{count, plural, one {picha # haikufuzu} other {picha # hazikufuzu}}",
+        "total": "Jumla ya pointi",
+        "profile": "Fungua wasifu"
+      }
+    },
+    "winners": {
+      "title": "Washindi waliopita",
+      "description": "Kumbukumbu ya kudumu ya mabingwa wa kila raundi.",
+      "mostObservations": "Uoni mwingi zaidi",
+      "bestPicture": "Picha bora",
+      "pending": "Itatangazwa",
+      "final": "Rasmi",
+      "provisional": "Ya muda",
+      "finalHint": "Washindi hawa wamethibitishwa na hawatabadilika.",
+      "provisionalHint": "Msimamo wa sasa — unaweza kubadilika hadi washindi wathibitishwe.",
+      "compact": "Karibuni",
+      "newer": "Raundi mpya zaidi",
+      "older": "Raundi za zamani",
+      "page": "{page} kati ya {total}",
+      "mostSubmitted": "Zilizowasilishwa zaidi",
+      "highestPoints": "Pointi za juu zaidi",
+      "mostLiked": "Zilizopendwa zaidi",
+      "award": {
+        "action": "Toa beji za washindi",
+        "actionMissing": "Toa beji zilizosalia",
+        "done": "Beji za washindi zimetolewa",
+        "error": "Imeshindikana kusasisha beji au hali ya barua pepe. Jaribu tena.",
+        "notification": {
+          "mostObservations": "Barua pepe ya uchunguzi mwingi zaidi",
+          "highestPoints": "Barua pepe ya pointi za juu zaidi",
+          "bestPicture": "Barua pepe ya picha bora",
+          "sent": "Imetumwa",
+          "delayed": "Imechelewa — tutaendelea kujaribu",
+          "missing_email": "Hakuna barua pepe ya akaunti; wasiliana na mshindi mwenyewe",
+          "lookup_failed": "Utafutaji wa barua pepe umeshindwa; jaribu baadaye au wasiliana na mshindi",
+          "cannot_send": "Haiwezi kutumwa kiotomatiki",
+          "handled_manually": "Imeshughulikiwa mwenyewe",
+          "not_prepared": "Barua pepe haijaandaliwa; jaribu tena au ishughulikie mwenyewe",
+          "notification_setup_failed": "Mpangilio wa barua pepe umeshindwa; jaribu tena au ishughulikie mwenyewe",
+          "retry": "Jaribu arifa tena",
+          "retrying": "Inajaribu tena…",
+          "markHandled": "Weka alama kuwa imeshughulikiwa",
+          "marking": "Inaweka alama…"
+        }
+      }
+    },
+    "map": {
+      "title": "Uchunguzi wa wiki",
+      "heading": "Mahali picha za raundi hii zilipopigwa",
+      "subtitle": "Kila uchunguzi wa picha wenye eneo uliopakiwa katika raundi hii. Buruta ratiba ya muda na ubonyeze cheza kuwaona wakitokea kadiri ya wiki.",
+      "loading": "Inaweka uchunguzi wa wiki hii kwenye ramani…",
+      "empty": "Bado hakuna uchunguzi wa picha wenye eneo katika raundi hii.",
+      "error": "Imeshindwa kupakia ramani ya uchunguzi."
+    },
+    "gallery": {
+      "heading": "Picha zilizopakiwa raundi hii",
+      "subtitle": "Ukuta wa moja kwa moja wa uchunguzi wa hivi karibuni kadiri unavyopakiwa. Gusa picha yoyote kuona maelezo.",
+      "subtitleAll": "Uchunguzi wote uliopakiwa raundi hii. Gusa picha yoyote kuifungua, kuipenda na kuacha maoni.",
+      "count": "{count, plural, =0 {Hakuna mawasilisho} one {Wasilisho #} other {Mawasilisho #}}",
+      "empty": "Bado hakuna picha zilizopakiwa raundi hii. Kuwa wa kwanza kuongeza moja.",
+      "error": "Imeshindwa kupakia ukuta wa picha.",
+      "openPhoto": "Fungua uchunguzi huu: {name}",
+      "unnamed": "Uchunguzi usiotambuliwa",
+      "view": {
+        "wall": "Ukuta wa picha",
+        "all": "Mawasilisho yote"
+      }
+    },
+    "bestPicture": {
+      "heading": "Vinara wa picha bora",
+      "subtitle": "Picha zilizopata mapenzi mengi zaidi raundi hii — zinazowania zawadi ya picha bora. Gusa picha yoyote kuona maelezo.",
+      "prize": "Picha bora {amount}",
+      "leader": "Mbele",
+      "likes": "{count, plural, one {pendwa #} other {mapenzi #}}",
+      "empty": "Bado hakuna mapenzi raundi hii. Penda picha ili iingie kwenye ushindani.",
+      "error": "Imeshindwa kupakia vinara.",
+      "openPhoto": "Fungua uchunguzi huu: {name}",
+      "unnamed": "Uchunguzi usiotambuliwa"
+    }
+  },
+  "dashboard": {
+    "metadata": {
+      "title": "Michango Muhtasari — GainForest",
+      "description": "Shughuli za michango kote GainForest: jumla iliyokusanywa, waungaji mkono, mienendo ya ufadhili na michango ya hivi karibuni.",
+      "measurementTechnique": "Risiti za michango zilizoorodheshwa kutoka rekodi za org.hypercerts.funding.receipt."
+    },
+    "hero": {
+      "eyebrow": "Shughuli za utoaji",
+      "title": "Michango",
+      "accent": "Muhtasari",
+      "imageAlt": "Mandhari ya urejeshaji yenye ukungu kwa shughuli za michango",
+      "lede": "Fuatilia utoaji kote GainForest: jumla iliyokusanywa, shughuli za waungaji mkono, maeneo yaliyofikiwa, mienendo ya ufadhili na michango ya hivi karibuni."
+    },
+    "periods": {
+      "all": "Wakati wote",
+      "month": "Siku 30 zilizopita",
+      "week": "Siku 7 zilizopita"
+    },
+    "kpis": {
+      "totalRaised": "Jumla iliyokusanywa",
+      "totalRaisedSub": "Michango yote ya USD",
+      "totalDonations": "Jumla ya michango",
+      "totalDonationsSub": "Risiti zilizorekodiwa",
+      "uniqueDonors": "Wachangiaji wa kipekee",
+      "uniqueDonorsSub": "Kwa DID au pochi",
+      "avgDonation": "Wastani wa mchango",
+      "avgDonationSub": "Kwa kila muamala",
+      "activeBumicerts": "vyeti hai",
+      "activeBumicertsSub": "Zimepokea fedha",
+      "totalDonated": "Jumla iliyochangiwa",
+      "completedDonations": "Michango iliyokamilika",
+      "donors": "wachangiaji",
+      "bumicertsWithDonations": "vyeti zenye michango",
+      "averageDonation": "Wastani wa kiasi cha mchango",
+      "countriesWithBumicerts": "Nchi zenye vyeti"
+    },
+    "geo": {
+      "title": "Ufikiaji wa kijiografia",
+      "countriesRepresented": "Nchi zilizowakilishwa",
+      "topCountries": "Nchi zinazoongoza",
+      "empty": "Hakuna data ya kijiografia inayopatikana.",
+      "organizationCount": "{count, plural, one {shirika #} other {mashirika #}}"
+    },
+    "chart": {
+      "title": "Utoaji kwa muda",
+      "raisedPer": "USD zilizokusanywa kwa kila {granularity}",
+      "empty": "Hakuna data ya michango kwa kipindi hiki.",
+      "donationCount": "{count, plural, one {mchango #} other {michango #}}",
+      "granularities": {
+        "day": "Kila siku",
+        "week": "Kila wiki",
+        "month": "Kila mwezi"
+      }
+    },
+    "tables": {
+      "topDonors": "Wachangiaji wakuu",
+      "byOrganization": "Kwa shirika",
+      "recentTransactions": "Miamala ya karibuni",
+      "noDonations": "Bado hakuna michango.",
+      "noTransactions": "Bado hakuna miamala.",
+      "donor": "Mchangiaji",
+      "totalDonated": "Jumla iliyochangiwa",
+      "donations": "Michango",
+      "lastDonation": "Mchango wa mwisho",
+      "organization": "Shirika",
+      "totalRaised": "Jumla iliyokusanywa",
+      "bumicerts": "vyeti",
+      "donors": "Wachangiaji",
+      "date": "Tarehe",
+      "amount": "Kiasi",
+      "bumicert": "cheti",
+      "txHash": "Hash ya tx",
+      "anonymous": "Asiyejulikana",
+      "anonymousWallet": "Asiyejulikana ({address})",
+      "allTimeDonations": "Wakati wote · {count, plural, one {mchango #} other {michango #}}",
+      "showingLatest": "inaonyesha {count} za karibuni",
+      "viewBumicert": "Tazama cheti",
+      "topCountries": "Nchi zinazoongoza",
+      "recentDonations": "Michango ya karibuni",
+      "showingAll": "inaonyesha zote",
+      "anonymousSupporter": "Muungaji mkono asiyejulikana",
+      "view": "Tazama",
+      "showFirst": "Onyesha {count} za kwanza",
+      "showAll": "Onyesha zote {count}",
+      "loadingCountries": "Inapakia nchi"
+    },
+    "error": {
+      "title": "Data ya michango haipatikani",
+      "description": "Hatukuweza kupakia taarifa za michango. Jaribu tena baada ya muda mfupi.",
+      "action": "Fungua muhtasari wa michango"
+    }
+  },
+  "donationsHub": {
+    "tabs": {
+      "overview": "Muhtasari",
+      "leaderboard": "Bao la wanaoongoza",
+      "ariaLabel": "Mwonekano wa michango"
+    }
+  },
+  "grants": {
+    "metadata": {
+      "title": "Ruzuku",
+      "description": "Omba programu za ruzuku zinazofadhili uhuru wa data na maamuzi kwa jamii zinazotegemea asili."
+    },
+    "hero": {
+      "eyebrow": "Ufadhili",
+      "title": "Ruzuku",
+      "accent": "Programu",
+      "imageAlt": "Mandhari ya uhuishaji yenye ukungu",
+      "lede": "Programu za ruzuku zilizo wazi kwa jamii zinazojenga uhuru wa data na maamuzi. Omba kwa mojawapo ya miradi yako."
+    },
+    "rewilding": {
+      "title": "Kurudisha Uasilia kwenye Wavuti",
+      "slots": "Ruzuku 10 zinapatikana",
+      "amount": "Hadi $1,000 kila moja",
+      "description": "Programu ya ruzuku inayofadhili virekodi vya AudioMoth na vifaa vingine vya kukusanya data uwandani, ili jamii ziweze kukusanya data zao za bayoanuwai papo hapo.",
+      "support": "Inafadhiliwa na ruzuku ya Klarna AI for Climate Resilience.",
+      "server": {
+        "aria": "Mchoro shirikishi wa vifaa vya kukusanya data uwandani",
+        "caption": "Ukusanyaji data uwandani"
+      },
+      "kits": {
+        "audiomoths": {
+          "title": "Virekodi vya AudioMoth",
+          "description": "Virekodi vya sauti vinavyonasa sauti za bayoanuwai uwandani."
+        },
+        "tools": {
+          "title": "Vifaa vya kukusanya data",
+          "description": "Vifaa vya uwandani vya kukusanya uchunguzi na ushahidi papo hapo."
+        }
+      },
+      "apply": "Omba kwa Mbofyo Mmoja",
+      "applicationsUnderReview": "Maombi yanapitiwa. Waombaji watakaochaguliwa watatangazwa hivi karibuni.",
+      "details": "Soma maelezo ya ruzuku",
+      "appliedTitle": "Maombi yametumwa",
+      "appliedNote": "Maombi yako kwa {project} sasa yamechapishwa kwenye mlisho.",
+      "postText": "Ninaomba ruzuku ya Kurudisha Uasilia kwenye Wavuti kwa mradi wangu \"{project}\" kwa ajili ya uhuru wa data na maamuzi. 🌱"
+    },
+    "applyModal": {
+      "title": "Chagua mradi wa kuombea",
+      "subtitle": "Chagua mojawapo ya miradi yako kutuma maombi yako.",
+      "searchPlaceholder": "Tafuta miradi yako",
+      "searchAria": "Tafuta miradi yako",
+      "loading": "Inapakia miradi yako…",
+      "errorTitle": "Imeshindikana kupakia miradi yako.",
+      "retry": "Jaribu tena",
+      "noProjectsTitle": "Bado hakuna miradi",
+      "noProjectsDescription": "Tengeneza mradi kwanza, kisha urudi kuombea nao.",
+      "createProject": "Tengeneza mradi",
+      "noMatch": "Hakuna mradi unaolingana na utafutaji wako.",
+      "untitledProject": "Mradi usio na kichwa",
+      "applyWith": "Omba kwa {project}",
+      "submitError": "Imeshindikana kutuma maombi yako. Tafadhali jaribu tena.",
+      "successTitle": "Maombi yamewasilishwa",
+      "successBody": "Asante kwa kuomba kwa {project}. Tutawasiliana nawe hivi karibuni kuhusu hatua zinazofuata.",
+      "successClose": "Imekamilika"
+    },
+    "interoperable": {
+      "category": "Programu ya Ruzuku Zinazoshirikiana",
+      "grantName": "Ma Earth Raundi ya 3",
+      "fundingType": "Ufadhili wa mraba",
+      "description": "Raundi ya ufadhili ya Ma Earth inayoungwa mkono na jamii inatumia ufadhili wa mraba: michango mingi midogo hulinganishwa na kukuzwa zaidi ya michango michache mikubwa. Maombi yamefungwa na raundi sasa inaendelea — vinjari miradi inayoshiriki na uiunge mkono.",
+      "browseProjects": "Vinjari miradi katika raundi hii",
+      "logoAlt": "Ma Earth"
+    },
+    "rewildingDashboard": {
+      "grant": {
+        "navLabel": "Ruzuku yangu",
+        "nextStepEyebrow": "Hatua inayofuata",
+        "dueBy": "ifikapo {date}",
+        "openRecorders": "Ongeza vinasa sauti",
+        "statsLabel": "Maendeleo ya ruzuku",
+        "stats": {
+          "audioUploaded": "Sauti zilizopakiwa",
+          "audioValue": "dakika {minutes}",
+          "recorders": "Vinasa sauti",
+          "recordersYours": "{count} vyako",
+          "recordersShipped": "{count} vimetumwa",
+          "speciesTagged": "Spishi zilizowekewa lebo",
+          "audioTargetBy": "Lengo la dakika {target} ifikapo {date}",
+          "audioBehindPace": "Dakika {minutes} nyuma ya mwendo · siku {days} zimebaki",
+          "audioAheadPace": "Dakika {minutes} mbele ya mwendo · siku {days} zimebaki",
+          "audioTargetMet": "Lengo limefikiwa",
+          "audioGrantClosed": "Kipindi cha ruzuku kimefungwa",
+          "audioStartsIn": "Inaanza baada ya siku {days} · dakika {rate}/siku zinahitajika"
+        },
+        "milestones": {
+          "title": "Hatua muhimu za ruzuku",
+          "progress": "{done} kati ya {total} zimethibitishwa",
+          "viewRecorders": "Fungua orodha",
+          "notStarted": "Haijaanza",
+          "empty": "Bado hakuna hatua muhimu. Zitaonekana hapa mara ruzuku yako itakapowekwa.",
+          "confirmed": "Imethibitishwa",
+          "payout": "Hutoa ${amount} · malipo ya {tranche}",
+          "reviewNote": "GainForest huthibitisha kila hatua muhimu — kila hatua iliyothibitishwa hufungua sehemu inayofuata ya ruzuku yako.",
+          "pending": "Haijathibitishwa",
+          "dueOn": "Ifikapo {date}",
+          "overdue": "Ilipaswa kufika {date}"
+        },
+        "metadata": {
+          "title": "Ruzuku yangu",
+          "description": "Ruzuku yako ya Rewilding the Web: hatua inayofuata, maendeleo na hatua muhimu."
+        },
+        "untitled": "Ruzuku yako",
+        "amount": "Ruzuku ya ${amount}",
+        "pace": {
+          "title": "Sauti zilizopakiwa dhidi ya mwendo unaohitajika",
+          "summary": "Dakika {current} kati ya lengo la {target} · mwendo wa kulifikia ifikapo {date}",
+          "rangeLabel": "Chagua kipindi",
+          "ranges": {
+            "1w": "Wiki",
+            "1m": "Mwezi",
+            "6m": "Miezi 6",
+            "all": "Tangu ruzuku",
+            "allUpcoming": "Upakiaji wote"
+          },
+          "phrases": {
+            "1w": "wiki hii",
+            "1m": "mwezi huu",
+            "6m": "katika miezi 6 iliyopita",
+            "all": "tangu ruzuku yako ianze"
+          },
+          "vsPaceNeeded": "dhidi ya mwendo unaohitajika · {range}",
+          "behindPhrase": "nyuma ya mwendo unaohitajika {phrase}",
+          "aheadPhrase": "mbele ya mwendo unaohitajika {phrase}",
+          "upcomingEyebrow": "mwanzo mzuri · {range}",
+          "upcomingPhrase": "zilizohifadhiwa kabla ya dirisha la ruzuku kufunguliwa tarehe {date}",
+          "upcomingNeeded": "0 inahitajika hadi tarehe {date}",
+          "upcomingRates": "{actual} halisi · {needed} inahitajika kuanzia tarehe {date}",
+          "actual": "halisi",
+          "needed": "inahitajika",
+          "perDay": "{rate}/siku",
+          "rates": "{actual} halisi · {needed} inahitajika",
+          "legendActual": "Halisi",
+          "legendNeeded": "Mwendo unaohitajika",
+          "focus": "Dakika {minutes} tarehe {date}",
+          "overallBehind": "Kwa jumla dakika {minutes} nyuma ya mwendo wa ruzuku nzima",
+          "overallAhead": "Kwa jumla dakika {minutes} mbele ya mwendo wa ruzuku nzima",
+          "overallUpcoming": "Dirisha la ruzuku linafunguliwa tarehe {date} · kila dakika hadi sasa ni mwanzo mzuri",
+          "overallMet": "Lengo la kurekodi limefikiwa"
+        }
+      },
+      "recorders": {
+        "navLabel": "Vinasa sauti vyangu",
+        "title": "Vinasa sauti vyangu",
+        "add": "Ongeza kinasa sauti",
+        "addShort": "Ongeza",
+        "filtersLabel": "Chuja vinasa sauti kwa asili",
+        "filters": {
+          "all": "Vyote {count}",
+          "owned": "Vyako {count}",
+          "shipped": "Kutoka GainForest {count}"
+        },
+        "origin": {
+          "owned": "chako",
+          "shipped": "kutoka GainForest"
+        },
+        "status": {
+          "recording": "Kinarekodi",
+          "idle": "Hakijawekwa",
+          "arriving": "Kinawasili ~{date}",
+          "inTransit": "Njiani",
+          "requested": "Kinaagizwa"
+        },
+        "emptyFilter": "Hakuna kinasa sauti kinacholingana na kichujio hiki bado.",
+        "unknownPrompt": "Una kinasa sauti tusichokifahamu? Kiongeze hapa.",
+        "metadata": {
+          "title": "Vinasa sauti vyangu",
+          "description": "Vinasa sauti vyote vya ruzuku yako ya Rewilding the Web na kila kimoja kilikotoka."
+        },
+        "empty": "Bado hakuna vinasa sauti.",
+        "addNotBuilt": "Kuongeza vinasa sauti bado hakujajengwa — kutawezeshwa mara tutakapoweza kuvihifadhi kwenye akaunti yako."
+      },
+      "addForm": {
+        "title": "Ongeza kinasa sauti",
+        "close": "Funga",
+        "originLegend": "Kinatoka wapi",
+        "originOwned": "Tayari ninacho",
+        "originOwnedHint": "Sajili kinasa sauti ulicho nacho.",
+        "originRequest": "Nitumieni kimoja",
+        "originRequestHint": "Omba GainForest ikutumie kimoja.",
+        "deviceType": "Aina ya kifaa",
+        "deviceOther": "Kinasa sauti kingine…",
+        "deviceOtherLabel": "Jina la kifaa",
+        "deviceOtherPlaceholder": "Chapa na modeli ya kifaa",
+        "quantity": "Vingapi",
+        "condition": "Hali",
+        "conditionOptions": {
+          "fieldWorking": "Kinafanya kazi, kiko uwandani",
+          "working": "Kinafanya kazi, hakijawekwa",
+          "needsRepair": "Kinahitaji matengenezo"
+        },
+        "requestNote": "Tunathibitisha idadi kulingana na ruzuku yako kabla ya kutuma.",
+        "location": "Mahali kinaposikiliza",
+        "locationPlaceholder": "Jina la eneo au alama",
+        "mapComingSoon": "Kichaguzi cha eneo kwenye ramani kinakuja hivi karibuni",
+        "save": "Hifadhi kinasa sauti",
+        "saveRequest": "Omba kutumiwa",
+        "milestoneNote": "Kinahesabika kwenye hatua yako ya orodha ya vifaa."
+      },
+      "shell": {
+        "eyebrow": "Rewilding the Web · onyesho la awali la msimamizi",
+        "placeholderNotice": "Tarakimu za vinasa sauti na spishi kwenye ukurasa huu bado hazijaunganishwa na rekodi halisi, kwa hivyo zinasoma sifuri. Sauti zilizopakiwa, hatua muhimu na nyaraka za ruzuku ni halisi.",
+        "granteeEyebrow": "Kurudisha Uasilia kwenye Wavuti"
+      }
+    }
+  },
+  "account": {
+    "metadata": {
+      "accountTitle": "Akaunti — vyeti",
+      "bumicertsTitle": "vyeti — vyeti",
+      "donationsTitle": "Historia ya michango — vyeti",
+      "accountFallback": "Akaunti",
+      "profileDescription": "{displayName} kwenye vyeti",
+      "organizationDescription": "{displayName} kwenye vyeti.",
+      "bumicertsPageTitle": "vyeti za {displayName} — vyeti",
+      "bumicertsPageDescription": "Vinjari vyeti zote zilizoundwa na {displayName}.",
+      "donationsPageTitle": "Historia ya michango ya {displayName} — vyeti",
+      "donationsPageDescription": "Vinjari historia ya michango ya umma ya {displayName}."
+    },
+    "errors": {
+      "loadOwnTitle": "Haikuweza kupakia akaunti yako",
+      "loadOwnDescription": "Tulipata tatizo kupata data ya akaunti yako. Tafadhali jaribu tena.",
+      "loadAccountTitle": "Haikuweza kupakia akaunti hii",
+      "loadAccountDescription": "Tulipata tatizo kupata data ya akaunti hii. Tafadhali jaribu tena.",
+      "loadBumicertsTitle": "Haikuweza kupakia vyeti za akaunti hii",
+      "loadBumicertsDescription": "Tulipata tatizo kupata vyeti za akaunti hii. Tafadhali jaribu tena."
+    },
+    "onboarding": {
+      "title": "Usajili wa kuanza unahitajika",
+      "description": "Umeingia, lakini akaunti yako ya vyeti bado haijasanidiwa. Kamilisha hatua za kuanza ili kuendelea.",
+      "action": "Anza usajili"
+    },
+    "tabs": {
+      "home": "Nyumbani",
+      "bumicerts": "vyeti",
+      "donationHistory": "Historia ya michango",
+      "evidenceTimeline": "Masasisho ya mradi",
+      "settings": "Mipangilio",
+      "leaderboard": "Ubao wa wanaoongoza"
+    },
+    "setupPrompt": {
+      "title": "Sanidi shirika lako",
+      "description": "Kabla ya kupakia maudhui, unahitaji kusanidi wasifu wa shirika lako. Huchukua dakika chache tu.",
+      "action": "Sanidi shirika"
+    },
+    "wallet": {
+      "setUpDonations": "Sanidi michango",
+      "signInDescription": "Ingia ili kuunganisha pochi yako na kupokea michango.",
+      "enabled": "Michango imewezeshwa ✓",
+      "walletLabel": "Pochi:",
+      "enabledDescription": "Wachangiaji sasa wanaweza kutuma USDC kwa shirika lako kupitia vyeti.",
+      "setupDescription": "Unganisha pochi ili kupokea michango ya USDC kutoka kwa waungaji mkono.",
+      "stepConnect": "Hatua ya 1: Unganisha pochi yako",
+      "connectWallet": "Unganisha pochi",
+      "stepSwitch": "Hatua ya 2: Hamia kwenye mtandao wa Ethereum",
+      "switching": "Inabadilisha...",
+      "switchToEthereum": "Hamia Ethereum",
+      "linkedSuccess": "✓ Pochi imeunganishwa kwa mafanikio!",
+      "linkedSuccessDescription": "Kichakataji faharasa kinaweza kuchukua muda kuchakata uthibitisho wako.",
+      "refresh": "Onyesha upya",
+      "stepLink": "Hatua ya 3: Unganisha pochi yako",
+      "waitingSignature": "Inasubiri saini…",
+      "writingAttestation": "Inaandika uthibitisho…",
+      "errorLinking": "Hitilafu kuunganisha pochi",
+      "signInWallet": "Saini kwenye pochi…",
+      "writingToAtproto": "Inaandika kwenye ATProto…",
+      "retry": "Jaribu tena",
+      "signAndLink": "Saini na unganisha pochi",
+      "signing": "Inatia sahihi…",
+      "saving": "Inahifadhi…"
+    },
+    "bumicerts": {
+      "emptyEyebrow": "Hakuna vyeti",
+      "emptyDescription": "Akaunti hii bado haijachapisha vyeti zozote.",
+      "unknownCreator": "Haijulikani"
+    },
+    "sidebar": {
+      "achievements": "Mafanikio",
+      "viewAllAchievements": "Tazama mafanikio yote",
+      "donationUnavailable": "Rekodi za michango hazipatikani kwa sasa",
+      "noPublicDonationsRecorded": "Bado hakuna michango ya umma iliyorekodiwa",
+      "supportedOrganizations": "Iliunga mkono {count} {count, plural, one {shirika} other {mashirika}}",
+      "noPublicDonationsReceived": "Bado hakuna michango ya umma iliyopokelewa",
+      "receivedDonations": "Ilipokea {count} {count, plural, one {mchango} other {michango}}",
+      "setupPublicProfile": "Sanidi wasifu wa umma wa vyeti",
+      "completedProfileDetails": "Imekamilisha {count} {count, plural, one {kipengele} other {vipengele}} vya wasifu",
+      "bumicertUnavailable": "Rekodi za cheti hazipatikani kwa sasa",
+      "publishedBumicerts": "Ilichapisha {count} {count, plural, one {cheti} other {vyeti}}",
+      "noBumicertsPublished": "Bado hakuna vyeti zilizochapishwa",
+      "profileReady": "Wasifu uko tayari",
+      "bumicertSteward": "Msimamizi wa cheti",
+      "creatorSeed": "Mbegu ya mtayarishi",
+      "communityBacked": "Inaungwa mkono na jamii",
+      "impactSupporter": "Msaidizi wa athari",
+      "inviteCollaborators": "Alika washirika",
+      "inviteCollaboratorsDescription": "Walete waungaji mkono na washirika kwenye kazi yako ya vyeti na kukuza athari endelevu pamoja.",
+      "inviteFriends": "Alika marafiki",
+      "inviteFriendsDescription": "Waalike marafiki zako kujiunga na vyeti na kuunda athari chanya pamoja.",
+      "shareProfileTitle": "Shiriki wasifu wako",
+      "shareProfileTitleOrganization": "Shiriki wasifu huu",
+      "shareProfileBody": "Nakili kiungo cha wasifu wako na ukishiriki na mtu yeyote.",
+      "shareProfileBodyOrganization": "Nakili kiungo cha wasifu huu na ukishiriki na washirika na wafadhili.",
+      "copyProfileLink": "Nakili kiungo cha wasifu",
+      "profileLinkCopied": "Imenakiliwa",
+      "shareOrganization": "Chunguza wasifu wa vyeti wa {displayName}: {pageUrl}",
+      "shareUser": "Jiunge nami kwenye vyeti na uunge mkono athari endelevu: {pageUrl}",
+      "totalBumicerts": "Jumla ya vyeti",
+      "donationsReceived": "Michango iliyopokelewa",
+      "totalDonations": "Jumla ya michango"
+    },
+    "hero": {
+      "coverImageAlt": "Picha ya jalada ya {displayName}",
+      "copyLink": "Nakili kiungo",
+      "copied": "Imenakiliwa!",
+      "share": "Shiriki",
+      "editProfile": "Hariri wasifu",
+      "edit": "Hariri",
+      "since": "Tangu {date}"
+    },
+    "settings": {
+      "profile": {
+        "title": "Hariri Wasifu",
+        "description": "Sasisha jina lako, wasifu, na picha za profaili.",
+        "displayNameLabel": "Jina la Kuonyesha",
+        "displayNamePlaceholder": "Jina lako",
+        "bioLabel": "Wasifu",
+        "bioPlaceholder": "Utambulisho mfupi kuhusu wewe ni nani.",
+        "changeBanner": "Badilisha bango",
+        "addBanner": "Ongeza bango",
+        "changeAvatar": "Badilisha picha ya wasifu",
+        "avatarEditorDescription": "Chagua picha wazi kwa profaili yako.",
+        "bannerEditorDescription": "Chagua bango linalofanana na profaili yako.",
+        "saveChanges": "Hifadhi Mabadiliko",
+        "saving": "Inahifadhi...",
+        "saved": "Imehifadhiwa!"
+      },
+      "account": {
+        "title": "Akaunti",
+        "description": "Vitambulisho vya akaunti yako kwenye mtandao wa AT Protocol.",
+        "handleLabel": "Kitambulisho",
+        "didLabel": "Kitambulisho Kisichogawanywa (DID)"
+      },
+      "password": {
+        "title": "Nenosiri",
+        "description": "Weka upya nenosiri lako kupitia nambari ya uthibitisho iliyotumwa kwa barua pepe yako.",
+        "emailLabel": "Anwani ya barua pepe",
+        "emailPlaceholder": "wewe@mfano.com",
+        "sendCodeDescription": "Tutatuma nambari ya kuweka upya kwenye barua pepe ya akaunti yako.",
+        "sendCode": "Tuma Nambari",
+        "sending": "Inatuma...",
+        "codeSent": "Nambari imetumwa kwa {email}. Angalia kikasha chako.",
+        "codeLabel": "Nambari ya Kuweka Upya",
+        "codePlaceholder": "Ingiza nambari kutoka barua pepe yako",
+        "newPasswordLabel": "Nenosiri Jipya",
+        "newPasswordPlaceholder": "Angalau herufi 8",
+        "confirmPasswordLabel": "Thibitisha Nenosiri",
+        "confirmPasswordPlaceholder": "Rudia nenosiri jipya",
+        "changePassword": "Badilisha Nenosiri",
+        "saving": "Inahifadhi...",
+        "cancel": "Ghairi",
+        "confirmMismatch": "Manenosiri hayafanani.",
+        "lengthError": "Nenosiri lazima liwe kati ya herufi 8 na 256.",
+        "requestError": "Imeshindwa kutuma barua pepe ya kuweka upya. Jaribu tena.",
+        "resetError": "Imeshindwa kuweka upya nenosiri. Angalia nambari.",
+        "successMessage": "Nenosiri limebadilishwa."
+      },
+      "wallets": {
+        "title": "Pochi Zilizounganishwa",
+        "addWallet": "Ongeza Pochi",
+        "empty": "Hakuna pochi zilizounganishwa bado.",
+        "verified": "Imethibitishwa",
+        "unverified": "Haijathibitishwa",
+        "description": "Unganisha pochi yako ya Ethereum kupokea michango ya USDC.",
+        "edit": "Hariri pochi",
+        "delete": "Futa pochi"
+      }
+    }
+  },
+  "sidebar": {
+    "sections": {
+      "explore": "CHUNGUZA",
+      "manage": "DHIBITI"
+    },
+    "items": {
+      "bumicerts": "vyeti",
+      "organizations": "Mashirika",
+      "leaderboard": "Bao la wanaoongoza",
+      "organization": "Shirika",
+      "sites": "Maeneo",
+      "audio": "Sauti",
+      "trees": "Miti",
+      "profile": "Wasifu"
+    },
+    "createBumicert": "Unda cheti",
+    "prompts": {
+      "signInDescription": "Ingia ili kudhibiti akaunti na maudhui yako.",
+      "signInAction": "Ingia",
+      "accountError": "Haikuweza kupakia akaunti yako kwa sasa.",
+      "checkingAccount": "Inakagua akaunti yako...",
+      "onboardingDescription": "Kamilisha usajili ili kudhibiti akaunti yako.",
+      "onboardingAction": "Anza"
+    },
+    "social": {
+      "documentation": "Nyaraka",
+      "github": "GitHub",
+      "twitter": "X (Twitter)",
+      "gainforest": "GainForest"
+    }
+  },
+  "maEarthFundingRound": {
+    "metadata": {
+      "title": "Omba Awamu wa 3 wa Ufadhili wa Ma Earth — vyeti",
+      "description": "Jifunze jinsi jamii za GainForest zinaweza kutumia vyeti kujiandaa kwa Awamu wa 3 wa Ufadhili wa Ma Earth na dimbwi la kulinganisha la $500,000."
+    },
+    "hero": {
+      "logoAlt": "Ma Earth",
+      "title": "Andaa cheti yako kwa Awamu wa 3 wa Ufadhili wa Ma Earth",
+      "description": "Ma Earth inaendesha awamu ya ufadhili inayoungwa mkono na jamii yenye dimbwi la kulinganisha la $500,000 kwa miradi inayotegemea mazingira. Ikiwa shirika lako tayari linaandika athari kupitia vyeti, tumia cheti yako ya umma kama rejeleo unapoomba kwenye Ma Earth."
+    },
+    "actions": {
+      "applyOnMaEarth": "Omba kwenye Ma Earth",
+      "createBumicertFirst": "Unda cheti kwanza"
+    },
+    "matchingPool": {
+      "value": "$500,000",
+      "label": "Dimbwi la kulinganisha",
+      "description": "Ma Earth hutumia ufadhili wa quadratic: ushiriki mpana wa waungaji mkono unaweza kuwa muhimu zaidi kuliko mchango mmoja mkubwa."
+    },
+    "facts": {
+      "matchingPool": {
+        "label": "Mfuko wa ulinganishaji",
+        "value": "$500,000",
+        "description": "Msaada wa jamii huongezwa nguvu kupitia modeli ya ulinganishaji ya Ma Earth."
+      },
+      "fundingRange": {
+        "label": "Kiwango cha ufadhili wa mradi",
+        "value": "$2k–$15k",
+        "description": "Kwa kazi mahususi, inayotekelezeka na inayotegemea mazingira, yenye taarifa wazi."
+      },
+      "applicationWindow": {
+        "label": "Kipindi cha maombi",
+        "value": "Imefunguliwa hadi Mei 31",
+        "description": "Maombi yako wazi hadi Mei 31, 2026."
+      }
+    },
+    "why": {
+      "eyebrow": "Kwa nini ujiandae na cheti?",
+      "title": "Rekodi yako ya athari inapaswa kusafiri pamoja na ombi lako.",
+      "description": "cheti hukusanya hadithi ya mradi, muktadha wa shirika, eneo, picha na ushahidi ambao wafadhili wanahitaji ili kuamini kazi hiyo. Husaidia kuunganisha kazi ya jamii iliyothibitishwa na mchakato wa ufadhili wa Ma Earth."
+    },
+    "includeItems": {
+      "story": "Hadithi ya mradi na maelezo mafupi",
+      "identity": "Utambulisho wa shirika na wasifu wa umma",
+      "evidence": "Picha, ushahidi, na madai ya athari yaliyoandikwa",
+      "location": "Marejeleo ya eneo au tovuti yanapopatikana",
+      "publicLink": "Kiungo cha umma cha cheti unachoweza kujumuisha kwenye ombi lako"
+    },
+    "eligibility": {
+      "title": "Nani anastahiki?",
+      "items": {
+        "nature": "Miradi ya mazingira ya urejeshaji, uhifadhi, kilimo, maji, udongo, bioanuwai, au jamii.",
+        "plan": "Mpango mahususi wenye malengo, muda, uwezo wa kutoa taarifa, na madai halisi ya mafanikio.",
+        "fundingNeed": "Hitaji la ufadhili kati ya USD $2,000 na $15,000 kwa kazi mahususi ya mradi.",
+        "stripe": "Mpangilio katika nchi inayoungwa mkono na Stripe au mshirika mwenyeji wa kifedha anayeweza kupokea fedha."
+      }
+    },
+    "timeline": {
+      "title": "Ratiba ya raundi",
+      "items": {
+        "applicationsClose": {
+          "date": "Mei 31",
+          "event": "Maombi yanafungwa"
+        },
+        "applicantsNotified": {
+          "date": "Juni 15",
+          "event": "Waombaji wanaarifiwa"
+        },
+        "acceptedProjects": {
+          "date": "Julai 1",
+          "event": "Miradi iliyokubaliwa inaingia kwenye raundi"
+        },
+        "roundCloses": {
+          "date": "Julai 21",
+          "event": "Raundi inafungwa na ufadhili unalipwa"
+        }
+      }
+    },
+    "flow": {
+      "eyebrow": "Mtiririko wa ombi",
+      "title": "Omba moja kwa moja kwenye Ma Earth, ukiwa na cheti yako tayari.",
+      "description": "vyeti haiwezi kuwasilisha ombi lako kiotomatiki. Fungua ukurasa wa kuchangisha fedha wa Ma Earth, omba huko, na uweke kiungo chako cha cheti ya umma popote kinaposaidia kueleza mradi na ushahidi wako."
+    }
+  },
+  "projects": {
+    "metadata": {
+      "title": "Miradi ya mazingira — ushahidi wa uwandani na rekodi za athari",
+      "description": "Vinjari miradi ya jamii na mashirika yenye maeneo, masasisho, uchunguzi, na ushahidi wa kazi ya urejeshaji."
+    },
+    "hero": {
+      "eyebrow": "Gundua miradi",
+      "title": "Gundua",
+      "accent": "Miradi",
+      "description": "Kila mradi ni kazi inayolenga — yenye lengo wazi, ratiba ya muda, na matokeo yanayotarajiwa."
+    },
+    "search": {
+      "ariaLabel": "Tafuta miradi",
+      "placeholder": "Tafuta miradi kwa jina au neno muhimu",
+      "sortAriaLabel": "Panga miradi",
+      "action": "Tafuta"
+    },
+    "categories": {
+      "eyebrow": "Gundua kwa kuvutiwa",
+      "title": "Gundua aina za miradi",
+      "description": "Anza na mada, kisha gundua watu na maeneo yanayoifanya iwe halisi.",
+      "items": {
+        "all": "Miradi yote",
+        "forests": "Misitu na miti",
+        "biodiversity": "Bioanuwai",
+        "foodWater": "Chakula, maji na udongo",
+        "communities": "Jamii",
+        "climate": "Ustahimilivu wa tabianchi"
+      }
+    },
+    "featured": {
+      "eyebrow": "Miradi teule",
+      "title": "Hadithi za kuanzia",
+      "description": "Uteuzi wa miradi iliyoandikwa vizuri kutoka kwa wasimamizi wa mazingira duniani kote.",
+      "badge": "Teule",
+      "action": "Gundua mradi",
+      "previous": "Miradi teule iliyotangulia",
+      "next": "Miradi teule inayofuata",
+      "goTo": "Nenda kwa {title}",
+      "manage": {
+        "add": "Teua mradi huu",
+        "remove": "Ondoa kwenye miradi teule",
+        "error": "Imeshindikana kusasisha miradi teule. Tafadhali jaribu tena."
+      }
+    },
+    "support": {
+      "eyebrow": "Iko wazi kwa msaada",
+      "title": "Saidia kazi nzuri ikue",
+      "description": "Saidia miradi inayokaribisha michango kutoka kwa jamii zao."
+    },
+    "catalog": {
+      "eyebrow": "Gundua miradi",
+      "title": "Gundua miradi yote",
+      "description": "Gundua miradi katika aina hii.",
+      "count": "{count, plural, one {Mradi # wa kugundua} other {Miradi # ya kugundua}}"
+    },
+    "view": {
+      "cards": "Kadi",
+      "list": "Orodha",
+      "map": "Ramani"
+    },
+    "list": {
+      "colProject": "Mradi",
+      "colSteward": "Msimamizi",
+      "colPlace": "Eneo",
+      "colFocus": "Lengo"
+    },
+    "sort": {
+      "newest": "Mpya zaidi",
+      "oldest": "Za zamani zaidi",
+      "az": "A → Z",
+      "za": "Z → A"
+    },
+    "stats": {
+      "projects": "Miradi",
+      "withBumicerts": "Miradi yenye vyeti",
+      "bumicerts": "vyeti katika miradi",
+      "withImages": "Miradi yenye picha"
+    },
+    "filters": {
+      "allProjects": "Miradi yote",
+      "allFilters": "Panga na chuja",
+      "description": "Onyesha miradi kwa beji ya chanzo, michango, picha, au eneo la mradi.",
+      "updateHint": "Vichujio husasishwa unapochagua.",
+      "images": "Huonyesha picha",
+      "locations": "Ina eneo",
+      "timeline": "Ina ratiba",
+      "donations": "Hupokea michango",
+      "donationsGainforest": "Michango ya GainForest",
+      "donationsMaearth": "Michango ya Ma Earth"
+    },
+    "empty": {
+      "eyebrow": "Hakuna matokeo",
+      "title": "Hakuna miradi iliyopatikana",
+      "description": "Jaribu kubadilisha utafutaji au vichujio ili kupata mikusanyiko zaidi ya miradi."
+    },
+    "footer": {
+      "showing": "Inaonyesha miradi {shown} kati ya {total}.",
+      "showMore": "Onyesha zaidi",
+      "end": "Umefika mwisho."
+    },
+    "card": {
+      "open": "Fungua mradi: {title}",
+      "projectSteward": "Msimamizi wa mradi",
+      "bumicertCount": "{count, plural, one {# cheti} other {# vyeti}}",
+      "projectPlace": "Eneo la mradi",
+      "showDetails": "Onyesha maelezo",
+      "loading": "Inapakia miradi",
+      "donate": "Changia",
+      "gainforestBadge": "Changia kwenye GainForest",
+      "acceptsDonations": "Hupokea michango",
+      "openForSupport": "Iko wazi kwa msaada",
+      "donationSummary": "{amount} kutoka kwa {donors, plural, one {mchangiaji #} other {wachangiaji #}}",
+      "donationSummaryShort": "{amount} · {donors, plural, one {mchangiaji #} other {wachangiaji #}}",
+      "donationWays": "Njia {count}",
+      "maEarth": "Ma Earth",
+      "round": "Raundi {round}",
+      "byDonors": "kutoka kwa {donors, plural, one {mchangiaji #} other {wachangiaji #}}",
+      "view": "Tazama mradi"
+    },
+    "actions": {
+      "clearAll": "Futa yote"
+    },
+    "evidence": {
+      "boundaries": "{count, plural, =0 {Bado hakuna mipaka ya eneo} one {Mpaka # wa eneo umechorwa} other {Mipaka # ya eneo imechorwa}}",
+      "sightings": "{count, plural, =0 {Bado hakuna uoni wa asili} one {Uoni # wa asili} other {Uoni # wa asili}}",
+      "timeline": "{count, plural, =0 {Bado hakuna masasisho ya mradi} one {Sasisho # la mradi} other {Masasisho # ya mradi}}",
+      "reviews": "{count, plural, =0 {Bado hakuna mapitio} one {Pitio #} other {Mapitio #}}"
+    }
+  },
+  "ownerFilter": {
+    "button": "Mmiliki",
+    "ariaLabel": "Chuja kwa aliyechapisha",
+    "searchPlaceholder": "Tafuta watu na mashirika",
+    "hint": "Andika jina ili kuchuja kwa aliyechapisha",
+    "searching": "Inatafuta…",
+    "noResults": "Hakuna watu au mashirika yanayolingana",
+    "showAll": "Onyesha wote",
+    "showing": "Inaonyesha {name}",
+    "clear": "Ondoa kichujio cha mmiliki",
+    "selectedFallback": "Akaunti iliyochaguliwa",
+    "filterByThis": "Onyesha mmiliki huyu pekee"
+  },
+  "browseGrid": {
+    "heading": "Njia za kugundua",
+    "description": "Njia za kuchunguza kazi ya GainForest, kwa wachunguzi, walezi, na timu za uwandani.",
+    "cards": {
+      "bumicerts": {
+        "label": "Miradi iliyothibitishwa",
+        "title": "vyeti",
+        "blurb": "Vinjari hadithi za miradi zenye picha, maeneo, watu na muktadha.",
+        "statLabel": "hadithi"
+      },
+      "organizations": {
+        "label": "Watunzaji wa asili",
+        "title": "Mashirika",
+        "blurb": "Pata jamii na mashirika yanayotunza mifumo ikolojia duniani kote.",
+        "statLabel": "wasifu"
+      },
+      "observations": {
+        "label": "Bioanuwai",
+        "title": "Uchunguzi",
+        "blurb": "Gundua mionekano ya spishi, maeneo, na picha au sauti kutoka GainForest.",
+        "statLabel": "mionekano"
+      },
+      "leaderboard": {
+        "label": "Mabingwa wa athari",
+        "title": "Ubao wa wanaoongoza",
+        "blurb": "Waone wafadhili wanaosaidia jamii kupitia vyeti.",
+        "statLabel": "imekusanywa"
+      }
+    }
+  },
+  "recordExplorer": {
+    "kind": {
+      "occurrence": {
+        "eyebrow": "Mionekano ya asili",
+        "title": "Vinjari",
+        "accent": "mionekano ya asili",
+        "lede": "Gundua mimea, wanyama, picha na rekodi za sauti za uwandani zilizoshirikiwa kutoka maeneo ya miradi.",
+        "search": "Tafuta kwa jina la kawaida, eneo au mmea/mnyama"
+      },
+      "site": {
+        "eyebrow": "Maeneo ya mradi",
+        "title": "Mradi",
+        "accent": "maeneo",
+        "lede": "Gundua vikundi vya utunzaji wa asili, mahali vinapofanya kazi, na hadithi vinazoshiriki.",
+        "search": "Chuja kwa shirika au nchi"
+      },
+      "bumicert": {
+        "eyebrow": "Gundua miradi",
+        "title": "Gundua",
+        "accent": "Athari ya urejeshaji",
+        "lede": "Vinjari miradi kutoka kwa jamii na mashirika yanayorejesha mifumo ikolojia, kuimarisha riziki, na kujenga mustakabali imara zaidi.",
+        "search": "Chuja vyeti kwa kichwa au maelezo"
+      },
+      "project": {
+        "eyebrow": "Miradi",
+        "title": "Vinjari",
+        "accent": "mikusanyiko ya miradi",
+        "lede": "Gundua mikusanyiko ya miradi na vyeti inazoziweka pamoja.",
+        "search": "Chuja miradi kwa kichwa au maelezo"
+      }
+    },
+    "view": {
+      "cards": "Kadi",
+      "list": "Orodha",
+      "map": "Ramani"
+    },
+    "sort": {
+      "newest": "Mpya zaidi kwanza",
+      "oldest": "Za zamani zaidi kwanza",
+      "az": "A → Z",
+      "za": "Z → A",
+      "aria": "Panga mionekano"
+    },
+    "filters": {
+      "photos": "Picha",
+      "fieldSounds": "Sauti za uwandani",
+      "allMedia": "Midia yote",
+      "allNature": "Asili yote",
+      "plants": "Mimea",
+      "trees": "Miti",
+      "birds": "Ndege",
+      "flowers": "Maua"
+    },
+    "empty": {
+      "loadTitle": "Haikuweza kupakia ukurasa huu",
+      "loadBody": "GainForest haikujibu. Huenda ni tatizo la muda; tembelea ukurasa wa hali na ujaribu tena.",
+      "noMatchesTitle": "Hakuna vinavyolingana hapa",
+      "noMatchesBody": "Jaribu jina, eneo au nchi tofauti; au onyesha zaidi ili kupanua utafutaji.",
+      "clearSearch": "Futa utafutaji",
+      "noCategoryTitle": "Hakuna mionekano ya {category} katika mwonekano huu",
+      "noCategoryBody": "Jaribu mionekano yote ya asili au onyesha matokeo zaidi ili kupanua mwonekano.",
+      "showAllNature": "Onyesha asili yote",
+      "noMediaTitle": "Hakuna mionekano ya {media} iliyopatikana karibu",
+      "photo": "picha",
+      "fieldSound": "sauti ya uwandani",
+      "noMediaBody": "Mionekano mipya zaidi haihusishi picha au rekodi za sauti za uwandani kila wakati. Ondoa vichujio ili kuvinjari yote.",
+      "removeFilters": "Ondoa vichujio",
+      "nothingTitle": "Bado hakuna kitu hapa",
+      "nothingBody": "Hakuna cha kuonyesha kwa sasa."
+    },
+    "loadingMore": "Inapakia zaidi…",
+    "showMore": "Onyesha zaidi",
+    "end": "Umefika mwisho.",
+    "card": {
+      "shared": "Imeshirikiwa {date}",
+      "showDetails": "Onyesha maelezo",
+      "playSound": "Cheza sauti",
+      "pauseSound": "Sitisha sauti",
+      "verified": "Imethibitishwa",
+      "gainforest": "GainForest",
+      "project": "Mradi",
+      "bumicert": "cheti",
+      "projectPlace": "Eneo la mradi",
+      "noCover": "Hakuna picha ya jalada",
+      "peopleNamed": "{count, plural, one {mtu # ametajwa} other {watu # wametajwa}}",
+      "projectPlaces": "{count, plural, one {eneo # la mradi} other {maeneo # ya mradi}}",
+      "natureSoundRecording": "Rekodi ya sauti ya asili",
+      "unidentifiedSighting": "Uonekano usiotambuliwa",
+      "media": {
+        "image": "Picha",
+        "audio": "Sauti ya uwandani",
+        "video": "Video",
+        "spectrogram": "Mwonekano wa sauti"
+      }
+    }
+  },
+  "recordDrawer": {
+    "actions": {
+      "donate": "Changia",
+      "view": "Tazama",
+      "viewProfile": "Tazama wasifu",
+      "copyLink": "Nakili kiungo",
+      "copied": "Imenakiliwa!",
+      "close": "Funga",
+      "edit": "Hariri",
+      "cancel": "Ghairi",
+      "saveChanges": "Hifadhi mabadiliko",
+      "viewObservation": "Tazama ukurasa wa uchunguzi",
+      "viewProject": "Tazama ukurasa wa mradi",
+      "openFullPage": "Fungua ukurasa kamili"
+    },
+    "kind": {
+      "occurrence": "Uonekano wa asili",
+      "bumicert": "cheti",
+      "project": "Mradi",
+      "site": "Eneo la mradi",
+      "organization": "Shirika"
+    },
+    "bumicertStats": {
+      "peopleNamed": "Watu waliotajwa",
+      "locations": "Maeneo",
+      "workPeriod": "Kipindi cha kazi"
+    },
+    "projectEvidence": {
+      "title": "Ushahidi"
+    },
+    "projectGallery": {
+      "title": "Picha",
+      "count": "{count, plural, one {picha #} other {picha #}}"
+    },
+    "projectUpdates": {
+      "title": "Masasisho ya hivi karibuni",
+      "seeAll": "Ona zote",
+      "fallback": "Sasisho"
+    },
+    "projectBumicerts": {
+      "title": "vyeti katika mradi huu",
+      "view": "Tazama cheti",
+      "showing": "Inaonyesha vyeti {shown} kati ya {total} zilizounganishwa.",
+      "empty": "Mradi huu bado hauna vyeti zilizounganishwa.",
+      "loading": "Inapakia vyeti zilizounganishwa"
+    },
+    "observation": {
+      "ownerTitle": "Maelezo ya uchunguzi",
+      "ownerDescription": "Badilisha maelezo yaliyohifadhiwa au ondoa uchunguzi huu ikiwa una ruhusa.",
+      "saved": "Uonekano umehifadhiwa.",
+      "saveError": "Uonekano huu haukuweza kuhifadhiwa. Tafadhali jaribu tena.",
+      "deleteError": "Uonekano huu haukuweza kufutwa. Tafadhali jaribu tena.",
+      "deleteTitle": "Ufute uonekano huu?",
+      "deleteDescription": "Hii huondoa uonekano na picha, sauti za uwandani na maelezo yaliyohifadhiwa yaliyounganishwa. Hili haliwezi kutenduliwa.",
+      "keep": "Hifadhi uonekano",
+      "delete": "Futa uonekano",
+      "fields": {
+        "scientificName": "Jina la mmea au mnyama",
+        "vernacularName": "Jina la kawaida",
+        "eventDate": "Tarehe ya kuonekana",
+        "recordedBy": "Imeshirikiwa na",
+        "latitude": "Latitudo",
+        "longitude": "Longitudo",
+        "place": "Mahali",
+        "country": "Nchi",
+        "habitat": "Makazi",
+        "notes": "Madokezo",
+        "kind": "Mmea au mnyama",
+        "mapLocation": "Eneo kwenye ramani",
+        "basisOfRecord": "Hii ni aina gani ya rekodi?"
+      },
+      "validation": {
+        "name": "Weka jina la mmea au mnyama.",
+        "date": "Weka wakati ulipoonekana.",
+        "location": "Weka eneo halali la ramani.",
+        "kind": "Chagua kama hii ni mmea au mnyama."
+      },
+      "kindOptions": {
+        "plant": "Mmea",
+        "animal": "Mnyama"
+      },
+      "chooseOne": "Chagua moja",
+      "chooseMapLocation": "Chagua eneo kwenye ramani.",
+      "chooseOnMap": "Chagua kwenye ramani",
+      "chooseMapLocationTitle": "Chagua eneo kwenye ramani",
+      "closeMapLocationChooser": "Funga kichagua eneo la ramani",
+      "movePin": "Bofya ramani kusogeza alama ya muono.",
+      "noMapLocation": "Hakuna eneo la ramani lililochaguliwa bado.",
+      "useLocation": "Tumia eneo",
+      "natureSoundRecording": "Rekodi ya sauti ya asili",
+      "unidentifiedSighting": "Muono usiotambuliwa",
+      "mediaTitle": "Media katika uchunguzi huu",
+      "mediaCount": "{count, plural, one {kipengee #} other {vipengee #}}",
+      "primaryMedia": "Media kuu",
+      "fieldSound": "Sauti ya uwanjani",
+      "mediaThumbnail": "Media ya uchunguzi",
+      "previousPhoto": "Picha iliyotangulia",
+      "nextPhoto": "Picha inayofuata",
+      "showPhoto": "Onyesha picha",
+      "reanalyze": "Changanua tena",
+      "reanalyzeHint": "Pata utambuzi mpya wa AI kutoka kwenye picha",
+      "reanalyzeApplied": "Imesasishwa na pendekezo jipya la AI — kagua na uhifadhi.",
+      "reanalyzeUnsure": "AI haikuweza kuitambua kwa uhakika. Jaribu kuongeza jina mwenyewe.",
+      "reanalyzeError": "Hatukuweza kuendesha AI kwa sasa. Tafadhali jaribu tena.",
+      "reanalyzeNoImage": "Hakuna picha ya kuchanganua kwa uchunguzi huu.",
+      "basisOptions": {
+        "human": "Imeonekana ana kwa ana",
+        "machine": "Utambuzi wa AI au kifaa",
+        "preserved": "Sampuli iliyohifadhiwa",
+        "material": "Sampuli ya nyenzo",
+        "living": "Sampuli hai"
+      }
+    },
+    "media": {
+      "image": "Picha",
+      "audio": "Sauti ya uwandani",
+      "video": "Video",
+      "spectrogram": "Mwonekano wa sauti"
+    },
+    "fields": {
+      "family": "Familia",
+      "genus": "Jenasi",
+      "kingdom": "Ufalme",
+      "basisOfRecord": "Kilichoonekana",
+      "count": "Idadi",
+      "sharedBy": "Imeshirikiwa na",
+      "location": "Eneo",
+      "mapLocation": "Eneo la ramani",
+      "observed": "Imeonekana",
+      "media": "Picha au sauti za uwandani",
+      "remarks": "Maelezo",
+      "peopleNamed": "Watu waliotajwa",
+      "projectPlaces": "Maeneo ya mradi",
+      "start": "Mwanzo",
+      "end": "Mwisho",
+      "bumicerts": "vyeti",
+      "projectPlace": "Eneo la mradi",
+      "added": "Imeongezwa",
+      "country": "Nchi",
+      "type": "Aina"
+    },
+    "audioHero": "Cheza sauti ya {title}",
+    "detailLabels": {
+      "nameDetails": "Maelezo ya jina",
+      "nameRank": "Daraja la jina",
+      "natureGroup": "Kundi la asili",
+      "sightingDetails": "Maelezo ya muono",
+      "sightingType": "Aina ya muono",
+      "lifeStage": "Hatua ya maisha",
+      "sex": "Jinsia",
+      "reproductiveCondition": "Hali ya uzazi",
+      "behavior": "Tabia",
+      "placeName": "Jina la mahali",
+      "cityOrTown": "Mji au kijiji",
+      "area": "Eneo",
+      "stateProvince": "Jimbo / mkoa",
+      "elevation": "Mwinuko",
+      "sharedDetails": "Maelezo yaliyoshirikiwa",
+      "observedBy": "Imeonwa na",
+      "namedBy": "Imetambuliwa na",
+      "dateNamed": "Tarehe ya utambuzi",
+      "shared": "Imeshirikiwa",
+      "sourceDetails": "Maelezo ya chanzo",
+      "sourceName": "Jina la chanzo",
+      "organizationCode": "Msimbo wa shirika",
+      "sourceGroup": "Kundi la chanzo",
+      "surveyMethod": "Mbinu ya uchunguzi",
+      "license": "Leseni",
+      "rightsHolder": "Mmiliki wa haki",
+      "sightingId": "ID ya muono"
+    }
+  },
+  "projectPage": {
+    "back": "Miradi yote",
+    "edit": "Hariri mradi",
+    "kind": "Mradi",
+    "ledBy": "Mradi wa",
+    "viewProfile": "Tazama wasifu",
+    "created": "Imeundwa",
+    "certs": "Vyeti",
+    "overviewTitle": "Muhtasari",
+    "overviewLead": "Muhtasari kutoka {certs, plural, one {cheti #} other {vyeti #}} katika mradi huu.",
+    "contributors": "Wachangiaji",
+    "places": "Maeneo",
+    "focusAreasLabel": "Maeneo ya kazi",
+    "whereLabel": "Nchi",
+    "activePeriodLabel": "Kipindi cha kazi",
+    "observations": "Uchunguzi",
+    "photos": "Picha",
+    "galleryTitle": "Matunzio",
+    "observationsTitle": "Uchunguzi",
+    "certsTitle": "Vyeti vya mradi huu",
+    "noCerts": "Hakuna vyeti vilivyoongezwa kwenye mradi huu bado.",
+    "metaTitle": "{name} — Mradi",
+    "metaFallback": "Mradi ulioshirikiwa kwenye GainForest.",
+    "timelineTitle": "Ratiba",
+    "publishingBadge": "Inachapishwa",
+    "publishingTitle": "Mradi wako unakuja",
+    "publishingBody": "Tunachapisha mradi wako. Kwa kawaida huchukua dakika moja — ukurasa utajisasisha wenyewe."
+  },
+  "observationPage": {
+    "back": "Uchunguzi wote",
+    "kind": "Uchunguzi wa asili",
+    "sharedBy": "Imeshirikiwa na",
+    "viewProfile": "Tazama wasifu",
+    "observed": "Imeonekana",
+    "shared": "Imeshirikiwa",
+    "place": "Mahali",
+    "notRecorded": "Haijarekodiwa",
+    "detailsTitle": "Maelezo",
+    "notesTitle": "Madokezo",
+    "fieldSound": "Sauti ya shambani",
+    "previous": "Picha iliyotangulia",
+    "next": "Picha inayofuata",
+    "showPhoto": "Onyesha picha {number}",
+    "zoom": "Kuza picha",
+    "close": "Funga",
+    "audioUnsupported": "Kivinjari chako hakitumii uchezaji wa sauti.",
+    "metaTitle": "{name} — Uchunguzi wa asili",
+    "metaFallback": "Uchunguzi wa asili ulioshirikiwa kwenye GainForest.",
+    "natureSound": "Rekodi ya sauti ya asili",
+    "unidentified": "Uchunguzi usiotambulika",
+    "suggestions": {
+      "title": "Mapendekezo ya spishi",
+      "description": "Mapendekezo ya utambulisho kutoka kwa wataalamu wa ikolojia. Mchunguzi anaweza kuyakagua kabla ya kubadilisha uchunguzi huu.",
+      "expertFallback": "Mtaalamu wa jamii",
+      "status": "Inasubiri ukaguzi"
+    }
+  },
+  "labeler": {
+    "meta": {
+      "title": "Kiweka lebo cha uchunguzi",
+      "description": "Kagua uchunguzi wa hivi karibuni na upendekeze utambulisho wa spishi."
+    },
+    "hero": {
+      "title": "Tambua",
+      "accent": "spishi"
+    },
+    "eyebrow": "Ukaguzi wa ikolojia",
+    "title": "Kiweka lebo cha uchunguzi",
+    "description": "Chunguza uchunguzi wa hivi karibuni na usiotambulika, kagua data za uga, na upendekeze jina mahususi la spishi.",
+    "unidentified": "Haujatambulika",
+    "filters": {
+      "searchLabel": "Tafuta uchunguzi",
+      "searchPlaceholder": "Tafuta spishi, jenasi, familia au mahali…",
+      "taxonLabel": "Taksoni",
+      "allTaxa": "Taksoni zote",
+      "genusLabel": "Jenasi",
+      "allGenera": "Jenasi zote",
+      "countryLabel": "Nchi",
+      "allCountries": "Nchi zote",
+      "regionLabel": "Eneo",
+      "allRegions": "Maeneo yote",
+      "mediaLabel": "Aina ya ushahidi",
+      "allMedia": "Ushahidi wote",
+      "photos": "Picha",
+      "audio": "Sauti"
+    },
+    "queue": {
+      "unidentified": "Inahitaji utambulisho",
+      "recent": "Uchunguzi wa hivi karibuni",
+      "count": "{count, plural, =0 {Hakuna uchunguzi} =1 {Uchunguzi 1} other {Uchunguzi #}}",
+      "ariaLabel": "Uchunguzi wa kukaguliwa",
+      "loadMore": "Pakia uchunguzi zaidi",
+      "loading": "Inapakia uchunguzi…"
+    },
+    "empty": {
+      "title": "Hakuna uchunguzi unaolingana",
+      "description": "Jaribu taksoni, jenasi, nchi, eneo au utafutaji mwingine."
+    },
+    "review": {
+      "selectPrompt": "Chagua uchunguzi ili kukagua ushahidi na data zake za uga.",
+      "currentIdentification": "Utambulisho wa sasa",
+      "openObservation": "Fungua ukurasa wa uchunguzi",
+      "family": "Familia",
+      "genus": "Jenasi",
+      "observer": "Mchunguzi",
+      "communityObserver": "Mchunguzi wa jamii",
+      "observed": "Ilionekana"
+    },
+    "proposal": {
+      "title": "Pendekeza utambulisho",
+      "description": "Pendekezo lako litaonekana kwenye uchunguzi na kumjulisha mchunguzi. Halitabadilisha jina la sasa moja kwa moja.",
+      "scientificName": "Jina la kisayansi",
+      "scientificPlaceholder": "mf. Panthera onca",
+      "commonNameOptional": "Jina la kawaida (si lazima)",
+      "commonPlaceholder": "mf. Jaguar",
+      "noteOptional": "Maelezo ya ushahidi (si lazima)",
+      "notePlaceholder": "Eleza sifa zinazoonekana au muktadha unaounga mkono utambulisho huu.",
+      "recordSuggestion": "Pendekezo la spishi",
+      "commonName": "Jina la kawaida",
+      "noteLabel": "Maelezo ya ushahidi",
+      "submit": "Tuma pendekezo",
+      "submitting": "Inatuma pendekezo…",
+      "success": "Umependekeza {name}. Mchunguzi atajulishwa.",
+      "error": "Pendekezo halikuweza kutumwa. Tafadhali jaribu tena.",
+      "signInDescription": "Ingia ili kutuma mapendekezo kutoka kwenye akaunti yako. Mtu yeyote bado anaweza kuchunguza foleni ya ukaguzi.",
+      "signIn": "Ingia ili kupendekeza"
+    }
+  },
+  "manageProjects": {
+    "hero": {
+      "title": "Miradi Yangu",
+      "description": "Unda na simamia miradi yako. Kila mradi unasimulia hadithi ya kazi yako na unaweza kuungwa mkono na wafadhili."
+    },
+    "metadata": {
+      "title": "Simamia Miradi — GainForest",
+      "description": "Unda na simamia miradi yako kwenye GainForest."
+    },
+    "actions": {
+      "editProject": "Hariri mradi",
+      "editProjectFor": "Hariri {title}",
+      "viewProjectFor": "Fungua {title}",
+      "manageGallery": "Dhibiti matunzio",
+      "manageGalleryFor": "Dhibiti matunzio ya {title}",
+      "manageObservations": "Uchunguzi",
+      "manageObservationsFor": "Uchunguzi wa {title}",
+      "manageSites": "Maeneo",
+      "manageSitesFor": "Maeneo ya {title}",
+      "manageTimeline": "Ratiba",
+      "manageTimelineFor": "Ratiba ya {title}"
+    },
+    "editor": {
+      "hero": {
+        "eyebrow": "Studio ya hadithi za athari",
+        "title": "Unda mradi",
+        "subtitle": "Geuza kazi ya shambani, ushahidi wa urejeshaji, na utunzaji wa jamii kuwa mradi unaoweza kuchapishwa — bila kuondoka GainForest."
+      },
+      "backToProjects": "Rudi kwa Miradi Yangu",
+      "startOver": "Anza upya",
+      "createTitle": "Unda mradi mpya",
+      "editTitle": "Hariri mradi",
+      "cancel": "Ghairi",
+      "close": "Funga",
+      "saving": "Inahifadhi…",
+      "saveChanges": "Hifadhi mabadiliko",
+      "saveProject": "Hifadhi mradi",
+      "delete": "Futa mradi",
+      "errors": {
+        "checkFields": "Angalia sehemu zilizoangaziwa.",
+        "cannotSave": "Huwezi kuhifadhi mradi huu.",
+        "saveFailed": "Mradi haukuweza kuhifadhiwa."
+      },
+      "fields": {
+        "name": {
+          "label": "Jina la mradi",
+          "hint": "tumia jina ambalo watu wataelewa",
+          "placeholder": "Urejeshaji wa msitu wa jamii"
+        },
+        "summary": {
+          "label": "Muhtasari mfupi",
+          "hint": "sentensi moja au mbili",
+          "placeholder": "Walinzi wa eneo wanarejesha vipande vya msitu, wakifuatilia ukuaji wa miti, na kushiriki taarifa kutoka shambani."
+        },
+        "story": {
+          "label": "Hadithi",
+          "hint": "hiari — kazi, mbinu, na matokeo",
+          "placeholder": "Nini kilitokea? Athari ilipimwaje? Nani ananufaika na nini kinafuata?"
+        },
+        "scope": {
+          "label": "Maeneo ya kuzingatia",
+          "hint": "chagua kila tokeo linalofaa",
+          "customPlaceholder": "Ongeza eneo lingine, mf. utawala wa kiasili"
+        },
+        "startDate": {
+          "label": "Tarehe ya kuanza"
+        },
+        "endDate": {
+          "label": "Tarehe ya kumaliza",
+          "ongoing": "Kazi hii inaendelea"
+        },
+        "people": {
+          "label": "Watu na vikundi",
+          "hint": "tafuta jina au @handle",
+          "placeholderFirst": "Tafuta mf. “Walinzi wa Rufiji” au @handle",
+          "placeholder": "Jina au @handle",
+          "remove": "Ondoa mtu au kikundi",
+          "add": "Ongeza mtu au kikundi",
+          "change": "Badilisha mtu au kikundi",
+          "selectedProfile": "Wasifu uliochaguliwa",
+          "suggestionsStart": "Anza kuandika ili kuona mapendekezo.",
+          "suggestionsLoading": "Inapakia mapendekezo…",
+          "suggestionsEmpty": "Hakuna zinazolingana bado. Unaweza kuendelea kuandika jina."
+        },
+        "sites": {
+          "label": "Maeneo",
+          "hint": "hiari — ambatanisha maeneo kutoka akaunti yako",
+          "loading": "Inapakia maeneo yako…",
+          "error": "Imeshindwa kupakia maeneo yako.",
+          "empty": "Bado hakuna maeneo. Chora moja kwenye ramani ili kuliongeza kwenye mradi wako.",
+          "unnamed": "Eneo lisilo na jina",
+          "fallback": "Eneo la mradi",
+          "add": "Ongeza eneo",
+          "manage": "Simamia maeneo yote"
+        },
+        "photo": {
+          "label": "Picha ya mradi",
+          "optional": "hiari",
+          "cta": "Chagua picha",
+          "formats": "JPG, PNG, WebP, HEIC, au HEIF.",
+          "change": "Badilisha picha",
+          "remove": "Ondoa picha"
+        }
+      },
+      "success": {
+        "back": "Rudi kwa Miradi Yangu",
+        "titleCreate": "Mradi umeundwa",
+        "titleEdit": "Mradi umehifadhiwa",
+        "description": "Mradi wako uko tayari.",
+        "descriptionNamed": "“{title}” uko tayari kushirikiwa na kupokea msaada.",
+        "view": "Tazama mradi"
+      },
+      "deleteModal": {
+        "title": "Futa mradi?",
+        "description": "Hii itaondoa “{title}” kutoka akaunti yako. Kitendo hiki hakiwezi kutenduliwa.",
+        "manageHeading": "Dhibiti",
+        "button": "Futa mradi",
+        "hint": "Kufuta huondoa mradi huu kwa kila mtu.",
+        "prompt": "Ili kuthibitisha, andika jina la mradi kama linavyoonyeshwa:",
+        "inputAria": "Andika jina la mradi ili kuthibitisha kufuta",
+        "mismatch": "Jina bado halilingani.",
+        "cancel": "Ghairi",
+        "confirm": "Futa mradi",
+        "error": "Mradi haukuweza kufutwa."
+      },
+      "discardModal": {
+        "title": "Uachane na mradi huu?",
+        "description": "Kufunga dirisha hili kutafuta hatua ulizokamilisha za kuunda mradi wako.",
+        "keepEditing": "Endelea kuhariri",
+        "discard": "Futa hatua zilizofikiwa"
+      },
+      "wizard": {
+        "back": "Rudi",
+        "next": "Endelea",
+        "start": "Anza",
+        "create": "Unda mradi"
+      },
+      "steps": {
+        "basics": {
+          "title": "Mradi wako unaitwaje?",
+          "subtitle": "Upe jina wazi na muhtasari wa mstari mmoja ambao watu wataelewa."
+        },
+        "focus": {
+          "title": "Hii ni kazi ya aina gani?",
+          "subtitle": "Chagua maeneo ya kuzingatia yanayoelezea mradi wako vyema."
+        },
+        "timeline": {
+          "title": "Kazi ilifanyika lini?",
+          "subtitle": "Ongeza tarehe ya kuanza, na tarehe ya kumaliza ikiwa imekamilika."
+        },
+        "story": {
+          "title": "Simulia hadithi ya mradi wako",
+          "subtitle": "Shiriki kazi, mbinu, ushahidi, na kilichobadilika."
+        },
+        "network": {
+          "title": "Nani na wapi?",
+          "subtitle": "Watambue watu nyuma ya kazi na ambatanisha maeneo ilipofanyika."
+        },
+        "photo": {
+          "title": "Ongeza picha ya mradi",
+          "subtitle": "Picha nzuri husaidia watu kutambua na kuamini mradi wako."
+        },
+        "review": {
+          "title": "Kagua mradi wako",
+          "subtitle": "Hakikisha kila kitu kiko sawa, kisha unda mradi wako."
+        }
+      },
+      "review": {
+        "name": "Jina",
+        "summary": "Muhtasari",
+        "focus": "Maeneo ya kuzingatia",
+        "timeline": "Kipindi",
+        "people": "Watu na vikundi",
+        "places": "Maeneo",
+        "photo": "Picha",
+        "none": "Haijaongezwa",
+        "ongoing": "inaendelea",
+        "added": "Imeongezwa",
+        "notAdded": "Haijaongezwa"
+      }
+    },
+    "emptyHero": {
+      "description": "Miradi huleta pamoja kazi yako ya athari — watu, maeneo, vipindi vya muda, na picha au maelezo ya kuunga mkono — katika ukurasa mmoja ambao wafadhili wanaweza kufuatilia na kuufadhili.",
+      "cta": "Unda mradi"
+    },
+    "publish": {
+      "alwaysPublicTitle": "Mtu yeyote mwenye kiungo anaweza kufungua miradi yako",
+      "alwaysPublicBody": "Tangu unapohifadhi mradi, ukurasa wake hufunguka kwa yeyote unayemshirikisha kiungo. Kama watu wanaweza kuupata bila kiungo ni uamuzi wako.",
+      "listedTitle": "Inaonyeshwa kwenye kurasa za uchunguzi",
+      "listedBody": "Watu wanaovinjari GainForest wanaweza kupata akaunti hii na miradi yake, na injini za utafutaji zinaweza kuzionyesha.",
+      "unlistedTitle": "Haionyeshwi kwenye kurasa za uchunguzi",
+      "unlistedBody": "Miradi yako haionekani watu wanapovinjari GainForest, na huachwa nje ya matokeo ya utafutaji. Ni watu unaowatumia kiungo pekee wanaoweza kuifikia.",
+      "action": "Onyesha kwenye kurasa za uchunguzi",
+      "publishing": "Inaongeza…",
+      "justListedBody": "Imekamilika. Inaweza kuchukua dakika chache kuonekana kwenye kurasa za uchunguzi.",
+      "memberBlocked": "Wamiliki na wasimamizi wa shirika pekee ndio wanaweza kubadilisha hili.",
+      "error": "Haikufanikiwa. Tafadhali jaribu tena baadaye.",
+      "unavailable": "Hili haliwezi kubadilishwa kwa sasa. Tafadhali jaribu tena baadaye.",
+      "statusUnknown": "Hatukuweza kuthibitisha kama akaunti hii inaonyeshwa kwenye kurasa za uchunguzi."
+    }
+  },
+  "manageBumicerts": {
+    "actions": {
+      "delete": "Futa Cert",
+      "deleteAria": "Futa {title}"
+    },
+    "deleteModal": {
+      "title": "Futa Cert?",
+      "description": "Hii itaondoa “{title}” kabisa kwenye akaunti yako. Kitendo hiki hakiwezi kutenduliwa.",
+      "cancel": "Ghairi",
+      "confirm": "Futa Cert",
+      "error": "Cert hii haikuweza kufutwa. Tafadhali jaribu tena."
+    }
+  },
+  "observations": {
+    "footer": {
+      "showing": "Inaonyesha uchunguzi wa asili {shown} kati ya {total}."
+    },
+    "list": {
+      "colSighting": "Uchunguzi",
+      "colObserver": "Mwangalizi",
+      "colDate": "Tarehe"
+    },
+    "metadata": {
+      "title": "Vivutio vya asili",
+      "description": "Gundua vivutio vya asili kwenye GainForest vyenye picha za uwandani, rekodi za sauti, majina ya spishi, na maeneo kutoka kazi halisi ya uwandani."
+    },
+    "view": {
+      "compact": "Fupi",
+      "comfortable": "Kawaida",
+      "density": "Msongamano wa kadi"
+    }
+  },
+  "manageProjectCerts": {
+    "metadata": {
+      "title": "Certs za mradi — GainForest",
+      "description": "Toa na simamia vyeti vya athari vya mradi."
+    },
+    "nav": {
+      "projects": "Miradi",
+      "refresh": "Onyesha upya"
+    },
+    "hero": {
+      "description": "Vyeti vya athari (Certs) unavyotoa kutoka mradi huu. Kila kimoja hukusanya ushahidi — picha, maeneo, tarehe, na wachangiaji — ili wafadhili waweze kuunga mkono kazi hii."
+    },
+    "stats": {
+      "linked": "{count, plural, one {# Cert iliyounganishwa} other {# Certs zilizounganishwa}}",
+      "available": "{count, plural, one {# Cert kinaweza kuunganishwa} other {# Certs zinaweza kuunganishwa}}",
+      "minted": "{count, plural, one {# Cert kimetolewa} other {# Certs zimetolewa}}"
+    },
+    "search": {
+      "ariaLabel": "Tafuta Certs",
+      "placeholder": "Tafuta Certs"
+    },
+    "actions": {
+      "create": "Unda Cert",
+      "retry": "Jaribu tena",
+      "add": "Ongeza",
+      "saving": "Inahifadhi…",
+      "view": "Tazama",
+      "unlink": "Tenganisha",
+      "mint": "Toa Cert",
+      "mintFirst": "Toa Cert yako ya kwanza",
+      "link": "Unganisha"
+    },
+    "errors": {
+      "loadTitle": "Imeshindikana kupakia Certs",
+      "loadFallback": "Imeshindikana kupakia Certs za mradi.",
+      "network": "Imeshindikana kufikia seva.",
+      "noPermission": "Huwezi kubadilisha mradi huu.",
+      "projectUnavailable": "Bado hatujaweza kuandaa mradi huu. Onyesha upya ukurasa na ujaribu tena.",
+      "updateFallback": "Imeshindikana kusasisha Certs za mradi."
+    },
+    "status": {
+      "linked": "Imeunganishwa"
+    },
+    "card": {
+      "noSummary": "Hakuna muhtasari bado."
+    },
+    "empty": {
+      "noCertsTitle": "Hakuna Certs zilizotolewa bado",
+      "noCertsDescription": "Cheti cha athari (Cert) hubadilisha mradi huu kuwa hadithi inayoweza kufadhiliwa — ushahidi wa mchango mmoja, wenye picha, tarehe, maeneo, na watu waliohusika. Toa cha kwanza ili kuomba ufadhili.",
+      "noMatchingTitle": "Hakuna Certs zinazolingana",
+      "noMatchingDescription": "Jaribu neno lingine la utafutaji au futa uga wa utafutaji."
+    },
+    "details": {
+      "sites": "{count, plural, one {# eneo} other {# maeneo}}",
+      "contributors": "{count, plural, one {# mchangiaji} other {# wachangiaji}}",
+      "impactPeriod": "Kipindi cha athari",
+      "created": "Imeundwa {date}"
+    },
+    "linkExisting": {
+      "toggle": "Unganisha Cert iliyopo",
+      "hide": "Ficha",
+      "title": "Unganisha Cert iliyopo",
+      "description": "Tayari umetoa Cert mahali pengine? Iunganishe na mradi huu. Hii husasisha ukurasa wa mradi; haiondoi wala kufuta Cert.",
+      "empty": "Huna Certs nyingine za kuunganisha kwa sasa."
+    }
+  },
+  "newCert": {
+    "gate": {
+      "title": "Cert hii ni ya mradi gani?",
+      "subtitle": "Cert ni cheti cha athari unachotoa kutoka mradi. Chagua mradi ambao hii inahusiana nao.",
+      "searchPlaceholder": "Tafuta miradi yako",
+      "searchAria": "Tafuta miradi yako",
+      "loading": "Inapakia miradi yako…",
+      "errorTitle": "Imeshindwa kupakia miradi yako",
+      "retry": "Jaribu tena",
+      "mintFrom": "Toa Cert kutoka mradi huu",
+      "noMatch": "Hakuna miradi inayolingana",
+      "noProjectsTitle": "Unda mradi kwanza",
+      "noProjectsDescription": "Certs hutolewa kutoka mradi. Unda mradi kuelezea kazi yako, kisha utoe vyeti vya athari ili kuomba ufadhili.",
+      "createProject": "Unda mradi",
+      "skip": "Toa bila kuunganisha na mradi"
+    }
+  },
+  "observationGrid": {
+    "sectionTitle": "Uchunguzi",
+    "openDetails": "Fungua maelezo ya uchunguzi: {name}",
+    "openAction": "Fungua",
+    "mediaCount": "{count, plural, one {kipengee # cha media} other {vipengee # vya media}}",
+    "selectObservation": "Chagua uchunguzi",
+    "deselectObservation": "Ondoa uteuzi wa uchunguzi",
+    "selectObservationNamed": "Chagua uchunguzi: {name}",
+    "deselectObservationNamed": "Ondoa uchaguzi wa uchunguzi: {name}",
+    "playSound": "Cheza sauti",
+    "pauseSound": "Sitisha sauti",
+    "natureSoundRecording": "Rekodi ya sauti ya asili",
+    "unidentifiedSighting": "Uchunguzi ambao haujatambuliwa"
+  },
+  "measurements": {
+    "title": "Vipimo",
+    "count": "{count, plural, one {kipimo #} other {vipimo #}}",
+    "fields": {
+      "dbh": "DBH",
+      "height": "Urefu",
+      "rootCollarDiameter": "Kipenyo cha shingo ya mzizi",
+      "canopyCover": "Kifuniko cha dari",
+      "girth": "Mzingo",
+      "stemCount": "Idadi ya vigogo",
+      "estimatedAge": "Umri unaokadiriwa",
+      "bodyMass": "Uzito wa mwili",
+      "totalLength": "Urefu jumla",
+      "groupSize": "Ukubwa wa kundi"
+    }
+  },
+  "globe": {
+    "metadata": {
+      "title": "Dunia — Chunguza Miradi ya Uhifadhi kwenye Dunia ya 3D",
+      "description": "Zunguka dunia hai ya 3D yenye mashirika na maeneo ya miradi yao, pamoja na tabaka za uoto wa ardhi na data za uhifadhi.",
+      "orgTitle": "{name} kwenye Dunia",
+      "orgDescription": "Chunguza maeneo ya miradi ya {name} kwenye dunia ya 3D.",
+      "projectTitle": "{name} kwenye Dunia",
+      "projectDescription": "Chunguza mipaka ya eneo la {name} kwenye dunia ya 3D."
+    },
+    "title": "Dunia",
+    "subtitle": "Mashirika na maeneo ya miradi yao kwenye Dunia hai ya 3D.",
+    "viewOnGlobe": "Tazama kwenye Dunia",
+    "tabs": {
+      "details": "Mashirika",
+      "layers": "Tabaka",
+      "popup": "Fungua kama kidirisha kinachoelea",
+      "dock": "Bandika pembeni"
+    },
+    "panel": {
+      "searchPlaceholder": "Tafuta mashirika…",
+      "treeFilter": "Data ya miti",
+      "treesEmpty": "Bado hakuna data ya miti iliyopakiwa.",
+      "treesFailed": "Data ya miti haipatikani kwa sasa.",
+      "toggleList": "Onyesha orodha ya mashirika",
+      "loading": "Inapakia mashirika…",
+      "count": "{count, plural, one {shirika #} other {mashirika #}}",
+      "empty": "Hakuna shirika linalolingana na utafutaji wako.",
+      "maEarth": "Ma Earth",
+      "dataFilter": "Tabaka za droni na data",
+      "dataBadge": "{count, plural, one {tabaka # la data ya ramani} other {tabaka # za data ya ramani}}"
+    },
+    "focus": {
+      "organizationLabel": "Shirika",
+      "projectLabel": "Mradi",
+      "clear": "Rudi kwa mashirika yote",
+      "viewProfile": "Tazama wasifu",
+      "openGlobe": "Ukurasa wa dunia",
+      "orgGlobe": "Dunia ya shirika",
+      "viewProject": "Tazama mradi",
+      "backToGlobe": "Rudi kwenye mwonekano wa dunia nzima",
+      "recenter": "Weka ramani katikati tena",
+      "sites": "{count, plural, one {eneo # kwenye ramani} other {maeneo # kwenye ramani}}",
+      "boundaries": "{count, plural, one {mpaka wa eneo #} other {mipaka ya eneo #}}",
+      "allSites": "Maeneo yote",
+      "orgLocationHeading": "Mahali pa shirika",
+      "projectSitesHeading": "Maeneo ya mradi",
+      "noSites": "Bado hakuna maeneo ya mradi yaliyowekwa kwenye ramani.",
+      "noBoundaries": "Mradi huu bado hauna mipaka ya eneo iliyowekwa kwenye ramani.",
+      "projectPill": "Mradi: {name}",
+      "moreProjects": "+{count} zaidi",
+      "projectHint": "Mipaka iliyoangaziwa inaonyesha mahali mradi huu unafanya kazi."
+    },
+    "layers": {
+      "button": "Tabaka",
+      "title": "Chunguza tabaka",
+      "landcover": "Uoto wa ardhi",
+      "landcoverSource": "ESA WorldCover 2021",
+      "measuredTrees": "Miti iliyopimwa",
+      "measuredTreesCount": "{count, plural, one {mti #} other {miti #}}",
+      "projectCategory": "Tabaka za mradi",
+      "noProjectLayers": "Shirika hili bado halina tabaka za ziada za ramani.",
+      "landcoverClasses": {
+        "treeCover": "Miti",
+        "shrubland": "Vichaka",
+        "grassland": "Nyasi",
+        "cropland": "Mashamba",
+        "builtUp": "Majengo",
+        "bareVegetation": "Ardhi wazi",
+        "water": "Maji",
+        "wetland": "Ardhi oevu",
+        "mangroves": "Mikoko"
+      },
+      "visibleDetails": "Kwenye ramani",
+      "visibleNow": "{count, plural, one {tabaka # kwenye ramani} other {tabaka # kwenye ramani}}",
+      "flyTo": "Kuza hadi {name}",
+      "hide": "Ficha {name}"
+    },
+    "timeline": {
+      "seriesFlights": "{count, plural, one {Safari # ya droni} other {Safari # za droni}} juu ya eneo lilelile",
+      "seriesHint": "Eneo lilelile lilipigwa picha kwa tarehe tofauti — washa kitelezi cha muda kuona linavyobadilika.",
+      "toggle": "Ona {name} kwa muda",
+      "title": "Mabadiliko kwa muda",
+      "close": "Ficha kitelezi cha muda",
+      "play": "Cheza ratiba ya muda",
+      "pause": "Simamisha ratiba ya muda",
+      "previous": "Picha ya awali",
+      "next": "Picha inayofuata",
+      "slider": "Tarehe ya kupiga picha",
+      "step": "{current} kati ya {total}"
+    },
+    "tree": {
+      "title": "Mti",
+      "close": "Funga",
+      "species": "Spishi",
+      "height": "Urefu",
+      "dbh": "DBH",
+      "measured": "Kilichopimwa:",
+      "unknown": "Haijulikani",
+      "unknownSpecies": "Spishi haijulikani",
+      "photo": "Picha {index}"
+    },
+    "loadingGlobe": "Inaandaa dunia…",
+    "sheet": {
+      "expand": "Onyesha maelezo",
+      "collapse": "Ficha maelezo"
+    }
+  }
+}

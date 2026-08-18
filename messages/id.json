@@ -1,0 +1,149 @@
+{
+  "landing": {
+    "nav": {
+      "home": "Beranda",
+      "explore": "Jelajahi",
+      "organizations": "Organisasi",
+      "create": "Buat",
+      "launchApp": "Buka aplikasi",
+      "signIn": "Masuk",
+      "menu": "Menu",
+      "navigation": "Navigasi",
+      "close": "Tutup",
+      "theme": "Tema",
+      "projects": "Proyek",
+      "observations": "Observasi",
+      "bioblitz": "BioBlitz"
+    },
+    "hero": {
+      "imageAlt": "Lembah hutan hujan berkabut",
+      "headingUnderlined": "Bersertifikat",
+      "headingRest": "dampak untuk pelindung alam",
+      "description": "Unggah observasi dari lapangan dan sertifikasi kerja yang telah kamu lakukan. Foto, spesies, dan lokasimu menjadi catatan permanen dan terverifikasi atas dampak lingkungan nyata.",
+      "cta": "Jelajahi proyek",
+      "androidCta": "Unduh aplikasi Android"
+    },
+    "paths": {
+      "title": "Pilih jalan Anda",
+      "description": "Baik Anda ingin menjelajahi bukti lapangan maupun menampilkan karya Anda, ada tempat untuk Anda.",
+      "cards": {
+        "funders": {
+          "label": "Untuk penjelajah",
+          "title": "Saya ingin menjelajah",
+          "emphasis": "bukti lapangan",
+          "description": "Jelajahi catatan terverifikasi atas kerja lingkungan nyata — momen restorasi yang sebenarnya, seperti yang terjadi di lapangan.",
+          "cta": "Jelajahi catatan",
+          "alt": "Sungai berkelok melalui hutan hujan"
+        },
+        "organizations": {
+          "label": "Untuk organisasi",
+          "title": "Saya adalah penjaga",
+          "emphasis": "alam",
+          "description": "Tampilkan kerja regeneratif Anda beserta bukti di baliknya.",
+          "cta": "Kelola organisasi saya",
+          "alt": "Air terjun di hutan tropis"
+        }
+      }
+    },
+    "explainer": {
+      "eyebrow": "Tonton penjelasannya",
+      "titlePrefix": "Cara baru untuk",
+      "titleEmphasis": "mendokumentasikan alam",
+      "description": "Dalam dua menit, lihat bagaimana Bumicerts mengubah kerja lapangan nyata menjadi catatan yang dapat diverifikasi bagi penjaga alam setempat.",
+      "play": "Putar video",
+      "videoTitle": "Bumicerts: catatan alam terverifikasi untuk penjaga alam setempat"
+    },
+    "certificate": {
+      "eyebrow": "Sertifikat",
+      "titleLine1": "Apa sebenarnya",
+      "titleLine2": "sertifikat itu?",
+      "faqItems": {
+        "digitalCertificate": {
+          "id": "1",
+          "question": "Sertifikat digital untuk dampak",
+          "answer": "sertifikat mencatat tindakan lingkungan tertentu dan memberinya identitas permanen yang dapat diverifikasi di jaringan terbuka dan terdesentralisasi."
+        },
+        "evidence": {
+          "id": "2",
+          "question": "Didukung bukti nyata",
+          "answer": "Foto, geolokasi, cap waktu, dan data pemantauan. Setiap klaim dapat diverifikasi: bukan janji dampak masa depan, melainkan bukti kerja yang telah dilakukan."
+        },
+        "communities": {
+          "id": "3",
+          "question": "Catatan bersama dengan komunitas",
+          "answer": "Setiap sertifikat menghubungkan bukti lapangan, konteks proyek, dan orang atau organisasi yang melakukan kerja tersebut, sehingga catatan mudah ditinjau dan dibagikan."
+        },
+        "story": {
+          "id": "4",
+          "question": "Klaim Anda atas cerita ini",
+          "answer": "Memiliki sertifikat berarti Anda menjadi bagian dari momen itu: pohon yang ditanam, terumbu yang dipulihkan, ekosistem yang dihidupkan kembali. Anda dapat membagikan, menyimpan, atau menghadiahkannya."
+        }
+      },
+      "previewTitle": "Reforestasi Gunung Halimun",
+      "previewDescription": "Restorasi hutan asli yang dipimpin komunitas di Jawa Barat, Indonesia. 5.000 pohon ditanam di 12 hektare.",
+      "objectives": {
+        "primary": "Reforestasi",
+        "secondary": "Keanekaragaman hayati"
+      }
+    },
+    "footer": {
+      "tagline": "Menghubungkan komunitas melalui bukti lapangan tepercaya.",
+      "infrastructure": "Infrastruktur terbuka. Dibangun bersama GainForest.",
+      "documentation": "Dokumentasi",
+      "copyright": "Sumber terbuka, digerakkan komunitas."
+    },
+    "maEarthBanner": {
+      "label": "Putaran Pendanaan Ma Earth 3",
+      "deadline": "Dibuka hingga 31 Mei",
+      "title": "Daftar ke Putaran Pendanaan Ma Earth 3",
+      "description": "Komunitas GainForest dapat menggunakan cerita proyek terverifikasi, bukti, dan catatan dampak mereka saat mendaftar ke putaran pendanaan yang didukung komunitas dari Ma Earth.",
+      "highlights": {
+        "matchingPool": "Dana pencocokan $500k",
+        "projects": "Proyek berbasis alam",
+        "record": "Siapkan catatan dampak Anda"
+      },
+      "actions": {
+        "apply": "Daftar di Ma Earth",
+        "learn": "Pelajari putaran ini"
+      }
+    },
+    "brand": {
+      "alt": "Ikon aplikasi GainForest"
+    },
+    "stats": {
+      "liveLabel": "Dampak langsung",
+      "bumicertsShared": "catatan dibagikan",
+      "organizationProfiles": "profil organisasi",
+      "natureSightingsShared": "temuan alam dibagikan",
+      "raisedForProjects": "terkumpul untuk proyek"
+    },
+    "openNetwork": {
+      "titlePrefix": "Dibangun di atas",
+      "titleEmphasis": "jaringan terbuka",
+      "description": "Catatanmu bersifat portabel — data dampak yang dapat berpindah antar aplikasi, komunitas, dan alat pendanaan, bukan basis data tertutup. Dukungan untuk Silvi dan platform lain segera hadir.",
+      "protocol": {
+        "name": "Certified",
+        "description": "data sosial portabel",
+        "poweredBy": "Didukung oleh Certified"
+      },
+      "youBadge": "Anda",
+      "apps": {
+        "maEarth": {
+          "blurb": "Komunitas dapat memakai bukti terverifikasi mereka saat mendaftar ke putaran pendanaan yang didukung komunitas."
+        },
+        "gainforest": {
+          "blurb": "GainForest membantu komunitas dan organisasi menerbitkan observasi lapangan, catatan biodiversitas, tempat, dan cerita proyek."
+        },
+        "hypercerts": {
+          "blurb": "Klaim dampak terbuka dapat terhubung dengan alat Hypercerts dan ekosistem pendanaan barang publik."
+        }
+      },
+      "points": {
+        "portable": "Portabel antar aplikasi",
+        "owned": "Dimiliki komunitas",
+        "shared": "Bukti dampak bersama"
+      },
+      "storageNote": "Saat pengelola alam mengunggah observasi, catatannya disimpan di akun GainForest mereka — atau di akun organisasi yang mereka kelola — sehingga jelas di mana data berada."
+    }
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "lexicon": 1,
+  "id": "app.gainforest.organization.layer",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "One renderable map product published by an organization: a vector GeoJSON file or raster imagery (e.g. a drone orthomosaic) hosted at `uri`. Repeat captures of the same area join an app.gainforest.organization.layerGroup by setting `groupRef` — membership lives here on the layer, so publishing a new capture is a single appended record.",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["name", "type", "uri", "createdAt"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxGraphemes": 256,
+            "description": "Display name of the layer"
+          },
+          "type": {
+            "type": "string",
+            "maxGraphemes": 64,
+            "description": "How the data at `uri` is rendered. Open set — clients ignore layers whose type they cannot render.",
+            "knownValues": [
+              "geojson_points",
+              "geojson_points_trees",
+              "geojson_line",
+              "choropleth",
+              "choropleth_shannon",
+              "raster_tif",
+              "tms_tile"
+            ]
+          },
+          "uri": {
+            "type": "string",
+            "format": "uri",
+            "maxGraphemes": 2048,
+            "description": "URL of the layer data: a GeoJSON file for vector types, a COG GeoTIFF for raster_tif, or a {z}/{x}/{y} tile template for tms_tile"
+          },
+          "description": {
+            "type": "string",
+            "maxGraphemes": 2048,
+            "description": "Description of the layer"
+          },
+          "category": {
+            "type": "string",
+            "maxGraphemes": 128,
+            "description": "Category used to section layers in UI (e.g. 'Biodiversity', 'Land Cover')"
+          },
+          "bounds": {
+            "type": "string",
+            "maxGraphemes": 128,
+            "description": "Geographic footprint as 'west,south,east,north' in WGS84 decimal degrees (e.g. '126.343,8.2547,126.3574,8.2648'). A string because lexicons have no float type. Lets clients fly to the layer and detect spatial overlap."
+          },
+          "capturedAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "When the underlying data was captured in the field (e.g. the drone flight date). Canonical temporal field: within a layer group, distinct capture days become the stops of a time slider, and layers sharing a capture day are treated as products of the same survey."
+          },
+          "groupRef": {
+            "type": "string",
+            "format": "at-uri",
+            "description": "AT-URI of the app.gainforest.organization.layerGroup this layer belongs to. Set on every repeat capture of a monitored area so clients can offer change-over-time views without geometric inference."
+          },
+          "siteRef": {
+            "type": "string",
+            "format": "at-uri",
+            "description": "AT-URI of the app.certified.location (project site) this layer belongs to"
+          },
+          "isDefault": {
+            "type": "boolean",
+            "description": "Whether this layer should be visible by default when its organization is focused"
+          },
+          "displayOrder": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Ordering priority within layer lists (lower sorts first)"
+          },
+          "legend": {
+            "type": "array",
+            "maxLength": 20,
+            "description": "Legend entries rendered while the layer is visible",
+            "items": {
+              "type": "ref",
+              "ref": "#legendEntry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "When this record was created"
+          }
+        }
+      }
+    },
+    "legendEntry": {
+      "type": "object",
+      "description": "A single entry in a layer legend",
+      "required": ["label", "color"],
+      "properties": {
+        "label": {
+          "type": "string",
+          "maxGraphemes": 128,
+          "description": "Display label for this legend entry"
+        },
+        "color": {
+          "type": "string",
+          "maxGraphemes": 16,
+          "description": "Color for this legend entry (e.g. '#FF5733')"
+        },
+        "value": {
+          "type": "string",
+          "maxGraphemes": 64,
+          "description": "Optional value associated with this legend entry"
+        }
+      }
+    }
+  }
+}

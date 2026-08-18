@@ -1,0 +1,5849 @@
+{
+  "generatedAt": "2026-07-06T13:05:37.622Z",
+  "version": "1.0.0",
+  "total": 718,
+  "firstDate": "2026-05-31",
+  "lastDate": "2026-07-06",
+  "categories": [
+    {
+      "key": "taina",
+      "label": "Tainá"
+    },
+    {
+      "key": "dataJobs",
+      "label": "Data batches"
+    },
+    {
+      "key": "donations",
+      "label": "Donations"
+    },
+    {
+      "key": "observations",
+      "label": "Observations"
+    },
+    {
+      "key": "projects",
+      "label": "Projects"
+    },
+    {
+      "key": "auth",
+      "label": "Accounts & auth"
+    },
+    {
+      "key": "admin",
+      "label": "Admin & moderation"
+    },
+    {
+      "key": "i18n",
+      "label": "Localization"
+    },
+    {
+      "key": "ui",
+      "label": "UI & design"
+    },
+    {
+      "key": "fix",
+      "label": "Fixes"
+    },
+    {
+      "key": "core",
+      "label": "Core & platform"
+    }
+  ],
+  "months": [
+    {
+      "month": "2026-07",
+      "count": 132,
+      "counts": {
+        "taina": 8,
+        "observations": 15,
+        "fix": 8,
+        "core": 20,
+        "dataJobs": 1,
+        "donations": 23,
+        "projects": 24,
+        "ui": 16,
+        "admin": 8,
+        "auth": 9
+      },
+      "commits": [
+        {
+          "hash": "14fcda1",
+          "date": "2026-07-06",
+          "author": "daviddao",
+          "subject": "Floating Tainá: minimize to a logo chip + 'create a project first' gate on the donation guide",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        },
+        {
+          "hash": "85b33ed",
+          "date": "2026-07-06",
+          "author": "daviddao",
+          "subject": "Link /submit-data from the profile menu and the observations modal's More ways",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "29b1a3e",
+          "date": "2026-07-06",
+          "author": "daviddao",
+          "subject": "Fix tour navigation redirect loop on shim routes",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "95a10d3",
+          "date": "2026-07-06",
+          "author": "daviddao",
+          "subject": "Floating Tainá tutorial guide: FAQ walkthroughs with screenshots + live spotlight tours",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        },
+        {
+          "hash": "40b7dc3",
+          "date": "2026-07-06",
+          "author": "daviddao",
+          "subject": "Gated live R2 round-trip test (runs only with R2_LIVE_TOKEN set)",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "694443b",
+          "date": "2026-07-06",
+          "author": "daviddao",
+          "subject": "Data batch jobs: 10GB partner uploads with review queue + admin panel",
+          "category": "dataJobs",
+          "categoryLabel": "Data batches"
+        },
+        {
+          "hash": "c28e29f",
+          "date": "2026-07-06",
+          "author": "daviddao",
+          "subject": "Tips go to gainforest.eth, not the facilitator wallet",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "b4c1db8",
+          "date": "2026-07-06",
+          "author": "daviddao",
+          "subject": "Admin: facilitator wallet tab with address, settled volume, and tx count",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "10bb2ef",
+          "date": "2026-07-06",
+          "author": "daviddao",
+          "subject": "Org settings: replace duplicated Members list with AI agent keys",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "e63521a",
+          "date": "2026-07-06",
+          "author": "daviddao",
+          "subject": "Publish card: show disabled with a hint when publishing isn't configured",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "ae2c843",
+          "date": "2026-07-06",
+          "author": "daviddao",
+          "subject": "Publish uses a dedicated badge, separate from GainForest endorsements",
+          "category": "admin",
+          "categoryLabel": "Admin & moderation"
+        },
+        {
+          "hash": "7000722",
+          "date": "2026-07-06",
+          "author": "daviddao",
+          "subject": "Donation source filters + self-serve Publish to the explore pages",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "dd8a778",
+          "date": "2026-07-06",
+          "author": "daviddao",
+          "subject": "Fix remaining paginators that dropped post-filtered records past the cursor",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "3aaf0b7",
+          "date": "2026-07-05",
+          "author": "daviddao",
+          "subject": "Fix donations filter dropping records past the page target",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "f6022ae",
+          "date": "2026-07-05",
+          "author": "daviddao",
+          "subject": "Android client metadata: serve on www without redirects, fix redirect scheme",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "5dca978",
+          "date": "2026-07-05",
+          "author": "daviddao",
+          "subject": "Serve ATProto client metadata for the Android app's native ePDS OAuth flow",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "ea92532",
+          "date": "2026-07-05",
+          "author": "daviddao",
+          "subject": "Footer: /globe link, Bluesky+Instagram; only link donatable Ma Earth campaigns",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "56e2793",
+          "date": "2026-07-05",
+          "author": "daviddao",
+          "subject": "Reviews tab: include comments posted on the project (collection) URI",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "fc75530",
+          "date": "2026-07-05",
+          "author": "daviddao",
+          "subject": "Fix empty-content validation rejecting text-only timeline updates",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "1681e84",
+          "date": "2026-07-05",
+          "author": "daviddao",
+          "subject": "Remove dead code across the codebase",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "b013883",
+          "date": "2026-07-05",
+          "author": "daviddao",
+          "subject": "Project page: two-column hero with cover beside donation sidebar, add org follow button",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "efdd037",
+          "date": "2026-07-05",
+          "author": "daviddao",
+          "subject": "Read review comments from feed posts, drop deprecated Simocracy source",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "dfe577c",
+          "date": "2026-07-05",
+          "author": "daviddao",
+          "subject": "Replace fake donation progress bar with subtle Ma Earth-style line on project cards",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "de69b6d",
+          "date": "2026-07-05",
+          "author": "daviddao",
+          "subject": "Make project donations prominent with Ma Earth-style support card",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "45db6e4",
+          "date": "2026-07-05",
+          "author": "daviddao",
+          "subject": "Add donation summaries to project listings",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "8fa1e49",
+          "date": "2026-07-05",
+          "author": "daviddao",
+          "subject": "Add donation filters to project and organization feeds",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "ee9106a",
+          "date": "2026-07-05",
+          "author": "daviddao",
+          "subject": "Polish donation checkout tip flow",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "c069945",
+          "date": "2026-07-05",
+          "author": "daviddao",
+          "subject": "Add donation cart and platform tips",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "e6b2eeb",
+          "date": "2026-07-05",
+          "author": "daviddao",
+          "subject": "Fix wallet link typed data domain",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "49c897d",
+          "date": "2026-07-05",
+          "author": "daviddao",
+          "subject": "Move wallet donations to Ethereum mainnet",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "a03312e",
+          "date": "2026-07-05",
+          "author": "daviddao",
+          "subject": "Include chain id in wallet link signature domain",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "ab0ee51",
+          "date": "2026-07-05",
+          "author": "daviddao",
+          "subject": "Fix WaaP wallet signing flow",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "33407ab",
+          "date": "2026-07-05",
+          "author": "daviddao",
+          "subject": "Route Bluesky through WaaP handle prompt, show real errors",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "5186fef",
+          "date": "2026-07-04",
+          "author": "daviddao",
+          "subject": "Make WaaP overlay clickable under open modals",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "897321e",
+          "date": "2026-07-04",
+          "author": "daviddao",
+          "subject": "Prewarm WaaP iframe and add overlay safety net",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "eef2002",
+          "date": "2026-07-04",
+          "author": "daviddao",
+          "subject": "Fix WaaP modal UX: hint first, no stuck buttons",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "79943a5",
+          "date": "2026-07-04",
+          "author": "daviddao",
+          "subject": "Show Bluesky handle hint in create-wallet flow",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "427e964",
+          "date": "2026-07-04",
+          "author": "daviddao",
+          "subject": "Add WaaP one-click wallet creation for donations",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "31fbf64",
+          "date": "2026-07-04",
+          "author": "daviddao",
+          "subject": "Remove Ma Earth donation links from accounts",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "070a0d1",
+          "date": "2026-07-04",
+          "author": "daviddao",
+          "subject": "Show Ma Earth donations on project pages",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "db246b3",
+          "date": "2026-07-04",
+          "author": "daviddao",
+          "subject": "Add Ma Earth donation links to accounts",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "0fe1d59",
+          "date": "2026-07-04",
+          "author": "daviddao",
+          "subject": "Add Bumicerts explainer video section to landing page",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "9ee7118",
+          "date": "2026-07-04",
+          "author": "daviddao",
+          "subject": "Fix landing hero/card video autoplay on mobile",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "63726ad",
+          "date": "2026-07-03",
+          "author": "daviddao",
+          "subject": "Use exact BioBlitz round window",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "d37304b",
+          "date": "2026-07-03",
+          "author": "daviddao",
+          "subject": "Improve BioBlitz round history",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "ff8b4ff",
+          "date": "2026-07-03",
+          "author": "daviddao",
+          "subject": "globe: click a tree to open a detail sidebar (photo + measurements)",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "52dc566",
+          "date": "2026-07-03",
+          "author": "daviddao",
+          "subject": "globe: restore measured trees (blob → S3 fallback + clustered layers)",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "d95b7f4",
+          "date": "2026-07-03",
+          "author": "Satyam",
+          "subject": "Smooth attachment panel switching",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "9d3d982",
+          "date": "2026-07-03",
+          "author": "Satyam",
+          "subject": "Resolve update composer merge",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "f25ce40",
+          "date": "2026-07-03",
+          "author": "Satyam",
+          "subject": "Redesign project update composer",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "0e58752",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "Hide donations feed filter behind admin access",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "d7c7196",
+          "date": "2026-07-03",
+          "author": "daviddao",
+          "subject": "Add grants apply success modal with confetti; level sidebar globe row",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "81e1375",
+          "date": "2026-07-03",
+          "author": "daviddao",
+          "subject": "fix(observations): stop the date picker overflowing the modal",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "ef2affc",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(explore): rename to Sort and Filter, fold sort into the popover",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "74286f0",
+          "date": "2026-07-03",
+          "author": "daviddao",
+          "subject": "fix(feed): burst card counts the whole run when it starts mid-page",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "4f42c55",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(trust): count GainForest endorsement awards as \"Trusted by GainForest\"",
+          "category": "admin",
+          "categoryLabel": "Admin & moderation"
+        },
+        {
+          "hash": "1d4dbe2",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(timeline): write plain-text project updates as attachments",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "df3b3f1",
+          "date": "2026-07-03",
+          "author": "daviddao",
+          "subject": "feat(feed): headline the burst card with the actual burst size",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "c9e0e20",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(explore): collapse ALL filters behind the All filters popover",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "852f94b",
+          "date": "2026-07-03",
+          "author": "daviddao",
+          "subject": "Remove temporary dev-harness preview page",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "b1a2a0a",
+          "date": "2026-07-03",
+          "author": "daviddao",
+          "subject": "fix(feed): only group same-account sightings uploaded close in time",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "4eb3039",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(grants): Ma Earth Round 3 applications closed — browse round projects instead",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "ebf585f",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "copy(admin): describe Award endorsements accurately (Ma Earth-style, Endorsements tab)",
+          "category": "admin",
+          "categoryLabel": "Admin & moderation"
+        },
+        {
+          "hash": "fd59d68",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "fix(admin): resolve shared cross-repo endorsement badges in Award endorsements tab",
+          "category": "admin",
+          "categoryLabel": "Admin & moderation"
+        },
+        {
+          "hash": "3893f34",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(explore): collapse source filters on organizations + occurrences too",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "d941d4a",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(explore): collapse source badge filters into All filters popover",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "cab4c53",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(donations): gate the donations hub to GainForest admins",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "d0030eb",
+          "date": "2026-07-03",
+          "author": "Satyam",
+          "subject": "Show add evidence on project overview",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "c4e39b3",
+          "date": "2026-07-03",
+          "author": "Satyam",
+          "subject": "Simplify project updates timeline UI",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "b324d31",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(account): rename \"Endorsements given\" tab to \"Endorsements\", move after Members",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "c6884cb",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(admin): add \"Award endorsements\" tab for GainForest org admins",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "44e8ec5",
+          "date": "2026-07-03",
+          "author": "Satyam",
+          "subject": "Show only selected project tab content",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "f13284d",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(bioblitz): add 'your data does more than win prizes' card",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "53c8759",
+          "date": "2026-07-03",
+          "author": "Satyam",
+          "subject": "Limit project overview updates preview",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "345a1e5",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(account): move org photo gallery into Overview, drop Files & photos tab",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "7f7bcf0",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(account): add \"Endorsements given\" tab to organization profiles",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "af89179",
+          "date": "2026-07-03",
+          "author": "daviddao",
+          "subject": "Add translations for observation quick-add extras (tags, measurements, project, apply-to-all)",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "9e6c025",
+          "date": "2026-07-03",
+          "author": "daviddao",
+          "subject": "fix: address platform feedback (project tabs, photo size, indexer lag, sidecar HTML)",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "f6ab3bd",
+          "date": "2026-07-03",
+          "author": "Satyam",
+          "subject": "Filter project scope tags",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "7c5ceb8",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "Move observation action toolbar under the All observations heading",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "1a89ea4",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "Remove observation storage note from section header",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "1ff6822",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "copy(landing): restore 'Cert' wording in the certificate explainer section",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "d1a0561",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(landing): slim the impact band to two tiles + drop the About Us section",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "1e7fd41",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(landing): remove hero proof-point strip (community-led / photo-verified / geolocated)",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "2b42938",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(trust): stop showing the \"Trusted by Ma Earth\" emblem",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "1acae36",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(account): show explicit Ma Earth funding round(s) on overview",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "bbaec24",
+          "date": "2026-07-03",
+          "author": "Satyam",
+          "subject": "Add skeleton loading states",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "54d680d",
+          "date": "2026-07-03",
+          "author": "Satyam",
+          "subject": "Fix footer placement on project pages",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "df572f9",
+          "date": "2026-07-03",
+          "author": "Satyam",
+          "subject": "Place observation storage note in section header",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "d20918b",
+          "date": "2026-07-03",
+          "author": "Satyam",
+          "subject": "Add Vercel Analytics",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "ba04422",
+          "date": "2026-07-03",
+          "author": "Satyam",
+          "subject": "Return users to current page after login",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "7c31e2e",
+          "date": "2026-07-03",
+          "author": "Satyam",
+          "subject": "Add observation storage guidance",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "acd5300",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(account): refine org updates digest — About heading, coherent title font, plain date range",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "7ab0fe8",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "copy(landing): remove all mentions of 'Cert' from the landing page",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "d5e9fad",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "copy(landing): reframe hero around uploading observations + certifying work",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "2250d49",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(account): condense org updates to one expanded entry + \"See X more\"",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "2a546a6",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(account): add cross-project \"Updates\" section to org profile",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "eaa83c3",
+          "date": "2026-07-03",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(admin): make Biome Trust an admin-managed endorser, not built-in",
+          "category": "admin",
+          "categoryLabel": "Admin & moderation"
+        },
+        {
+          "hash": "7fcc605",
+          "date": "2026-07-01",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(admin): manage trusted endorsers from the admin panel",
+          "category": "admin",
+          "categoryLabel": "Admin & moderation"
+        },
+        {
+          "hash": "dd94e44",
+          "date": "2026-07-02",
+          "author": "daviddao",
+          "subject": "globe: show org logos in map pins, shrink to minimal badges",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "61eea9a",
+          "date": "2026-07-02",
+          "author": "Satyam",
+          "subject": "Fix project cover upload failures",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "07a9021",
+          "date": "2026-07-02",
+          "author": "daviddao",
+          "subject": "fix(modal): stabilize ModalPortalTarget ref callback (React #185 live crash)",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "8706629",
+          "date": "2026-07-02",
+          "author": "daviddao",
+          "subject": "refactor(account-switcher): replace hand-rolled store with TanStack Query",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "af159ce",
+          "date": "2026-07-02",
+          "author": "daviddao",
+          "subject": "globe: fix land cover tiles, add full Ma Earth roster with badge pins",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "b7ad112",
+          "date": "2026-07-02",
+          "author": "daviddao",
+          "subject": "refactor(modal): host under app providers + call-site content rendering",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "d13975b",
+          "date": "2026-07-02",
+          "author": "daviddao",
+          "subject": "refactor(shell): split the 1,800-line AppShell into focused modules",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "872d662",
+          "date": "2026-07-02",
+          "author": "daviddao",
+          "subject": "refactor(cert): cert route owns its header tabs, drop window-global bridge",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "52dddb6",
+          "date": "2026-07-02",
+          "author": "daviddao",
+          "subject": "refactor(shell): server-first session, gate chrome outside the shell",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "bd7b3f1",
+          "date": "2026-07-02",
+          "author": "daviddao",
+          "subject": "fix(shell): add error boundaries, client crash reporting, stable modal context",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "6018dbf",
+          "date": "2026-07-02",
+          "author": "daviddao",
+          "subject": "Add native 3D Globe view (ported from Green Globe)",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "7b75868",
+          "date": "2026-07-02",
+          "author": "daviddao",
+          "subject": "Add Tainá admin oversight panel",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        },
+        {
+          "hash": "e1c2157",
+          "date": "2026-07-02",
+          "author": "daviddao",
+          "subject": "Add Tainá agent profile controls",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        },
+        {
+          "hash": "7002a73",
+          "date": "2026-07-02",
+          "author": "daviddao",
+          "subject": "Add privacy policy page",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "b5a2235",
+          "date": "2026-07-02",
+          "author": "daviddao",
+          "subject": "docs(taina): document Tainá architecture, flows, and links in AGENTS.md + README",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        },
+        {
+          "hash": "c9dda8c",
+          "date": "2026-07-02",
+          "author": "daviddao",
+          "subject": "feat(taina): restart sessions, real GainForest agent keys, Tainá key badge",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        },
+        {
+          "hash": "3ab94fe",
+          "date": "2026-07-01",
+          "author": "daviddao",
+          "subject": "docs(taina): document Tainá runtime env vars in .env.local.example",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        },
+        {
+          "hash": "7f8b85c",
+          "date": "2026-07-01",
+          "author": "daviddao",
+          "subject": "feat(taina): integrate Tainá agent village into bumicerts",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        },
+        {
+          "hash": "ce29e39",
+          "date": "2026-07-01",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(admin): make the moderation panel a standalone /admin page",
+          "category": "admin",
+          "categoryLabel": "Admin & moderation"
+        },
+        {
+          "hash": "850e107",
+          "date": "2026-07-01",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(members): add Bluesky accounts directly from org settings",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "60893f2",
+          "date": "2026-07-01",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(admin): move moderation panel from profile tab to account menu",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "e449d79",
+          "date": "2026-07-01",
+          "author": "Satyam",
+          "subject": "Update observation record type prompt",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "3dcc993",
+          "date": "2026-07-01",
+          "author": "Satyam",
+          "subject": "feat(user-menu): simplify menu with expandable per-account sections",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "70b4406",
+          "date": "2026-07-01",
+          "author": "Satyam",
+          "subject": "Use DWC dataset lexicon for observation groups",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "e3f9acb",
+          "date": "2026-07-01",
+          "author": "Satyam",
+          "subject": "Update welcome email greeting",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "a5c0870",
+          "date": "2026-07-01",
+          "author": "Sharfy Adamantine",
+          "subject": "Revert \"fix(shell): pin footer to viewport bottom so it never flashes on load\"",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "99130bc",
+          "date": "2026-07-01",
+          "author": "Sharfy Adamantine",
+          "subject": "fix(shell): pin footer to viewport bottom so it never flashes on load",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "3eae6ae",
+          "date": "2026-07-01",
+          "author": "Sharfy Adamantine",
+          "subject": "fix(timeline): stop evidence preview flicker when switching images",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "5d8adce",
+          "date": "2026-07-01",
+          "author": "Sharfy Adamantine",
+          "subject": "i18n: rename 'Evidence Timeline' to 'Project Updates' in UI copy",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "7fca366",
+          "date": "2026-07-01",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(badges): link Trusted-by emblems to the endorser's account page",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "a732351",
+          "date": "2026-07-01",
+          "author": "Sharfy Adamantine",
+          "subject": "i18n: reword Projects page hero & metadata copy",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "b0ff142",
+          "date": "2026-07-01",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(badges): honor Biome Trust endorsements as a trusted issuer",
+          "category": "admin",
+          "categoryLabel": "Admin & moderation"
+        },
+        {
+          "hash": "f036b7b",
+          "date": "2026-07-01",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(observations): label the observation list with an \"All observations\" heading",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        }
+      ]
+    },
+    {
+      "month": "2026-06",
+      "count": 573,
+      "counts": {
+        "observations": 109,
+        "auth": 44,
+        "donations": 25,
+        "core": 154,
+        "projects": 90,
+        "ui": 85,
+        "admin": 4,
+        "fix": 36,
+        "i18n": 12,
+        "taina": 13,
+        "dataJobs": 1
+      },
+      "commits": [
+        {
+          "hash": "f2c17f7",
+          "date": "2026-06-30",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(observations): delete a dataset without deleting its observations",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "693aed3",
+          "date": "2026-06-30",
+          "author": "Sharfy Adamantine",
+          "subject": "fix(observations): make delete the primary bulk action, demote grouping",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "8447218",
+          "date": "2026-06-30",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(observations): always-visible datasets strip with loading skeleton",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "df4410c",
+          "date": "2026-06-30",
+          "author": "daviddao",
+          "subject": "feat(feed): add Following tab scoped to followed accounts",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "7fac552",
+          "date": "2026-06-30",
+          "author": "daviddao",
+          "subject": "Rename user-facing \"Cert\" to \"project\" in donation card, account UI, dashboard, and SEO",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "402a7ad",
+          "date": "2026-06-30",
+          "author": "Sharfy Adamantine",
+          "subject": "refactor(observations): datasets are certified collections nested under projects",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "b49e167",
+          "date": "2026-06-30",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(observations): group observations into datasets (folder UI)",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "2d5530c",
+          "date": "2026-06-30",
+          "author": "Satyam",
+          "subject": "Let auth service restore inviter sessions",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "e063390",
+          "date": "2026-06-30",
+          "author": "daviddao",
+          "subject": "Merge Gallery and Attachments into one \"Files & photos\" tab",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "151f653",
+          "date": "2026-06-30",
+          "author": "Satyam",
+          "subject": "Fix org invite acceptance auth session lookup",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "d638447",
+          "date": "2026-06-30",
+          "author": "daviddao",
+          "subject": "Add an Attachments section to the profile",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "15deff3",
+          "date": "2026-06-30",
+          "author": "daviddao",
+          "subject": "Surface observations-CSV datasets as biodiversity evidence",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "3bdd2e8",
+          "date": "2026-06-30",
+          "author": "daviddao",
+          "subject": "Show all observations on account tab, not just ones with photos",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "6b4bb56",
+          "date": "2026-06-30",
+          "author": "daviddao",
+          "subject": "Add CSV dataset upload to observations modal",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "ff76195",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "bioblitz: add 'All submissions' grid view to the round gallery",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "ebbd9c0",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "Reframe Rewilding grant around AudioMoths + field data collection tools (drop PDS framing)",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "5e6a16f",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "Redesign steward moderation controls into one minimal collapsible panel",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "b8b3754",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "Show Ma Earth logo on the Ma Earth Round 3 grant section",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "90b24cf",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "Admin: review grant applicants + bioblitz registrants, award recognition badges from profiles",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "c75b779",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "Drop engraved side-face labels on PDS visual; keep clean layered slab",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "812a15b",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "Add interactive isometric personal-data-server visual to Rewilding section",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "d64be7c",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "Rename Rewilding apply CTA to 'One-Click Apply'",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "3963dba",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "Treat Interoperable Grants Program as a category; name grant 'Ma Earth Round 3' (quadratic funding)",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "2c10ac8",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "Show 'up to $1,000 each' on Rewilding the Web grants",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "17ecadf",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "Add Grants page under Funding with Rewilding the Web + interoperable grants",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "fede43a",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "feat(docs): restore lexicon SideNav, use GainForest logo mark",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "dd5f345",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "Remove Has Certs quick filter from organizations page",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "f0294f7",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "refactor(docs): make /docs/lexicons minimal, single-column",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "e716d77",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "feat(docs): add /docs/lexicons schema explorer",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "4a28aeb",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "Add best-picture front-runners to BioBlitz page",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "380f286",
+          "date": "2026-06-29",
+          "author": "Satyam",
+          "subject": "feat(invites): allow removing pending invitations",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "5c68416",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "fix(observations): default uploads to 'Seen in person' (HumanObservation)",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "2039107",
+          "date": "2026-06-29",
+          "author": "Satyam",
+          "subject": "fix(invites): support auth internal service token",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "fb231b7",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "feat(observations): unify the sighting page into one inline read/edit section",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "c23474b",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "feat(observations): edit the sighting inline on its page (no slide-over)",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "660a707",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "perf(profile): batch reply/like record previews",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "08a534f",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "feat(observations): Re-run AI on saved sightings + Edit button on the observation page",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "8346820",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "refactor(observations): drop the quick-add drag-to-separate zone",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "a0f043f",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "feat(observations): always-visible split button + AI-detection progress bar",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "72a1f48",
+          "date": "2026-06-29",
+          "author": "daviddao",
+          "subject": "feat(observations): quick-add status badges, progress bar, re-run AI; raise limit to 50",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "2f1c89f",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(profile): preview liked/replied records; drop end-of-list label",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "5709dcd",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Drag a photo out to a drop zone to split it into its own observation",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "a9290e8",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Support multiple photos per observation",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "0d609d4",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "fix(follow): stop follow button + page flicker on the list views",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "1d6f9c8",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(profile): Posts, Replies & Likes activity tabs",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "099ca16",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(follow): followers & following list pages",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "c00e4c6",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(follow): move follow button by the since pill; add follow to feed hover card",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "95af604",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "refactor(account): shared AccountHeroSkeleton for loading states",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "48a0282",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(follow): follow accounts with follower/following counts",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "59014dd",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(feed): delete your own posts and comments",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "880361b",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(bioblitz): in-app registration via a join post + confetti",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "de80cae",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(engagement): like & comment on projects and organizations too",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "ec19184",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "fix(account-switcher): per-session snapshot cache to stop infinite render loop",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "99fb6ff",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(feed): batch comments, in-place comment/post editing, cleaner batch footer",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "cd80455",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(feed): post, comment & like as an organization you manage",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "f7746c6",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Show Admin tab on the admin group's own profile",
+          "category": "admin",
+          "categoryLabel": "Admin & moderation"
+        },
+        {
+          "hash": "619b706",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(feed): tap a photo to like & comment in place via an in-feed lightbox",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "fad0063",
+          "date": "2026-06-29",
+          "author": "Satyam",
+          "subject": "Proxy observation location search",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "a0d6917",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(observations): like & comment a sighting from its page and the explorer drawer",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "d94833b",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Detect admin-group membership via the user's own group list",
+          "category": "admin",
+          "categoryLabel": "Admin & moderation"
+        },
+        {
+          "hash": "193782e",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(feed): per-sighting engagement + read-only likes total on summary cards",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "3a03391",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Add Admin tab listing all flagged test accounts",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "2528099",
+          "date": "2026-06-29",
+          "author": "Satyam",
+          "subject": "Add location search to observation picker",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "399dbd9",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Exclude test-flagged accounts from global search",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "0267487",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Exclude test-flagged accounts from the BioBlitz challenge",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "d68e6d7",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(feed): rich account hover card on avatars & names",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "7b13b4e",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Hide test-flagged accounts from projects, observations and feed",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "83cc81b",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Show all observations by default in explorer",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "f3e2a2b",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Add notifications bell for likes & comments on your records",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "d2e1d09",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "refac(feed): make the right filter rail minimal and subtle",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "39d3c2c",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(feed): move filters to a Bluesky-style right rail",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "1f0055b",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "fix(seo): bust social OG cache with a versioned image URL",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "adc43c6",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(feed): navbar filter tabs, likeable replies, and a 'who liked this' hover",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "21f16e8",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(feed): elegant composer with avatar + observation button, comment avatars, cleaner sticky filter bar",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "201cee7",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(feed): read likes/comments from the indexer + posts as feed rows",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "27c93ac",
+          "date": "2026-06-28",
+          "author": "Satyam",
+          "subject": "Fix certified profile avatar blob shape",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "5ec2d7e",
+          "date": "2026-06-28",
+          "author": "Satyam",
+          "subject": "Stop using Bluesky profile data",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "bbf7d34",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "SEO: brand-led title + refresh whale OG image to current hero slogan",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "1d73805",
+          "date": "2026-06-28",
+          "author": "Satyam",
+          "subject": "Fix profile save auth cookie forwarding",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "13aae4d",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Fix EmptyHeroBanner painting over the account dropdown",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "6289a19",
+          "date": "2026-06-28",
+          "author": "Sharfy Adamantine",
+          "subject": "fix(modal): make modals scrollable on mobile",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "2c25585",
+          "date": "2026-06-28",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(observations): prompt for location access instead of guessing",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "3195935",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Settings: one-click 'connect your agent' prompt with the key baked in",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "236de54",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(profile): add quick links to avatar menu and edit/view actions to project cards",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "169a5e0",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Refocus /skill.md on observations, projects, and evidence timelines",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "ab4093f",
+          "date": "2026-06-28",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(observations): privacy-fuzzed approximate location for observations",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "45e424a",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(feed): add an Upload button in the header on the feed page",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "f01cc69",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Add AI agent API keys to user settings + /skill.md",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "14e4f7e",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Use binoculars icon in sidebar add-observations preview card",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "26d095d",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Hide occurrence badge/media/category filter pills in profile + manage observations",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "83cc9d5",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Compact list styling for observations + organisations; binoculars for add-observations",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "0af170b",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(feed): skip past a saturating sightings burst instead of crawling it",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "6b781a0",
+          "date": "2026-06-28",
+          "author": "Sharfy Adamantine",
+          "subject": "feat(observations): extract EXIF GPS/date from HEIC, HEIF and AVIF",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "09e6349",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(feed): show an org's true sighting total on burst cards, fewer calls",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "97ceb7e",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Make projects list view compact, table-style",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "b216e8b",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(feed): collapse consecutive same-org sightings into one summary card",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "2d410a5",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat(feed): true newest-first merge with cursor pagination + load more",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "9597c71",
+          "date": "2026-06-28",
+          "author": "Satyam",
+          "subject": "Restore people autocomplete in projects",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "d71cf19",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat: make feed the logged-in home, fold Certs into Projects in feed",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "3525660",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "feat: add live activity feed sidebar tab and /feed route",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "bdb72eb",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Show images in observation and organization list views",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "70fbd0d",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Add a List view with images to the profile Projects tab",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "f53d04a",
+          "date": "2026-06-28",
+          "author": "Satyam",
+          "subject": "Add project image edit controls",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "bf19321",
+          "date": "2026-06-28",
+          "author": "Satyam",
+          "subject": "Make cert donations role-aware",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "5c3a406",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Add memberOf translations (es, id, pt, sw) for profile hero",
+          "category": "i18n",
+          "categoryLabel": "Localization"
+        },
+        {
+          "hash": "379b1a4",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Speed up projects explorer: render cards first, lazy-load scope tags + evidence badges",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "d1a1524",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Fix React error #310 in RecordDrawer: hoist projectGalleryImages useMemo above early return",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "40a5d87",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Redesign explorer project drawer: drop duplicate map, add photo gallery",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "27b149e",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Allow submitting unidentified observations",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "048805d",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Replace sidebar Add data with Add observations modal",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "22cfdcd",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Enrich explorer project drawer with boundary map and latest updates",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "be113f9",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Hide sidebar Create-a-project card once the account has a project",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "6678fd2",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Make the project detail page mobile-responsive",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "90cf434",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Enrich the project sidebar with at-a-glance facts, a mini map, and updates",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "081af58",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Integrate the project detail page into one page instead of tabs",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "90bdfa2",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Stop the BioBlitz dismiss button from overlapping the strip content",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "bddcf0a",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Make the BioBlitz promo strip responsive on mobile",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "12981fd",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Fold the project Cert summary into the project drawer; quiet \"View profile\"",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "aebdb54",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Add a Timeline project filter; collapse Ma Earth rounds into one chip",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "e05a678",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Drop deprecated Certs from global search",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "b915901",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Fix slow projects explorer: one batched query for card evidence",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "8c1eb9a",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Use the shared seedling banner for empty organizations, gallery, and donations states",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "710ae56",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Show per-project Evidence summary on project cards",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "7b553fa",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Collapse the observations tab to just the banner when there is no data",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "2a631af",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Show the seedling hero banner as the empty observations state",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "79fb8c0",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Remove the Tainá banner from the observations tab",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        },
+        {
+          "hash": "8c87808",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Show Cert focus tags on project cards instead of a \"1 Cert\" count",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "0482d65",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Close the create popup when \"View project\" navigates from success",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "057c60d",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Sidebar \"Create a project\" opens the wizard popup directly",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "f93d2a8",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Fix: drawing a place no longer dismisses the whole create wizard",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "e7593d8",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Hide the search + Add row on the empty projects state",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "00f44d8",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Open create popup from the sidebar link; use a close icon in the modal",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "ce3464c",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Keep the create-project popup as a centered dialog on small screens",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "3e4d191",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Open project creation as a popup instead of inline on the profile",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "609aa16",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Create project places inline in the wizard via the draw map",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "f51f0e4",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Make project creation a step-by-step wizard (Ma Earth UX, bumicerts style)",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "1479f4e",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Merge certs into projects: 1:1 auto-created hypercert per project",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "70a6558",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "Move Sites & Timeline onto projects; add profile gallery uploader",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "d7e0e22",
+          "date": "2026-06-28",
+          "author": "daviddao",
+          "subject": "observations: show measurements inline, drop Measurements & Drone tabs",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "8c49219",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "Merge Trees into Observations as a Measurements layer",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "3b82014",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "Move management onto the profile and drop /manage from navigation",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "bd0cd9b",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "Give personal profiles data-upload parity with organizations",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "05c5f7b",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "feat(account): merge manage dashboard into the profile (edit in place)",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "0eed522",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "Drop globe from language button; minimal compact form in collapsed rail",
+          "category": "i18n",
+          "categoryLabel": "Localization"
+        },
+        {
+          "hash": "0cda35c",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "Move language picker into the sidebar footer next to the theme toggle",
+          "category": "i18n",
+          "categoryLabel": "Localization"
+        },
+        {
+          "hash": "cc4d379",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "Slim navbar account button to avatar-only; move language into the menu",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "bad1d14",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "Add global Cmd+K search across Certs, Projects, Organizations, Observations",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "6b9bc7c",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "feat(manage): unified \"Add data\" drop-in with auto-detect + per-type simplifications",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "baf23f9",
+          "date": "2026-06-27",
+          "author": "Sharfy Adamantine",
+          "subject": "feat: render real GeoJSON boundary on record location map",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "8da208b",
+          "date": "2026-06-27",
+          "author": "Sharfy Adamantine",
+          "subject": "Match profile tab and overview folder icons to sidebar",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "a0559d0",
+          "date": "2026-06-27",
+          "author": "Sharfy Adamantine",
+          "subject": "refactor: resolve project country from coordinates only, never the name",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "91bb9b9",
+          "date": "2026-06-27",
+          "author": "Sharfy Adamantine",
+          "subject": "fix: use BumicertIcon for cert tab, overview folder, and empty state on profile",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "f241b32",
+          "date": "2026-06-27",
+          "author": "Sharfy Adamantine",
+          "subject": "fix: use BumicertIcon for project card cert badge to match sidebar",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "4729f5a",
+          "date": "2026-06-27",
+          "author": "Sharfy Adamantine",
+          "subject": "cert delete: require typing the Cert name + clearer destructive styling",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "ded40a6",
+          "date": "2026-06-27",
+          "author": "Sharfy Adamantine",
+          "subject": "feat: show project country on cards instead of generic label",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "f4025a4",
+          "date": "2026-06-27",
+          "author": "Sharfy Adamantine",
+          "subject": "fix: make profile dropdown opaque to prevent text bleed-through",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "fc29ca2",
+          "date": "2026-06-27",
+          "author": "Satyam",
+          "subject": "Refine BioBlitz page layout",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "b4d0dd5",
+          "date": "2026-06-27",
+          "author": "Satyam",
+          "subject": "Keep E2E flows aligned with new UI",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "c3ee692",
+          "date": "2026-06-27",
+          "author": "Satyam",
+          "subject": "Fix profile image uploads",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "3bc11e8",
+          "date": "2026-06-27",
+          "author": "Satyam",
+          "subject": "Add proxy bot protection",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "1fee677",
+          "date": "2026-06-27",
+          "author": "Satyam",
+          "subject": "Guard BioBlitz banner translations",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "c56e77d",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "Donations: unify Overview/Leaderboard into one hero with an in-hero view toggle",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "cd026fd",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "feat(bioblitz): observations-of-the-week map on the BioBlitz page",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "d9b78aa",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "feat(maps): timeline playback speed selector + createdAt fallback",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "808761b",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "RecordDrawer: move View project page button to the top",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "ce2eb40",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "Sidebar: reflect the account selected in the top-right switcher",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "19e68ba",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "Manage: move org About below the hero and shrink its oversized font",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "5b4f777",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "RecordDrawer: unify the view-detail-page buttons across record kinds",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "7561bc2",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "feat(maps): bumiscan-style timeline scrubber + rich hover tooltips",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "8d89319",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "Account: show manage Projects/Observations UI on profile tabs for stewards",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "e76e20a",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "Projects: summarise linked gallery images and observations on the project page",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "c9c7f83",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "Projects: drop long description from form, make short summary optional and unlimited",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "a17c8b3",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "Projects: generate an Overview on the project page aggregated from its Certs",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "3796759",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "Manage: move org About section above hero; rename org overview tab label",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "5e551ab",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "Projects: add standalone project detail page, link from record drawer",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "6f6b74d",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "Profile: add Organizations tab (own profile only) between Certs and Observations",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "2dd1488",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "Account: show folder cards (Projects/Certs/Observations/Donations) on personal profiles",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "d8acba2",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "Overview: shrink folder stat cards and tighten typography",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "79e8282",
+          "date": "2026-06-27",
+          "author": "daviddao",
+          "subject": "Overview: use leaf icon for Projects folder to match sidebar card",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "e1f8fba",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Account: render org overview as the manage-style folder dashboard",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "a19a2b8",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Profile: show certs grid at 5 per row on large screens",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "8687137",
+          "date": "2026-06-26",
+          "author": "kzoeps",
+          "subject": "indexer: make GraphQL endpoint configurable",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "8ee241d",
+          "date": "2026-06-26",
+          "author": "kzoeps",
+          "subject": "indexer: make GraphQL endpoint configurable",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "729d9b8",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Account: compact Overview tab for personal profiles, drop bulky sidebar",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "d1c0378",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Account: replace Invite friends X-share with Share your profile copy link",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "bc05717",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Landing: forward logged-in visitors to their profile; fix Explore Projects link",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "7b8bf72",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Landing: source preview cert from Ma Earth and GainForest badges",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "d4d882e",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Landing: add language switcher to navbar; rename Get started to Sign in",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "44ef1c3",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Profile: add Projects + Observations tabs (Certs · Projects · Observations · Donation History)",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "89a4d7b",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Certs: add delete action on the cert page and in My Certs",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "b7a518a",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Settings/handle: degrade gracefully when auth service lacks the endpoint",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "0054e65",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Settings: let users change their username (handle)",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "a5909e3",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Sidebar: add profile row above Explore linking to your profile",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "1e328c4",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Explore: route 'My X' header buttons to the manage pages",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "f0a79cf",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Sidebar: group explore nav into Explore + Funding sections",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "901d3cb",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Replace Explore/Manage sidebar toggle with avatar workspace hub",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "89cecea",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Leaderboard: compact, more elegant layout (slim controls, stat strip, denser rows)",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "8e37491",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Landing: certified-impact hero heading; donations hub + leaderboard updates",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "5108c27",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Nest Leaderboard under Donations in the sidebar",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "6a6c0ae",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Match observation card to project card with sparkles and floating card",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "1a47342",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Add 'Add Observations' creation card to the sidebar",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "358e8b6",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Redesign BioBlitz as a compact single-screen dashboard (no scrolling)",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "53f673d",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Make BioBlitz banner link directly to /bioblitz; add banner translations",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "6f827b0",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Forward signed-in users to /projects instead of /manage",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "2c03f42",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Replace landing Launch App button with Sign in and forward signed-in users to app",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "fd69fb7",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "landing: show only Ma Earth verified certs in the preview rotation",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "3699b1e",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "landing: replace mock cert preview with live 3D trading cards",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "514fe32",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "landing: make hero a four-ecosystem montage",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "d372dd7",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "landing: iNaturalist-inspired video + live-metrics refresh",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "5ab9276",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "proxy: exclude media files from locale redirect",
+          "category": "i18n",
+          "categoryLabel": "Localization"
+        },
+        {
+          "hash": "ae1f1f1",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "sidebar: portal the manage context switcher flyout",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "4d894d2",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "observations: add dedicated nature-sighting detail page",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "b5b43e5",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Make observation card owners filterable, matching projects & certs",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "b0630fa",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "header: replace Create Project with per-page \"My <records>\" button",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "126f9e5",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Add owner filter to Certs, Projects & Observations explore pages",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "56fb300",
+          "date": "2026-06-26",
+          "author": "DonGuillotine",
+          "subject": "Add organization evidence timeline pages",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "e08a3f5",
+          "date": "2026-06-26",
+          "author": "Satyam",
+          "subject": "Revamp /bioblitz UI and add global promo banner",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "08736ab",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Make Explore/Manage sidebar rails more compact",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "d0765ed",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Lead Explore with Projects; pair Certs beneath it",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "6dd8ae4",
+          "date": "2026-06-26",
+          "author": "Satyam",
+          "subject": "Fix collapsed sidebar controls",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "a9376ca",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "BioBlitz: add This round / All time toggle to the collectors board",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "9e9dc9d",
+          "date": "2026-06-26",
+          "author": "Satyam",
+          "subject": "Soften observation selection bar",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "637a615",
+          "date": "2026-06-26",
+          "author": "Satyam",
+          "subject": "Refine manage observations add flow",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "f69fe44",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "BioBlitz: label top collectors with their organisation membership",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "9721835",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Filter My Observations per project",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "89e3945",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Add My Observations + collect observations for projects",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "aaf20af",
+          "date": "2026-06-26",
+          "author": "Satyam",
+          "subject": "Skip account picker for invite redirects",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "e41ed5a",
+          "date": "2026-06-26",
+          "author": "Satyam",
+          "subject": "Improve empty organization manage UX",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "71dd991",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Fix sidebar collapse hooks order crash (React #310)",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "2eb8cc8",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Add an elegant collapsible desktop sidebar (icon rail)",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "6d7076d",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "BioBlitz: clarify step 2 upload paths (My Observations page or Tainá)",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        },
+        {
+          "hash": "087e586",
+          "date": "2026-06-26",
+          "author": "Satyam",
+          "subject": "Fix observation owner display names",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "b4b0570",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "BioBlitz: add round registration + support links",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "2bb2f9a",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Make projects personal-account friendly and reframe Certs as minted from projects",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "3f4aae2",
+          "date": "2026-06-26",
+          "author": "daviddao",
+          "subject": "Add weekly BioBlitz Challenge page",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "78c8dc2",
+          "date": "2026-06-26",
+          "author": "Satyam",
+          "subject": "Show observation deletion progress",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "851d617",
+          "date": "2026-06-26",
+          "author": "Satyam",
+          "subject": "Improve observation media grid controls",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "c296780",
+          "date": "2026-06-26",
+          "author": "Satyam",
+          "subject": "Fix observation upload row animation: drive row removal off committed state",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "a5a7104",
+          "date": "2026-06-26",
+          "author": "Satyam",
+          "subject": "Add upload animation, draft store, and location picker to observations add-mode",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "fbc2e8b",
+          "date": "2026-06-26",
+          "author": "Satyam",
+          "subject": "Polish observation add-mode panel and location picker",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "a8b6329",
+          "date": "2026-06-26",
+          "author": "DonGuillotine",
+          "subject": "Support rich timeline notes and file previews",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "4f25c60",
+          "date": "2026-06-26",
+          "author": "Satyam",
+          "subject": "Show failed upload share in red on the progress bar",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "a81837c",
+          "date": "2026-06-26",
+          "author": "Satyam",
+          "subject": "Restructure observation add-mode header into compact action row",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "42b2e89",
+          "date": "2026-06-26",
+          "author": "Satyam",
+          "subject": "Compact observation add-mode hero spacing",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "521b630",
+          "date": "2026-06-26",
+          "author": "Satyam",
+          "subject": "Improve observation upload review flow",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "1428758",
+          "date": "2026-06-25",
+          "author": "Satyam",
+          "subject": "Add close action to location picker",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "a8190a6",
+          "date": "2026-06-25",
+          "author": "Satyam",
+          "subject": "Fix manage observation location picker",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "fef8a27",
+          "date": "2026-06-25",
+          "author": "DonGuillotine",
+          "subject": "ECO-740 port Green Globe timeline map controls",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "67364d9",
+          "date": "2026-06-25",
+          "author": "Satyam",
+          "subject": "Polish observation upload status panel",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "3f2624a",
+          "date": "2026-06-25",
+          "author": "Satyam",
+          "subject": "Improve observation upload grouping UX",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "f6f692b",
+          "date": "2026-06-25",
+          "author": "DonGuillotine",
+          "subject": "Send welcome emails from auth lifecycle events",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "49aeede",
+          "date": "2026-06-25",
+          "author": "Satyam",
+          "subject": "Update invitation e2e flow",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "c434e92",
+          "date": "2026-06-25",
+          "author": "Satyam",
+          "subject": "Polish invitation acceptance flow",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "3dc8a42",
+          "date": "2026-06-25",
+          "author": "Satyam",
+          "subject": "Fix invitation menu loading state",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "b6b87a6",
+          "date": "2026-06-25",
+          "author": "Satyam",
+          "subject": "Polish group invitation flow",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "a6e68cf",
+          "date": "2026-06-25",
+          "author": "Satyam",
+          "subject": "Add CGS group email invitations",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "d0b008b",
+          "date": "2026-06-25",
+          "author": "Satyam",
+          "subject": "Harden observation analysis and revamp add UI",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "91af36f",
+          "date": "2026-06-25",
+          "author": "Satyam",
+          "subject": "Harden observation analysis and revamp add UI",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "7c5940f",
+          "date": "2026-06-24",
+          "author": "Satyam",
+          "subject": "Fix create project org context routing",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "c50bb07",
+          "date": "2026-06-24",
+          "author": "Satyam",
+          "subject": "Use Gemini API key env for observation analysis",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "efcb642",
+          "date": "2026-06-24",
+          "author": "Satyam",
+          "subject": "Rework observation add-mode into a scannable data table",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "4cfebbd",
+          "date": "2026-06-23",
+          "author": "Satyam",
+          "subject": "Default observation uploads to one group",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "307df26",
+          "date": "2026-06-23",
+          "author": "Satyam",
+          "subject": "Make bulk observation add a scannable list",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "f975ef7",
+          "date": "2026-06-23",
+          "author": "Satyam",
+          "subject": "Add bulk observation image upload",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "fd20cdf",
+          "date": "2026-06-23",
+          "author": "Satyam",
+          "subject": "Unify trusted badge display",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "984745f",
+          "date": "2026-06-23",
+          "author": "Satyam",
+          "subject": "Refine organization account hero",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "3d12d87",
+          "date": "2026-06-23",
+          "author": "Satyam",
+          "subject": "Show trusted organization badges",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "e929d16",
+          "date": "2026-06-22",
+          "author": "Satyam",
+          "subject": "Add ePDS login skill",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "9d168f9",
+          "date": "2026-06-22",
+          "author": "Satyam",
+          "subject": "Fix manage site fetching and avatar uploads",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "909d33f",
+          "date": "2026-06-22",
+          "author": "Satyam",
+          "subject": "Update cert publish success actions",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "d41a97f",
+          "date": "2026-06-22",
+          "author": "Satyam",
+          "subject": "Add project cert management e2e coverage",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "9173a22",
+          "date": "2026-06-22",
+          "author": "Satyam",
+          "subject": "Avoid full reload when linking project certs",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "0bc8ff6",
+          "date": "2026-06-22",
+          "author": "Satyam",
+          "subject": "Fix project cert availability after unlink",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "fdfbf30",
+          "date": "2026-06-22",
+          "author": "Satyam",
+          "subject": "Add project cert management",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "ecbc05a",
+          "date": "2026-06-22",
+          "author": "Satyam",
+          "subject": "Add project gallery management",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "4450eea",
+          "date": "2026-06-22",
+          "author": "Satyam",
+          "subject": "Update Certified landing badge",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "3fb7f6e",
+          "date": "2026-06-22",
+          "author": "Satyam",
+          "subject": "Place members after folders on organization manage page",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "2fe6714",
+          "date": "2026-06-22",
+          "author": "Satyam",
+          "subject": "Fix project cover image uploads",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "1d46694",
+          "date": "2026-06-22",
+          "author": "Satyam",
+          "subject": "Fix manage optimistic update flicker",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "c02872b",
+          "date": "2026-06-22",
+          "author": "Satyam",
+          "subject": "Improve organization recovery email setup",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "ce5e751",
+          "date": "2026-06-22",
+          "author": "Satyam",
+          "subject": "Fix manage profile refresh after onboarding",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "c160f2c",
+          "date": "2026-06-22",
+          "author": "Satyam",
+          "subject": "Fix onboarding prompt and require auth env",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "d54b5b6",
+          "date": "2026-06-22",
+          "author": "Satyam",
+          "subject": "Cache public explore data for 24 hours",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "affab93",
+          "date": "2026-06-22",
+          "author": "Satyam",
+          "subject": "Fix language selector hydration id mismatch",
+          "category": "i18n",
+          "categoryLabel": "Localization"
+        },
+        {
+          "hash": "5851235",
+          "date": "2026-06-22",
+          "author": "Satyam",
+          "subject": "Fix view toggle flicker",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "b19a7da",
+          "date": "2026-06-22",
+          "author": "Satyam",
+          "subject": "Add verbose e2e cleanup logging",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "88973bc",
+          "date": "2026-06-22",
+          "author": "Satyam",
+          "subject": "Filter public pages by featured badges",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "d110816",
+          "date": "2026-06-22",
+          "author": "Satyam",
+          "subject": "Ensure CGS groups use recovery email and mandatory e2e cleanup",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "644869a",
+          "date": "2026-06-21",
+          "author": "Diegorb1329",
+          "subject": "Fix localized auth completion hydration",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "882d69f",
+          "date": "2026-06-21",
+          "author": "Satyam",
+          "subject": "Restore accurate cert counts",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "99bb500",
+          "date": "2026-06-21",
+          "author": "Satyam",
+          "subject": "Fix certs show more counts",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "6b936bb",
+          "date": "2026-06-21",
+          "author": "Satyam",
+          "subject": "Update footer documentation link",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "c001b5d",
+          "date": "2026-06-21",
+          "author": "Satyam",
+          "subject": "Show icons only in mobile view switchers",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "f9fd663",
+          "date": "2026-06-21",
+          "author": "Satyam",
+          "subject": "Add cert badge filters",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "8755247",
+          "date": "2026-06-21",
+          "author": "Satyam",
+          "subject": "Filter certs by featured badges",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "beea0d4",
+          "date": "2026-06-19",
+          "author": "Satyam",
+          "subject": "Refine account header UI",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "d3c6b4d",
+          "date": "2026-06-19",
+          "author": "Satyam",
+          "subject": "Fix account switcher profile hydration",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "8ddead7",
+          "date": "2026-06-19",
+          "author": "Satyam",
+          "subject": "Speed up group settings and data council",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "d57a81c",
+          "date": "2026-06-19",
+          "author": "Satyam",
+          "subject": "Add data council member controls",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "73f0696",
+          "date": "2026-06-19",
+          "author": "Satyam",
+          "subject": "Show internal badge errors in modals",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "cd38d63",
+          "date": "2026-06-19",
+          "author": "Satyam",
+          "subject": "Tighten user menu trigger",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "c84d7c4",
+          "date": "2026-06-19",
+          "author": "Satyam",
+          "subject": "Rename Taina references to Tainá",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        },
+        {
+          "hash": "14e6dbc",
+          "date": "2026-06-19",
+          "author": "Satyam",
+          "subject": "Seed manage observations from server",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "aa8ad11",
+          "date": "2026-06-19",
+          "author": "Satyam",
+          "subject": "Add observations to manage navigation",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "0308aff",
+          "date": "2026-06-19",
+          "author": "Satyam",
+          "subject": "Improve Taina observation card copy and layout",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        },
+        {
+          "hash": "8de5bb4",
+          "date": "2026-06-19",
+          "author": "Satyam",
+          "subject": "Refine /manage/observations hero and add Taina intro",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        },
+        {
+          "hash": "d79d384",
+          "date": "2026-06-19",
+          "author": "Satyam",
+          "subject": "Compute public origin from requests",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "14980a2",
+          "date": "2026-06-19",
+          "author": "Satyam",
+          "subject": "Gate internal badges by GainForest roles",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "cf82653",
+          "date": "2026-06-19",
+          "author": "Satyam",
+          "subject": "Add public profile link to manage pages",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "5ac5fee",
+          "date": "2026-06-19",
+          "author": "DonGuillotine",
+          "subject": "Port timeline viewer components",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "e96a39c",
+          "date": "2026-06-19",
+          "author": "DonGuillotine",
+          "subject": "Port evidence adder picker flows",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "380ce64",
+          "date": "2026-06-19",
+          "author": "DonGuillotine",
+          "subject": "ECO-736 align context attachment mutations",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "5d48b98",
+          "date": "2026-06-19",
+          "author": "DonGuillotine",
+          "subject": "Port evidence adder picker flows",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "7fb0987",
+          "date": "2026-06-19",
+          "author": "DonGuillotine",
+          "subject": "ECO-736 align context attachment mutations",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "bbe3289",
+          "date": "2026-06-19",
+          "author": "Satyam",
+          "subject": "Rework internal badge management",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "b5e8349",
+          "date": "2026-06-19",
+          "author": "Satyam",
+          "subject": "Refine internal badge dashboard UX",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "e455d76",
+          "date": "2026-06-19",
+          "author": "DonGuillotine",
+          "subject": "Implement source-truth timeline references",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "ce21986",
+          "date": "2026-06-19",
+          "author": "DonGuillotine",
+          "subject": "fix: enforce tree evidence site context",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "e7cd035",
+          "date": "2026-06-18",
+          "author": "Satyam",
+          "subject": "Add internal badge dashboard",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "4434509",
+          "date": "2026-06-17",
+          "author": "DonGuillotine",
+          "subject": "Harden recorder display and tree translations",
+          "category": "i18n",
+          "categoryLabel": "Localization"
+        },
+        {
+          "hash": "2765a83",
+          "date": "2026-06-17",
+          "author": "DonGuillotine",
+          "subject": "Address timeline review concerns",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "4d9c6c3",
+          "date": "2026-06-17",
+          "author": "Satyam",
+          "subject": "Test CGS admin-to-member role transition",
+          "category": "admin",
+          "categoryLabel": "Admin & moderation"
+        },
+        {
+          "hash": "244c060",
+          "date": "2026-06-17",
+          "author": "Satyam",
+          "subject": "Update E2E suite for CGS organization flow",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "97b3270",
+          "date": "2026-06-17",
+          "author": "Satyam",
+          "subject": "Update E2E cert naming",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "6faf9ec",
+          "date": "2026-06-17",
+          "author": "Satyam",
+          "subject": "Rename cert routes",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "f45e480",
+          "date": "2026-06-17",
+          "author": "Satyam",
+          "subject": "Always show organization creation in user menu",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "ce22ecf",
+          "date": "2026-06-17",
+          "author": "Satyam",
+          "subject": "Rename Bumicert copy to Cert",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "3896226",
+          "date": "2026-06-17",
+          "author": "Satyam",
+          "subject": "Add conditional organization creation entry",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "eef6e94",
+          "date": "2026-06-17",
+          "author": "Satyam",
+          "subject": "Document translation requirements for UI copy",
+          "category": "i18n",
+          "categoryLabel": "Localization"
+        },
+        {
+          "hash": "508a280",
+          "date": "2026-06-17",
+          "author": "Satyam",
+          "subject": "Complete translations for record drawer and projects",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "f713b33",
+          "date": "2026-06-16",
+          "author": "DonGuillotine",
+          "subject": "Enable biodiversity evidence dataset selection",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "98fe3a2",
+          "date": "2026-06-16",
+          "author": "Satyam",
+          "subject": "Show fuller Use Taina label on larger screens",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        },
+        {
+          "hash": "13a9060",
+          "date": "2026-06-16",
+          "author": "Satyam",
+          "subject": "Explain the audio workspace and Taina on the manage audio page",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        },
+        {
+          "hash": "0e1a437",
+          "date": "2026-06-16",
+          "author": "Satyam",
+          "subject": "Apply parallel UI updates",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "f481785",
+          "date": "2026-06-16",
+          "author": "Satyam",
+          "subject": "Add project image galleries",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "cd57160",
+          "date": "2026-06-16",
+          "author": "DonGuillotine",
+          "subject": "Add drone viewer to manage",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "7458bff",
+          "date": "2026-06-16",
+          "author": "Satyam",
+          "subject": "Refine marketplace heroes and internal stats dashboard",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "f40f239",
+          "date": "2026-06-16",
+          "author": "Satyam",
+          "subject": "Update agent guidance",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "a4fc2a2",
+          "date": "2026-06-16",
+          "author": "Satyam",
+          "subject": "Fix remaining CGS management gaps",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "9dc9108",
+          "date": "2026-06-16",
+          "author": "Satyam",
+          "subject": "Fix remaining CGS UX and role gates",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "a37c2ed",
+          "date": "2026-06-16",
+          "author": "Satyam",
+          "subject": "Fix CGS member UX and role gating",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "9c52d5f",
+          "date": "2026-06-16",
+          "author": "Satyam",
+          "subject": "fix: prefer indexed member profiles",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "63ccbcc",
+          "date": "2026-06-16",
+          "author": "Satyam",
+          "subject": "fix: resolve certified profiles for CGS members",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "0db3750",
+          "date": "2026-06-16",
+          "author": "Satyam",
+          "subject": "chore: save current work before cgs member fix",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "a477590",
+          "date": "2026-06-16",
+          "author": "Satyam",
+          "subject": "Fix outdated Playwright E2E flows",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "156a319",
+          "date": "2026-06-15",
+          "author": "Satyam",
+          "subject": "Format organization errors for members",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "0df386b",
+          "date": "2026-06-15",
+          "author": "Satyam",
+          "subject": "Fix missing i18n messages and hydration mismatch",
+          "category": "i18n",
+          "categoryLabel": "Localization"
+        },
+        {
+          "hash": "472cc70",
+          "date": "2026-06-15",
+          "author": "Satyam",
+          "subject": "Fix locale-aware URL route handling",
+          "category": "i18n",
+          "categoryLabel": "Localization"
+        },
+        {
+          "hash": "dc0d122",
+          "date": "2026-06-15",
+          "author": "Satyam",
+          "subject": "Translate manage dashboard chrome",
+          "category": "i18n",
+          "categoryLabel": "Localization"
+        },
+        {
+          "hash": "2544195",
+          "date": "2026-06-15",
+          "author": "Satyam",
+          "subject": "Fix localized manage dashboard route detection",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "ca34ce7",
+          "date": "2026-06-15",
+          "author": "Satyam",
+          "subject": "Increase sidebar width",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "3cdb132",
+          "date": "2026-06-15",
+          "author": "Satyam",
+          "subject": "Localize marketplace translations",
+          "category": "i18n",
+          "categoryLabel": "Localization"
+        },
+        {
+          "hash": "5f62f37",
+          "date": "2026-06-15",
+          "author": "Satyam",
+          "subject": "chore: checkpoint before i18n rewrite",
+          "category": "i18n",
+          "categoryLabel": "Localization"
+        },
+        {
+          "hash": "61f0210",
+          "date": "2026-06-12",
+          "author": "Satyam",
+          "subject": "Keep active group context in header",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "9d41171",
+          "date": "2026-06-12",
+          "author": "Satyam",
+          "subject": "chore: trigger staging preview deployment",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "f058689",
+          "date": "2026-06-12",
+          "author": "Satyam",
+          "subject": "Fix group settings members and menu label",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "60d1607",
+          "date": "2026-06-12",
+          "author": "Satyam",
+          "subject": "Fix transient CGS account list resets",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "d0ae83c",
+          "date": "2026-06-12",
+          "author": "Satyam",
+          "subject": "Show organization profile copy on manage cards",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "2834153",
+          "date": "2026-06-12",
+          "author": "Satyam",
+          "subject": "Remove organization-facing jargon",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "9e8071c",
+          "date": "2026-06-12",
+          "author": "Satyam",
+          "subject": "Sync manage context from URL",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "02652c6",
+          "date": "2026-06-12",
+          "author": "Satyam",
+          "subject": "Checkpoint current manage changes",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "5188846",
+          "date": "2026-06-12",
+          "author": "Satyam",
+          "subject": "Fix manage group context sync",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "d361bb9",
+          "date": "2026-06-12",
+          "author": "Satyam",
+          "subject": "fix(cgs): retry generated org handles",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "90c5ff3",
+          "date": "2026-06-12",
+          "author": "Satyam",
+          "subject": "Modernize organization tiles and group members UI",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "fe60acd",
+          "date": "2026-06-12",
+          "author": "Satyam",
+          "subject": "Fix group manage hero for alias routes",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "f732155",
+          "date": "2026-06-12",
+          "author": "Satyam",
+          "subject": "Add org About editing, members list, and personal account cleanup",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "0257a26",
+          "date": "2026-06-12",
+          "author": "Satyam",
+          "subject": "Add account switcher and revamp org management UI",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "c8b6a56",
+          "date": "2026-06-12",
+          "author": "Satyam",
+          "subject": "Revise onboarding and organization management flow",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "8d2b17c",
+          "date": "2026-06-12",
+          "author": "Satyam",
+          "subject": "Update manage sidebar synchronously",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "aa300b3",
+          "date": "2026-06-12",
+          "author": "Satyam",
+          "subject": "Add scoped group manage routes",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "55d30f7",
+          "date": "2026-06-12",
+          "author": "Satyam",
+          "subject": "Add account group switcher",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "838a0b5",
+          "date": "2026-06-11",
+          "author": "Satyam",
+          "subject": "Rebuild /manage dashboard: hero, detail buttons, folder tiles",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "7d58297",
+          "date": "2026-06-11",
+          "author": "DonGuillotine",
+          "subject": "Prevent future tree event dates",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "8c834a5",
+          "date": "2026-06-11",
+          "author": "DonGuillotine",
+          "subject": "Use modal stack for tree group delete confirmation",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "9be1aec",
+          "date": "2026-06-11",
+          "author": "Satyam",
+          "subject": "Redesign /auth/complete account picker with profile cards",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "fd3a5ff",
+          "date": "2026-06-11",
+          "author": "Satyam",
+          "subject": "Add /auth/complete sign-in flow with account-context selection",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "6e2329d",
+          "date": "2026-06-11",
+          "author": "daviddao",
+          "subject": "Add Reviews tab: ATProto evaluations + comments incl. Simocracy sims",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "bd26553",
+          "date": "2026-06-11",
+          "author": "DonGuillotine",
+          "subject": "Add root collar diameter tree measurement support",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "f63f2c7",
+          "date": "2026-06-11",
+          "author": "daviddao",
+          "subject": "Add transparency note to donate modal (TODO.md P2)",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "a96843c",
+          "date": "2026-06-11",
+          "author": "daviddao",
+          "subject": "Add P1 evidence trust layer (TODO.md)",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "e9cf912",
+          "date": "2026-06-11",
+          "author": "daviddao",
+          "subject": "Add marketplace P0 improvements from UX review (see TODO.md)",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "48b7fe0",
+          "date": "2026-06-11",
+          "author": "Satyam",
+          "subject": "Refactor manage dashboard overview",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "798fff6",
+          "date": "2026-06-11",
+          "author": "Satyam",
+          "subject": "Add CGS group management checkpoint",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "ac4d650",
+          "date": "2026-06-11",
+          "author": "DonGuillotine",
+          "subject": "Implement tree group deletion",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "eee6963",
+          "date": "2026-06-11",
+          "author": "Satyam",
+          "subject": "Update open network landing copy",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "c08a75b",
+          "date": "2026-06-11",
+          "author": "DonGuillotine",
+          "subject": "Fix large Kobo photo folder uploads",
+          "category": "dataJobs",
+          "categoryLabel": "Data batches"
+        },
+        {
+          "hash": "c9f0d17",
+          "date": "2026-06-11",
+          "author": "Satyam",
+          "subject": "Add deterministic project E2E coverage",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "b7ca042",
+          "date": "2026-06-11",
+          "author": "Satyam",
+          "subject": "Point project CTAs to new project flow",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "e23d902",
+          "date": "2026-06-11",
+          "author": "Satyam",
+          "subject": "Split disposable e2e checklist tests",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "d2cd09f",
+          "date": "2026-06-11",
+          "author": "Satyam",
+          "subject": "Polish manage navigation and titles",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "3ef1fb1",
+          "date": "2026-06-11",
+          "author": "Satyam",
+          "subject": "Add manage projects workflow",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "6e52d0e",
+          "date": "2026-06-10",
+          "author": "Satyam",
+          "subject": "Redesign sidebar with Explore/Manage tab switcher",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "bdb271a",
+          "date": "2026-06-10",
+          "author": "Satyam",
+          "subject": "Add projects marketplace route",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "a3439f0",
+          "date": "2026-06-11",
+          "author": "DonGuillotine",
+          "subject": "Implement tree group landing and attach flow",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "9fce80f",
+          "date": "2026-06-11",
+          "author": "DonGuillotine",
+          "subject": "Add tree upload lifecycle tracking and feedback",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "a6b4267",
+          "date": "2026-06-11",
+          "author": "DonGuillotine",
+          "subject": "Add Green Globe tree preview",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "50a0f02",
+          "date": "2026-06-11",
+          "author": "daviddao",
+          "subject": "Speed up explorer and donations loading",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "1190f8e",
+          "date": "2026-06-10",
+          "author": "Satyam",
+          "subject": "Add observation CRUD e2e coverage",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "cfcaf51",
+          "date": "2026-06-10",
+          "author": "Satyam",
+          "subject": "Add observation drawer management",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "57fcdae",
+          "date": "2026-06-10",
+          "author": "Satyam",
+          "subject": "Remove banned word instruction",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "4e8b011",
+          "date": "2026-06-10",
+          "author": "Satyam",
+          "subject": "Restore network terminology on landing",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "c945c31",
+          "date": "2026-06-10",
+          "author": "Satyam",
+          "subject": "Restore precise impact wording",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "dc9cfdf",
+          "date": "2026-06-10",
+          "author": "Satyam",
+          "subject": "Rename app branding to GainForest",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "c57faee",
+          "date": "2026-06-10",
+          "author": "Satyam",
+          "subject": "Update GainForest landing branding",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "17f9b5b",
+          "date": "2026-06-10",
+          "author": "DonGuillotine",
+          "subject": "Add site-boundary checks to tree uploads",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "a59bae4",
+          "date": "2026-06-09",
+          "author": "Satyam",
+          "subject": "Update sidebar branding labels",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "6f3c2c6",
+          "date": "2026-06-09",
+          "author": "Satyam",
+          "subject": "Fix observations data load",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "7649cce",
+          "date": "2026-06-09",
+          "author": "Satyam",
+          "subject": "Improve landing polish and load more behavior",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "a02bc7f",
+          "date": "2026-06-09",
+          "author": "Satyam",
+          "subject": "Fix tree manager review blockers",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "a07fa0a",
+          "date": "2026-06-09",
+          "author": "Satyam",
+          "subject": "Remove internal tiles from landing page",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "43712be",
+          "date": "2026-06-09",
+          "author": "Satyam",
+          "subject": "Unify stat tile labels",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "ff77fea",
+          "date": "2026-06-09",
+          "author": "DonGuillotine",
+          "subject": "Implement tree manager parity",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "526c2e9",
+          "date": "2026-06-09",
+          "author": "Satyam",
+          "subject": "Avoid nested form in Taina chat",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        },
+        {
+          "hash": "82073ab",
+          "date": "2026-06-09",
+          "author": "Satyam",
+          "subject": "Polish Taina chat copy",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        },
+        {
+          "hash": "02cb4e7",
+          "date": "2026-06-09",
+          "author": "Satyam",
+          "subject": "Refine Taina chat styling and input focus",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        },
+        {
+          "hash": "195ad60",
+          "date": "2026-06-09",
+          "author": "Satyam",
+          "subject": "Add Taina writing companion",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        },
+        {
+          "hash": "9824e42",
+          "date": "2026-06-09",
+          "author": "Satyam",
+          "subject": "Remove Bumicerts debug logs and avoid duplicate page mounts",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "3645cc5",
+          "date": "2026-06-09",
+          "author": "Satyam",
+          "subject": "Debug and stabilize Bumicerts view state",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "72795ef",
+          "date": "2026-06-09",
+          "author": "Satyam",
+          "subject": "Add query params for filtering controls",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "f1419b3",
+          "date": "2026-06-09",
+          "author": "Donald Nwokoro",
+          "subject": "Implement tree upload persistence parity (#3)",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "9b0c563",
+          "date": "2026-06-09",
+          "author": "Donald Nwokoro",
+          "subject": "Add tree photo upload persistence",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "9b31ba6",
+          "date": "2026-06-09",
+          "author": "Satyam",
+          "subject": "Polish list row hover styling",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "09fb8ae",
+          "date": "2026-06-09",
+          "author": "Satyam",
+          "subject": "Add list view to browse and manage surfaces",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "e773336",
+          "date": "2026-06-09",
+          "author": "Satyam",
+          "subject": "Fix RainbowKit modal pointer events",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "4894b4a",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Fix organizations observation filter loading",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "b63f01c",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Hide field devices from sidebar",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "18aca77",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Refine observation filter toolbar",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "aea72ef",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Improve nature sightings browsing",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "a3fb609",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Update organization stats and filters",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "76bbf7e",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Fix browse filters and clarify labels",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "8d161de",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Simplify confusing user-facing labels",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "ddde329",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Expand E2E checklist coverage",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "96fc1de",
+          "date": "2026-06-08",
+          "author": "DonGuillotine",
+          "subject": "Add site boundary creation to tree upload",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "311821a",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Remove duplicate owner donation status",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "70ec45a",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Fix /manage/audio parity with reference upload/audio",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "3eefc08",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Add owner donation wallet setup",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "7b28975",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Show redirecting state on auth continue",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "8b784c0",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Tweak sidebar skeleton contrast",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "d8f5a16",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Fix observation filters preserving manage tab",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "49563fa",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Fix stats tiles when totals load",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "f8f3cc6",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Apply shimmer animation to all skeletons",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "9997d63",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Update manage audio workspace",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "7017b34",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Make manage sidebar loading skeleton visible",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "0b7cd25",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Show manage sidebar skeleton while profile loads",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "dc4e413",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Fix organization country display",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "3c1de8e",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Prefer handles in public links",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "c81c2af",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Load shell profile details separately",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "424f9dd",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Refine donation success sharing",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "eff2fd7",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Fix site preview selection and blob shape",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "78e3423",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Bring manage sites feature parity",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "d0cae5d",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Refine manage profile edit modals",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "482ba44",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Fix tree upload mode navigation",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "53e3e8f",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Show observations tab on org manage page",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "114a2b4",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Remove manage settings route",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "f78b6f7",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Refine route loading states",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "fcace99",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Fix organization country location flow",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "735b23a",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Remove legacy organization record usage",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "9e53cbc",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Style Bumicert donations like leaderboard",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "eafc33f",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Add updated loading skeletons to bumicert detail and account pages",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "805d163",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Add graceful not found pages",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "a71c40e",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Update pnpm lockfile",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "e5eb1a7",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Fix funding facilitator configuration",
+          "category": "admin",
+          "categoryLabel": "Admin & moderation"
+        },
+        {
+          "hash": "a300b14",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Add organization observations tab",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "228ebfd",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Remove edit profile from settings",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "5b192e2",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Align manage tabs with account tabs",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "991d041",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Fix status page service names",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "01df03c",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Redo /status page with the modern app UI",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "3693542",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Redo loading skeletons to match current UI",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "d6c1273",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Match onboarding and profile editing to monorepo bumicerts",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "2a3bd19",
+          "date": "2026-06-08",
+          "author": "Satyam",
+          "subject": "Add disposable account E2E checklist",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "257c93c",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Add basic Playwright E2E suite",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "8e5b83c",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Fix /manage site editor, draw polygon modal, and trees preview step",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "82d3b60",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Improve Bumicert form error states",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "b0ba050",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Match Bumicert date and site flows",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "1153a80",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Restore donation modal size and wallet copy",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "e5818e5",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Fix new Bumicert creation flow",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "8e9c12d",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Fix donation flow",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "583dbee",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Build out Bumicert evidence timeline",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "8db7348",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Show Bumicert sidebar on larger tab views",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "034c46c",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Fix Bumicert sidebar sticky bounds",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "9b86bbe",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Fix leaderboard donation text wrapping",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "3b0b90b",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Fix Bumicert detail mobile overflow",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "75b004a",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Refine donations overview layout",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "0eb92ae",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Polish donation dashboard stats",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "31f4b47",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Clarify /devices cards with labeled health metrics",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "6bb42e9",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Modernize donations dashboard UI",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "8ecab30",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Fix observations audio playback",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "70a4579",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Fix observation audio filter",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "fc9602a",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Refine observation gallery cards",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "225db1e",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Show available avatars on Bumicert cards",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "4c6d980",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Show creator names on Bumicert cards",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "f9d51ac",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Speed up observations loading",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "400a39c",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Make observations feel faster",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "9a77c89",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Improve hero image resolution",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "66997a1",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Refine leaderboard filters and donor rows",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "8e48fff",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Refine leaderboard donor rows",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "743ae16",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Improve leaderboard mobile controls",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "8b7e159",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Update organization filters",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "9662b92",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Restore clear site and wallet copy",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "fec81ba",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Improve drawer maps and popover layering",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "fa19457",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Remove organization source filters",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "437bdb8",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Improve organization imagery and filters",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "e1f063e",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Theme the explorer map for dark mode",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "810aaf6",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Add filter scroll fade",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "1d2499f",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Align explorer toolbar controls",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "0dc127b",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Fix explorer filtering and alignment",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "b50a869",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Replace inline UI SVGs with Lucide icons",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "68415dd",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Fix and cache stat tile totals",
+          "category": "fix",
+          "categoryLabel": "Fixes"
+        },
+        {
+          "hash": "2272c3e",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Improve landing page loading and spacing",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "1558db1",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Update sidebar sign-in prompt copy",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "fa7a158",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Replace Create-a-Bumicert card with unlock prompt when signed out",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "9ad5311",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Update record drawer layout",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "586ef7c",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Refine Bumicert card tag rows",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "ab8da89",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Reduce heavy explorer rendering",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "a903ce3",
+          "date": "2026-06-07",
+          "author": "Satyam",
+          "subject": "Polish explorer and navigation UI",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "7351770",
+          "date": "2026-06-06",
+          "author": "Satyam",
+          "subject": "Hide stat tiles until data loads",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "a746b48",
+          "date": "2026-06-06",
+          "author": "Satyam",
+          "subject": "Default explore filters to photos",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "324c7cd",
+          "date": "2026-06-06",
+          "author": "Satyam",
+          "subject": "Update explorer UI and thumbnail",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "07136a9",
+          "date": "2026-06-06",
+          "author": "Satyam",
+          "subject": "Collapse new bumicert flow into a single page",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "4f3087a",
+          "date": "2026-06-06",
+          "author": "Satyam",
+          "subject": "Add bumicert creation flow with stepped form",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "dd5a945",
+          "date": "2026-06-06",
+          "author": "Satyam",
+          "subject": "Align manage settings sections",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "a3d2bba",
+          "date": "2026-06-06",
+          "author": "Satyam",
+          "subject": "Refine manage account tabs",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "21e81d1",
+          "date": "2026-06-06",
+          "author": "Satyam",
+          "subject": "Update landing stats and funding totals",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "160d894",
+          "date": "2026-06-06",
+          "author": "Satyam",
+          "subject": "Update manage bumicerts copy",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "1c5679d",
+          "date": "2026-06-06",
+          "author": "Satyam",
+          "subject": "Split public account and manage routes",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "73d0b5f",
+          "date": "2026-06-06",
+          "author": "Satyam",
+          "subject": "Polish manage bumicerts and sidebar",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "8e81587",
+          "date": "2026-06-06",
+          "author": "Satyam",
+          "subject": "Remove user-facing technical jargon",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "fc1e82e",
+          "date": "2026-06-06",
+          "author": "Satyam",
+          "subject": "Match manage bumicerts landing to create page",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "fc317c0",
+          "date": "2026-06-06",
+          "author": "Satyam",
+          "subject": "Improve manage route parity",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "f42d54d",
+          "date": "2026-06-06",
+          "author": "Satyam",
+          "subject": "Add route-aware header actions",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "71e5192",
+          "date": "2026-06-06",
+          "author": "Satyam",
+          "subject": "Align manage routes with upload flow",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "ad25da9",
+          "date": "2026-06-06",
+          "author": "Satyam",
+          "subject": "Rename app to Bumicerts",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "75238fc",
+          "date": "2026-06-06",
+          "author": "Satyam",
+          "subject": "Add manage data import interfaces",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "a492b93",
+          "date": "2026-06-06",
+          "author": "Satyam",
+          "subject": "Configure auth host for certs rewrite",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "1a5cfba",
+          "date": "2026-06-06",
+          "author": "Satyam",
+          "subject": "Revamp bumicert detail tabs and overview",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "88e34ea",
+          "date": "2026-06-06",
+          "author": "Satyam",
+          "subject": "Add local bumicert detail route",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "580a5ea",
+          "date": "2026-06-06",
+          "author": "Satyam",
+          "subject": "Add manage dashboard placeholders",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "e14dd81",
+          "date": "2026-06-05",
+          "author": "Satyam",
+          "subject": "Add account routes",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "4390df3",
+          "date": "2026-06-05",
+          "author": "Satyam",
+          "subject": "Wire central GainForest auth flow",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "1714650",
+          "date": "2026-06-05",
+          "author": "Satyam",
+          "subject": "Add consistent picture heroes to sidebar pages",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "5ef6386",
+          "date": "2026-06-05",
+          "author": "Satyam",
+          "subject": "Unify stats tile styling",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "3d04598",
+          "date": "2026-06-05",
+          "author": "Satyam",
+          "subject": "Match donations dashboard to Bumicerts",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "b5b463a",
+          "date": "2026-06-05",
+          "author": "Satyam",
+          "subject": "Implement Bumicerts-style leaderboard",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "2bf26cb",
+          "date": "2026-06-05",
+          "author": "Satyam",
+          "subject": "Update homepage and navigation UI",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "1e946a4",
+          "date": "2026-06-05",
+          "author": "Satyam",
+          "subject": "Revamp Bumicerts explorer UI",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "c824bd2",
+          "date": "2026-06-02",
+          "author": "daviddao",
+          "subject": "hero: chart the species-observations KPI from the recent 1000",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "bcef3cc",
+          "date": "2026-06-02",
+          "author": "daviddao",
+          "subject": "explorer: sync every toolbar control to the URL for sharable views",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "2b075c9",
+          "date": "2026-06-02",
+          "author": "daviddao",
+          "subject": "trends: sparkline + expand-modal on every metric across all pages",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "35a012c",
+          "date": "2026-06-02",
+          "author": "daviddao",
+          "subject": "indexer: raise page cap to 1000, load full media views",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "36bee5a",
+          "date": "2026-06-02",
+          "author": "daviddao",
+          "subject": "observations: filter Photos/Audio on real blob evidence, not thumbnails",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "093095b",
+          "date": "2026-06-02",
+          "author": "daviddao",
+          "subject": "Add sparkline + expand-to-modal trend charts to home KPI band",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "d7c66d6",
+          "date": "2026-06-01",
+          "author": "daviddao",
+          "subject": "observations: push Photos filter to indexer via thumbnailUrl where-clause",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "20d75eb",
+          "date": "2026-06-01",
+          "author": "daviddao",
+          "subject": "Footer: correct legal block to GainForest e.V. (match gainforest-app)",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "3579afa",
+          "date": "2026-06-01",
+          "author": "daviddao",
+          "subject": "Theme toggle: circular view-transition reveal (ported from broadlistening)",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "0e620a7",
+          "date": "2026-06-01",
+          "author": "daviddao",
+          "subject": "Add site-wide dark mode using the donations dashboard's ink palette",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "5fe0e14",
+          "date": "2026-06-01",
+          "author": "daviddao",
+          "subject": "SEO: sitemap + robots on bumiscan.vercel.app, centralize SITE_URL",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "76fb070",
+          "date": "2026-06-01",
+          "author": "daviddao",
+          "subject": "AuthorChip: open the account drawer on click (completes account-drawer feature)",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "eb1c428",
+          "date": "2026-06-01",
+          "author": "daviddao",
+          "subject": "Add account drawer + point metadata base at bumiscan.vercel.app",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "d666037",
+          "date": "2026-06-01",
+          "author": "daviddao",
+          "subject": "Map: plot certified actor org locations from their certified-location strongRef",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "6e5ba5b",
+          "date": "2026-06-01",
+          "author": "daviddao",
+          "subject": "Add Bumiscan social/OG image (1200×630) and wire og:image + twitter:image",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "b714cd6",
+          "date": "2026-06-01",
+          "author": "daviddao",
+          "subject": "Sites: add certified actor orgs as a second source with a source filter",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "d1995f6",
+          "date": "2026-06-01",
+          "author": "daviddao",
+          "subject": "Rebrand: GainForest Explorer → Bumiscan",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "b74d7f2",
+          "date": "2026-06-01",
+          "author": "daviddao",
+          "subject": "Status: add rolling uptime % + incident history with visualisation",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "e95e42a",
+          "date": "2026-06-01",
+          "author": "daviddao",
+          "subject": "Show readable created_at timestamp in occurrence and org/site detail drawers",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "7c12208",
+          "date": "2026-06-01",
+          "author": "daviddao",
+          "subject": "Apply social icons + rich-text/media to observation & site drawers",
+          "category": "observations",
+          "categoryLabel": "Observations"
+        },
+        {
+          "hash": "92e7a20",
+          "date": "2026-06-01",
+          "author": "daviddao",
+          "subject": "Bumicert drawer: minimalist social icons + full rich-text/media rendering",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "6f87a20",
+          "date": "2026-06-01",
+          "author": "daviddao",
+          "subject": "Bumicert drawer: surface org socials, full description, scope tags, exact created time",
+          "category": "projects",
+          "categoryLabel": "Projects"
+        },
+        {
+          "hash": "4643ae2",
+          "date": "2026-06-01",
+          "author": "daviddao",
+          "subject": "Drawer: rich, grouped record detail fetched on open",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "017a232",
+          "date": "2026-06-01",
+          "author": "daviddao",
+          "subject": "Drawer: make the AT URI copy control a subtle icon button",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "0c5ff97",
+          "date": "2026-06-01",
+          "author": "daviddao",
+          "subject": "Explorer: shareable URLs for the search query + open record",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "e5cd1d3",
+          "date": "2026-06-01",
+          "author": "daviddao",
+          "subject": "Devices: remove the 'Tainá monitor on GitHub' footer link",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        },
+        {
+          "hash": "c6ca3fb",
+          "date": "2026-06-01",
+          "author": "daviddao",
+          "subject": "Map: cluster records into labelled count bubbles instead of overlapping pins",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "931f644",
+          "date": "2026-06-01",
+          "author": "daviddao",
+          "subject": "Home: show how many Tainás are live right now",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        }
+      ]
+    },
+    {
+      "month": "2026-05",
+      "count": 13,
+      "counts": {
+        "ui": 4,
+        "core": 5,
+        "donations": 1,
+        "auth": 1,
+        "taina": 2
+      },
+      "commits": [
+        {
+          "hash": "dc4867a",
+          "date": "2026-05-31",
+          "author": "daviddao",
+          "subject": "Load the first 1000 records per stream (paged), fix arbitrary-host images",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "226f304",
+          "date": "2026-05-31",
+          "author": "daviddao",
+          "subject": "Drawer: link the AT Protocol URI to Hyperscan's raw record view",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "7a5c706",
+          "date": "2026-05-31",
+          "author": "daviddao",
+          "subject": "Unify page-header type to the donations scale; add live KPI bands to record pages",
+          "category": "donations",
+          "categoryLabel": "Donations"
+        },
+        {
+          "hash": "46c024f",
+          "date": "2026-05-31",
+          "author": "daviddao",
+          "subject": "Map: frame the full point cloud at the right size (pixel margin + min-zoom for single-site clusters)",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "09b21e9",
+          "date": "2026-05-31",
+          "author": "daviddao",
+          "subject": "Map: auto-zoom to frame loaded points, yielding to user pan/zoom",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "32c19f2",
+          "date": "2026-05-31",
+          "author": "daviddao",
+          "subject": "Default to All + add a Cards/Map view toggle",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "3a0a310",
+          "date": "2026-05-31",
+          "author": "daviddao",
+          "subject": "Cards: denser grid (~5 per row on a laptop, 6 on wide), trimmed sizes",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "9e94c8f",
+          "date": "2026-05-31",
+          "author": "daviddao",
+          "subject": "Cards: adopt the Bumicerts marketplace card style, tuned for readability",
+          "category": "ui",
+          "categoryLabel": "UI & design"
+        },
+        {
+          "hash": "759bd17",
+          "date": "2026-05-31",
+          "author": "daviddao",
+          "subject": "Show owner identity (did:plc -> handle + avatar) + created date on every record",
+          "category": "auth",
+          "categoryLabel": "Accounts & auth"
+        },
+        {
+          "hash": "b0caa4b",
+          "date": "2026-05-31",
+          "author": "daviddao",
+          "subject": "Strip marketing copy; technical-dashboard tone throughout",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        },
+        {
+          "hash": "9d0b4d0",
+          "date": "2026-05-31",
+          "author": "daviddao",
+          "subject": "docs: document multi-page routes + the Tainá device monitor env var",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        },
+        {
+          "hash": "eedb1ad",
+          "date": "2026-05-31",
+          "author": "daviddao",
+          "subject": "Split the single page into routes + integrate the Tainá Pi monitor",
+          "category": "taina",
+          "categoryLabel": "Tainá"
+        },
+        {
+          "hash": "71078b2",
+          "date": "2026-05-31",
+          "author": "daviddao",
+          "subject": "GainForest Explorer: live block explorer for the data commons",
+          "category": "core",
+          "categoryLabel": "Core & platform"
+        }
+      ]
+    }
+  ]
+}

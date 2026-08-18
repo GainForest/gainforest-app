@@ -1,0 +1,2309 @@
+{
+  "map": {
+    "play": "Reproducir línea de tiempo",
+    "pause": "Pausar línea de tiempo",
+    "from": "Desde",
+    "to": "Hasta",
+    "shown": "{count} mostrados",
+    "dragHint": "Arrastra los controles para elegir un periodo",
+    "startAria": "Fecha de inicio — {date}",
+    "endAria": "Fecha de fin — {date}",
+    "unidentified": "Sin identificar",
+    "finding": "Buscando ubicaciones en el mapa…",
+    "mappedItems": "{count} elementos con ubicación en el mapa",
+    "mappedSites": "{count} sitios con ubicación en el mapa",
+    "noLocations": "Ninguno de los elementos mostrados tiene una ubicación en el mapa todavía.",
+    "speed": "Velocidad de reproducción"
+  },
+  "explore": {
+    "metadata": {
+      "title": "Explorar certificados",
+      "description": "Explora registros ambientales de guardianes de la naturaleza de todo el mundo, con fotos, lugares y evidencia detrás de cada certificado."
+    },
+    "structuredData": {
+      "name": "Explorar certificados",
+      "description": "Certificados verificados de impacto ambiental de guardianes de la naturaleza de todo el mundo."
+    },
+    "hero": {
+      "eyebrow": "Explorar certificados",
+      "titlePrefix": "Descubre",
+      "titleEmphasis": "Impacto regenerativo",
+      "description": "Explora certificados de comunidades y organizaciones que restauran ecosistemas, fortalecen medios de vida y construyen un futuro más resiliente."
+    },
+    "actions": {
+      "createBumicert": "Crear certificado",
+      "allProjects": "Todos los proyectos",
+      "allFilters": "Todos los filtros",
+      "clearAll": "Borrar todo",
+      "applyFilters": "Aplicar filtros",
+      "applyFiltersWithCount": "Aplicar filtros ({count})",
+      "clearCategory": "Borrar {category}"
+    },
+    "filters": {
+      "allTitle": "Ordenar y filtrar",
+      "sortLabel": "Ordenar",
+      "description": "Muestra Certs por insignia de origen, fotos, lugares del proyecto, personas nombradas, fechas de trabajo o donaciones.",
+      "sightingsDescription": "Muestra avistamientos por origen, tipo de medio o grupo de naturaleza.",
+      "organization": "Organización",
+      "bioregion": "Biorregión",
+      "country": "País",
+      "impactArea": "Área de impacto",
+      "allBumicerts": "Todos los certificados",
+      "allFilters": "Ordenar y filtrar",
+      "allFiltersAria": "Ordenar y filtrar",
+      "updateHint": "Los filtros se actualizan a medida que eliges.",
+      "images": "Muestra fotos",
+      "locations": "Muestra lugares de proyecto",
+      "contributors": "Muestra personas nombradas",
+      "active": "Muestra fechas de trabajo",
+      "donations": "Acepta donaciones",
+      "badges": {
+        "all": "Todas",
+        "gainforest": "GainForest",
+        "maearth": "En la plataforma Ma Earth",
+        "maearthRound1": "Ma Earth Ronda 1",
+        "maearthRound2": "Ma Earth Ronda 2"
+      }
+    },
+    "sort": {
+      "newest": "Más recientes",
+      "oldest": "Más antiguos",
+      "az": "A → Z",
+      "za": "Z → A"
+    },
+    "search": {
+      "ariaLabel": "Buscar certificados",
+      "placeholder": "Buscar certificados por nombre o descripción",
+      "sortAriaLabel": "Ordenar proyectos"
+    },
+    "empty": {
+      "eyebrow": "Sin resultados",
+      "title": "No se encontraron certificados",
+      "description": "Prueba ajustar tu búsqueda o filtros para encontrar más historias de proyectos."
+    },
+    "resultsFound": "{count, plural, one {# proyecto encontrado} other {# proyectos encontrados}}",
+    "view": {
+      "cards": "Tarjetas",
+      "list": "Lista",
+      "map": "Mapa"
+    },
+    "stats": {
+      "published": "certificados publicados",
+      "withLocations": "certificados con ubicaciones",
+      "contributors": "Colaboradores en certificados",
+      "withCover": "certificados con portada"
+    },
+    "footer": {
+      "showing": "Mostrando {shown} de {total} certificados.",
+      "showMore": "Mostrar más",
+      "end": "Has llegado al final."
+    },
+    "card": {
+      "open": "Abrir proyecto: {title}",
+      "noCover": "Sin imagen de portada",
+      "showDetails": "Mostrar detalles",
+      "missingImage": "Imagen faltante",
+      "projectSteward": "Guardián del proyecto",
+      "peopleNamed": "{count, plural, one {# persona nombrada} other {# personas nombradas}}",
+      "projectPlaces": "{count, plural, one {# lugar de proyecto} other {# lugares de proyecto}}",
+      "natureSightings": "{count, plural, one {# avistamiento de naturaleza} other {# avistamientos de naturaleza}}",
+      "natureSightingsShared": "{count, plural, one {# avistamiento de naturaleza compartido por esta organización} other {# avistamientos de naturaleza compartidos por esta organización}}",
+      "datesAdded": "Fechas del proyecto agregadas",
+      "raised": "Recaudado: {amount}",
+      "donations": "Donaciones",
+      "acceptingDonations": "Acepta donaciones",
+      "acceptingDonationsRaised": "Acepta donaciones — {amount} recaudado hasta ahora"
+    }
+  },
+  "organizations": {
+    "metadata": {
+      "title": "Organizaciones",
+      "description": "Explora organizaciones guardianas de la naturaleza que comparten observaciones de campo, proyectos y evidencia con GainForest."
+    },
+    "hero": {
+      "imageAltLight": "Bosque montañoso brumoso al amanecer",
+      "imageAltDark": "Bosque montañoso brumoso al atardecer",
+      "eyebrow": "Organizaciones",
+      "titleAriaLabel": "Guardianes de la naturaleza",
+      "titleFirst": "Naturaleza",
+      "titleSecond": "Guardianes",
+      "description": "Descubre organizaciones que lideran la custodia ambiental y el cambio impulsado por comunidades."
+    },
+    "search": {
+      "placeholder": "Buscar organizaciones",
+      "sortAriaLabel": "Ordenar"
+    },
+    "sort": {
+      "bumicerts": "Más certificados",
+      "alpha": "Alfabético",
+      "newest": "Más recientes primero",
+      "oldest": "Más antiguos primero",
+      "az": "A → Z",
+      "za": "Z → A"
+    },
+    "empty": {
+      "title": "No se encontraron organizaciones",
+      "description": "Prueba ajustar tu búsqueda o tus filtros."
+    },
+    "error": {
+      "title": "Algo salió mal",
+      "description": "No pudimos cargar las organizaciones. Prueba actualizar la página."
+    },
+    "view": {
+      "cards": "Tarjetas",
+      "list": "Lista",
+      "map": "Mapa"
+    },
+    "list": {
+      "colOrganization": "Organización",
+      "colType": "Tipo",
+      "colPlace": "Lugar",
+      "colJoined": "Se unió"
+    },
+    "filters": {
+      "description": "Muestra organizaciones por origen, donaciones, observaciones, categoría o país."
+    },
+    "quickFilters": {
+      "observations": "Tiene observaciones",
+      "donations": "Acepta donaciones",
+      "donationsGainforest": "Donaciones GainForest",
+      "donationsMaearth": "Donaciones Ma Earth"
+    },
+    "facets": {
+      "category": "Categoría",
+      "country": "País"
+    },
+    "stats": {
+      "profiles": "Perfiles públicos de organizaciones",
+      "withBumicerts": "Organizaciones con historias de proyectos",
+      "withObservations": "Organizaciones con avistamientos de naturaleza",
+      "locations": "Ubicaciones en organizaciones"
+    },
+    "actions": {
+      "clear": "Limpiar",
+      "clearFilters": "Limpiar filtros",
+      "showMore": "Mostrar más"
+    },
+    "footer": {
+      "showing": "Mostrando {shown} de {total} organizaciones.",
+      "end": "Has llegado al final."
+    },
+    "card": {
+      "joined": "Se unió en {year}",
+      "publicProfile": "Perfil público",
+      "showDetails": "Mostrar detalles",
+      "descriptionWithType": "Una organización de tipo {types} que impulsa la custodia ambiental liderada por comunidades{where}.",
+      "descriptionDefault": "Un guardián de la naturaleza que protege y restaura ecosistemas locales{where}.",
+      "where": " en {country}"
+    },
+    "loading": "Cargando organizaciones"
+  },
+  "leaderboard": {
+    "metadata": {
+      "title": "Clasificación — GainForest",
+      "description": "Consulta los principales donantes que generan impacto en GainForest. Nuestros campeones de impacto se ordenan según sus contribuciones totales de financiación."
+    },
+    "hero": {
+      "eyebrow": "Clasificación",
+      "titlePrefix": "Impacto",
+      "titleEmphasis": "Campeones",
+      "description": "Celebramos a las personas generosas que impulsan el cambio regenerativo para las comunidades y el planeta."
+    },
+    "periods": {
+      "all": "Todo el tiempo",
+      "month": "Este mes",
+      "week": "Esta semana"
+    },
+    "donorFilters": {
+      "all": "Todos los donantes",
+      "anonymous": "Solo anónimos",
+      "known": "Solo identificados"
+    },
+    "sort": {
+      "label": "Ordenar por",
+      "totalRaised": "Total recaudado",
+      "donationCount": "Cantidad de donaciones",
+      "recentDonation": "Donación reciente"
+    },
+    "stats": {
+      "totalRaised": "Total recaudado",
+      "totalRaisedDetail": "Todo el tiempo en la plataforma",
+      "totalDonors": "Total de donantes",
+      "totalDonorsDetail": "Generosos campeones de impacto",
+      "projectsSupported": "Proyectos apoyados",
+      "projectsSupportedDetail": "Restaurando ecosistemas y medios de vida",
+      "uniqueDonors": "Donantes únicos",
+      "bumicertsFunded": "certificados financiados",
+      "donationCount": "N.º de donaciones"
+    },
+    "empty": {
+      "title": "Aún no hay donaciones",
+      "description": "Sé la primera persona en generar impacto."
+    },
+    "card": {
+      "rankAriaLabel": "Puesto {rank}",
+      "anonymous": "Anónimo ({address})",
+      "donationSummary": "{count, plural, one {# donación} other {# donaciones}}",
+      "lastDonation": "Última donación {relativeTime}",
+      "topDonor": "Principal donante",
+      "natureChampion": "Campeón de la naturaleza",
+      "consistentGiver": "Donante constante",
+      "risingSupporter": "Colaborador emergente",
+      "openWallet": "Abrir {wallet} en Etherscan",
+      "openAccount": "Abrir la cuenta del donante en una pestaña nueva",
+      "anonymousSupporter": "Colaborador anónimo",
+      "donationSummaryWithTime": "{count, plural, one {# donación} other {# donaciones}} · Última donación {relativeTime}",
+      "openPayment": "Abrir detalles de pago",
+      "openSupporter": "Abrir perfil del colaborador en una pestaña nueva"
+    },
+    "donorFiltersShort": {
+      "all": "Todos",
+      "anonymous": "Anónimos",
+      "known": "Identificados"
+    },
+    "error": {
+      "title": "No se pudo cargar la clasificación",
+      "description": "Inténtalo de nuevo en un momento."
+    }
+  },
+  "bioblitz": {
+    "metadata": {
+      "title": "Desafío BioBlitz semanal",
+      "description": "Sal al aire libre y fotografía biodiversidad silvestre. Cada observación válida debe incluir una foto subida; las personas y las plantas en maceta no cuentan."
+    },
+    "banner": {
+      "message": "El Reto BioBlitz Semanal está en marcha. Fotografía la naturaleza y gana premios.",
+      "cta": "Saber más",
+      "dismiss": "Descartar este aviso",
+      "close": "Cerrar"
+    },
+    "hero": {
+      "eyebrow": "Reto BioBlitz Semanal",
+      "titlePrefix": "Reto",
+      "titleEmphasis": "BioBlitz",
+      "description": "Una carrera semanal y amistosa para registrar biodiversidad al aire libre con tus propias fotos subidas. Desde la Ronda 8, las fotos de animales valen 2 puntos, las de plantas 1 punto, y nombrar la especie suma 0,5 puntos extra. Las personas y las plantas en maceta no cuentan.",
+      "program": "Parte del programa Klarna AI for Climate Resilience, con GainForest."
+    },
+    "rsvp": {
+      "button": "Regístrate para participar",
+      "note": "Regístrate para que podamos contar tus aportes y enviarte el premio si ganas.",
+      "registering": "Registrando…",
+      "registered": "Ya estás registrado",
+      "registeredNote": "Contaremos tus aportes y te enviaremos el premio si ganas.",
+      "error": "No se pudo registrar ahora. Inténtalo de nuevo.",
+      "postText": "¡Me uno al Desafío BioBlitz Semanal — {label}! Voy a salir a fotografiar la naturaleza por la biodiversidad. 🌿🔭 #BioBlitz",
+      "legalConsent": "Al registrarte, aceptas los <terms>Términos de BioBlitz</terms> y reconoces el <privacy>Aviso de privacidad</privacy>."
+    },
+    "legal": {
+      "programLabel": "Desafío BioBlitz",
+      "back": "Volver a BioBlitz",
+      "links": {
+        "terms": "Términos de BioBlitz",
+        "privacy": "Aviso de privacidad de BioBlitz",
+        "generalPrivacy": "Política de privacidad de GainForest"
+      },
+      "terms": {
+        "metadata": {
+          "title": "Términos de BioBlitz",
+          "description": "Requisitos, participación, aportes, premios y demás reglas del Desafío BioBlitz de GainForest."
+        },
+        "title": "Términos de BioBlitz",
+        "effectiveDate": "En vigor desde el 18 de julio de 2026",
+        "intro": {
+          "p1": "Estos términos rigen la participación en el Desafío BioBlitz de GainForest. Al registrarte en una ronda, aceptas estos términos.",
+          "p2": "GainForest e.V., una asociación suiza sin ánimo de lucro, organiza el desafío. No se requiere compra ni pago para participar."
+        },
+        "sections": {
+          "eligibility": {
+            "title": "1. Requisitos y países admitidos",
+            "paragraphs": {
+              "p1": "BioBlitz está abierto a personas de 18 años o más en todo el mundo donde la participación y la recepción de premios estén permitidas por la legislación local. Las personas de 16 o 17 años solo pueden participar con el consentimiento de su padre, madre o tutor legal. El desafío no está dirigido a menores de 16 años.",
+              "p2": "Un país o territorio está admitido cuando GainForest y sus proveedores de pago pueden ofrecer legalmente el desafío y entregar allí un premio. No puedes recibir un premio si vives o resides habitualmente en un país o territorio sujeto a sanciones integrales o embargos conforme a medidas aplicables de Suiza, las Naciones Unidas o la Unión Europea, ni donde la participación o la entrega del premio esté prohibida por la ley o por las reglas del proveedor de pagos.",
+              "p3": "No debes figurar en ninguna lista aplicable de sanciones, personas restringidas o partes denegadas. Como estas reglas cambian, GainForest puede verificar los requisitos antes de enviar un premio y retenerlo o cancelarlo cuando la ley lo exija."
+            }
+          },
+          "participation": {
+            "title": "2. Cómo participar",
+            "paragraphs": {
+              "p1": "Necesitas una cuenta de GainForest y debes registrarte en cada ronda. Una observación válida debe añadirse durante las fechas indicadas, mostrar biodiversidad al aire libre e incluir una foto subida directamente con la observación. Las personas y las plantas en maceta no cuentan.",
+              "p2": "Cada persona puede usar una sola cuenta. Las entradas automatizadas, duplicadas, manipuladas, retrodatadas, engañosas o fraudulentas pueden retirarse del desafío."
+            }
+          },
+          "submissions": {
+            "title": "3. Tus aportes",
+            "paragraphs": {
+              "p1": "Debes ser titular de las fotos y demás contenido que envíes, o tener permiso para usarlos y publicarlos. Conservas la propiedad de tu contenido.",
+              "p2": "Autorizas a GainForest a mostrar, indexar, revisar y compartir tus aportes para operar y promocionar BioBlitz y la misión ambiental de GainForest, con atribución siempre que sea razonablemente posible.",
+              "p3": "No molestes a la fauna, dañes hábitats, entres sin permiso ni pongas a nadie en riesgo para crear un aporte. Evita publicar ubicaciones precisas de especies vulnerables, ecosistemas sensibles o lugares donde la divulgación pueda causar daño."
+            }
+          },
+          "winners": {
+            "title": "4. Selección de ganadores",
+            "paragraphs": {
+              "p1": "Desde la Ronda 8, el premio a la Mayor puntuación se basa en la puntuación total más alta de observaciones válidas durante la ronda: cada foto válida de animal vale 2 puntos, cada foto válida de planta vale 1 punto, y cualquiera suma 0,5 puntos extra cuando la especie está identificada en lugar de quedar sin identificar. En rondas anteriores, este premio se basaba en el mayor número de observaciones válidas. El premio a Mejor foto se selecciona con los criterios descritos en la página de BioBlitz, incluida la calidad de la imagen, el tema y la participación de la comunidad cuando corresponda.",
+              "p2": "GainForest puede revisar entradas, resolver empates, corregir errores de conteo y descalificar entradas no válidas. Las decisiones son definitivas en la medida permitida por la ley."
+            }
+          },
+          "prizes": {
+            "title": "5. Premios",
+            "paragraphs": {
+              "p1": "Los valores de los premios aparecen en la página de BioBlitz. La persona ganadora debe responder a GainForest y facilitar la información razonablemente necesaria para confirmar que cumple los requisitos y entregar el premio. Si no responde en 14 días, no cumple los requisitos o no puede recibir legalmente el premio, GainForest puede elegir a otra persona.",
+              "p2": "Las personas ganadoras son responsables de los impuestos, comisiones y obligaciones de declaración que les correspondan. Los premios no se pueden transferir y se puede sustituir el efectivo o el método de pago cuando sea razonablemente necesario."
+            }
+          },
+          "conduct": {
+            "title": "6. Participación justa",
+            "paragraphs": {
+              "p1": "GainForest puede retirar entradas o cuentas relacionadas con fraude, acoso, contenido dañino, infracciones de derechos, interferencias con el servicio o conductas que perjudiquen un desafío justo y seguro."
+            }
+          },
+          "publicContent": {
+            "title": "7. Contenido público y privacidad",
+            "paragraphs": {
+              "p1": "El registro crea una publicación pública de BioBlitz en tu cuenta de GainForest. Las observaciones que publiques pueden incluir tu nombre de perfil, fotografías, información de especies, fechas y datos de ubicación, y pueden ser accesibles públicamente a través de la red del Protocolo AT.",
+              "p2": "El Aviso de privacidad de BioBlitz explica cómo se usan los datos del desafío. También se aplica la Política de privacidad general de GainForest."
+            }
+          },
+          "changes": {
+            "title": "8. Cambios, suspensión o cancelación",
+            "paragraphs": {
+              "p1": "GainForest puede cambiar, suspender o cancelar una ronda si fallos técnicos, problemas de seguridad, requisitos legales, fraude o circunstancias fuera de nuestro control razonable impiden su funcionamiento justo. Cuando sea posible, comunicaremos los cambios importantes en la página de BioBlitz."
+            }
+          },
+          "liability": {
+            "title": "9. Responsabilidad",
+            "paragraphs": {
+              "p1": "Participas voluntariamente y eres responsable de cumplir las leyes locales y tomar decisiones seguras en el campo. En la medida permitida por la ley, GainForest no responde por lesiones, pérdidas o daños causados por actividades de campo inseguras, servicios de terceros o hechos fuera de nuestro control razonable. Nada en estos términos excluye responsabilidades que legalmente no puedan excluirse."
+            }
+          },
+          "law": {
+            "title": "10. Legislación aplicable",
+            "paragraphs": {
+              "p1": "Estos términos se rigen por la legislación suiza. Los tribunales de Zúrich, Suiza, tienen jurisdicción, sin perjuicio de los derechos obligatorios de consumo o protecciones locales que te correspondan."
+            }
+          },
+          "contact": {
+            "title": "11. Contacto",
+            "paragraphs": {
+              "p1": "Envía tus preguntas sobre estos términos o los requisitos de los premios a team@gainforest.net."
+            }
+          }
+        }
+      },
+      "privacy": {
+        "metadata": {
+          "title": "Aviso de privacidad de BioBlitz",
+          "description": "Cómo gestiona GainForest el registro, las observaciones, los datos de ganadores y otra información del Desafío BioBlitz."
+        },
+        "title": "Aviso de privacidad de BioBlitz",
+        "effectiveDate": "En vigor desde el 18 de julio de 2026",
+        "intro": {
+          "p1": "Este aviso explica cómo usa GainForest la información personal para el Desafío BioBlitz. Complementa la Política de privacidad general de GainForest.",
+          "p2": "GainForest e.V. es responsable de operar el desafío. Escribe a team@gainforest.net para consultas o solicitudes de privacidad."
+        },
+        "sections": {
+          "data": {
+            "title": "1. Información usada para el desafío",
+            "paragraphs": {
+              "p1": "Usamos el identificador de tu cuenta, nombre de perfil, imagen de perfil, idioma y publicación pública de registro en BioBlitz para confirmar tu participación en una ronda.",
+              "p2": "Usamos las observaciones enviadas durante la ronda, incluidas fotos u otros medios, información de especies, fechas, datos de ubicación, notas e interacciones relacionadas como Me gusta, para operar la clasificación y elegir a los ganadores.",
+              "p3": "Si ganas, podemos pedir tu nombre, datos de contacto, país de residencia, confirmación de edad o del tutor, información para controles de sanciones cuando la ley lo exija y los datos de pago necesarios para entregar el premio."
+            }
+          },
+          "use": {
+            "title": "2. Por qué la usamos",
+            "paragraphs": {
+              "p1": "Usamos esta información para registrar participantes, validar entradas, operar clasificaciones, elegir y contactar ganadores, entregar premios, prevenir fraude, mantener la seguridad del desafío, responder preguntas y compartir resultados y contenidos destacados de BioBlitz."
+            }
+          },
+          "public": {
+            "title": "3. Qué es público",
+            "paragraphs": {
+              "p1": "Tu publicación de registro, perfil y observaciones publicadas son públicos. Pueden aparecer en páginas, mapas, galerías, clasificaciones y anuncios de ganadores de GainForest.",
+              "p2": "GainForest usa el Protocolo AT, que es abierto y federado. Los registros públicos pueden ser copiados o indexados por servicios independientes que GainForest no controla. Eliminar un registro de origen indica a los servicios compatibles que lo retiren, aunque no se puede garantizar la eliminación de todas las copias de terceros."
+            }
+          },
+          "location": {
+            "title": "4. Ubicación y datos sensibles de la naturaleza",
+            "paragraphs": {
+              "p1": "Las ubicaciones de observaciones pueden mostrarse públicamente. Usa los controles de ubicación aproximada cuando sea necesario y no publiques ubicaciones precisas de especies vulnerables, hábitats sensibles o comunidades sin el permiso adecuado."
+            }
+          },
+          "prizes": {
+            "title": "5. Ganadores y proveedores",
+            "paragraphs": {
+              "p1": "Podemos compartir la información mínima necesaria con proveedores de pagos, identidad, cumplimiento, alojamiento y comunicaciones que nos ayudan a operar el desafío y entregar premios.",
+              "p2": "Podemos publicar el nombre e imagen de perfil de una persona ganadora, su contenido ganador, la categoría del premio y su número de observaciones. Pediremos permiso antes de usar otros datos biográficos privados."
+            }
+          },
+          "legalBases": {
+            "title": "6. Bases jurídicas",
+            "paragraphs": {
+              "p1": "Tratamos la información del desafío para cumplir nuestro acuerdo contigo, con tu consentimiento cuando sea necesario, por nuestro interés legítimo en organizar un desafío de conservación justo y para cumplir obligaciones legales. Puedes retirar el consentimiento cuando el tratamiento dependa de él, sin afectar al tratamiento lícito anterior."
+            }
+          },
+          "retention": {
+            "title": "7. Conservación",
+            "paragraphs": {
+              "p1": "Conservamos los registros privados de entrega y requisitos del premio solo durante el tiempo necesario para pagos, contabilidad, prevención del fraude y obligaciones legales. Las observaciones y publicaciones de registro públicas permanecen en tu cuenta hasta que las elimines, con los límites propios de una red federada."
+            }
+          },
+          "rights": {
+            "title": "8. Tus opciones y derechos",
+            "paragraphs": {
+              "p1": "Según dónde vivas, puedes solicitar acceso, corrección, eliminación, limitación u oposición al uso de tu información personal, pedir portabilidad o retirar tu consentimiento. Escribe a team@gainforest.net. Puedes gestionar o eliminar registros públicos desde tu cuenta de GainForest."
+            }
+          },
+          "children": {
+            "title": "9. Participantes jóvenes",
+            "paragraphs": {
+              "p1": "El desafío no está dirigido a menores de 16 años. Las personas de 16 o 17 años necesitan el consentimiento de su padre, madre o tutor legal. Si sabemos que un menor aportó información sin el consentimiento adecuado, tomaremos medidas razonables para retirarla."
+            }
+          },
+          "changes": {
+            "title": "10. Cambios en este aviso",
+            "paragraphs": {
+              "p1": "Podemos actualizar este aviso y publicaremos aquí la fecha revisada. Daremos un aviso más destacado cuando un cambio afecte de forma importante a los participantes."
+            }
+          },
+          "contact": {
+            "title": "11. Contacto",
+            "paragraphs": {
+              "p1": "Envía preguntas y solicitudes de privacidad a team@gainforest.net o a GainForest e.V., Schwandenacker 35, 8052 Zúrich, Suiza."
+            }
+          }
+        }
+      }
+    },
+    "help": {
+      "prompt": "¿Dudas?",
+      "officeHours": "Únete a las horas de consulta",
+      "community": "Pregunta en el chat del grupo"
+    },
+    "status": {
+      "live": "En vivo",
+      "upcoming": "Empieza pronto",
+      "ended": "Finalizado"
+    },
+    "rounds": {
+      "title": "Rondas",
+      "current": "Actual"
+    },
+    "round": {
+      "startsIn": "Empieza en",
+      "endsIn": "Termina en",
+      "ended": "Ronda finalizada",
+      "days": "{count, plural, one {# día} other {# días}}",
+      "hours": "{count, plural, one {# hora} other {# horas}}",
+      "minutes": "{count, plural, one {# minuto} other {# minutos}}"
+    },
+    "prizes": {
+      "title": "Premios en cada ronda",
+      "badgeNote": "Además, una insignia permanente de ganador en tu perfil.",
+      "mostObservations": {
+        "title": "Más observaciones",
+        "blurb": "Para quien registre más avistamientos válidos en la ronda."
+      },
+      "highestPoints": {
+        "title": "Mayor puntuación",
+        "blurb": "Para quien logre la mayor puntuación en la ronda: 2 puntos por foto de animal, 1 por foto de planta y +0,5 si nombras la especie."
+      },
+      "bestPicture": {
+        "title": "Mejor foto",
+        "blurb": "Para la foto de naturaleza más impactante de la semana, elegida por el equipo."
+      }
+    },
+    "how": {
+      "title": "Cómo funciona",
+      "steps": {
+        "outside": {
+          "title": "Sal a explorar",
+          "blurb": "Registra biodiversidad al aire libre. Las personas y las plantas en maceta no cuentan."
+        },
+        "upload": {
+          "title": "Sube tus fotos",
+          "blurb": "Cada observación necesita su propia foto subida. Añádela en Mis observaciones o con Tainá."
+        },
+        "review": {
+          "title": "Revisa el nombre de la especie",
+          "blurb": "Confirma o corrige el nombre sugerido: desde la Ronda 8, una especie nombrada suma 0,5 puntos extra."
+        }
+      },
+      "proof": {
+        "title": "Tus datos hacen más que ganar premios",
+        "intro": "Cada observación que envías se guarda en tu cuenta, así que puedes usarla más adelante como prueba para tus propios proyectos.",
+        "uses": "Puedes rendir cuentas a quienes otorgan financiamiento con un registro claro de tu trabajo. También puedes mostrar a socios y partes interesadas que lo que haces marca la diferencia.",
+        "outro": "Sin trabajo extra: solo sigue observando. Con el tiempo, esto construye evidencia real que puedes usar cuando la necesites."
+      }
+    },
+    "board": {
+      "title": "Tabla de esta ronda",
+      "live": "En vivo",
+      "subtitleLive": "Quién lidera ahora mismo con observaciones fotográficas válidas.",
+      "subtitleLivePoints": "Quién lidera en puntos ahora mismo con observaciones fotográficas válidas.",
+      "subtitleEnded": "Clasificación final de esta ronda.",
+      "subtitleUpcoming": "Sé la primera persona en la tabla cuando abra la ronda.",
+      "subtitleAll": "Quienes tienen más observaciones fotográficas válidas en todo el reto.",
+      "scope": {
+        "round": "Esta ronda",
+        "all": "Histórico"
+      },
+      "leader": "En cabeza",
+      "observations": "{count, plural, one {# observación} other {# observaciones}}",
+      "points": "{points} ptos",
+      "pointsFull": "{points, plural, one {# punto} other {# puntos}}",
+      "openCollector": "Abrir el perfil en una pestaña nueva",
+      "rankAriaLabel": "Puesto {rank}",
+      "org": {
+        "label": "Organización",
+        "account": "Cuenta personal",
+        "members": "{count, plural, one {# integrante} other {# integrantes}}",
+        "types": {
+          "nonprofit": "Sin fines de lucro",
+          "business": "Empresa",
+          "company": "Compañía",
+          "community": "Grupo comunitario",
+          "government": "Gobierno",
+          "academic": "Académica"
+        }
+      },
+      "stats": {
+        "observations": "Observaciones esta ronda",
+        "observationsAll": "Observaciones (histórico)",
+        "animals": "Animales",
+        "plants": "Plantas",
+        "named": "Especies nombradas",
+        "collectors": "Participantes",
+        "timeLeft": "Tiempo restante"
+      },
+      "eligibility": {
+        "title": "Imágenes revisadas",
+        "eligibleOnly": "Solo cuentan las válidas",
+        "wildlife": "Fauna silvestre",
+        "plants": "Plantas al aire libre",
+        "people": "Personas",
+        "potted": "Plantas en maceta",
+        "other": "Otras excluidas",
+        "explainer": "Solo cuentan las observaciones claras de fauna o plantas al aire libre con una foto subida directamente. Se excluyen personas, plantas en maceta o de interior, sujetos poco claros y observaciones sin una foto subida."
+      },
+      "empty": {
+        "title": "Aún no hay avistamientos",
+        "description": "Sé quien añada la primera observación de esta ronda."
+      },
+      "error": {
+        "title": "No se pudo cargar la tabla",
+        "description": "Inténtalo de nuevo en un momento."
+      },
+      "cta": "Añade tus observaciones",
+      "pointsGuide": {
+        "title": "Cómo se calculan los puntos",
+        "animalValue": "2 ptos",
+        "animalLabel": "Por foto de animal",
+        "plantValue": "1 pto",
+        "plantLabel": "Por foto de planta",
+        "namedValue": "+0,5 ptos",
+        "namedLabel": "Especie nombrada",
+        "note": "Los puntos comenzaron en la Ronda 8. El total es: fotos de animales × 2, más fotos de plantas × 1, más 0,5 por cada especie nombrada. Toca una fila de la tabla para ver el cálculo de esa persona."
+      },
+      "breakdown": {
+        "toggle": "Cómo se calcularon los puntos",
+        "animals": "{count, plural, one {# foto de animal} other {# fotos de animales}} × 2",
+        "plants": "{count, plural, one {# foto de planta} other {# fotos de plantas}} × 1",
+        "labeled": "{count, plural, one {# especie nombrada} other {# especies nombradas}} × 0,5",
+        "ineligible": "{count, plural, one {# foto no calificó} other {# fotos no calificaron}}",
+        "total": "Puntos totales",
+        "profile": "Abrir perfil"
+      }
+    },
+    "winners": {
+      "title": "Ganadores anteriores",
+      "description": "Un registro permanente de los campeones de cada ronda.",
+      "mostObservations": "Más observaciones",
+      "bestPicture": "Mejor foto",
+      "pending": "Por anunciar",
+      "final": "Definitivo",
+      "provisional": "Preliminar",
+      "finalHint": "Estos ganadores están confirmados y no cambiarán.",
+      "provisionalHint": "Clasificación actual: puede cambiar hasta que se confirmen los ganadores.",
+      "compact": "Recientes",
+      "newer": "Rondas recientes",
+      "older": "Rondas anteriores",
+      "page": "{page} de {total}",
+      "mostSubmitted": "Más envíos",
+      "highestPoints": "Mayor puntuación",
+      "mostLiked": "Más me gusta",
+      "award": {
+        "action": "Otorgar insignias a los ganadores",
+        "actionMissing": "Otorgar insignias pendientes",
+        "done": "Insignias de ganadores otorgadas",
+        "error": "No se pudieron actualizar las insignias o el estado del correo. Inténtalo de nuevo.",
+        "notification": {
+          "mostObservations": "Correo de más observaciones",
+          "highestPoints": "Correo de mayor puntuación",
+          "bestPicture": "Correo de mejor foto",
+          "sent": "Enviado",
+          "delayed": "Retrasado; seguiremos intentándolo",
+          "missing_email": "No encontramos un correo de la cuenta; contacta al ganador manualmente",
+          "lookup_failed": "Falló la búsqueda del correo; inténtalo más tarde o contacta al ganador",
+          "cannot_send": "No se puede enviar automáticamente",
+          "handled_manually": "Gestionado manualmente",
+          "not_prepared": "Correo no preparado; reintenta o gestiónalo manualmente",
+          "notification_setup_failed": "Falló la configuración del correo; reintenta o gestiónalo manualmente",
+          "retry": "Reintentar notificación",
+          "retrying": "Reintentando…",
+          "markHandled": "Marcar como gestionado",
+          "marking": "Marcando…"
+        }
+      }
+    },
+    "map": {
+      "title": "Observaciones de la semana",
+      "heading": "Dónde se tomaron las fotos de esta ronda",
+      "subtitle": "Cada avistamiento con foto y ubicación subido durante esta ronda. Arrastra la línea de tiempo y pulsa reproducir para verlos aparecer a lo largo de la semana.",
+      "loading": "Cargando los avistamientos de la semana…",
+      "empty": "Aún no hay avistamientos con foto y ubicación en esta ronda.",
+      "error": "No se pudo cargar el mapa de observaciones."
+    },
+    "gallery": {
+      "heading": "Fotos subidas en esta ronda",
+      "subtitle": "Un muro en vivo con los últimos avistamientos a medida que se suben. Toca cualquier foto para ver los detalles.",
+      "subtitleAll": "Todos los avistamientos subidos en esta ronda. Toca cualquier foto para abrirla, darle me gusta y comentar.",
+      "count": "{count, plural, =0 {Sin participaciones} one {# participación} other {# participaciones}}",
+      "empty": "Aún no se han subido fotos en esta ronda. Sé el primero en añadir una.",
+      "error": "No se pudo cargar el muro de fotos.",
+      "openPhoto": "Abrir este avistamiento: {name}",
+      "unnamed": "Avistamiento sin identificar",
+      "view": {
+        "wall": "Muro de fotos",
+        "all": "Todas las participaciones"
+      }
+    },
+    "bestPicture": {
+      "heading": "Favoritas a mejor foto",
+      "subtitle": "Las fotos con más me gusta de esta ronda: las que compiten por el premio a la mejor foto. Toca cualquier foto para ver los detalles.",
+      "prize": "{amount} mejor foto",
+      "leader": "En cabeza",
+      "likes": "{count, plural, one {# me gusta} other {# me gusta}}",
+      "empty": "Aún no hay me gusta en esta ronda. Da me gusta a una foto para que entre en competencia.",
+      "error": "No se pudieron cargar las favoritas.",
+      "openPhoto": "Abrir este avistamiento: {name}",
+      "unnamed": "Avistamiento sin identificar"
+    }
+  },
+  "dashboard": {
+    "metadata": {
+      "title": "Resumen de donaciones — GainForest",
+      "description": "Actividad de donaciones en GainForest: total recaudado, colaboradores, tendencias de financiación y donaciones recientes.",
+      "measurementTechnique": "Recibos de donación indexados desde registros org.hypercerts.funding.receipt."
+    },
+    "hero": {
+      "eyebrow": "Actividad de donaciones",
+      "title": "Donaciones",
+      "accent": "Resumen",
+      "imageAlt": "Paisaje regenerativo brumoso para la actividad de donaciones",
+      "lede": "Haz seguimiento de las donaciones en GainForest: total recaudado, actividad de colaboradores, lugares alcanzados, tendencias de financiación y donaciones recientes."
+    },
+    "periods": {
+      "all": "Todo el tiempo",
+      "month": "Últimos 30 días",
+      "week": "Últimos 7 días"
+    },
+    "kpis": {
+      "totalRaised": "Total recaudado",
+      "totalRaisedSub": "Todas las donaciones en USD",
+      "totalDonations": "Total de donaciones",
+      "totalDonationsSub": "Recibos registrados",
+      "uniqueDonors": "Donantes únicos",
+      "uniqueDonorsSub": "Por DID o billetera",
+      "avgDonation": "Donación media",
+      "avgDonationSub": "Por transacción",
+      "activeBumicerts": "certificados activos",
+      "activeBumicertsSub": "Han recibido fondos",
+      "totalDonated": "Total donado",
+      "completedDonations": "Donaciones completadas",
+      "donors": "donantes",
+      "bumicertsWithDonations": "certificados con donaciones",
+      "averageDonation": "Importe promedio de donación",
+      "countriesWithBumicerts": "Países con certificados"
+    },
+    "geo": {
+      "title": "Alcance geográfico",
+      "countriesRepresented": "Países representados",
+      "topCountries": "Países principales",
+      "empty": "No hay datos geográficos disponibles.",
+      "organizationCount": "{count, plural, one {# organización} other {# organizaciones}}"
+    },
+    "chart": {
+      "title": "Donaciones a lo largo del tiempo",
+      "raisedPer": "USD recaudados por {granularity}",
+      "empty": "No hay datos de donaciones para este período.",
+      "donationCount": "{count, plural, one {# donación} other {# donaciones}}",
+      "granularities": {
+        "day": "Diario",
+        "week": "Semanal",
+        "month": "Mensual"
+      }
+    },
+    "tables": {
+      "topDonors": "Donantes principales",
+      "byOrganization": "Por organización",
+      "recentTransactions": "Transacciones recientes",
+      "noDonations": "Aún no hay donaciones.",
+      "noTransactions": "Aún no hay transacciones.",
+      "donor": "Donante",
+      "totalDonated": "Total donado",
+      "donations": "Donaciones",
+      "lastDonation": "Última donación",
+      "organization": "Organización",
+      "totalRaised": "Total recaudado",
+      "bumicerts": "certificados",
+      "donors": "Donantes",
+      "date": "Fecha",
+      "amount": "Importe",
+      "bumicert": "certificado",
+      "txHash": "Hash de tx",
+      "anonymous": "Anónimo",
+      "anonymousWallet": "Anónimo ({address})",
+      "allTimeDonations": "Todo el tiempo · {count, plural, one {# donación} other {# donaciones}}",
+      "showingLatest": "mostrando los últimos {count}",
+      "viewBumicert": "Ver certificado",
+      "topCountries": "Países principales",
+      "recentDonations": "Donaciones recientes",
+      "showingAll": "mostrando todo",
+      "anonymousSupporter": "Colaborador anónimo",
+      "view": "Ver",
+      "showFirst": "Mostrar los primeros {count}",
+      "showAll": "Mostrar todos {count}",
+      "loadingCountries": "Cargando países"
+    },
+    "error": {
+      "title": "Los datos de donaciones no están disponibles",
+      "description": "No pudimos cargar la información de donaciones. Inténtalo de nuevo en un momento.",
+      "action": "Abrir resumen de donaciones"
+    }
+  },
+  "donationsHub": {
+    "tabs": {
+      "overview": "Resumen",
+      "leaderboard": "Clasificación",
+      "ariaLabel": "Vistas de donaciones"
+    }
+  },
+  "grants": {
+    "metadata": {
+      "title": "Subvenciones",
+      "description": "Postula a programas de subvenciones que financian la soberanía de datos y de decisiones para comunidades basadas en la naturaleza."
+    },
+    "hero": {
+      "eyebrow": "Financiación",
+      "title": "Subvenciones",
+      "accent": "Programas",
+      "imageAlt": "Paisaje regenerativo con niebla",
+      "lede": "Programas de subvenciones abiertos para comunidades que construyen soberanía de datos y de decisiones. Postula con uno de tus proyectos."
+    },
+    "rewilding": {
+      "title": "Resilvestrar la web",
+      "slots": "10 subvenciones disponibles",
+      "amount": "Hasta $1000 cada una",
+      "description": "Un programa de subvenciones que financia grabadoras AudioMoth y otras herramientas de recolección de datos de campo, para que las comunidades reúnan sus propios datos de biodiversidad sobre el terreno.",
+      "support": "Con el apoyo de la subvención Klarna AI for Climate Resilience.",
+      "server": {
+        "aria": "Ilustración interactiva de herramientas de recolección de datos de campo",
+        "caption": "Recolección de datos en el campo"
+      },
+      "kits": {
+        "audiomoths": {
+          "title": "Grabadoras AudioMoth",
+          "description": "Grabadoras acústicas que captan el sonido de la biodiversidad en el campo."
+        },
+        "tools": {
+          "title": "Herramientas de recolección de datos",
+          "description": "Kits de campo para reunir observaciones y evidencia sobre el terreno."
+        }
+      },
+      "apply": "Postular con un clic",
+      "applicationsUnderReview": "Las solicitudes están en revisión. Las personas seleccionadas se anunciarán pronto.",
+      "details": "Leer detalles de la subvención",
+      "appliedTitle": "Solicitud enviada",
+      "appliedNote": "Tu solicitud para {project} ya se publicó en el feed.",
+      "postText": "Postulando a la subvención Resilvestrar la web con mi proyecto \"{project}\": por la soberanía de datos y de decisiones. 🌱"
+    },
+    "applyModal": {
+      "title": "Elige un proyecto para postular",
+      "subtitle": "Elige uno de tus proyectos para enviar tu solicitud.",
+      "searchPlaceholder": "Busca tus proyectos",
+      "searchAria": "Busca tus proyectos",
+      "loading": "Cargando tus proyectos…",
+      "errorTitle": "No se pudieron cargar tus proyectos.",
+      "retry": "Reintentar",
+      "noProjectsTitle": "Aún no hay proyectos",
+      "noProjectsDescription": "Crea un proyecto primero y luego vuelve para postular con él.",
+      "createProject": "Crear un proyecto",
+      "noMatch": "Ningún proyecto coincide con tu búsqueda.",
+      "untitledProject": "Proyecto sin título",
+      "applyWith": "Postular con {project}",
+      "submitError": "No se pudo enviar tu solicitud. Inténtalo de nuevo.",
+      "successTitle": "Solicitud enviada",
+      "successBody": "Gracias por postular con {project}. Nos pondremos en contacto pronto sobre los próximos pasos.",
+      "successClose": "Listo"
+    },
+    "interoperable": {
+      "category": "Programa de subvenciones interoperables",
+      "grantName": "Ma Earth Ronda 3",
+      "fundingType": "Financiación cuadrática",
+      "description": "La ronda de financiación respaldada por la comunidad de Ma Earth usa financiación cuadrática: muchas donaciones pequeñas se igualan y amplifican más que unas pocas grandes. Las postulaciones han cerrado y la ronda ya está en marcha: explora los proyectos que participan y apóyalos.",
+      "browseProjects": "Explora los proyectos de esta ronda",
+      "logoAlt": "Ma Earth"
+    },
+    "rewildingDashboard": {
+      "grant": {
+        "navLabel": "Mi subvención",
+        "nextStepEyebrow": "Siguiente paso",
+        "dueBy": "vence {date}",
+        "openRecorders": "Añadir grabadoras",
+        "statsLabel": "Progreso de la subvención",
+        "stats": {
+          "audioUploaded": "Audio subido",
+          "audioValue": "{minutes} min",
+          "recorders": "Grabadoras",
+          "recordersYours": "{count} tuyas",
+          "recordersShipped": "{count} enviadas",
+          "speciesTagged": "Especies etiquetadas",
+          "audioTargetBy": "Meta de {target} min para el {date}",
+          "audioBehindPace": "{minutes} min por detrás del ritmo · quedan {days} días",
+          "audioAheadPace": "{minutes} min por delante del ritmo · quedan {days} días",
+          "audioTargetMet": "Meta alcanzada",
+          "audioGrantClosed": "Periodo de la subvención cerrado",
+          "audioStartsIn": "Empieza en {days} días · se necesitan {rate} min/día"
+        },
+        "milestones": {
+          "title": "Hitos de la subvención",
+          "progress": "{done} de {total} confirmados",
+          "viewRecorders": "Abrir inventario",
+          "notStarted": "Sin empezar",
+          "empty": "Aún no hay hitos. Aparecerán aquí cuando se configure tu subvención.",
+          "confirmed": "Confirmado",
+          "payout": "Libera ${amount} · pago {tranche}",
+          "reviewNote": "GainForest confirma cada hito: cada hito confirmado libera la siguiente parte de tu subvención.",
+          "pending": "Sin confirmar",
+          "dueOn": "Vence {date}",
+          "overdue": "Venció {date}"
+        },
+        "metadata": {
+          "title": "Mi subvención",
+          "description": "Tu subvención Rewilding the Web: siguiente paso, progreso e hitos."
+        },
+        "untitled": "Tu subvención",
+        "amount": "Subvención de ${amount}",
+        "pace": {
+          "title": "Audio subido frente al ritmo necesario",
+          "summary": "{current} de {target} min objetivo · ritmo para lograrlo antes de {date}",
+          "rangeLabel": "Elige un periodo",
+          "ranges": {
+            "1w": "Semana",
+            "1m": "Mes",
+            "6m": "6 meses",
+            "all": "Desde la subvención",
+            "allUpcoming": "Todas las subidas"
+          },
+          "phrases": {
+            "1w": "esta semana",
+            "1m": "este mes",
+            "6m": "en los últimos 6 meses",
+            "all": "desde que empezó tu subvención"
+          },
+          "vsPaceNeeded": "frente al ritmo necesario · {range}",
+          "behindPhrase": "por detrás del ritmo necesario {phrase}",
+          "aheadPhrase": "por delante del ritmo necesario {phrase}",
+          "upcomingEyebrow": "ventaja inicial · {range}",
+          "upcomingPhrase": "acumulados antes de que la ventana de la subvención abra el {date}",
+          "upcomingNeeded": "0 necesarios hasta el {date}",
+          "upcomingRates": "{actual} real · {needed} necesario desde el {date}",
+          "actual": "real",
+          "needed": "necesario",
+          "perDay": "{rate}/día",
+          "rates": "{actual} real · {needed} necesario",
+          "legendActual": "Real",
+          "legendNeeded": "Ritmo necesario",
+          "focus": "{minutes} min el {date}",
+          "overallBehind": "En total {minutes} min por detrás del ritmo de toda la subvención",
+          "overallAhead": "En total {minutes} min por delante del ritmo de toda la subvención",
+          "overallUpcoming": "La ventana de la subvención abre el {date} · cada minuto ya subido es ventaja",
+          "overallMet": "Meta de grabación alcanzada"
+        }
+      },
+      "recorders": {
+        "navLabel": "Mis grabadoras",
+        "title": "Mis grabadoras",
+        "add": "Añadir una grabadora",
+        "addShort": "Añadir",
+        "filtersLabel": "Filtrar grabadoras por origen",
+        "filters": {
+          "all": "Todas {count}",
+          "owned": "Tuyas {count}",
+          "shipped": "De GainForest {count}"
+        },
+        "origin": {
+          "owned": "tuya",
+          "shipped": "de GainForest"
+        },
+        "status": {
+          "recording": "Grabando",
+          "idle": "Sin desplegar",
+          "arriving": "Llega ~{date}",
+          "inTransit": "En camino",
+          "requested": "En pedido"
+        },
+        "emptyFilter": "Ninguna grabadora coincide con este filtro todavía.",
+        "unknownPrompt": "¿Tienes una grabadora que no conocemos? Añádela aquí.",
+        "metadata": {
+          "title": "Mis grabadoras",
+          "description": "Todas las grabadoras de tu subvención Rewilding the Web y de dónde viene cada una."
+        },
+        "empty": "Aún no hay grabadoras.",
+        "addNotBuilt": "Añadir grabadoras todavía no está desarrollado; se activará cuando podamos guardarlas en tu cuenta."
+      },
+      "addForm": {
+        "title": "Añadir una grabadora",
+        "close": "Cerrar",
+        "originLegend": "De dónde viene",
+        "originOwned": "Ya la tengo",
+        "originOwnedHint": "Registra una grabadora que ya posees.",
+        "originRequest": "Envíenme una",
+        "originRequestHint": "Pide a GainForest que te envíe una.",
+        "deviceType": "Tipo de dispositivo",
+        "deviceOther": "Otra grabadora…",
+        "deviceOtherLabel": "Nombre del dispositivo",
+        "deviceOtherPlaceholder": "Marca y modelo del dispositivo",
+        "quantity": "Cuántas",
+        "condition": "Estado",
+        "conditionOptions": {
+          "fieldWorking": "Funciona, en el campo",
+          "working": "Funciona, sin desplegar",
+          "needsRepair": "Necesita reparación"
+        },
+        "requestNote": "Confirmamos las cantidades con tu subvención antes del envío.",
+        "location": "Dónde escucha",
+        "locationPlaceholder": "Nombre del sitio o punto de referencia",
+        "mapComingSoon": "Selector de ubicación en el mapa próximamente",
+        "save": "Guardar grabadora",
+        "saveRequest": "Solicitar envío",
+        "milestoneNote": "Cuenta para tu hito de inventario."
+      },
+      "shell": {
+        "eyebrow": "Rewilding the Web · vista previa de administración",
+        "placeholderNotice": "Las cifras de grabadoras y especies de esta página aún no están conectadas a registros reales, por eso marcan cero. El audio subido, los hitos y los documentos de la subvención sí son reales.",
+        "granteeEyebrow": "Resilvestrar la web"
+      }
+    }
+  },
+  "account": {
+    "metadata": {
+      "accountTitle": "Cuenta — certificados",
+      "bumicertsTitle": "certificados — certificados",
+      "donationsTitle": "Historial de donaciones — certificados",
+      "accountFallback": "Cuenta",
+      "profileDescription": "{displayName} en certificados",
+      "organizationDescription": "{displayName} en certificados.",
+      "bumicertsPageTitle": "certificados de {displayName} — certificados",
+      "bumicertsPageDescription": "Explora todos los certificados creados por {displayName}.",
+      "donationsPageTitle": "Historial de donaciones de {displayName} — certificados",
+      "donationsPageDescription": "Explora el historial público de donaciones de {displayName}."
+    },
+    "errors": {
+      "loadOwnTitle": "No se pudo cargar tu cuenta",
+      "loadOwnDescription": "Tuvimos problemas al obtener los datos de tu cuenta. Inténtalo de nuevo.",
+      "loadAccountTitle": "No se pudo cargar esta cuenta",
+      "loadAccountDescription": "Tuvimos problemas al obtener los datos de esta cuenta. Inténtalo de nuevo.",
+      "loadBumicertsTitle": "No se pudieron cargar los certificados de esta cuenta",
+      "loadBumicertsDescription": "Tuvimos problemas al obtener los certificados de esta cuenta. Inténtalo de nuevo."
+    },
+    "onboarding": {
+      "title": "Se requiere incorporación",
+      "description": "Has iniciado sesión, pero tu cuenta de certificados aún no está configurada. Completa la incorporación para continuar.",
+      "action": "Iniciar incorporación"
+    },
+    "tabs": {
+      "home": "Inicio",
+      "bumicerts": "certificados",
+      "donationHistory": "Historial de donaciones",
+      "leaderboard": "Clasificación",
+      "evidenceTimeline": "Actualizaciones del proyecto",
+      "settings": "Configuración"
+    },
+    "setupPrompt": {
+      "title": "Configura tu organización",
+      "description": "Antes de subir contenido, debes configurar el perfil de tu organización. Solo toma unos minutos.",
+      "action": "Configurar organización"
+    },
+    "wallet": {
+      "setUpDonations": "Configurar donaciones",
+      "signInDescription": "Inicia sesión para vincular tu billetera y recibir donaciones.",
+      "enabled": "Donaciones activadas ✓",
+      "walletLabel": "Billetera:",
+      "enabledDescription": "Los donantes ya pueden enviar USDC a tu organización mediante certificados.",
+      "setupDescription": "Vincula una billetera para recibir donaciones en USDC de tus colaboradores.",
+      "stepConnect": "Paso 1: Conecta tu billetera",
+      "connectWallet": "Conectar billetera",
+      "stepSwitch": "Paso 2: Cambia a la red Ethereum",
+      "switching": "Cambiando...",
+      "switchToEthereum": "Cambiar a Ethereum",
+      "linkedSuccess": "✓ ¡Billetera vinculada correctamente!",
+      "linkedSuccessDescription": "El indexador puede tardar un momento en procesar tu atestación.",
+      "refresh": "Actualizar",
+      "stepLink": "Paso 3: Vincula tu billetera",
+      "waitingSignature": "Esperando la firma…",
+      "writingAttestation": "Escribiendo atestación…",
+      "errorLinking": "Error al vincular la billetera",
+      "signInWallet": "Firmar en la billetera…",
+      "writingToAtproto": "Escribiendo en ATProto…",
+      "retry": "Reintentar",
+      "signAndLink": "Firmar y vincular billetera",
+      "signing": "Firmando…",
+      "saving": "Guardando…"
+    },
+    "bumicerts": {
+      "emptyEyebrow": "Sin certificados",
+      "emptyDescription": "Esta cuenta aún no ha publicado ningún certificado.",
+      "unknownCreator": "Desconocido"
+    },
+    "sidebar": {
+      "achievements": "Logros",
+      "viewAllAchievements": "Ver todos los logros",
+      "donationUnavailable": "Los registros de donaciones no están disponibles ahora",
+      "noPublicDonationsRecorded": "Aún no hay donaciones públicas registradas",
+      "supportedOrganizations": "Apoyó a {count} {count, plural, one {organización} other {organizaciones}}",
+      "noPublicDonationsReceived": "Aún no se han recibido donaciones públicas",
+      "receivedDonations": "Recibió {count} {count, plural, one {donación} other {donaciones}}",
+      "setupPublicProfile": "Configura un perfil público de certificados",
+      "completedProfileDetails": "Completó {count} {count, plural, one {detalle} other {detalles}} del perfil",
+      "bumicertUnavailable": "Los registros de certificados no están disponibles ahora",
+      "publishedBumicerts": "Publicó {count} {count, plural, one {certificado} other {certificados}}",
+      "noBumicertsPublished": "Aún no hay certificados publicados",
+      "profileReady": "Perfil listo",
+      "bumicertSteward": "Guardián de certificado",
+      "creatorSeed": "Semilla creadora",
+      "communityBacked": "Respaldado por la comunidad",
+      "impactSupporter": "Colaborador de impacto",
+      "inviteCollaborators": "Invitar colaboradores",
+      "inviteCollaboratorsDescription": "Invita a colaboradores y personas de apoyo a tu trabajo en certificados y hagan crecer juntos el impacto regenerativo.",
+      "inviteFriends": "Invitar amigos",
+      "inviteFriendsDescription": "Invita a tus amigos a unirse a certificados y crear impacto positivo juntos.",
+      "shareProfileTitle": "Comparte tu perfil",
+      "shareProfileTitleOrganization": "Comparte este perfil",
+      "shareProfileBody": "Copia el enlace de tu perfil y compártelo con quien quieras.",
+      "shareProfileBodyOrganization": "Copia el enlace de este perfil y compártelo con colaboradores y financiadores.",
+      "copyProfileLink": "Copiar enlace del perfil",
+      "profileLinkCopied": "Copiado",
+      "shareOrganization": "Explora el perfil de certificados de {displayName}: {pageUrl}",
+      "shareUser": "Únete a mí en certificados y apoya el impacto regenerativo: {pageUrl}",
+      "totalBumicerts": "Total de certificados",
+      "donationsReceived": "Donaciones recibidas",
+      "totalDonations": "Total de donaciones"
+    },
+    "hero": {
+      "coverImageAlt": "Imagen de portada de {displayName}",
+      "copyLink": "Copiar enlace",
+      "copied": "¡Copiado!",
+      "share": "Compartir",
+      "editProfile": "Editar perfil",
+      "edit": "Editar",
+      "since": "Desde {date}"
+    },
+    "settings": {
+      "profile": {
+        "title": "Editar Perfil",
+        "description": "Actualiza tu nombre, biografía e imágenes de perfil.",
+        "displayNameLabel": "Nombre",
+        "displayNamePlaceholder": "Tu nombre",
+        "bioLabel": "Biografía",
+        "bioPlaceholder": "Una breve introducción sobre quién eres.",
+        "changeBanner": "Cambiar banner",
+        "addBanner": "Agregar banner",
+        "changeAvatar": "Cambiar avatar",
+        "avatarEditorDescription": "Elige un avatar claro para tu perfil.",
+        "bannerEditorDescription": "Elige un banner que refleje tu perfil.",
+        "saveChanges": "Guardar cambios",
+        "saving": "Guardando...",
+        "saved": "¡Guardado!"
+      },
+      "account": {
+        "title": "Cuenta",
+        "description": "Tus identificadores de cuenta en la red AT Protocol.",
+        "handleLabel": "Identificador",
+        "didLabel": "Identificador Descentralizado (DID)"
+      },
+      "password": {
+        "title": "Contraseña",
+        "description": "Restablece tu contraseña mediante un código enviado a tu correo.",
+        "emailLabel": "Correo electrónico",
+        "emailPlaceholder": "tu@ejemplo.com",
+        "sendCodeDescription": "Enviaremos un código de restablecimiento al correo electrónico de tu cuenta.",
+        "sendCode": "Enviar código",
+        "sending": "Enviando...",
+        "codeSent": "Se envió un código a {email}. Revisa tu bandeja de entrada.",
+        "codeLabel": "Código de restablecimiento",
+        "codePlaceholder": "Ingresa el código de tu correo",
+        "newPasswordLabel": "Nueva contraseña",
+        "newPasswordPlaceholder": "Mín. 8 caracteres",
+        "confirmPasswordLabel": "Confirmar contraseña",
+        "confirmPasswordPlaceholder": "Repite la nueva contraseña",
+        "changePassword": "Cambiar contraseña",
+        "saving": "Guardando...",
+        "cancel": "Cancelar",
+        "confirmMismatch": "Las contraseñas no coinciden.",
+        "lengthError": "La contraseña debe tener entre 8 y 256 caracteres.",
+        "requestError": "No se pudo enviar el correo. Inténtalo de nuevo.",
+        "resetError": "No se pudo restablecer la contraseña. Verifica el código.",
+        "successMessage": "Contraseña cambiada exitosamente."
+      },
+      "wallets": {
+        "title": "Billeteras Vinculadas",
+        "addWallet": "Agregar Billetera",
+        "empty": "Aún no hay billeteras vinculadas.",
+        "verified": "Verificada",
+        "unverified": "No verificada",
+        "description": "Conecta tu billetera Ethereum para recibir donaciones en USDC.",
+        "edit": "Editar cartera",
+        "delete": "Eliminar cartera"
+      }
+    }
+  },
+  "sidebar": {
+    "sections": {
+      "explore": "EXPLORAR",
+      "manage": "GESTIONAR"
+    },
+    "items": {
+      "bumicerts": "certificados",
+      "organizations": "Organizaciones",
+      "leaderboard": "Clasificación",
+      "organization": "Organización",
+      "sites": "Sitios",
+      "audio": "Audio",
+      "trees": "Árboles",
+      "profile": "Perfil"
+    },
+    "createBumicert": "Crear un certificado",
+    "prompts": {
+      "signInDescription": "Inicia sesión para gestionar tu cuenta y contenido.",
+      "signInAction": "Iniciar sesión",
+      "accountError": "No se pudo cargar tu cuenta en este momento.",
+      "checkingAccount": "Comprobando tu cuenta...",
+      "onboardingDescription": "Completa la incorporación para gestionar tu cuenta.",
+      "onboardingAction": "Incorporarse"
+    },
+    "social": {
+      "documentation": "Documentación",
+      "github": "GitHub",
+      "twitter": "X (Twitter)",
+      "gainforest": "GainForest"
+    }
+  },
+  "maEarthFundingRound": {
+    "metadata": {
+      "title": "Postula a la Ronda de financiación 3 de Ma Earth — certificados",
+      "description": "Aprende cómo las comunidades de GainForest pueden usar certificados para prepararse para la Ronda de financiación 3 de Ma Earth y el fondo de contrapartida de $500,000."
+    },
+    "hero": {
+      "logoAlt": "Ma Earth",
+      "title": "Prepara tu certificado para la Ronda de financiación 3 de Ma Earth",
+      "description": "Ma Earth está organizando una ronda de financiación respaldada por la comunidad con un fondo de contrapartida de $500,000 para proyectos basados en la naturaleza. Si tu organización ya documenta impacto con certificados, usa tu certificado público como referencia cuando postules en Ma Earth."
+    },
+    "actions": {
+      "applyOnMaEarth": "Postular en Ma Earth",
+      "createBumicertFirst": "Crear un certificado primero"
+    },
+    "matchingPool": {
+      "value": "$500,000",
+      "label": "Fondo de contrapartida",
+      "description": "Ma Earth usa financiación cuadrática: una participación más amplia de apoyos puede importar más que una sola contribución grande."
+    },
+    "facts": {
+      "matchingPool": {
+        "label": "Fondo de contrapartida",
+        "value": "$500,000",
+        "description": "El apoyo de la comunidad se amplifica mediante el modelo de contrapartida de Ma Earth."
+      },
+      "fundingRange": {
+        "label": "Rango de financiación del proyecto",
+        "value": "$2k–$15k",
+        "description": "Para trabajo específico, viable y basado en la naturaleza con informes claros."
+      },
+      "applicationWindow": {
+        "label": "Plazo de solicitud",
+        "value": "Abierto hasta el 31 de mayo",
+        "description": "Las solicitudes están abiertas hasta el 31 de mayo de 2026."
+      }
+    },
+    "why": {
+      "eyebrow": "¿Por qué prepararse con un certificado?",
+      "title": "Tu registro de impacto debería viajar con tu solicitud.",
+      "description": "Un certificado reúne la historia del proyecto, el contexto de la organización, la ubicación, fotos y evidencia que los financiadores necesitan para confiar en el trabajo. Ayuda a conectar trabajo comunitario verificado con el proceso de financiación de Ma Earth."
+    },
+    "includeItems": {
+      "story": "Historia del proyecto y descripción breve",
+      "identity": "Identidad de la organización y perfil público",
+      "evidence": "Fotos, evidencia y declaraciones de impacto documentadas",
+      "location": "Referencias de ubicación o sitio cuando estén disponibles",
+      "publicLink": "Un enlace público del certificado que puedes incluir en tu solicitud"
+    },
+    "eligibility": {
+      "title": "¿Quién es elegible?",
+      "items": {
+        "nature": "Proyectos de restauración, conservación, agricultura, agua, suelo, biodiversidad o comunidad basados en la naturaleza.",
+        "plan": "Un plan específico con objetivos, plazos, capacidad de reporte y declaraciones de éxito auténticas.",
+        "fundingNeed": "Una necesidad de financiación entre USD $2,000 y $15,000 para trabajo específico del proyecto.",
+        "stripe": "Configuración en un país compatible con Stripe o un socio fiscal anfitrión que pueda recibir fondos."
+      }
+    },
+    "timeline": {
+      "title": "Cronograma de la ronda",
+      "items": {
+        "applicationsClose": {
+          "date": "31 de mayo",
+          "event": "Cierre de solicitudes"
+        },
+        "applicantsNotified": {
+          "date": "15 de junio",
+          "event": "Notificación a solicitantes"
+        },
+        "acceptedProjects": {
+          "date": "1 de julio",
+          "event": "Los proyectos aceptados se unen a la ronda"
+        },
+        "roundCloses": {
+          "date": "21 de julio",
+          "event": "La ronda cierra y se desembolsa la financiación"
+        }
+      }
+    },
+    "flow": {
+      "eyebrow": "Flujo de solicitud",
+      "title": "Postula directamente en Ma Earth, con tu certificado listo.",
+      "description": "certificados no puede enviar tu solicitud automáticamente. Abre la página de recaudación de Ma Earth, postula allí e incluye tu enlace público de certificado donde ayude a explicar tu proyecto y evidencia."
+    }
+  },
+  "projects": {
+    "metadata": {
+      "title": "Proyectos de naturaleza — evidencia de campo y registros de impacto",
+      "description": "Explora proyectos de comunidades y organizaciones con lugares, novedades, observaciones y evidencia de trabajo regenerativo."
+    },
+    "hero": {
+      "eyebrow": "Explorar proyectos",
+      "title": "Explora",
+      "accent": "Proyectos",
+      "description": "Cada proyecto es un trabajo enfocado — con un objetivo claro, un plazo y los resultados esperados."
+    },
+    "search": {
+      "ariaLabel": "Buscar proyectos",
+      "placeholder": "Buscar proyectos por nombre o palabra clave",
+      "sortAriaLabel": "Ordenar proyectos",
+      "action": "Buscar"
+    },
+    "categories": {
+      "eyebrow": "Explora por interés",
+      "title": "Explora categorías de proyectos",
+      "description": "Empieza con un tema y descubre a las personas y lugares que lo hacen realidad.",
+      "items": {
+        "all": "Todos los proyectos",
+        "forests": "Bosques y árboles",
+        "biodiversity": "Biodiversidad",
+        "foodWater": "Alimentos, agua y suelo",
+        "communities": "Comunidades",
+        "climate": "Resiliencia climática"
+      }
+    },
+    "featured": {
+      "eyebrow": "Proyectos destacados",
+      "title": "Historias para comenzar",
+      "description": "Una selección de proyectos bien documentados de guardianes de la naturaleza de todo el mundo.",
+      "badge": "Destacado",
+      "action": "Explorar proyecto",
+      "previous": "Proyectos destacados anteriores",
+      "next": "Siguientes proyectos destacados",
+      "goTo": "Ir a {title}",
+      "manage": {
+        "add": "Destacar este proyecto",
+        "remove": "Quitar de proyectos destacados",
+        "error": "No se pudieron actualizar los proyectos destacados. Inténtalo de nuevo."
+      }
+    },
+    "support": {
+      "eyebrow": "Abiertos a apoyo",
+      "title": "Ayuda a que crezca un buen trabajo",
+      "description": "Apoya proyectos que reciben activamente contribuciones de su comunidad."
+    },
+    "catalog": {
+      "eyebrow": "Explorar proyectos",
+      "title": "Explora todos los proyectos",
+      "description": "Explora los proyectos de esta categoría.",
+      "count": "{count, plural, one {# proyecto para explorar} other {# proyectos para explorar}}"
+    },
+    "view": {
+      "cards": "Tarjetas",
+      "list": "Lista",
+      "map": "Mapa"
+    },
+    "list": {
+      "colProject": "Proyecto",
+      "colSteward": "Guardián",
+      "colPlace": "Lugar",
+      "colFocus": "Enfoque"
+    },
+    "sort": {
+      "newest": "Más recientes",
+      "oldest": "Más antiguos",
+      "az": "A → Z",
+      "za": "Z → A"
+    },
+    "stats": {
+      "projects": "Proyectos",
+      "withBumicerts": "Proyectos con certificados",
+      "bumicerts": "certificados en proyectos",
+      "withImages": "Proyectos con imágenes"
+    },
+    "filters": {
+      "allProjects": "Todos los proyectos",
+      "allFilters": "Ordenar y filtrar",
+      "description": "Muestra proyectos por insignia de origen, donaciones, imágenes o un lugar de proyecto.",
+      "updateHint": "Los filtros se actualizan a medida que eliges.",
+      "images": "Muestra imágenes",
+      "locations": "Tiene un lugar",
+      "timeline": "Tiene una cronología",
+      "donations": "Acepta donaciones",
+      "donationsGainforest": "Donaciones GainForest",
+      "donationsMaearth": "Donaciones Ma Earth"
+    },
+    "empty": {
+      "eyebrow": "Sin resultados",
+      "title": "No se encontraron proyectos",
+      "description": "Prueba ajustar tu búsqueda o filtros para encontrar más colecciones de proyectos."
+    },
+    "footer": {
+      "showing": "Mostrando {shown} de {total} proyectos.",
+      "showMore": "Mostrar más",
+      "end": "Has llegado al final."
+    },
+    "card": {
+      "open": "Abrir proyecto: {title}",
+      "projectSteward": "Guardián del proyecto",
+      "bumicertCount": "{count, plural, one {# certificado} other {# certificados}}",
+      "projectPlace": "Lugar del proyecto",
+      "showDetails": "Mostrar detalles",
+      "loading": "Cargando proyectos",
+      "donate": "Donar",
+      "gainforestBadge": "Dona en GainForest",
+      "acceptsDonations": "Acepta donaciones",
+      "openForSupport": "Abierto a apoyo",
+      "donationSummary": "{amount} de {donors, plural, one {# persona} other {# personas}}",
+      "donationSummaryShort": "{amount} · {donors, plural, one {# persona} other {# personas}}",
+      "donationWays": "{count} formas",
+      "maEarth": "Ma Earth",
+      "round": "Ronda {round}",
+      "byDonors": "de {donors, plural, one {# donante} other {# donantes}}",
+      "view": "Ver proyecto"
+    },
+    "actions": {
+      "clearAll": "Borrar todo"
+    },
+    "evidence": {
+      "boundaries": "{count, plural, =0 {Sin límites de sitio aún} one {# límite de sitio mapeado} other {# límites de sitio mapeados}}",
+      "sightings": "{count, plural, =0 {Sin avistamientos de naturaleza aún} one {# avistamiento de naturaleza} other {# avistamientos de naturaleza}}",
+      "timeline": "{count, plural, =0 {Sin actualizaciones del proyecto aún} one {# actualización del proyecto} other {# actualizaciones del proyecto}}",
+      "reviews": "{count, plural, =0 {Sin evaluaciones aún} one {# evaluación} other {# evaluaciones}}"
+    }
+  },
+  "ownerFilter": {
+    "button": "Autor",
+    "ariaLabel": "Filtrar por quién lo publicó",
+    "searchPlaceholder": "Buscar personas y organizaciones",
+    "hint": "Escribe un nombre para filtrar por quién lo publicó",
+    "searching": "Buscando…",
+    "noResults": "No hay personas ni organizaciones coincidentes",
+    "showAll": "Mostrar a todos",
+    "showing": "Mostrando {name}",
+    "clear": "Quitar el filtro de autor",
+    "selectedFallback": "Cuenta seleccionada",
+    "filterByThis": "Mostrar solo este autor"
+  },
+  "browseGrid": {
+    "heading": "Formas de explorar",
+    "description": "Formas de explorar el trabajo en GainForest, pensadas para exploradores, guardianes y equipos de campo.",
+    "cards": {
+      "bumicerts": {
+        "label": "Proyectos verificados",
+        "title": "certificados",
+        "blurb": "Explora historias de proyectos con fotos, lugares, personas y contexto.",
+        "statLabel": "historias"
+      },
+      "organizations": {
+        "label": "Guardianes de la naturaleza",
+        "title": "Organizaciones",
+        "blurb": "Encuentra comunidades y organizaciones que cuidan ecosistemas en todo el mundo.",
+        "statLabel": "perfiles"
+      },
+      "observations": {
+        "label": "Biodiversidad",
+        "title": "Observaciones",
+        "blurb": "Explora avistamientos de especies, lugares y fotos o sonidos de GainForest.",
+        "statLabel": "avistamientos"
+      },
+      "leaderboard": {
+        "label": "Campeones de impacto",
+        "title": "Clasificación",
+        "blurb": "Mira a los donantes que ayudan a comunidades mediante certificados.",
+        "statLabel": "recaudado"
+      }
+    }
+  },
+  "recordExplorer": {
+    "kind": {
+      "occurrence": {
+        "eyebrow": "Avistamientos de naturaleza",
+        "title": "Explora",
+        "accent": "avistamientos de naturaleza",
+        "lede": "Explora plantas, animales, fotos y grabaciones de sonidos de campo compartidas desde lugares de proyecto.",
+        "search": "Buscar por nombre común, lugar o planta/animal"
+      },
+      "site": {
+        "eyebrow": "Sitios de proyecto",
+        "title": "Proyecto",
+        "accent": "sitios",
+        "lede": "Explora grupos de custodia de la naturaleza, dónde trabajan y las historias que comparten.",
+        "search": "Filtrar por organización o país"
+      },
+      "bumicert": {
+        "eyebrow": "Explorar proyectos",
+        "title": "Descubrir",
+        "accent": "Impacto regenerativo",
+        "lede": "Explora proyectos de comunidades y organizaciones que restauran ecosistemas, fortalecen medios de vida y construyen un futuro más resiliente.",
+        "search": "Filtrar certificados por título o descripción"
+      },
+      "project": {
+        "eyebrow": "Proyectos",
+        "title": "Explora",
+        "accent": "colecciones de proyectos",
+        "lede": "Explora colecciones de proyectos y los certificados que agrupan.",
+        "search": "Filtrar proyectos por título o descripción"
+      }
+    },
+    "view": {
+      "cards": "Tarjetas",
+      "list": "Lista",
+      "map": "Mapa"
+    },
+    "sort": {
+      "newest": "Más recientes primero",
+      "oldest": "Más antiguos primero",
+      "az": "A → Z",
+      "za": "Z → A",
+      "aria": "Ordenar avistamientos"
+    },
+    "filters": {
+      "photos": "Fotos",
+      "fieldSounds": "Sonidos de campo",
+      "allMedia": "Todos los medios",
+      "allNature": "Toda la naturaleza",
+      "plants": "Plantas",
+      "trees": "Árboles",
+      "birds": "Aves",
+      "flowers": "Flores"
+    },
+    "empty": {
+      "loadTitle": "No se pudo cargar esta página",
+      "loadBody": "GainForest no respondió. Puede ser un problema temporal; visita la página de estado e inténtalo de nuevo.",
+      "noMatchesTitle": "No hay coincidencias aquí",
+      "noMatchesBody": "Prueba con otro nombre, lugar o país, o muestra más para ampliar la búsqueda.",
+      "clearSearch": "Limpiar búsqueda",
+      "noCategoryTitle": "No hay avistamientos de {category} en esta vista",
+      "noCategoryBody": "Prueba todos los avistamientos de naturaleza o muestra más resultados para ampliar la vista.",
+      "showAllNature": "Mostrar toda la naturaleza",
+      "noMediaTitle": "No se encontraron avistamientos con {media} cerca",
+      "photo": "foto",
+      "fieldSound": "sonido de campo",
+      "noMediaBody": "Los avistamientos más recientes no siempre incluyen fotos o grabaciones de sonidos de campo. Quita los filtros para explorar todo.",
+      "removeFilters": "Quitar filtros",
+      "nothingTitle": "Aún no hay nada aquí",
+      "nothingBody": "No hay nada que mostrar por ahora."
+    },
+    "loadingMore": "Cargando más…",
+    "showMore": "Mostrar más",
+    "end": "Has llegado al final.",
+    "card": {
+      "shared": "Compartido {date}",
+      "showDetails": "Mostrar detalles",
+      "playSound": "Reproducir sonido",
+      "pauseSound": "Pausar sonido",
+      "verified": "Verificado",
+      "gainforest": "GainForest",
+      "project": "Proyecto",
+      "bumicert": "certificado",
+      "projectPlace": "Lugar del proyecto",
+      "noCover": "Sin imagen de portada",
+      "peopleNamed": "{count, plural, one {# persona nombrada} other {# personas nombradas}}",
+      "projectPlaces": "{count, plural, one {# lugar de proyecto} other {# lugares de proyecto}}",
+      "natureSoundRecording": "Grabación de sonido de naturaleza",
+      "unidentifiedSighting": "Avistamiento no identificado",
+      "media": {
+        "image": "Foto",
+        "audio": "Sonido de campo",
+        "video": "Video",
+        "spectrogram": "Vista de sonido"
+      }
+    }
+  },
+  "recordDrawer": {
+    "actions": {
+      "donate": "Donar",
+      "view": "Ver",
+      "viewProfile": "Ver perfil",
+      "copyLink": "Copiar enlace",
+      "copied": "¡Copiado!",
+      "close": "Cerrar",
+      "edit": "Editar",
+      "cancel": "Cancelar",
+      "saveChanges": "Guardar cambios",
+      "viewObservation": "Ver página de la observación",
+      "viewProject": "Ver página del proyecto",
+      "openFullPage": "Abrir página completa"
+    },
+    "kind": {
+      "occurrence": "Avistamiento de naturaleza",
+      "bumicert": "certificado",
+      "project": "Proyecto",
+      "site": "Sitio del proyecto",
+      "organization": "Organización"
+    },
+    "bumicertStats": {
+      "peopleNamed": "Personas nombradas",
+      "locations": "Ubicaciones",
+      "workPeriod": "Periodo de trabajo"
+    },
+    "projectEvidence": {
+      "title": "Evidencia"
+    },
+    "projectGallery": {
+      "title": "Fotos",
+      "count": "{count, plural, one {# foto} other {# fotos}}"
+    },
+    "projectUpdates": {
+      "title": "Últimas novedades",
+      "seeAll": "Ver todo",
+      "fallback": "Novedad"
+    },
+    "projectBumicerts": {
+      "title": "certificados en este proyecto",
+      "view": "Ver certificado",
+      "showing": "Mostrando {shown} de {total} certificados vinculados.",
+      "empty": "Este proyecto aún no tiene certificados vinculados.",
+      "loading": "Cargando certificados vinculados"
+    },
+    "observation": {
+      "ownerTitle": "Detalles del avistamiento",
+      "ownerDescription": "Cambia los detalles guardados o elimina este avistamiento si tienes permiso.",
+      "saved": "Avistamiento guardado.",
+      "saveError": "No se pudo guardar este avistamiento. Inténtalo de nuevo.",
+      "deleteError": "No se pudo eliminar este avistamiento. Inténtalo de nuevo.",
+      "deleteTitle": "¿Eliminar este avistamiento?",
+      "deleteDescription": "Esto elimina el avistamiento y las fotos, sonidos de campo y detalles guardados vinculados. Esta acción no se puede deshacer.",
+      "keep": "Conservar avistamiento",
+      "delete": "Eliminar avistamiento",
+      "fields": {
+        "scientificName": "Nombre de planta o animal",
+        "vernacularName": "Nombre común",
+        "eventDate": "Fecha de observación",
+        "recordedBy": "Compartido por",
+        "latitude": "Latitud",
+        "longitude": "Longitud",
+        "place": "Lugar",
+        "country": "País",
+        "habitat": "Hábitat",
+        "notes": "Notas",
+        "kind": "Planta o animal",
+        "mapLocation": "Ubicación en el mapa",
+        "basisOfRecord": "¿Qué tipo de registro es?"
+      },
+      "validation": {
+        "name": "Ingresa el nombre de una planta o un animal.",
+        "date": "Ingresa cuándo se observó.",
+        "location": "Ingresa una ubicación válida en el mapa.",
+        "kind": "Elige si es una planta o un animal."
+      },
+      "kindOptions": {
+        "plant": "Planta",
+        "animal": "Fauna"
+      },
+      "chooseOne": "Elige una opción",
+      "chooseMapLocation": "Elige una ubicación en el mapa.",
+      "chooseOnMap": "Elegir en el mapa",
+      "chooseMapLocationTitle": "Elegir ubicación en el mapa",
+      "closeMapLocationChooser": "Cerrar selector de ubicación en el mapa",
+      "movePin": "Haz clic en el mapa para mover el pin del avistamiento.",
+      "noMapLocation": "Aún no se eligió una ubicación en el mapa.",
+      "useLocation": "Usar ubicación",
+      "natureSoundRecording": "Grabación de sonido de la naturaleza",
+      "unidentifiedSighting": "Avistamiento sin identificar",
+      "mediaTitle": "Medios en este avistamiento",
+      "mediaCount": "{count, plural, one {# elemento} other {# elementos}}",
+      "primaryMedia": "Medio principal",
+      "fieldSound": "Sonido de campo",
+      "mediaThumbnail": "Medio de la observación",
+      "previousPhoto": "Foto anterior",
+      "nextPhoto": "Foto siguiente",
+      "showPhoto": "Mostrar foto",
+      "reanalyze": "Reanalizar",
+      "reanalyzeHint": "Obtén una nueva identificación de IA a partir de la foto",
+      "reanalyzeApplied": "Actualizado con una nueva sugerencia de IA: revísalo y guárdalo.",
+      "reanalyzeUnsure": "La IA no pudo identificarlo con seguridad. Prueba a añadir un nombre tú mismo.",
+      "reanalyzeError": "No pudimos reanalizar con IA ahora mismo. Inténtalo de nuevo.",
+      "reanalyzeNoImage": "No hay ninguna foto que analizar para esta observación.",
+      "basisOptions": {
+        "human": "Visto en persona",
+        "machine": "Detección por IA o dispositivo",
+        "preserved": "Espécimen preservado",
+        "material": "Muestra de material",
+        "living": "Espécimen vivo"
+      }
+    },
+    "media": {
+      "image": "Foto",
+      "audio": "Sonido de campo",
+      "video": "Video",
+      "spectrogram": "Vista de sonido"
+    },
+    "fields": {
+      "family": "Familia",
+      "genus": "Género",
+      "kingdom": "Reino",
+      "basisOfRecord": "Qué se observó",
+      "count": "Cantidad",
+      "sharedBy": "Compartido por",
+      "location": "Ubicación",
+      "mapLocation": "Ubicación en el mapa",
+      "observed": "Observado",
+      "media": "Fotos o sonidos de campo",
+      "remarks": "Observaciones",
+      "peopleNamed": "Personas nombradas",
+      "projectPlaces": "Lugares de proyecto",
+      "start": "Inicio",
+      "end": "Fin",
+      "bumicerts": "certificados",
+      "projectPlace": "Lugar del proyecto",
+      "added": "Agregado",
+      "country": "País",
+      "type": "Tipo"
+    },
+    "audioHero": "Reproducir sonido de {title}",
+    "detailLabels": {
+      "nameDetails": "Detalles del nombre",
+      "nameRank": "Rango del nombre",
+      "natureGroup": "Grupo natural",
+      "sightingDetails": "Detalles del avistamiento",
+      "sightingType": "Tipo de avistamiento",
+      "lifeStage": "Etapa de vida",
+      "sex": "Sexo",
+      "reproductiveCondition": "Condición reproductiva",
+      "behavior": "Comportamiento",
+      "placeName": "Nombre del lugar",
+      "cityOrTown": "Ciudad o pueblo",
+      "area": "Área",
+      "stateProvince": "Estado / provincia",
+      "elevation": "Elevación",
+      "sharedDetails": "Detalles compartidos",
+      "observedBy": "Observado por",
+      "namedBy": "Identificado por",
+      "dateNamed": "Fecha de identificación",
+      "shared": "Compartido",
+      "sourceDetails": "Detalles de la fuente",
+      "sourceName": "Nombre de la fuente",
+      "organizationCode": "Código de organización",
+      "sourceGroup": "Grupo de origen",
+      "surveyMethod": "Método de muestreo",
+      "license": "Licencia",
+      "rightsHolder": "Titular de derechos",
+      "sightingId": "ID del avistamiento"
+    }
+  },
+  "projectPage": {
+    "back": "Todos los proyectos",
+    "edit": "Editar proyecto",
+    "kind": "Proyecto",
+    "ledBy": "Proyecto de",
+    "viewProfile": "Ver perfil",
+    "created": "Creado",
+    "certs": "Certificados",
+    "overviewTitle": "Resumen",
+    "overviewLead": "Un resumen a partir de {certs, plural, one {# certificado} other {# certificados}} de este proyecto.",
+    "contributors": "Colaboradores",
+    "places": "Lugares",
+    "focusAreasLabel": "Áreas de enfoque",
+    "whereLabel": "Dónde",
+    "activePeriodLabel": "Periodo de actividad",
+    "observations": "Observaciones",
+    "photos": "Fotos",
+    "galleryTitle": "Galería",
+    "observationsTitle": "Observaciones",
+    "certsTitle": "Certificados de este proyecto",
+    "noCerts": "Todavía no se han añadido certificados a este proyecto.",
+    "metaTitle": "{name} — Proyecto",
+    "metaFallback": "Un proyecto compartido en GainForest.",
+    "timelineTitle": "Cronología",
+    "publishingBadge": "Publicando",
+    "publishingTitle": "Tu proyecto está en camino",
+    "publishingBody": "Estamos publicando tu proyecto. Esto suele tardar un minuto; la página se actualizará sola."
+  },
+  "observationPage": {
+    "back": "Todos los avistamientos",
+    "kind": "Avistamiento de naturaleza",
+    "sharedBy": "Compartido por",
+    "viewProfile": "Ver perfil",
+    "observed": "Observado",
+    "shared": "Compartido",
+    "place": "Lugar",
+    "notRecorded": "Sin registrar",
+    "detailsTitle": "Detalles",
+    "notesTitle": "Notas",
+    "fieldSound": "Sonido de campo",
+    "previous": "Foto anterior",
+    "next": "Foto siguiente",
+    "showPhoto": "Mostrar foto {number}",
+    "zoom": "Ampliar foto",
+    "close": "Cerrar",
+    "audioUnsupported": "Tu navegador no admite la reproducción de audio.",
+    "metaTitle": "{name} — Avistamiento de naturaleza",
+    "metaFallback": "Un avistamiento de naturaleza compartido en GainForest.",
+    "natureSound": "Grabación de sonido de la naturaleza",
+    "unidentified": "Avistamiento sin identificar",
+    "suggestions": {
+      "title": "Sugerencias de especies",
+      "description": "Propuestas de identificación de expertos ecológicos. La persona observadora puede revisarlas antes de cambiar este avistamiento.",
+      "expertFallback": "Experto de la comunidad",
+      "status": "Pendiente de revisión"
+    }
+  },
+  "labeler": {
+    "meta": {
+      "title": "Etiquetador de observaciones",
+      "description": "Revisa avistamientos recientes y sugiere identificaciones de especies."
+    },
+    "hero": {
+      "title": "Identifica",
+      "accent": "especies"
+    },
+    "eyebrow": "Revisión ecológica",
+    "title": "Etiquetador de observaciones",
+    "description": "Explora avistamientos recientes y sin identificar, revisa sus datos de campo y propón un nombre de especie concreto.",
+    "unidentified": "Sin identificar",
+    "filters": {
+      "searchLabel": "Buscar observaciones",
+      "searchPlaceholder": "Buscar especie, género, familia o lugar…",
+      "taxonLabel": "Taxón",
+      "allTaxa": "Todos los taxones",
+      "genusLabel": "Género",
+      "allGenera": "Todos los géneros",
+      "countryLabel": "País",
+      "allCountries": "Todos los países",
+      "regionLabel": "Región",
+      "allRegions": "Todas las regiones",
+      "mediaLabel": "Tipo de evidencia",
+      "allMedia": "Toda la evidencia",
+      "photos": "Fotos",
+      "audio": "Audio"
+    },
+    "queue": {
+      "unidentified": "Necesita identificación",
+      "recent": "Avistamientos recientes",
+      "count": "{count, plural, =0 {Sin observaciones} =1 {1 observación} other {# observaciones}}",
+      "ariaLabel": "Observaciones para revisar",
+      "loadMore": "Cargar más observaciones",
+      "loading": "Cargando observaciones…"
+    },
+    "empty": {
+      "title": "No hay avistamientos coincidentes",
+      "description": "Prueba otro taxón, género, país, región o búsqueda."
+    },
+    "review": {
+      "selectPrompt": "Selecciona un avistamiento para revisar su evidencia y datos de campo.",
+      "currentIdentification": "Identificación actual",
+      "openObservation": "Abrir página de la observación",
+      "family": "Familia",
+      "genus": "Género",
+      "observer": "Observador",
+      "communityObserver": "Observador de la comunidad",
+      "observed": "Observado"
+    },
+    "proposal": {
+      "title": "Sugerir una identificación",
+      "description": "Tu sugerencia aparecerá en el avistamiento y notificará a quien lo observó. No reemplazará el nombre actual automáticamente.",
+      "scientificName": "Nombre científico",
+      "scientificPlaceholder": "p. ej., Panthera onca",
+      "commonNameOptional": "Nombre común (opcional)",
+      "commonPlaceholder": "p. ej., Jaguar",
+      "noteOptional": "Nota de evidencia (opcional)",
+      "notePlaceholder": "Explica los rasgos visibles o el contexto que apoyan esta identificación.",
+      "recordSuggestion": "Sugerencia de especie",
+      "commonName": "Nombre común",
+      "noteLabel": "Nota de evidencia",
+      "submit": "Enviar sugerencia",
+      "submitting": "Enviando sugerencia…",
+      "success": "Sugeriste {name}. Se notificará al observador.",
+      "error": "No se pudo enviar la sugerencia. Inténtalo de nuevo.",
+      "signInDescription": "Inicia sesión para enviar sugerencias desde tu cuenta. Cualquiera puede explorar la cola de revisión.",
+      "signIn": "Iniciar sesión para sugerir"
+    }
+  },
+  "manageProjects": {
+    "hero": {
+      "title": "Mis proyectos",
+      "description": "Crea y gestiona tus proyectos. Cada proyecto cuenta la historia de tu trabajo y puede recibir apoyo de financiadores."
+    },
+    "metadata": {
+      "title": "Gestionar proyectos — GainForest",
+      "description": "Crea y gestiona tus proyectos en GainForest."
+    },
+    "actions": {
+      "editProject": "Editar proyecto",
+      "editProjectFor": "Editar {title}",
+      "viewProjectFor": "Abrir {title}",
+      "manageGallery": "Gestionar galería",
+      "manageGalleryFor": "Gestionar galería de {title}",
+      "manageObservations": "Observaciones",
+      "manageObservationsFor": "Observaciones de {title}",
+      "manageSites": "Sitios",
+      "manageSitesFor": "Sitios de {title}",
+      "manageTimeline": "Cronología",
+      "manageTimelineFor": "Cronología de {title}"
+    },
+    "editor": {
+      "hero": {
+        "eyebrow": "Estudio de historias de impacto",
+        "title": "Crear un proyecto",
+        "subtitle": "Convierte el trabajo de campo, las pruebas de restauración y la custodia comunitaria en un proyecto publicable, sin salir de GainForest."
+      },
+      "backToProjects": "Volver a Mis proyectos",
+      "startOver": "Empezar de nuevo",
+      "createTitle": "Crear nuevo proyecto",
+      "editTitle": "Editar proyecto",
+      "cancel": "Cancelar",
+      "close": "Cerrar",
+      "saving": "Guardando…",
+      "saveChanges": "Guardar cambios",
+      "saveProject": "Guardar proyecto",
+      "delete": "Eliminar proyecto",
+      "errors": {
+        "checkFields": "Revisa los campos resaltados.",
+        "cannotSave": "No puedes guardar este proyecto.",
+        "saveFailed": "No se pudo guardar el proyecto."
+      },
+      "fields": {
+        "name": {
+          "label": "Nombre del proyecto",
+          "hint": "usa un nombre que la gente entienda",
+          "placeholder": "Restauración del bosque comunitario"
+        },
+        "summary": {
+          "label": "Resumen breve",
+          "hint": "una o dos frases",
+          "placeholder": "La comunidad local restaura parcelas de bosque, hace seguimiento del crecimiento de los árboles y comparte novedades desde el terreno."
+        },
+        "story": {
+          "label": "Historia",
+          "hint": "opcional: el trabajo, los métodos y los resultados",
+          "placeholder": "¿Qué pasó? ¿Cómo se midió el impacto? ¿Quién se beneficia y qué sigue?"
+        },
+        "scope": {
+          "label": "Áreas de enfoque",
+          "hint": "elige todos los resultados que correspondan",
+          "customPlaceholder": "Añade otra área, p. ej. gobernanza indígena"
+        },
+        "startDate": {
+          "label": "Fecha de inicio"
+        },
+        "endDate": {
+          "label": "Fecha de fin",
+          "ongoing": "Este trabajo está en curso"
+        },
+        "people": {
+          "label": "Personas y grupos",
+          "hint": "busca un nombre o @usuario",
+          "placeholderFirst": "Busca p. ej. “Guardianes de Rufiji” o @usuario",
+          "placeholder": "Nombre o @usuario",
+          "remove": "Quitar persona o grupo",
+          "add": "Añadir persona o grupo",
+          "change": "Cambiar persona o grupo",
+          "selectedProfile": "Perfil seleccionado",
+          "suggestionsStart": "Empieza a escribir para ver sugerencias.",
+          "suggestionsLoading": "Cargando sugerencias…",
+          "suggestionsEmpty": "Aún no hay coincidencias. Puedes seguir escribiendo un nombre."
+        },
+        "sites": {
+          "label": "Lugares",
+          "hint": "opcional: adjunta lugares de tu cuenta",
+          "loading": "Cargando tus lugares…",
+          "error": "No se pudieron cargar tus lugares.",
+          "empty": "Aún no hay lugares. Dibuja uno en el mapa para añadirlo a tu proyecto.",
+          "unnamed": "Lugar sin nombre",
+          "fallback": "Lugar del proyecto",
+          "add": "Añadir un lugar",
+          "manage": "Gestionar todos los lugares"
+        },
+        "photo": {
+          "label": "Foto del proyecto",
+          "optional": "opcional",
+          "cta": "Elegir una foto",
+          "formats": "JPG, PNG, WebP, HEIC o HEIF.",
+          "change": "Cambiar foto",
+          "remove": "Quitar foto"
+        }
+      },
+      "success": {
+        "back": "Volver a Mis proyectos",
+        "titleCreate": "Proyecto creado",
+        "titleEdit": "Proyecto guardado",
+        "description": "Tu proyecto está listo.",
+        "descriptionNamed": "«{title}» está listo para compartir y recibir apoyo.",
+        "view": "Ver proyecto"
+      },
+      "deleteModal": {
+        "title": "¿Eliminar proyecto?",
+        "description": "Esto eliminará «{title}» de tu cuenta. Esta acción no se puede deshacer.",
+        "manageHeading": "Gestionar",
+        "button": "Eliminar proyecto",
+        "hint": "Al eliminarlo, el proyecto desaparece para todos.",
+        "prompt": "Para confirmar, escribe el nombre del proyecto exactamente como se muestra:",
+        "inputAria": "Escribe el nombre del proyecto para confirmar la eliminación",
+        "mismatch": "El nombre aún no coincide.",
+        "cancel": "Cancelar",
+        "confirm": "Eliminar proyecto",
+        "error": "No se pudo eliminar el proyecto."
+      },
+      "discardModal": {
+        "title": "¿Descartar este proyecto?",
+        "description": "Al cerrar esta ventana se eliminará el progreso de la creación de tu proyecto.",
+        "keepEditing": "Seguir editando",
+        "discard": "Descartar progreso"
+      },
+      "wizard": {
+        "back": "Atrás",
+        "next": "Siguiente",
+        "start": "Empezar",
+        "create": "Crear proyecto"
+      },
+      "steps": {
+        "basics": {
+          "title": "¿Cómo se llama tu proyecto?",
+          "subtitle": "Ponle un nombre claro y un resumen de una línea que la gente entienda."
+        },
+        "focus": {
+          "title": "¿Qué tipo de trabajo es?",
+          "subtitle": "Elige las áreas de enfoque que mejor describan tu proyecto."
+        },
+        "timeline": {
+          "title": "¿Cuándo se hizo el trabajo?",
+          "subtitle": "Añade una fecha de inicio y, si terminó, una fecha de fin."
+        },
+        "story": {
+          "title": "Cuenta la historia de tu proyecto",
+          "subtitle": "Comparte el trabajo, los métodos, las pruebas y lo que cambió."
+        },
+        "network": {
+          "title": "¿Quién y dónde?",
+          "subtitle": "Reconoce a las personas detrás del trabajo y adjunta los lugares donde ocurrió."
+        },
+        "photo": {
+          "title": "Añade una foto del proyecto",
+          "subtitle": "Una buena foto ayuda a reconocer y confiar en tu proyecto."
+        },
+        "review": {
+          "title": "Revisa tu proyecto",
+          "subtitle": "Comprueba que todo está bien y crea tu proyecto."
+        }
+      },
+      "review": {
+        "name": "Nombre",
+        "summary": "Resumen",
+        "focus": "Áreas de enfoque",
+        "timeline": "Periodo",
+        "people": "Personas y grupos",
+        "places": "Lugares",
+        "photo": "Foto",
+        "none": "Sin añadir",
+        "ongoing": "en curso",
+        "added": "Añadida",
+        "notAdded": "Sin añadir"
+      }
+    },
+    "emptyHero": {
+      "description": "Los proyectos reúnen tu trabajo de impacto —personas, lugares, periodos de tiempo y fotos o notas de apoyo— en una sola página que los financiadores pueden seguir y apoyar.",
+      "cta": "Crear un proyecto"
+    },
+    "publish": {
+      "alwaysPublicTitle": "Cualquiera con el enlace puede abrir tus proyectos",
+      "alwaysPublicBody": "Desde que guardas un proyecto, su página se abre para cualquiera con quien la compartas. Que la gente pueda encontrarla sin enlace depende de ti.",
+      "listedTitle": "Aparece en las páginas de exploración",
+      "listedBody": "Quienes exploran GainForest pueden encontrar esta cuenta y sus proyectos, y los buscadores pueden mostrarlos.",
+      "unlistedTitle": "No aparece en las páginas de exploración",
+      "unlistedBody": "Tus proyectos no aparecen cuando la gente explora GainForest y quedan fuera de los resultados de búsqueda. Solo quienes reciban un enlace pueden abrirlos.",
+      "action": "Mostrar en las páginas de exploración",
+      "publishing": "Añadiendo…",
+      "justListedBody": "Listo. Puede tardar unos minutos en aparecer en las páginas de exploración.",
+      "memberBlocked": "Solo los propietarios y administradores de la organización pueden cambiar esto.",
+      "error": "No se pudo completar. Inténtalo de nuevo más tarde.",
+      "unavailable": "Esto no se puede cambiar en este momento. Inténtalo de nuevo más tarde.",
+      "statusUnknown": "No pudimos comprobar si esta cuenta aparece en las páginas de exploración."
+    }
+  },
+  "manageBumicerts": {
+    "actions": {
+      "delete": "Eliminar Cert",
+      "deleteAria": "Eliminar {title}"
+    },
+    "deleteModal": {
+      "title": "¿Eliminar Cert?",
+      "description": "Esto eliminará permanentemente «{title}» de tu cuenta. Esta acción no se puede deshacer.",
+      "cancel": "Cancelar",
+      "confirm": "Eliminar Cert",
+      "error": "No se pudo eliminar este Cert. Inténtalo de nuevo."
+    }
+  },
+  "observations": {
+    "footer": {
+      "showing": "Mostrando {shown} de {total} observaciones de naturaleza."
+    },
+    "list": {
+      "colSighting": "Observación",
+      "colObserver": "Observador",
+      "colDate": "Fecha"
+    },
+    "metadata": {
+      "title": "Avistamientos de naturaleza",
+      "description": "Explora avistamientos de naturaleza en GainForest con fotos de campo, grabaciones sonoras, nombres de especies y ubicaciones de trabajo real en terreno."
+    },
+    "view": {
+      "compact": "Compacta",
+      "comfortable": "Cómoda",
+      "density": "Densidad de tarjetas"
+    }
+  },
+  "manageProjectCerts": {
+    "metadata": {
+      "title": "Certs del proyecto — GainForest",
+      "description": "Emite y gestiona los certificados de impacto de un proyecto."
+    },
+    "nav": {
+      "projects": "Proyectos",
+      "refresh": "Actualizar"
+    },
+    "hero": {
+      "description": "Certificados de impacto (Certs) que emites a partir de este proyecto. Cada uno reúne pruebas (fotos, lugares, fechas y colaboradores) para que los financiadores puedan apoyar el trabajo."
+    },
+    "stats": {
+      "linked": "{count, plural, one {# Cert vinculado} other {# Certs vinculados}}",
+      "available": "{count, plural, one {# Cert se puede vincular} other {# Certs se pueden vincular}}",
+      "minted": "{count, plural, one {# Cert emitido} other {# Certs emitidos}}"
+    },
+    "search": {
+      "ariaLabel": "Buscar Certs",
+      "placeholder": "Buscar Certs"
+    },
+    "actions": {
+      "create": "Crear Cert",
+      "retry": "Reintentar",
+      "add": "Agregar",
+      "saving": "Guardando…",
+      "view": "Ver",
+      "unlink": "Desvincular",
+      "mint": "Emitir un Cert",
+      "mintFirst": "Emite tu primer Cert",
+      "link": "Vincular"
+    },
+    "errors": {
+      "loadTitle": "No se pudieron cargar los Certs",
+      "loadFallback": "No se pudieron cargar los Certs del proyecto.",
+      "network": "No se pudo conectar con el servidor.",
+      "noPermission": "No puedes cambiar este proyecto.",
+      "projectUnavailable": "Aún no pudimos preparar este proyecto. Actualiza la página e inténtalo de nuevo.",
+      "updateFallback": "No se pudieron actualizar los Certs del proyecto."
+    },
+    "status": {
+      "linked": "Vinculado"
+    },
+    "card": {
+      "noSummary": "Aún no hay resumen."
+    },
+    "empty": {
+      "noCertsTitle": "Aún no se han emitido Certs",
+      "noCertsDescription": "Un certificado de impacto (Cert) convierte este proyecto en una historia financiable: la prueba de una contribución, con fotos, fechas, lugares y las personas implicadas. Emite el primero para solicitar financiación.",
+      "noMatchingTitle": "No hay Certs coincidentes",
+      "noMatchingDescription": "Prueba otro término de búsqueda o borra el campo de búsqueda."
+    },
+    "details": {
+      "sites": "{count, plural, one {# sitio} other {# sitios}}",
+      "contributors": "{count, plural, one {# colaborador} other {# colaboradores}}",
+      "impactPeriod": "Periodo de impacto",
+      "created": "Creado {date}"
+    },
+    "linkExisting": {
+      "toggle": "Vincular un Cert existente",
+      "hide": "Ocultar",
+      "title": "Vincular un Cert existente",
+      "description": "¿Ya emitiste un Cert en otro lugar? Vincúlalo a este proyecto. Esto actualiza la página del proyecto; no mueve ni elimina el Cert.",
+      "empty": "No tienes otros Certs para vincular por ahora."
+    }
+  },
+  "newCert": {
+    "gate": {
+      "title": "¿Para qué proyecto es este Cert?",
+      "subtitle": "Un Cert es un certificado de impacto que emites a partir de un proyecto. Elige el proyecto al que pertenece.",
+      "searchPlaceholder": "Busca tus proyectos",
+      "searchAria": "Busca tus proyectos",
+      "loading": "Cargando tus proyectos…",
+      "errorTitle": "No se pudieron cargar tus proyectos",
+      "retry": "Reintentar",
+      "mintFrom": "Emitir un Cert de este proyecto",
+      "noMatch": "Sin proyectos coincidentes",
+      "noProjectsTitle": "Crea primero un proyecto",
+      "noProjectsDescription": "Los Certs se emiten a partir de un proyecto. Crea un proyecto para describir tu trabajo y luego emite certificados de impacto para solicitar financiación.",
+      "createProject": "Crear un proyecto",
+      "skip": "Emitir sin vincular a un proyecto"
+    }
+  },
+  "observationGrid": {
+    "sectionTitle": "Observaciones",
+    "openDetails": "Abrir detalles de la observación: {name}",
+    "openAction": "Abrir",
+    "mediaCount": "{count, plural, one {# elemento multimedia} other {# elementos multimedia}}",
+    "selectObservation": "Seleccionar observación",
+    "deselectObservation": "Deseleccionar observación",
+    "selectObservationNamed": "Seleccionar observación: {name}",
+    "deselectObservationNamed": "Deseleccionar observación: {name}",
+    "playSound": "Reproducir sonido",
+    "pauseSound": "Pausar sonido",
+    "natureSoundRecording": "Grabación de sonido de la naturaleza",
+    "unidentifiedSighting": "Avistamiento sin identificar"
+  },
+  "measurements": {
+    "title": "Mediciones",
+    "count": "{count, plural, one {# medición} other {# mediciones}}",
+    "fields": {
+      "dbh": "DAP",
+      "height": "Altura",
+      "rootCollarDiameter": "Diámetro del cuello de la raíz",
+      "canopyCover": "Cobertura del dosel",
+      "girth": "Circunferencia",
+      "stemCount": "Número de tallos",
+      "estimatedAge": "Edad estimada",
+      "bodyMass": "Masa corporal",
+      "totalLength": "Longitud total",
+      "groupSize": "Tamaño del grupo"
+    }
+  },
+  "globe": {
+    "metadata": {
+      "title": "Globo — Explora proyectos de conservación en una Tierra 3D",
+      "description": "Recorre un globo 3D vivo con organizaciones y sus sitios de proyecto, con capas de cobertura del suelo y datos de conservación.",
+      "orgTitle": "{name} en el Globo",
+      "orgDescription": "Explora los sitios de proyecto de {name} en el globo 3D.",
+      "projectTitle": "{name} en el Globo",
+      "projectDescription": "Explora los límites del sitio de {name} en el globo 3D."
+    },
+    "title": "Globo",
+    "subtitle": "Organizaciones y sus sitios de proyecto en una Tierra 3D viva.",
+    "viewOnGlobe": "Ver en el Globo",
+    "tabs": {
+      "details": "Organizaciones",
+      "layers": "Capas",
+      "popup": "Abrir como ventana flotante",
+      "dock": "Fijar al lateral"
+    },
+    "panel": {
+      "searchPlaceholder": "Buscar organizaciones…",
+      "treeFilter": "Datos de árboles",
+      "treesEmpty": "Aún no se han subido datos de árboles.",
+      "treesFailed": "Los datos de árboles no están disponibles en este momento.",
+      "toggleList": "Mostrar la lista de organizaciones",
+      "loading": "Cargando organizaciones…",
+      "count": "{count, plural, one {# organización} other {# organizaciones}}",
+      "empty": "Ninguna organización coincide con tu búsqueda.",
+      "maEarth": "Ma Earth",
+      "dataFilter": "Capas de dron y datos",
+      "dataBadge": "{count, plural, one {# capa de datos del mapa} other {# capas de datos del mapa}}"
+    },
+    "focus": {
+      "organizationLabel": "Organización",
+      "projectLabel": "Proyecto",
+      "clear": "Volver a todas las organizaciones",
+      "viewProfile": "Ver perfil",
+      "openGlobe": "Página del globo",
+      "orgGlobe": "Globo de la organización",
+      "viewProject": "Ver proyecto",
+      "backToGlobe": "Volver a la vista global",
+      "recenter": "Centrar el mapa",
+      "sites": "{count, plural, one {# sitio mapeado} other {# sitios mapeados}}",
+      "boundaries": "{count, plural, one {# límite de sitio} other {# límites de sitio}}",
+      "allSites": "Todos los sitios",
+      "orgLocationHeading": "Ubicación de la organización",
+      "projectSitesHeading": "Sitios de proyecto",
+      "noSites": "Aún no hay sitios de proyecto mapeados.",
+      "noBoundaries": "Este proyecto aún no tiene límites de sitio mapeados.",
+      "projectPill": "Proyecto: {name}",
+      "moreProjects": "+{count} más",
+      "projectHint": "Los límites resaltados muestran dónde trabaja este proyecto."
+    },
+    "layers": {
+      "button": "Capas",
+      "title": "Explorar capas",
+      "landcover": "Cobertura del suelo",
+      "landcoverSource": "ESA WorldCover 2021",
+      "measuredTrees": "Árboles medidos",
+      "measuredTreesCount": "{count, plural, one {# árbol} other {# árboles}}",
+      "projectCategory": "Capas del proyecto",
+      "noProjectLayers": "Esta organización aún no tiene capas de mapa adicionales.",
+      "landcoverClasses": {
+        "treeCover": "Cobertura arbórea",
+        "shrubland": "Matorral",
+        "grassland": "Pastizal",
+        "cropland": "Cultivos",
+        "builtUp": "Urbanizado",
+        "bareVegetation": "Suelo desnudo",
+        "water": "Agua",
+        "wetland": "Humedal",
+        "mangroves": "Manglares"
+      },
+      "visibleDetails": "En el mapa",
+      "visibleNow": "{count, plural, one {# capa en el mapa} other {# capas en el mapa}}",
+      "flyTo": "Acercar a {name}",
+      "hide": "Ocultar {name}"
+    },
+    "timeline": {
+      "seriesFlights": "{count, plural, one {# vuelo de dron} other {# vuelos de dron}} sobre la misma zona",
+      "seriesHint": "La misma zona se sobrevoló en fechas distintas: activa la línea de tiempo para ver cómo cambia.",
+      "toggle": "Ver {name} a lo largo del tiempo",
+      "title": "Cambio a lo largo del tiempo",
+      "close": "Ocultar el control de tiempo",
+      "play": "Reproducir la línea de tiempo",
+      "pause": "Pausar la línea de tiempo",
+      "previous": "Captura anterior",
+      "next": "Captura siguiente",
+      "slider": "Fecha de captura",
+      "step": "{current} de {total}"
+    },
+    "tree": {
+      "title": "Árbol",
+      "close": "Cerrar",
+      "species": "Especie",
+      "height": "Altura",
+      "dbh": "DAP",
+      "measured": "Medido:",
+      "unknown": "Desconocido",
+      "unknownSpecies": "Especie desconocida",
+      "photo": "Foto {index}"
+    },
+    "loadingGlobe": "Preparando el globo…",
+    "sheet": {
+      "expand": "Mostrar detalles",
+      "collapse": "Ocultar detalles"
+    }
+  }
+}

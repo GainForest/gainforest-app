@@ -1,0 +1,733 @@
+{
+  "detail": {
+    "actions": {
+      "deleteBumicert": "Hapus sertifikat",
+      "manage": "Kelola",
+      "deleteHint": "Menghapus akan menghilangkan sertifikat ini untuk semua orang.",
+      "deleteConfirmTitle": "Hapus sertifikat?",
+      "deleteConfirmDescription": "Ini akan menghapus “{title}” secara permanen. Tindakan ini tidak dapat dibatalkan.",
+      "deleteConfirmPrompt": "Untuk mengonfirmasi, ketik nama sertifikat persis seperti yang ditampilkan:",
+      "deleteConfirmInputAria": "Ketik nama sertifikat untuk mengonfirmasi penghapusan",
+      "deleteConfirmMismatch": "Nama belum cocok.",
+      "deleteConfirmCancel": "Batal",
+      "deleteConfirmConfirm": "Hapus sertifikat",
+      "deleteError": "Sertifikat ini tidak dapat dihapus. Silakan coba lagi."
+    },
+    "error": {
+      "loadTitle": "Tidak dapat memuat sertifikat ini",
+      "loadDescription": "Kami kesulitan mengambil data sertifikat ini. Silakan coba lagi atau kembali ke beranda."
+    },
+    "timeline": {
+      "title": "Pembaruan proyek",
+      "itemCount": "{count, plural, =0 {0 item} =1 {1 item} other {# item}}",
+      "linked": "tertaut {window}",
+      "linkedWindow": "Jendela tertaut: {window}",
+      "emptyFiltered": "Tidak ada bukti yang cocok dengan filter ini.",
+      "emptyTitle": "Belum ada bukti yang diunggah",
+      "emptyDescription": "Laporan bukti, audit, dan catatan lapangan yang diterbitkan oleh organisasi ini akan muncul di sini.",
+      "filters": {
+        "all": "Semua",
+        "tree": "Pohon",
+        "audio": "Suara",
+        "biodiversity": "Alam",
+        "document": "Dokumen",
+        "file": "Berkas"
+      },
+      "ownerTools": "Alat pemilik",
+      "linkEvidenceTitle": "Tautkan bukti",
+      "linkEvidenceDescription": "Tambahkan bukti tersimpan atau berkas ke {title}. Item yang Anda tambahkan akan muncul di pembaruan proyek publik di bawah.",
+      "notTimelineYet": "Belum menjadi bagian dari linimasa",
+      "linkedTitle": "Pembaruan proyek tertaut",
+      "linkedItemCount": "{count, plural, =0 {0 item tertaut ke aktivitas sertifikat ini} =1 {1 item tertaut ke aktivitas sertifikat ini} other {# item tertaut ke aktivitas sertifikat ini}}",
+      "linkedDescription": "Tinjau catatan, file, dan lapisan peta yang sudah menjadi bagian dari pembaruan proyek publik.",
+      "orgTitle": "Pembaruan dari proyek organisasi ini",
+      "orgItemCount": "{count, plural, =0 {0 pembaruan} =1 {1 pembaruan} other {# pembaruan}}",
+      "orgDescription": "Laporan, file, dan catatan lapangan yang diterbitkan di seluruh proyek yang dijalankan organisasi ini.",
+      "seeMore": "Lihat {count} lainnya",
+      "pageOf": "Halaman {current} dari {total}",
+      "previousPage": "Halaman sebelumnya",
+      "nextPage": "Halaman berikutnya",
+      "timelineTools": "Alat lini waktu",
+      "linksUnavailable": "Tautan lini waktu yang ada tidak dapat diperiksa. Muat ulang sebelum menambahkan kelompok pohon.",
+      "linkSuccess": "Tersambung ke lini waktu publik. Mungkin perlu beberapa saat agar terlihat oleh semua orang.",
+      "fallbacks": {
+        "linkedNatureDataGroup": "Grup data alam tertaut",
+        "linkedNatureData": "Data alam tertaut"
+      }
+    },
+    "evidenceAdder": {
+      "title": "Tambahkan pembaruan",
+      "composerDescription": "Tulis pembaruan singkat. Lampirkan suara, observasi, pohon, atau berkas jika membantu.",
+      "captionPlaceholder": "Bagikan pembaruan proyek singkat. Anda dapat memposting teks saja atau melampirkan bukti di bawah.",
+      "titlePlaceholder": "Judul (opsional)",
+      "editor": {
+        "bold": "Tebal",
+        "italic": "Miring",
+        "underline": "Garis bawah",
+        "strikethrough": "Coret",
+        "heading": "Judul",
+        "subheading": "Subjudul",
+        "quote": "Kutipan",
+        "bulletedList": "Daftar poin",
+        "numberedList": "Daftar bernomor",
+        "addLink": "Tambah tautan",
+        "removeLink": "Hapus tautan",
+        "linkUrlPlaceholder": "https://example.org",
+        "applyLink": "Terapkan",
+        "cancelLink": "Batal"
+      },
+      "attachLabel": "Lampirkan bukti opsional:",
+      "attachingType": "Melampirkan {type}",
+      "postUpdate": "Posting pembaruan",
+      "chooseAttachment": "Pilih sesuatu untuk dilampirkan",
+      "updateTitleFallback": "Pembaruan proyek",
+      "selectType": "Pilih jenis bukti yang akan ditambahkan.",
+      "selectEvidence": "Pilih bukti yang akan ditambahkan.",
+      "addType": "Tambahkan {type}",
+      "tabs": {
+        "images": "Gambar",
+        "audio": "Suara",
+        "soundscape": "Lanskap suara",
+        "trees": "Pohon",
+        "biodiversity": "Observasi",
+        "files": "Berkas"
+      },
+      "linking": "Memposting…",
+      "loadingSources": "Memuat bukti…",
+      "sourcesLoadError": "Tidak dapat memuat bukti yang tersedia. Segarkan halaman dan coba lagi.",
+      "selectToLink": "Pilih bukti untuk ditautkan",
+      "linkItems": "{count, plural, =1 {Tautkan 1 item} other {Tautkan # item}}",
+      "optionalNote": "Catatan Opsional",
+      "optionalNotePlaceholder": "Tambahkan konteks tentang bukti ini…",
+      "authError": "Ada yang tidak beres. Harap segarkan halaman.",
+      "contentType": "Jenis konten",
+      "selectContentType": "Pilih jenis konten",
+      "addFilePlaceholder": "Tambahkan file sebagai bukti",
+      "fileHelp": "Berkas hingga {maxSize}.",
+      "addImagePlaceholder": "Jatuhkan gambar di sini atau klik untuk mengunggah",
+      "imageHelp": "Gambar hingga {maxSize}.",
+      "externalLink": "Tautan eksternal",
+      "externalLinkPlaceholder": "https://example.org/report",
+      "addLink": "Tambahkan",
+      "externalLinkHelp": "Tautkan laporan, situs web, dasbor, atau platform bukti eksternal.",
+      "invalidUrlProtocol": "Gunakan URL http atau https.",
+      "invalidUrl": "Masukkan URL yang valid.",
+      "remove": "Hapus",
+      "removeFile": "Hapus {name}",
+      "removeExternalLink": "Hapus tautan eksternal",
+      "noFilesSelected": "Belum ada file atau link yang dipilih.",
+      "contentTypes": {
+        "document": "Dokumen",
+        "report": "Laporan",
+        "audit": "Audit lingkungan",
+        "evidence": "Bukti",
+        "testimonial": "Testimoni",
+        "methodology": "Metodologi",
+        "photo": "Foto",
+        "video": "Video",
+        "dataset": "Kumpulan Data",
+        "certificate": "Sertifikat",
+        "audio": "Suara",
+        "other": "Lainnya",
+        "update": "Pembaruan",
+        "treeDataset": "Dataset pohon",
+        "biodiversity": "Alam",
+        "occurrence": "Pohon"
+      },
+      "emptyUploaded": "Belum ada {type} yang diunggah.",
+      "uploadType": "Unggah {type}",
+      "manage": "Kelola",
+      "untitledRecording": "Rekaman tanpa judul",
+      "untitledSoundscape": "Lanskap suara tanpa judul",
+      "soundscapeHelp": "Pilih lanskap suara yang sudah dibuat dari rekaman organisasi ini. Pembaca dapat memutarnya langsung dari pembaruan.",
+      "soundscapeEmpty": "Belum ada lanskap suara dari organisasi ini yang bisa dibaca saat ini.",
+      "unnamedTreeDataset": "Grup pohon tanpa nama",
+      "unknownObservation": "Temuan alam tidak diketahui",
+      "treeCount": "{count, plural, =1 {1 pohon} other {# pohon}}",
+      "speciesCount": "{count, plural, =1 {1 spesies} other {# spesies}}",
+      "siteContextLabel": "Lokasi proyek: {siteName}",
+      "siteContextReady": "Lokasi proyek siap",
+      "siteContextMixed": "Grup pohon ini mencakup lebih dari satu lokasi proyek",
+      "siteContextIncomplete": "Sebagian pohon belum memiliki lokasi proyek",
+      "siteContextUnresolved": "Lokasi proyek tidak dapat diperiksa",
+      "siteContextUnavailable": "Lokasi proyek belum ada",
+      "incompleteBumicertReference": "Tidak dapat menautkan bukti karena referensi sertifikat tidak lengkap. Muat ulang halaman dan coba lagi.",
+      "partialLinkSuccess": "{createdCount, plural, =1 {1 lampiran ditautkan} other {# lampiran ditautkan}}, tetapi tidak semua {totalCount, plural, =1 {1 grup} other {# grup}} selesai. {error}",
+      "emptyLabels": {
+        "audio": "rekaman suara",
+        "trees": "grup pohon",
+        "biodiversity": "observasi"
+      },
+      "attachmentTitles": {
+        "images": "Gambar",
+        "audio": "Rekaman suara",
+        "soundscape": "Lanskap suara",
+        "trees": "Grup pohon",
+        "biodiversity": "Observasi"
+      },
+      "chooseEvidenceType": "Pilih jenis bukti",
+      "selectSourceToLink": "Pilih sumber untuk menautkan bukti yang sudah ada ke linimasa ini.",
+      "linkType": "Tautkan {type}",
+      "selectRecordsToLink": "Pilih catatan bukti untuk ditautkan ke linimasa ini.",
+      "backToEvidenceTypes": "Kembali ke jenis bukti",
+      "alreadyLinkedDataset": "Sudah ditautkan ke linimasa ini",
+      "checkingExistingLinks": "Memeriksa tautan linimasa yang sudah ada…",
+      "unableToVerifyExistingLinks": "Tautan yang ada tidak dapat diperiksa. Muat ulang sebelum menautkan grup pohon.",
+      "tabDescriptions": {
+        "images": "Unggah foto proyek.",
+        "audio": "Tambahkan suara yang sudah disimpan oleh organisasi ini.",
+        "soundscape": "Tambahkan lanskap suara 24 jam yang dibuat dari rekaman organisasi ini.",
+        "trees": "Tambahkan informasi pohon yang dikelompokkan berdasarkan lokasi proyek.",
+        "biodiversity": "Filter observasi dan tambahkan catatan yang ditampilkan atau grup tersimpan.",
+        "files": "Tambahkan laporan, foto, video, atau halaman web."
+      },
+      "update": {
+        "heading": "Tulis pembaruan",
+        "subheading": "Bagikan kemajuan dengan kata-kata Anda sendiri. Pembaruan akan tampil di pembaruan proyek publik.",
+        "titleLabel": "Judul",
+        "titlePlaceholder": "Apa yang baru?",
+        "bodyLabel": "Pembaruan",
+        "bodyPlaceholder": "Bagikan kemajuan, capaian, atau kabar dari lapangan…",
+        "post": "Terbitkan pembaruan",
+        "posting": "Menerbitkan…"
+      },
+      "permissions": {
+        "signIn": "Masuk dengan akun yang dapat mengelola lini waktu ini.",
+        "notMember": "Beralih ke akun organisasi yang dapat mengelola lini waktu ini.",
+        "createDenied": "Anda tidak dapat menautkan bukti ke lini waktu ini.",
+        "deleteDenied": "Anda tidak dapat menghapus bukti dari lini waktu ini."
+      },
+      "linkError": "Bukti ini tidak dapat ditautkan. Coba lagi.",
+      "manageType": "Kelola {type}",
+      "biodiversity": {
+        "attachmentGroupTitle": "Grup alam",
+        "attachmentObservationsTitle": "Observasi",
+        "emptyLabel": "observasi",
+        "searchLabel": "Cari",
+        "searchPlaceholder": "Cari alam",
+        "recorderLabel": "Pencatat",
+        "allRecorders": "Semua pencatat",
+        "recorderOptionFallback": "Pencatat {number}",
+        "displayedTitle": "Observasi yang ditampilkan",
+        "displayedSummary": "{shown} dari {total, plural, =1 {1 temuan} other {# temuan}} ditampilkan. Pilih temuan dari tampilan yang difilter ini.",
+        "clearDisplayed": "Hapus yang ditampilkan",
+        "selectDisplayed": "Pilih yang ditampilkan",
+        "noDataMatches": "Tidak ada observasi yang cocok dengan filter ini.",
+        "recordedBy": "Dicatat oleh {name}",
+        "recorderFallback": "pencatat tersimpan",
+        "alreadyLinked": "Sudah ditautkan",
+        "coveredByGroup": "Dicakup oleh kelompok",
+        "groupsTitle": "Grup alam",
+        "groupsDescription": "Kelompok memakai filter pencatat dan pencarian yang sama.",
+        "noGroupsMatch": "Tidak ada grup alam yang cocok dengan filter ini.",
+        "multipleRecorders": "{count, plural, =1 {1 pencatat} other {# pencatat}}",
+        "firstRecorderAndMore": "{name} + {count, plural, =1 {1 lainnya} other {# lainnya}}",
+        "shownCount": "{count} ditampilkan",
+        "totalCount": "total {count}",
+        "speciesCount": "{count, plural, =1 {1 spesies} other {# spesies}}",
+        "groupStatus": "Data dikelompokkan",
+        "manageData": "Kelola observasi",
+        "groupedNatureDataFallback": "Data alam yang dikelompokkan",
+        "csvUpload": {
+          "title": "Unggah lembar data",
+          "description": "Tambahkan CSV observasi (dengan kolom pengukuran apa pun) sebagai satu berkas. Cocok untuk daftar besar.",
+          "choose": "Pilih berkas CSV",
+          "hint": "Lembar data yang disimpan sebagai .csv",
+          "notCsv": "Silakan pilih berkas .csv.",
+          "tooLarge": "Berkas ini terlalu besar. Jaga di bawah {maxSize}.",
+          "remove": "Hapus berkas"
+        }
+      },
+      "unableToVerifyTreeSiteContext": "Tidak dapat memeriksa semua pohon. Muat ulang sebelum menautkan grup pohon.",
+      "validation": {
+        "fileTooLarge": "Pilih berkas hingga {maxSize}.",
+        "fileTypeNotAllowed": "Pilih jenis berkas yang didukung.",
+        "tooManyItems": "Tautkan lebih sedikit item sekaligus.",
+        "invalidContext": "Grup pohon ini memerlukan lokasi proyek. Muat ulang dan coba lagi."
+      }
+    },
+    "metadata": {
+      "notFound": "sertifikat Tidak Ditemukan"
+    },
+    "timelineEntry": {
+      "kind": {
+        "tree": "Pohon",
+        "audio": "Suara",
+        "biodiversity": "Alam",
+        "document": "Berkas",
+        "site": "Lokasi proyek",
+        "update": "Pembaruan",
+        "other": "Pembaruan"
+      },
+      "notSpecified": "Tidak ditentukan",
+      "resolvingDate": "Menyelesaikan tanggal bukti…",
+      "linked": "tertaut {date}",
+      "treeCount": "{count, plural, =1 {1 pohon} other {# pohon}}",
+      "speciesCount": "{count, plural, =1 {1 spesies} other {# spesies}}",
+      "observationCount": "{count, plural, =1 {1 temuan} other {# temuan}}",
+      "recordingCount": "{count, plural, =1 {1 rekaman} other {# rekaman}}",
+      "itemCount": "{count, plural, =1 {1 item} other {# item}}",
+      "dataGroupCount": "{count, plural, =1 {1 grup data} other {# grup data}}",
+      "linkedFile": "Berkas tertaut",
+      "previewKinds": {
+        "image": "Gambar",
+        "video": "Video",
+        "audio": "Suara",
+        "pdf": "Berkas PDF",
+        "document": "Dokumen"
+      },
+      "linkedTreeInformation": "Informasi pohon tertaut",
+      "linkedItem": "Bukti tertaut",
+      "linkedProjectPlace": "Lokasi proyek tertaut",
+      "linkedTreeGroup": "Grup pohon tertaut",
+      "linkedSound": "Suara tertaut",
+      "linkedSoundscape": "Lanskap suara tertaut",
+      "groupedData": "Data dikelompokkan",
+      "openMap": "Buka peta",
+      "viewMap": "Lihat peta",
+      "openGreenGlobe": "Buka di Green Globe",
+      "removeEvidence": "Hapus bukti",
+      "collapseEvidence": "Ciutkan bukti",
+      "expandEvidence": "Perluas bukti",
+      "resolvingRecords": "Menyelesaikan catatan bukti terkait…",
+      "selectedObservations": "Temuan terpilih",
+      "more": "+{count} lagi",
+      "viewGreenGlobe": "Lihat di Green Globe",
+      "evidenceItem": "Barang bukti",
+      "greenGlobePreview": "Pratinjau Green Globe",
+      "open": "Terbuka",
+      "greenGlobeFallback": "Jika pratinjau tidak dimuat, buka Green Globe di tab baru. Detail Dampak",
+      "sharedGreenGlobePreviewHint": "Gunakan peta Green Globe bersama di atas untuk melihat lapisan pohon.",
+      "greenGlobeMapTitle": "Peta Green Globe",
+      "resolvingSpatialLayers": "Memuat lapisan peta…",
+      "activeLayerCount": "{count, plural, =1 {1 lapisan aktif} other {# lapisan aktif}}",
+      "showOnMapHint": "Gunakan Tampilkan di peta pada kartu pohon untuk melihat lapisan di sini.",
+      "greenGlobeIframeTitle": "Pratinjau peta Green Globe",
+      "treeDatasetMapLayers": "Lapisan pohon di peta",
+      "showDatasetOnGreenGlobeMap": "Tampilkan {title} di peta",
+      "hideDatasetFromGreenGlobeMap": "Sembunyikan {title} dari peta",
+      "showOnMap": "Tampilkan di peta",
+      "hideFromMap": "Sembunyikan dari peta",
+      "deleteConfirm": {
+        "title": "Hapus bukti?",
+        "body": "Hapus “{title}”? Hal ini tidak dapat dibatalkan.",
+        "removing": "Menghapus… Laporan",
+        "remove": "Hapus",
+        "cancel": "Batalkan"
+      },
+      "activeHiddenLayerSummary": "{activeCount} ditampilkan · {hiddenCount} disembunyikan",
+      "activeHiddenLayerSummaryWithHint": "{activeCount} ditampilkan · {hiddenCount} disembunyikan — gunakan Tampilkan lapisan pada kartu pohon untuk melihat lapisan di sini.",
+      "showLayerHint": "Gunakan Tampilkan lapisan pada kartu pohon untuk melihat lapisan di sini.",
+      "activeLayerBadge": "{count} ditampilkan",
+      "hiddenLayerBadge": "{count} disembunyikan",
+      "activeLayersInPreview": "Ditampilkan di peta",
+      "hiddenLayerPrefix": "Tersembunyi: {title}",
+      "activeOnMap": "Ditampilkan di peta",
+      "hiddenFromMap": "Disembunyikan dari peta",
+      "visibleLayerDescription": "Grup pohon ini terlihat di peta.",
+      "hiddenLayerDescription": "Grup pohon ini sedang disembunyikan.",
+      "showLayer": "Tampilkan lapisan",
+      "hideLayer": "Sembunyikan lapisan",
+      "deleteUnavailable": "Anda tidak dapat menghapus bukti ini.",
+      "deleteError": "Item ini tidak dapat dihapus.",
+      "deleteAlreadyRemoved": "Bukti ini sudah dihapus. Muat ulang halaman.",
+      "displayedBiodiversityData": "Catatan alam yang ditampilkan",
+      "natureObservationsFallback": "Temuan alam",
+      "openLinkedFile": "Buka berkas tertaut",
+      "openFile": "Buka berkas",
+      "downloadFile": "Unduh berkas",
+      "previewUnavailable": "Berkas ini tidak dapat dipratinjau di sini.",
+      "unresolvedReferenceBody": "Bukti tertaut ini belum dapat dimuat.",
+      "preparingFile": "Menyiapkan…",
+      "documentPreviewLoading": "Memuat pratinjau berkas…",
+      "documentPreviewPdfError": "PDF tidak dapat disiapkan untuk pratinjau.",
+      "documentPreviewPdfUnavailable": "PDF ini dapat dibuka atau diunduh, tetapi tidak dapat dipratinjau di sini.",
+      "documentPreviewEmpty": "{title} kosong.",
+      "documentPreviewTruncated": "Pratinjau dipersingkat. Buka atau unduh berkas untuk melihat semuanya.",
+      "documentPreviewTextError": "Teks berkas tidak dapat dimuat di sini.",
+      "documentPreviewTextUnavailable": "Berkas ini dapat dibuka atau diunduh, tetapi tidak dapat dipratinjau di sini.",
+      "documentPreviewHtmlError": "Berkas halaman web tidak dapat dimuat di sini.",
+      "documentPreviewHtmlUnavailable": "Berkas halaman web ini dapat dibuka atau diunduh, tetapi tidak dapat dipratinjau di sini.",
+      "documentPreviewUnsupported": "Jenis berkas ini dikenali, tetapi tidak dapat dipratinjau di sini. Buka atau unduh berkas untuk melihatnya.",
+      "documentFormats": {
+        "pdf": "Berkas PDF",
+        "text": "Berkas teks",
+        "markdown": "Berkas Markdown",
+        "html": "Berkas halaman web",
+        "rtf": "Berkas RTF",
+        "word": "Berkas Word",
+        "spreadsheet": "Lembar kerja",
+        "presentation": "Presentasi",
+        "document": "Dokumen"
+      }
+    },
+    "reference": {
+      "linkedRecord": "Catatan tertaut",
+      "linkedAudioRecord": "Rekaman audio tertaut",
+      "audioEvidence": "Bukti audio",
+      "playRecording": "Putar rekaman",
+      "linkedDataset": "Dataset tertaut",
+      "viewGreenGlobe": "Lihat di Green Globe",
+      "linkedTreeRecord": "Catatan pohon tertaut",
+      "linkedSiteRecord": "Catatan situs tertaut",
+      "siteEvidence": "Bukti situs",
+      "openSiteMap": "Buka peta situs",
+      "recordCount": "{count, plural, =1 {1 catatan} other {# catatan}}",
+      "speciesCount": "{count, plural, =1 {1 spesies} other {# spesies}}",
+      "individualCount": "{count, plural, =1 {1 individu} other {# individu}}"
+    },
+    "overview": {
+      "aboutOrganization": "Tentang Organisasi",
+      "aboutCreator": "Tentang Pembuat",
+      "profile": "Profil",
+      "certifiedProfile": "Profil tersertifikasi",
+      "moreFromCreator": "sertifikat lainnya dari pembuat ini",
+      "moreFromOrganization": "sertifikat lainnya dari organisasi ini",
+      "viewAll": "Lihat semua",
+      "ongoing": "sedang berlangsung",
+      "noDescription": "Tidak ada deskripsi.",
+      "projectDetails": "Detail proyek",
+      "activityPeriod": "Periode aktivitas",
+      "published": "Diterbitkan",
+      "firstSiteBoundary": "Batas situs pertama",
+      "firstSiteBoundaryMap": "Peta batas situs pertama",
+      "contributors": "Kontributor",
+      "noLocationSet": "Lokasi belum diatur"
+    },
+    "headerTabs": {
+      "overview": "Ringkasan",
+      "siteBoundaries": "Batas Situs",
+      "reviews": "Ulasan",
+      "donations": "Donasi",
+      "timeline": "Linimasa",
+      "share": "Bagikan",
+      "copied": "Tersalin!",
+      "donate": "Donasi",
+      "goToOverview": "Buka tab ringkasan"
+    },
+    "projectNav": {
+      "overview": "Ringkasan",
+      "sightings": "Pengamatan",
+      "places": "Tempat",
+      "updates": "Pembaruan",
+      "reviews": "Ulasan",
+      "support": "Dukungan"
+    },
+    "support": {
+      "title": "Dukungan",
+      "donations": "Donasi",
+      "fromSupporters": "Dari {count, plural, other {# pendukung}}",
+      "noDonationsYet": "Jadilah yang pertama mendukung proyek ini.",
+      "donate": "Donasi",
+      "donateAgain": "Donasi lagi",
+      "donateOnMaEarth": "Donasi di Ma Earth",
+      "round": "Putaran {round}",
+      "includesMaEarth": "Total mencakup donasi GainForest dan Ma Earth.",
+      "viaMaEarth": "Terkumpul melalui kampanye Ma Earth.",
+      "notAccepting": "Proyek ini belum menerima donasi. Ikuti {name} untuk kabar terbaru.",
+      "messageQuote": "Pesan donor: “{message}”"
+    }
+  },
+  "create": {
+    "actions": {
+      "createBumicert": "Buat sertifikat"
+    },
+    "landing": {
+      "hero": {
+        "titleLine1": "Ciptakan dampak.",
+        "titleLine2": "Sertifikasi perubahan.",
+        "description": "Buat sertifikat untuk menunjukkan komitmen Anda terhadap keberlanjutan dan menginspirasi perubahan nyata."
+      },
+      "explainer": {
+        "title": "Apa itu sertifikat?",
+        "body1": "sertifikat adalah kisah dampak Anda—bukti kontribusi Anda terhadap manusia, komunitas, dan planet ini.",
+        "body2": "Ini membantu Anda mendokumentasikan, berbagi, dan merayakan dampak positif Anda dengan transparansi dan kredibilitas.",
+        "learnMore": "Pelajari lebih lanjut"
+      }
+    },
+    "tabs": {
+      "ariaLabel": "Tampilan pembuatan sertifikat",
+      "recent": "sertifikat terbaru",
+      "drafts": "Draf"
+    },
+    "recent": {
+      "errorTitle": "Tidak dapat memuat sertifikat",
+      "errorFallback": "Silakan coba lagi sebentar lagi.",
+      "emptyTitle": "Belum ada sertifikat terbaru",
+      "emptyLine1": "Anda belum membuat sertifikat apa pun.",
+      "emptyLine2": "Buat sertifikat pertama Anda untuk memulai.",
+      "createFirst": "Buat sertifikat pertama Anda"
+    },
+    "drafts": {
+      "untitledDraft": "Draf Tanpa Judul",
+      "signedOutTitle": "Masuk untuk melihat draf",
+      "signedOutDescription": "Draf sertifikat disimpan ke akun Anda sehingga Anda dapat melanjutkan pekerjaan Anda nanti.",
+      "loadingTitle": "Memuat draf",
+      "loadingDescription": "Kami sedang memeriksa aplikasi sertifikat yang disimpan.",
+      "errorTitle": "Tidak dapat memuat draf",
+      "errorFallback": "Gagal memuat draf. Silakan coba lagi.",
+      "emptyTitle": "Belum ada konsep",
+      "emptyDescription": "Mulai sertifikat baru dan simpan sebagai draf bila Anda ingin kembali lagi nanti.",
+      "deleteAria": "Hapus {title}"
+    },
+    "draft": {
+      "actions": {
+        "tips": "Kiat",
+        "closeTips": "Tutup tips",
+        "saveAsDraft": "Simpan sebagai Draf",
+        "continue": "Lanjutkan"
+      },
+      "validation": {
+        "required": "Diperlukan",
+        "maxCharacters": "Tidak boleh lebih dari karakter {count}",
+        "descriptionRequired": "Deskripsi diperlukan",
+        "contributorNameRequired": "Semua kontributor harus mempunyai nama",
+        "coverImageMaxSize": "Gambar sampul harus berukuran 4MB atau lebih kecil",
+        "coverImageType": "Gambar sampul harus JPG, PNG, atau WebP"
+      },
+      "sidebar": {
+        "previewTitle": "Pratinjau sertifikat",
+        "generatingPreview": "Menghasilkan metadata pratinjau...",
+        "completeFirstStep": "Silakan selesaikan langkah pertama untuk membuat pratinjau.",
+        "tipsTitle": "Tips untuk bagian ini"
+      },
+      "steps": {
+        "cover": {
+          "title": "Detail Sampul",
+          "tips": {
+            "bullets": [
+              "Gunakan nama pendek dan deskriptif untuk sertifikat Anda.",
+              "Sertakan situs web atau tautan sosial ke sertifikat Anda untuk memudahkan akses."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        },
+        "impact": {
+          "title": "Detail Dampak",
+          "tips": {
+            "pre": "Saat menulis cerita berdampak Anda, gunakan kerangka kerja STAR ini:",
+            "bullets": [
+              "Situasi — Apa yang terjadi dan siapa atau apa yang terkena dampaknya?",
+              "Tugas — Apa peran organisasi, kelompok, atau komunitas Anda? Siapa lagi yang terlibat?",
+              "Tindakan — Jelaskan apa yang dilakukan organisasi atau komunitas Anda.",
+              "Hasil — Apa yang terjadi sebagai hasilnya? Cantumkan angka-angka jika ada, dan sebutkan hasil yang nyata dan tidak nyata. Hal ini akan didukung dengan data dampak yang Anda berikan nantinya."
+            ],
+            "post": "Menulis dengan bebas. Cerita yang lebih panjang dipersilakan."
+          }
+        },
+        "site": {
+          "title": "Detail Situs",
+          "tips": {
+            "bullets": [
+              "Tambahkan komunitas atau organisasi Anda sendiri terlebih dahulu, lalu orang atau grup lain yang bergabung.",
+              "Pastikan semua orang setuju untuk disertakan.",
+              "Unggah batas situs Anda dalam format GeoJSON agar terlihat di peta."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        },
+        "review": {
+          "title": "Tinjau",
+          "tips": {
+            "bullets": [
+              "Pastikan Anda telah menyelesaikan semua langkah sebelumnya.",
+              "Tinjau tampilan sertifikat Anda sebelum mengirimkan."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        },
+        "submit": {
+          "title": "Kirim",
+          "tips": {
+            "bullets": [
+              "Anda telah menyelesaikan semua langkah! Tidak ada lagi tip untuk bagian ini."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        }
+      },
+      "stepForms": {
+        "cover": {
+          "heading": "Bagikan dampak Anda secara sekilas.",
+          "coverImage": {
+            "label": "Gambar Sampul",
+            "info": "Pilih gambar yang paling mewakili karya Anda",
+            "placeholder": "Unggah atau seret dan lepas gambar"
+          },
+          "title": {
+            "label": "sertifikat Judul",
+            "info": "Beri sertifikat Anda judul yang jelas dan deskriptif",
+            "placeholder": "sertifikat Saya yang Luar Biasa"
+          },
+          "dateRange": {
+            "label": "sertifikat Rentang Tanggal",
+            "info": "Pilih periode saat pekerjaan dan dampak Anda terjadi",
+            "ongoing": "Sedang Berlangsung",
+            "ongoingCheckbox": "Pekerjaan ini masih berlangsung"
+          },
+          "workType": {
+            "label": "Pekerjaan apa yang kamu lakukan?",
+            "info": "Silakan pilih lebih dari satu",
+            "options": {
+              "ecologicalRestoration": "Restorasi Ekologis",
+              "agroforestry": "Agroforestri",
+              "climateAdaptation": "Adaptasi Iklim",
+              "biodiversityMonitoring": "Pemantauan alam",
+              "environmentalEducation": "Pendidikan Lingkungan Hidup",
+              "indigenousLocalKnowledge": "Pengetahuan Adat & Lokal",
+              "environmentalJustice": "Keadilan Lingkungan"
+            }
+          }
+        },
+        "impact": {
+          "heading": "Bagikan kisah dampak Anda.",
+          "story": {
+            "label": "Kisah Dampak Anda",
+            "description": "Ceritakan kepada kami dampak yang Anda berikan — apa yang berubah, siapa saja yang terlibat, dan bagaimana hal ini membantu. Tidak usah buru-buru. Kisah Anda membantu menginspirasi orang lain dan memverifikasi pekerjaan Anda.",
+            "info": "Beritahu kami apa yang Anda lakukan dan apa yang terjadi sebagai hasilnya",
+            "placeholder": "Jelaskan kisah dampak Anda..."
+          },
+          "shortDescription": {
+            "label": "Deskripsi Singkat",
+            "description": "Deskripsi singkat tentang kisah pengaruh Anda. Ini yang akan dijadikan gambaran singkat tentang sertifikat.",
+            "info": "Ringkas pekerjaan Anda dan hasilnya dalam beberapa baris",
+            "placeholder": "Ringkasan singkat tentang sertifikat ini.",
+            "generateTitle": "Buat deskripsi singkat dengan AI",
+            "generateDisabledTitle": "Tulis kisah pengaruh Anda terlebih dahulu"
+          }
+        },
+        "site": {
+          "heading": "Bagikan kontributor dan situs Anda.",
+          "contributors": {
+            "label": "Daftar Kontributor",
+            "description": "Tambahkan semua orang yang terlibat dalam sertifikat ini — termasuk komunitas atau organisasi Anda sendiri dan kolaborator mana pun. Tip: Mulailah dengan menambahkan grup Anda sendiri terlebih dahulu sebelum mencantumkan mitra atau pendukung Anda.",
+            "info": "Cantumkan setiap individu atau organisasi yang berkontribusi pada pekerjaan ini."
+          },
+          "boundaries": {
+            "label": "Batas Situs",
+            "description": "Harap unggah batas situs Anda dalam format GeoJSON agar kami dapat memvisualisasikan sertifikat Anda di peta.",
+            "info": "Tambahkan batasan yang paling mewakili tempat pekerjaan dilakukan.",
+            "selectHelp": "Pilih batas sertifikat ini, atau tambahkan yang baru.",
+            "manageSites": "Kelola situs",
+            "loading": "Memuat situs Anda...",
+            "loadError": "Tidak dapat memuat situs.",
+            "empty": "Tidak ada situs yang ditemukan.",
+            "addSite": "Tambahkan situs",
+            "unnamedSite": "Situs Tanpa Nama",
+            "invalidLocation": "Lokasi tidak valid"
+          },
+          "permissions": {
+            "label": "Izin",
+            "confirm": "Saya mengonfirmasi bahwa semua kontributor yang terdaftar telah memberikan izin untuk memasukkan karyanya ke dalam sertifikat ini.",
+            "terms": "Saya menyetujui Syarat & Ketentuan."
+          }
+        },
+        "submit": {
+          "signedInRequired": "Anda harus masuk untuk mempublikasikan.",
+          "prepareError": "Gagal menyiapkan data publikasi.",
+          "authenticatedTitle": "Diautentikasi",
+          "checkingAuth": "Kami sedang memeriksa apakah Anda diautentikasi.",
+          "notSignedIn": "Anda belum masuk. Harap masuk untuk melanjutkan.",
+          "failedTitle": "Gagal dipublikasikan.",
+          "publishingTitle": "Publikasikan sertifikat Anda",
+          "readyTitle": "Siap terbitkan sertifikat Anda",
+          "publishingDescription": "Kami menerbitkan sertifikat Anda.",
+          "readyDescription": "Silakan klik tombol di bawah untuk mempublikasikan sertifikat Anda.",
+          "retry": "Coba lagi",
+          "publishAction": "Publikasikan sertifikat",
+          "editDetails": "Edit detail",
+          "successTitle": "sertifikat Anda berhasil diterbitkan!",
+          "linkEvidenceNow": "Tautkan bukti sekarang",
+          "viewBumicert": "Lihat sertifikat",
+          "viewProject": "Lihat Proyek",
+          "viewProjects": "Lihat Proyek",
+          "setUpDonations": "Siapkan Donasi",
+          "shareFeedback": "Bagikan Masukan",
+          "createAnother": "Ciptakan sertifikat lain"
+        }
+      },
+      "modals": {
+        "saveDraft": {
+          "title": "Simpan sebagai Draf",
+          "description": "Simpan kemajuan Anda saat ini sebagai draf.",
+          "successDescription": "Draf Anda berhasil disimpan.",
+          "saveProgressFor": "Simpan kemajuan Anda untuk",
+          "untitledDraft": "Draf Tanpa Judul",
+          "saving": "Menyimpan...",
+          "saveAction": "Simpan Draf",
+          "savedBody": "Draf Anda telah disimpan. Anda dapat terus mengerjakannya nanti.",
+          "close": "Tutup"
+        },
+        "deleteDraft": {
+          "title": "Hapus Draf",
+          "description": "Konfirmasikan pilihan Anda untuk menghapus draf.",
+          "successDescription": "Draf telah berhasil dihapus.",
+          "missingDraftDescription": "Tidak dapat menentukan draf mana yang akan dihapus.",
+          "confirmBody": "Apakah Anda yakin ingin <destructive>menghapus</destructive> draf, <strong>{title}?</strong><br></br>Tindakan ini tidak dapat dibatalkan.",
+          "untitledDraft": "Draf Tanpa Judul",
+          "cancel": "Batalkan",
+          "deleting": "Menghapus...",
+          "deleteAction": "Hapus Draf",
+          "deletedBody": "Draf telah berhasil dihapus.",
+          "close": "Tutup"
+        },
+        "uploadLogo": {
+          "title": "Unggah Logo",
+          "description": "Unggah logo untuk akun Anda akun.",
+          "placeholder": "Unggah logo untuk akun Anda",
+          "authRequired": "Pengguna tidak diautentikasi",
+          "logoRequired": "Logo diperlukan",
+          "done": "Selesai",
+          "uploading": "Unggah...",
+          "upload": "Unggah"
+        }
+      },
+      "review": {
+        "heading": "Tinjau informasinya.",
+        "uploaded": "Unggah",
+        "notUploaded": "Tidak Diunggah",
+        "dateRange": "Dari {start} ke {end}",
+        "notSelected": "Tidak Dipilih",
+        "impactStoryAdded": "Kisah dampak ditambahkan",
+        "sitesSelected": "{count, plural, =1 {1 situs dipilih} other {# situs dipilih}}",
+        "yes": "Ya",
+        "no": "Belum ada",
+        "edit": "Ubah",
+        "missingFields": "Bidang berikut tidak ada:",
+        "fieldsWithErrors": "Bidang berikut mengalami kesalahan:",
+        "fixIssues": "Harap perbaiki masalah ini untuk melanjutkan.",
+        "allFieldsCorrect": "Semua kolom diisi dengan benar.",
+        "fix": "Perbaiki",
+        "preview": {
+          "title": "Pratinjau sertifikat Anda",
+          "missingLogo": "Akun Anda tidak memiliki logo. Apakah Anda ingin menambahkan satu?",
+          "generating": "Membuat pratinjau...",
+          "completeFirstStep": "Selesaikan langkah pertama untuk melihat pratinjau sertifikat Anda."
+        }
+      },
+      "hydration": {
+        "errorTitle": "Kesalahan",
+        "errorDescription": "Kami tidak dapat memuat data yang Anda simpan. Silakan hubungi dukungan.",
+        "close": "Tutup",
+        "back": "Kembali",
+        "coverImageTitle": "Gambar sampul tidak dapat dimuat",
+        "coverImageDescription": "Data draf Anda berhasil dipulihkan, tetapi gambar sampul tidak dapat diambil. Unggah ulang gambar sampul untuk melanjutkan.",
+        "gotIt": "Mengerti"
+      }
+    },
+    "auth": {
+      "signedOutTitle": "Anda belum masuk.",
+      "signedOutDescription": "Silakan masuk untuk membuat sertifikat.",
+      "accountErrorTitle": "Tidak dapat memuat akun Anda",
+      "accountErrorDescription": "Kami mengalami masalah saat memuat akun Anda. Silakan coba lagi.",
+      "accountSetupTitle": "Akun Anda belum disiapkan.",
+      "accountSetupDescription": "Silakan lengkapi informasi akun Anda untuk membuat sertifikat.",
+      "manageAccount": "Kelola akun saya",
+      "pleaseWait": "Mohon tunggu..."
+    }
+  }
+}

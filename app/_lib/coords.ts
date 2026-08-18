@@ -1,0 +1,309 @@
+/**
+ * Coordinate resolution for the map view.
+ *
+ * Occurrences carry decimalLatitude/Longitude directly. Sites, Projects, and Bumicerts
+ * reference `app.certified.location` records instead, so their coordinates are
+ * resolved here — a client-side port of gainforest-app's
+ * `resolveCertifiedLocationCoords` (app/_lib/projects.ts):
+ *
+ *   - inline string  → parse "lat,lon" or inline GeoJSON
+ *   - blob           → download the GeoJSON from the owner's PDS, take a centroid
+ *
+ * Sites map their DID → default-site AT-URI via
+ * `appGainforestOrganizationDefaultSite`; Bumicerts use the activity's own
+ * `locations[]` AT-URIs. Everything runs in the browser (indexer + plc +
+ * PDS are CORS-open) and is bounded by a per-blob timeout + concurrency cap so
+ * a slow community PDS never hangs the map.
+ */
+
+import { INDEXER_URL } from "./urls";
+import { resolvePdsHost } from "./pds";
+import { circleGeoJson } from "./geo-circle";
+import type { ExplorerRecord, RecordKind } from "./indexer";
+
+export type MapPoint = {
+  lat: number;
+  lon: number;
+  label: string;
+  did: string;
+  /** Set when a loaded record backs this point (so a click opens its drawer).
+   *  Unset for site pins that are not in the current loaded page. */
+  recordId?: string;
+  /** The full GeoJSON geometry behind this location, when the location is a
+   *  polygon/feature rather than a bare "lat,lon". Lets the single-record map
+   *  draw the real boundary instead of only a centroid pin. */
+  geojson?: GeoJSON.GeoJSON | null;
+};
+
+/** Centroid + (optionally) the raw GeoJSON a location resolved from. */
+export type ResolvedLocation = { lat: number; lon: number; geojson?: GeoJSON.GeoJSON | null };
+
+export function mapTileUrl(dark: boolean): string {
+  return `https://{s}.basemaps.cartocdn.com/${dark ? "dark_all" : "light_all"}/{z}/{x}/{y}{r}.png`;
+}
+
+// ── GeoJSON centroid + inline string parsing (ported) ──────────────────────
+
+function centroidFromGeoJson(g: unknown): { lat: number; lon: number } | null {
+  if (!g || typeof g !== "object") return null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- GeoJSON is deeply variadic
+  const geo = g as any;
+  if (geo.type === "Feature") return centroidFromGeoJson(geo.geometry);
+  if (geo.type === "FeatureCollection") {
+    for (const f of geo.features ?? []) {
+      const c = centroidFromGeoJson(f?.geometry);
+      if (c) return c;
+    }
+    return null;
+  }
+  if (geo.type === "Point" && Array.isArray(geo.coordinates)) {
+    const [lon, lat] = geo.coordinates;
+    return Number.isFinite(lon) && Number.isFinite(lat) ? { lon, lat } : null;
+  }
+  let ring: unknown[] | undefined;
+  if (geo.type === "Polygon") ring = geo.coordinates?.[0];
+  else if (geo.type === "MultiPolygon") ring = geo.coordinates?.[0]?.[0];
+  if (!Array.isArray(ring) || ring.length === 0) return null;
+  let sx = 0;
+  let sy = 0;
+  let n = 0;
+  for (const p of ring) {
+    if (Array.isArray(p) && p.length >= 2 && Number.isFinite(p[0]) && Number.isFinite(p[1])) {
+      sx += p[0] as number;
+      sy += p[1] as number;
+      n++;
+    }
+  }
+  return n ? { lon: sx / n, lat: sy / n } : null;
+}
+
+function parseInlineLocationString(str: string): ResolvedLocation | null {
+  const trimmed = str.trim();
+  const m = trimmed.match(/^(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)$/);
+  if (m) {
+    const lat = Number(m[1]);
+    const lon = Number(m[2]);
+    if (Number.isFinite(lat) && Number.isFinite(lon)) return { lat, lon, geojson: null };
+  }
+  try {
+    const parsed = JSON.parse(trimmed);
+    const centroid = centroidFromGeoJson(parsed);
+    if (centroid) return { ...centroid, geojson: parsed as GeoJSON.GeoJSON };
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+// ── Certified-location → coordinates ───────────────────────────────────────
+
+const CERT_LOC_QUERY = `
+  query MapCertifiedLocByUri($uri: String!) {
+    appCertifiedLocationByUri(uri: $uri) {
+      did
+      certifiedProfileData { displayName }
+      location {
+        __typename
+        ... on AppCertifiedLocationString { string }
+        ... on OrgHypercertsDefsSmallBlob { blob { ref } }
+      }
+    }
+  }
+`;
+
+const locCache = new Map<string, ResolvedLocation | null>();
+
+export async function resolveCertifiedLocationCoords(
+  uri: string,
+  signal?: AbortSignal,
+): Promise<ResolvedLocation | null> {
+  if (locCache.has(uri)) return locCache.get(uri) ?? null;
+  let result: ResolvedLocation | null = null;
+  try {
+    const res = await fetch(INDEXER_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ query: CERT_LOC_QUERY, variables: { uri } }),
+      signal,
+    });
+    const json = (await res.json()) as {
+      data?: {
+        appCertifiedLocationByUri?: {
+          did?: string;
+          certifiedProfileData?: { displayName?: string | null } | null;
+          location?:
+            | { __typename: "AppCertifiedLocationString"; string?: string | null }
+            | { __typename: "OrgHypercertsDefsSmallBlob"; blob?: { ref?: string | null } | null }
+            | null;
+        } | null;
+      };
+    };
+    const node = json.data?.appCertifiedLocationByUri;
+    const loc = node?.location;
+    if (loc?.__typename === "AppCertifiedLocationString" && loc.string) {
+      result = parseInlineLocationString(loc.string);
+    } else if (loc?.__typename === "OrgHypercertsDefsSmallBlob" && loc.blob?.ref && node?.did) {
+      const host = await resolvePdsHost(node.did, signal);
+      if (host) {
+        const r = await fetch(
+          `https://${host}/xrpc/com.atproto.sync.getBlob?did=${encodeURIComponent(
+            node.did,
+          )}&cid=${encodeURIComponent(loc.blob.ref)}`,
+          { signal: signal ?? AbortSignal.timeout(5000) },
+        );
+        // Blobs are either GeoJSON (bumicert sites) or plain "lat,lon" text
+        // (certified `coordinate-decimal` locations); parse both.
+        if (r.ok) result = parseInlineLocationString(await r.text());
+      }
+    }
+  } catch (err) {
+    if ((err as Error).name === "AbortError") throw err;
+    result = null;
+  }
+  locCache.set(uri, result);
+  return result;
+}
+
+// ── Public: resolve points for records ────────────────────────────────────
+
+/**
+ * GeoJSON circle for an occurrence whose coordinates carry a Darwin Core
+ * `coordinateUncertaintyInMeters` — i.e. the location is an *area*, not a point
+ * (privacy-generalised observations set this to the obscuring radius). The
+ * circle is derived on the fly from the centroid + radius; nothing custom is
+ * stored on the record.
+ */
+function occurrenceUncertaintyCircle(
+  record: Extract<ExplorerRecord, { kind: "occurrence" }>,
+): GeoJSON.GeoJSON | null {
+  if (record.lat == null || record.lon == null) return null;
+  const radius = record.coordinateUncertaintyInMeters;
+  if (typeof radius !== "number" || !Number.isFinite(radius) || radius <= 0) return null;
+  return circleGeoJson(record.lat, record.lon, radius);
+}
+
+export async function resolvePointForRecord(
+  record: ExplorerRecord,
+  signal?: AbortSignal,
+): Promise<MapPoint | null> {
+  if (record.kind === "occurrence") {
+    if (record.lat == null || record.lon == null) return null;
+    return {
+      lat: record.lat,
+      lon: record.lon,
+      label: record.scientificName || record.vernacularName || "Unidentified",
+      did: record.did,
+      recordId: record.id,
+      geojson: occurrenceUncertaintyCircle(record),
+    };
+  }
+
+  if (record.kind === "bumicert") {
+    const locationUri = record.locationUris[0];
+    if (!locationUri) return null;
+    const coords = await resolveCertifiedLocationCoords(locationUri, signal);
+    return coords ? { ...coords, label: record.title, did: record.did, recordId: record.id } : null;
+  }
+
+  if (record.kind === "project") {
+    if (!record.locationUri) return null;
+    const coords = await resolveCertifiedLocationCoords(record.locationUri, signal);
+    return coords ? { ...coords, label: record.title, did: record.did, recordId: record.id } : null;
+  }
+
+  if (!record.locationUri) return null;
+  const coords = await resolveCertifiedLocationCoords(record.locationUri, signal);
+  return coords ? { ...coords, label: record.name, did: record.did, recordId: record.id } : null;
+}
+
+const CONCURRENCY = 6;
+
+async function runLimited(tasks: Array<() => Promise<void>>, signal?: AbortSignal) {
+  let i = 0;
+  async function worker() {
+    while (i < tasks.length) {
+      if (signal?.aborted) return;
+      await tasks[i++]!();
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, tasks.length) }, worker));
+}
+
+/**
+ * Resolve map points for a set of records, emitting via `onProgress` as they
+ * land. Occurrences resolve instantly from their own coordinates; sites and
+ * bumicerts resolve their certified locations in the background.
+ */
+export async function resolvePointsFor(
+  records: ExplorerRecord[],
+  kind: RecordKind,
+  opts: { onProgress?: (points: MapPoint[]) => void; signal?: AbortSignal } = {},
+): Promise<MapPoint[]> {
+  const { onProgress, signal } = opts;
+  const points: MapPoint[] = [];
+
+  if (kind === "occurrence") {
+    for (const r of records) {
+      if (r.kind === "occurrence" && r.lat != null && r.lon != null) {
+        points.push({
+          lat: r.lat,
+          lon: r.lon,
+          label: r.scientificName || r.vernacularName || "Unidentified",
+          did: r.did,
+          recordId: r.id,
+          geojson: occurrenceUncertaintyCircle(r),
+        });
+      }
+    }
+    onProgress?.([...points]);
+    return points;
+  }
+
+  if (kind === "bumicert") {
+    const targets = records.filter(
+      (r): r is Extract<ExplorerRecord, { kind: "bumicert" }> =>
+        r.kind === "bumicert" && r.locationUris.length > 0,
+    );
+    const tasks = targets.map((r) => async () => {
+      const coords = await resolveCertifiedLocationCoords(r.locationUris[0], signal);
+      if (coords) {
+        points.push({ ...coords, label: r.title, did: r.did, recordId: r.id });
+        onProgress?.([...points]);
+      }
+    });
+    await runLimited(tasks, signal);
+    return points;
+  }
+
+  if (kind === "project") {
+    const targets = records.filter(
+      (r): r is Extract<ExplorerRecord, { kind: "project" }> =>
+        r.kind === "project" && Boolean(r.locationUri),
+    );
+    const tasks = targets.map((r) => async () => {
+      const coords = await resolveCertifiedLocationCoords(r.locationUri!, signal);
+      if (coords) {
+        points.push({ ...coords, label: r.title, did: r.did, recordId: r.id });
+        onProgress?.([...points]);
+      }
+    });
+    await runLimited(tasks, signal);
+    return points;
+  }
+
+  // Organizations carry their own `app.certified.location` reference, so resolve
+  // each loaded organization's coordinates directly.
+  const siteRecords = records.filter(
+    (r): r is Extract<ExplorerRecord, { kind: "site" }> => r.kind === "site",
+  );
+  const certTargets = siteRecords.filter((r) => r.locationUri);
+  const tasks = certTargets.map((r) => async () => {
+    const coords = await resolveCertifiedLocationCoords(r.locationUri!, signal);
+    if (coords) {
+      points.push({ ...coords, label: r.name, did: r.did, recordId: r.id });
+      onProgress?.([...points]);
+    }
+  });
+  await runLimited(tasks, signal);
+  return points;
+}

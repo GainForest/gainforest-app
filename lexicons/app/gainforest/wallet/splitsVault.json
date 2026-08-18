@@ -1,0 +1,44 @@
+{
+  "lexicon": 1,
+  "id": "app.gainforest.wallet.splitsVault",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "LEGACY — superseded by app.gainforest.wallet.primary; existing records are still read and are migrated to the primary collection on their next write. An organization's shared donation wallet: a Splits SmartVault (ERC-4337 passkey multisig) whose address is derived deterministically with CREATE2 from the organization DID and the founding signer set. Because owner, signers, threshold, and the salt scheme are all recorded here, anyone can recompute SmartVaultFactory.getAddress(...) and verify that `address` really belongs to this organization — the derivation is the proof; no signature is needed. Fixed rkey `self`: one canonical wallet per organization. While no code exists at the address the signer set may still change (the address is re-derived); once the vault is deployed on-chain this record is frozen and signer changes happen on-chain.",
+      "key": "literal:self",
+      "record": {
+        "type": "object",
+        "required": ["address", "factory", "chainId", "owner", "threshold", "saltScheme", "signers", "createdAt"],
+        "properties": {
+          "name": { "type": "string", "maxLength": 800, "maxGraphemes": 80, "description": "Plain-language wallet label." },
+          "address": { "type": "string", "description": "Predicted deterministic vault address (0x…, 20 bytes)." },
+          "factory": { "type": "string", "description": "SmartVaultFactory address the prediction was made against." },
+          "chainId": { "type": "integer", "description": "EVM chain id the donation flow settles on (the address is identical on every chain where the factory is deployed)." },
+          "owner": { "type": "string", "description": "The vault's Ownable superuser slot. Always the zero address: only the signer set controls the vault." },
+          "threshold": { "type": "integer", "minimum": 1, "description": "Number of signer approvals required per operation." },
+          "saltScheme": { "type": "string", "description": "Versioned salt derivation label; the CREATE2 salt is keccak256(saltScheme + ':' + organization DID)." },
+          "signers": {
+            "type": "array",
+            "minLength": 1,
+            "items": { "type": "ref", "ref": "#passkeySigner" },
+            "description": "Founding signer set, in derivation order — a CREATE2 input."
+          },
+          "createdAt": { "type": "string", "format": "datetime" }
+        }
+      }
+    },
+    "passkeySigner": {
+      "type": "object",
+      "required": ["kind", "publicKeyX", "publicKeyY", "credentialId", "memberDid", "addedAt"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["passkey"] },
+        "publicKeyX": { "type": "string", "description": "32-byte hex, secp256r1 public key X coordinate (SmartVault Signer slot1)." },
+        "publicKeyY": { "type": "string", "description": "32-byte hex, secp256r1 public key Y coordinate (SmartVault Signer slot2)." },
+        "credentialId": { "type": "string", "description": "WebAuthn credential id (base64url) so the member's browser can find the passkey again." },
+        "memberDid": { "type": "string", "format": "did", "description": "DID of the organization member this passkey belongs to." },
+        "label": { "type": "string", "maxLength": 800, "maxGraphemes": 80, "description": "Plain-language signer label." },
+        "addedAt": { "type": "string", "format": "datetime" }
+      }
+    }
+  }
+}

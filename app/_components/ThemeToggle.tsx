@@ -1,21 +1,22 @@
 "use client";
 
+import { MoonIcon, SunIcon } from "lucide-react";
 import { useEffect, useState, type MouseEvent } from "react";
+import { Button } from "@/components/ui/button";
 
-// Light/dark toggle with a circular View-Transition reveal (ported verbatim
-// from gainforest-explorer's ThemeToggle, which itself came from
+// Light/dark toggle with a circular View-Transition reveal (ported from
 // broadlistening-frontend). On click we set the new theme inside
 // `document.startViewTransition(...)` and grow a `clip-path: circle()` on
 // `::view-transition-new(root)` out from the click origin, so the new theme
 // wipes in radially. Falls back to an instant swap when the API is missing
 // (Firefox / older Safari) or the user prefers reduced motion. The pre-paint
-// class is set by the inline THEME_INIT script in layout (no FOUC).
+// class is set by the inline script in layout (no FOUC).
 
-const STORAGE_KEY = "gainforest-theme";
+const STORAGE_KEY = "bumicerts-theme";
 const RIPPLE_DURATION_MS = 1200;
 
 type DocWithVT = Document & {
-  startViewTransition?: (cb: () => void) => { ready: Promise<void> };
+  startViewTransition?: (cb: () => void) => { ready: Promise<void>; finished: Promise<void> };
 };
 
 function applyTheme(dark: boolean) {
@@ -61,8 +62,14 @@ function runThemeTransition(
   const root = document.documentElement;
   root.style.setProperty("--theme-ripple-x", `${origin.x}px`);
   root.style.setProperty("--theme-ripple-y", `${origin.y}px`);
+  // Scopes the ripple's ::view-transition rules (globals.css) to this
+  // transition so they never clip a navigation view transition.
+  root.classList.add("vt-theme-ripple");
 
   const transition = doc.startViewTransition!(update);
+  transition.finished
+    .catch(() => {})
+    .then(() => root.classList.remove("vt-theme-ripple"));
   transition.ready
     .then(() => {
       root.animate(
@@ -101,43 +108,18 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
   };
 
   return (
-    <button
+    <Button
       type="button"
+      variant="outline"
+      size="icon"
       onClick={toggle}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       aria-pressed={mounted ? isDark : undefined}
       title={isDark ? "Light mode" : "Dark mode"}
-      className={`inline-flex h-9 w-9 items-center justify-center rounded-full border border-border-soft text-foreground/75 transition-colors hover:border-foreground/35 hover:text-foreground ${className}`}
+      className={className}
     >
       {/* Default to the moon (light mode) until mounted to match SSR. */}
-      {mounted && isDark ? <SunIcon /> : <MoonIcon />}
-    </button>
-  );
-}
-
-function MoonIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function SunIcon() {
-  return (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="12" cy="12" r="4.2" stroke="currentColor" strokeWidth="1.7" />
-      <path
-        d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-      />
-    </svg>
+      {mounted && isDark ? <SunIcon aria-hidden /> : <MoonIcon aria-hidden />}
+    </Button>
   );
 }

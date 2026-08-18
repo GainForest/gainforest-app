@@ -1,0 +1,30 @@
+{
+  "metadata": {
+    "title": "Changelog",
+    "description": "Every change shipped to GainForest, visualized over time."
+  },
+  "eyebrow": "What's new",
+  "heading": "GainForest v{version}",
+  "intro": "A living timeline of everything we've shipped — new features, refinements, and fixes, grouped by month and colour-coded by area.",
+  "stats": {
+    "commits": "Changes",
+    "months": "Months",
+    "range": "Span"
+  },
+  "filterLabel": "Filter by area",
+  "all": "Everything",
+  "shipped": "{count, plural, one {# change} other {# changes}}",
+  "categories": {
+    "taina": "Tainá",
+    "dataJobs": "Data batches",
+    "donations": "Donations",
+    "observations": "Observations",
+    "projects": "Projects & orgs",
+    "auth": "Accounts & sign-in",
+    "admin": "Admin & review",
+    "i18n": "Languages",
+    "ui": "Design & UI",
+    "fix": "Fixes",
+    "core": "Core platform"
+  }
+}

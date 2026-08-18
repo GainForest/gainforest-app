@@ -1,104 +1,123 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Design tokens keep the shadcn-compatible slots and sage primary ported
-   from ../bumicerts-clean-rewrite/app/globals.css, while restoring the warm
-   cream surfaces from the pre-June 2026 gainforest.earth palette.
+   GainForest — GainForest design system tokens.
 
-   Compatibility aliases (`--border-soft`, `--surface`, `--surface-sunken`,
-   `--brand`, `--ink*`) keep this app's existing components themed without
-   a mechanical class rename. `--brand` maps onto the sage primary; the mint
-   #2fce8a remains retired.
-
-   Headlines: tall serif (Cormorant Garamond), with italic emphasis on
-   a single key word — never a whole line.
-   Buttons: full-pill (border-radius: 9999px).
-   Rhythm: mostly light sections with two deliberate near-black `--ink`
-   beats (DataCommons + closing Footer), unchanged from before.
+   Mirrored from ../bumicerts-monorepo/apps/bumicerts/app/globals.css: stark
+   white/ink surfaces, oklch sage primary, shadcn-compatible card/muted/accent
+   slots, and the same radius + typography registrations. Compatibility aliases
+   keep the explorer-specific card, map, and status components themed without a
+   large mechanical class rename.
 ────────────────────────────────────────────────────────────────────────── */
 
 :root {
-  /* Warm cream palette restored from the pre-June 2026 landing. */
-  --background: #f4efe4;
-  --foreground: #1c1c1a;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
 
-  --card: #fbf8f0;
-  --card-foreground: #1c1c1a;
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
 
-  --popover: #fbf8f0;
-  --popover-foreground: #1c1c1a;
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
 
   --primary: oklch(0.5 0.0719 157.12);
   --primary-dark: oklch(0.42 0.0719 157.12);
-  --primary-foreground: #fafafa;
+  --primary-foreground: oklch(0.985 0 0);
 
-  --secondary: #efe9da;
-  --secondary-foreground: #1c1c1a;
+  --secondary: oklch(0.97 0.003 264.54);
+  --secondary-foreground: oklch(0.205 0 0);
 
-  --muted: #efe9da;
-  --muted-foreground: #5b5b56;
+  --muted: oklch(0.97 0.003 264.54);
+  --muted-foreground: oklch(0.48 0.012 264.54);
 
-  --accent: #e7e5d8;
+  --accent: oklch(0.97 0.0209 147.64);
   --accent-foreground: oklch(0.3 0.04 157);
 
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: #fafafa;
+  /* Muted highlight ramp — the low end of the one green ramp (sage hue 157),
+     for surfaces that mark a row without competing with its content:
+     whisper = unread row, highlight = pinned card. The ramp *inverts* in dark
+     rather than mirroring (see .dark) — a 0.99 tint would be a white slab on
+     near-black. */
+  --whisper: oklch(0.99 0.006 157.12);
+  --highlight: oklch(0.975 0.012 157.12);
 
-  --border: #d9d3c3;
-  --input: #d9d3c3;
+  /* The pinned-card treatment, assembled from the ramp. Light takes the
+     whisper step, dark takes highlight (see .dark) — the fill alone is only
+     ~1.03:1 against the page, so the rail is what actually carries the
+     "pinned" read. */
+  --pinned: var(--whisper);
+  --pinned-hover: var(--highlight);
+  --pinned-border: oklch(0.905 0.017 157.12);
+
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+
+  --border: oklch(0.922 0.004 286.32);
+  --input: oklch(0.922 0.004 286.32);
   --ring: oklch(0.5 0.0719 157.12 / 0.3);
 
   --radius: 0.75rem;
 
-  /* Legacy gainforest-app aliases, mapped onto the current token slots. */
+  /* Bumicerts legacy aliases, now mapped onto the GainForest system. */
   --border-soft: var(--border);
   --surface: var(--card);
   --surface-sunken: var(--muted);
   --brand: var(--primary);
   --brand-dark: var(--primary-dark);
-  --ink: #141413;
-  --ink-foreground: #f4efe4;
-  --ink-muted: #a8a59a;
-  --ink-border: #2a2a27;
+  --ink: oklch(0.08 0 0);
+  --ink-foreground: oklch(0.93 0 0);
+  --ink-muted: oklch(0.65 0.01 264.54);
+  --ink-border: oklch(1 0 0 / 0.08);
+
+  --ok: oklch(0.58 0.12 157);
+  --warn: oklch(0.72 0.13 78);
+  --down: oklch(0.62 0.19 28);
 
   color-scheme: light;
 }
 
-/* ──────────────────────────────────────────────────────────────────────────
-   Dark mode — same block as bumicerts-clean-rewrite: neutral near-black
-   surfaces with the sage primary lifted one step for legibility. Toggled
-   by adding `.dark` to <html> (see ThemeToggle + the no-FOUC script in
-   layout). The already-dark sections (DataCommons, Footer) keep using the
-   `--ink` tokens, which stay near-black in both themes.
-────────────────────────────────────────────────────────────────────────── */
 .dark {
-  --background: #141413;
-  --foreground: #f1ece1;
+  --background: oklch(0.08 0 0);
+  --foreground: oklch(0.93 0 0);
 
-  --card: #1c1c1a;
-  --card-foreground: #f1ece1;
+  --card: oklch(0.12 0 0);
+  --card-foreground: oklch(0.93 0 0);
 
-  --popover: #1c1c1a;
-  --popover-foreground: #f1ece1;
+  --popover: oklch(0.12 0 0);
+  --popover-foreground: oklch(0.93 0 0);
 
   --primary: oklch(0.58 0.0751 159.05);
   --primary-dark: oklch(0.66 0.0751 159.05);
   --primary-foreground: oklch(0.93 0 0);
 
-  --secondary: #26251f;
-  --secondary-foreground: #f1ece1;
+  --secondary: oklch(0.18 0.005 264.54);
+  --secondary-foreground: oklch(0.93 0 0);
 
-  --muted: #26251f;
-  --muted-foreground: #a8a59a;
+  --muted: oklch(0.16 0.005 264.54);
+  --muted-foreground: oklch(0.65 0.01 264.54);
 
-  --accent: #2a3029;
+  --accent: oklch(0.2 0.02 157);
   --accent-foreground: oklch(0.75 0.08 157);
 
-  --destructive: oklch(0.65 0.22 27.325);
-  --destructive-foreground: #141413;
+  /* Inverted, not mirrored: both lift *up* off the 0.12 card by 2-4 points of
+     lightness instead of sinking toward white. */
+  --whisper: oklch(0.145 0.008 157.12);
+  --highlight: oklch(0.165 0.016 157.12);
 
-  --border: #2c2c28;
-  --input: #2c2c28;
+  /* Dark starts a rung higher (highlight, not whisper) and leans harder on the
+     rail, because a 1px hairline at 8% white is nearly invisible here. */
+  --pinned: var(--highlight);
+  --pinned-hover: var(--accent);
+  --pinned-border: oklch(0.345 0.043 157.12);
+
+  --destructive: oklch(0.65 0.22 27.325);
+  --destructive-foreground: oklch(0.08 0 0);
+
+  --border: oklch(1 0 0 / 0.08);
+  --input: oklch(1 0 0 / 0.08);
   --ring: oklch(0.58 0.0751 159.05 / 0.3);
 
   --border-soft: var(--border);
@@ -106,12 +125,21 @@
   --surface-sunken: var(--muted);
   --brand: var(--primary);
   --brand-dark: var(--primary-dark);
-  --ink: #141413;
-  --ink-foreground: #f4efe4;
-  --ink-muted: #a8a59a;
-  --ink-border: #2a2a27;
+  --ink: oklch(0.08 0 0);
+  --ink-foreground: oklch(0.93 0 0);
+  --ink-muted: oklch(0.65 0.01 264.54);
+  --ink-border: oklch(1 0 0 / 0.08);
+
+  --ok: oklch(0.64 0.13 157);
+  --warn: oklch(0.76 0.13 78);
+  --down: oklch(0.68 0.18 28);
 
   color-scheme: dark;
+}
+
+@theme {
+  --breakpoint-xs: 30rem;
+  --animate-spin-slow: spin 8s linear infinite;
 }
 
 @theme inline {
@@ -130,6 +158,11 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-whisper: var(--whisper);
+  --color-highlight: var(--highlight);
+  --color-pinned: var(--pinned);
+  --color-pinned-hover: var(--pinned-hover);
+  --color-pinned-border: var(--pinned-border);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
@@ -144,10 +177,15 @@
   --color-ink-border: var(--ink-border);
   --color-surface: var(--surface);
   --color-surface-sunken: var(--surface-sunken);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-down: var(--down);
 
-  --font-sans: var(--font-sans), system-ui, sans-serif;
-  --font-garamond: var(--font-garamond), Georgia, serif;
-  --font-instrument: var(--font-instrument), Georgia, serif;
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-serif: var(--font-garamond-var), Georgia, serif;
+  --font-garamond: var(--font-garamond-var), Georgia, serif;
+  --font-instrument: var(--font-instrument-serif-var), Georgia, serif;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -162,18 +200,94 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Mobile browsers otherwise allow a loose horizontal rubber-band when
+   decorative absolutely-positioned art (hero backdrops, coverflow side
+   cards, floating chat bubbles) pokes past the viewport edge. `clip` — not
+   `hidden` — forbids horizontal panning without creating a scroll container,
+   so vertical scrolling and position: sticky are unaffected. */
+html,
+body {
+  overflow-x: clip;
+}
+
 html,
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
-/* Smooth surface swap on theme toggle (bumicerts-clean-rewrite). */
 body {
   transition:
     background-color 0.3s ease,
     color 0.3s ease;
+}
+
+/* Radix Dialog sets pointer-events: none on <body> while an app modal is open.
+   RainbowKit renders its wallet modal in a separate portal, so force it to
+   remain clickable when opened from donation and wallet-linking modals. */
+[data-rk],
+[data-rk] * {
+  pointer-events: auto;
+}
+
+/* …which unfortunately covers the whole app, so anything that has to stay
+   out of the pointer's way — chart tooltips drawn under the cursor — needs to
+   say so louder, including its children. */
+[data-chart-tooltip],
+[data-chart-tooltip] * {
+  pointer-events: none !important;
+}
+
+/* Theme-toggle ripple. Scoped under `html.vt-theme-ripple` (set by the
+   ThemeToggle for the duration of its transition) so these rules never leak
+   into navigation view transitions, which would clip the incoming page to an
+   invisible 0px circle. */
+html.vt-theme-ripple::view-transition-group(root),
+html.vt-theme-ripple::view-transition-old(root),
+html.vt-theme-ripple::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+html.vt-theme-ripple::view-transition-old(root) {
+  z-index: 1;
+}
+html.vt-theme-ripple::view-transition-new(root) {
+  z-index: 2;
+  clip-path: circle(
+    0px at var(--theme-ripple-x, 0px) var(--theme-ripple-y, 0px)
+  );
+}
+
+/* Cross-route view transitions (project card → project page). `html.vt-nav`
+   is set by useViewTransitionNavigate for the duration of the flight. The
+   detail hero opts into the shared morph only while a navigation transition
+   is running, so the theme ripple never sees stray named elements. */
+html.vt-nav [data-vt-project-media] {
+  view-transition-name: var(--vt-project-media);
+  view-transition-class: project-media;
+}
+html.vt-nav::view-transition-old(root),
+html.vt-nav::view-transition-new(root) {
+  animation-duration: 0.32s;
+}
+/* The flying photo: cover-fit both snapshots so the portrait card photo
+   morphs into the wide hero without stretching. */
+html.vt-nav::view-transition-group(.project-media) {
+  animation-duration: 0.42s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+html.vt-nav::view-transition-image-pair(.project-media) {
+  isolation: auto;
+}
+html.vt-nav::view-transition-old(.project-media),
+html.vt-nav::view-transition-new(.project-media) {
+  animation: none;
+  mix-blend-mode: normal;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  overflow: clip;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -182,176 +296,684 @@ body {
   }
 }
 
-* {
-  border-color: var(--border);
+@layer base {
+  * {
+    border-color: var(--border);
+  }
 }
 
-/* ── View Transition: circular reveal on theme toggle ───────────────────
-   Ported verbatim from gainforest-explorer (originally broadlistening /
-   bumicerts-monorepo). ThemeToggle sets --theme-ripple-x/y to the click
-   origin and calls document.startViewTransition(...); this block disables
-   the default cross-fade, layers the new theme above the old, and starts its
-   clip-path as a 0px circle at that origin so an inline Web Animation can
-   grow the circle out to the far viewport corner (~1.2s) for a clean radial
-   wipe. */
-::view-transition-group(root),
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-::view-transition-old(root) {
-  z-index: 1;
-}
-::view-transition-new(root) {
-  z-index: 2;
-  clip-path: circle(
-    0px at var(--theme-ripple-x, 0px) var(--theme-ripple-y, 0px)
-  );
+/* Editorial brushed underline — single arced cubic curve, ported verbatim
+   from the GainForest "Real Communities" hero the way gainforest-app's
+   BrushedText does it. */
+.brush-svg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.5rem;
+  height: 1rem;
+  width: 100%;
+  overflow: visible;
+  color: var(--primary);
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* ---------------------------------------------------------------------------
-   Monochrome partner / award logo treatment (AwardsStrip, Supporters,
-   AboutRecognition). On light surfaces dark silhouettes multiply onto the
-   background — but multiply drowns dark marks on the near-black dark theme,
-   so `.dark` flips the recipe: invert to light silhouettes and screen them
-   onto the ink.
+   Live-record fade-in. New cards in the explorer grids and dashboard rows
+   ease up a few px so a freshly loaded page doesn't pop. Respects reduced
+   motion.
 --------------------------------------------------------------------------- */
-.logo-mono {
-  filter: grayscale(1) contrast(1.05);
-  mix-blend-mode: multiply;
-}
-.dark .logo-mono {
-  filter: grayscale(1) invert(1) contrast(1.05);
-  mix-blend-mode: screen;
-}
-
-/* Full-colour logos (the XPRIZE Rainforest lockup) keep their colours on
-   light surfaces but collapse to a white silhouette on the dark theme,
-   where their dark navy wordmark would otherwise vanish. */
-.dark .logo-dark-invert {
-  filter: brightness(0) invert(1);
-}
-
-/* Awards strip logo marquee — inert logos drifting slowly from right
-   to left in one continuous loop. Replaces the earlier swipeable
-   overflow-scroll carousel; the marquee reads as a calmer credibility
-   band that animates itself rather than waiting for a swipe.
-
-   The track contains TWO identical copies of the logo set rendered
-   inline with no flex `gap` and a uniform `margin-right` on every
-   item (including the trailing item of each copy). That means the
-   total track width is exactly `2 * (sum of items + N * margin)`, so
-   `transform: translateX(-50%)` lands the first item of the duplicate
-   copy exactly where the first item of the original sat — a perfectly
-   seamless loop with no visible jump at the boundary. Animation is
-   GPU-friendly (`translate3d`) and pauses on hover / keyboard focus.
-*/
-.awards-marquee {
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    transparent 0,
-    #000 28px,
-    #000 calc(100% - 28px),
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    90deg,
-    transparent 0,
-    #000 28px,
-    #000 calc(100% - 28px),
-    transparent 100%
-  );
-}
-
-.awards-marquee-track {
-  display: flex;
-  align-items: center;
-  width: max-content;
-  animation: awards-marquee-scroll 50s linear infinite;
-  will-change: transform;
-}
-
-.awards-marquee:hover .awards-marquee-track,
-.awards-marquee:focus-within .awards-marquee-track {
-  animation-play-state: paused;
-}
-
-@keyframes awards-marquee-scroll {
+@keyframes fade-in-up {
   from {
-    transform: translate3d(0, 0, 0);
+    opacity: 0;
+    transform: translateY(8px);
   }
   to {
-    transform: translate3d(-50%, 0, 0);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .awards-marquee-track {
-    animation: none;
+.animate-in {
+  animation: fade-in-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.quick-popover-in {
+  animation: panelIn 120ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes drawerIn {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
   }
 }
 
-/* QuickLikeButton — one-shot pop when a heart flips to liked. The
-   class is applied per-click and removed on animationend, so unlike
-   stays quiet. */
-.gf-heart-pop {
-  animation: gf-heart-pop 0.35s cubic-bezier(0.2, 1.4, 0.4, 1);
+@keyframes panelIn {
+  from {
+    transform: translateY(8px) scale(0.99);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }
 
-@keyframes gf-heart-pop {
+/* Quick-like heart — a short celebratory pop when a thumbnail is liked. */
+@keyframes quick-like-pop {
   0% {
-    transform: scale(0.7);
+    transform: scale(1);
   }
-  55% {
-    transform: scale(1.3);
+  40% {
+    transform: scale(1.35);
   }
   100% {
     transform: scale(1);
   }
 }
 
+.animate-quick-like-pop {
+  animation: quick-like-pop 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .gf-heart-pop {
+  .animate-in,
+  .quick-popover-in,
+  .animate-quick-like-pop {
     animation: none;
   }
 }
 
-/* Awards & press card carousel — hide scrollbars and keep only a very
-   soft horizontal edge fade. The rail has top/bottom padding in
-   Media.tsx so hover-lift borders and shadows stay inside the scroll
-   port instead of being clipped. */
-.media-card-carousel {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    transparent 0,
-    #000 18px,
-    #000 calc(100% - 18px),
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    90deg,
-    transparent 0,
-    #000 18px,
-    #000 calc(100% - 18px),
-    transparent 100%
-  );
+/* Status / live pulse dot — soft breathing halo, used for the LIVE badges
+   and the operational status indicator. */
+@keyframes live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 currentColor;
+  }
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 22%, transparent);
+  }
 }
 
-.media-card-carousel::-webkit-scrollbar {
+.pulse-dot {
+  animation: live-pulse 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-dot {
+    animation: none;
+  }
+}
+
+/* Skeleton shimmer for loading cards. */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-sunken) 25%,
+    color-mix(in srgb, var(--surface-sunken) 60%, #fff) 37%,
+    var(--surface-sunken) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+/* Skeletons on the globe's translucent glass panels: the default near-white
+   .skeleton washes out over the map, so tint with the foreground for a visible
+   grey. Foreground-based so it reads correctly in both light and dark. */
+.globe-glass .skeleton {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--foreground) 10%, transparent) 25%,
+    color-mix(in srgb, var(--foreground) 17%, transparent) 37%,
+    color-mix(in srgb, var(--foreground) 10%, transparent) 63%
+  );
+  background-size: 200% 100%;
+}
+
+.sidebar-skeleton {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--foreground) 9%, transparent) 25%,
+    color-mix(in srgb, var(--foreground) 14%, transparent) 37%,
+    color-mix(in srgb, var(--foreground) 9%, transparent) 63%
+  );
+  background-size: 200% 100%;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+
+/* BioBlitz photo wall — two rows of square cards auto-scrolling in opposite
+   directions. Each row renders its cards twice so the -50% translate loops
+   seamlessly; the marquee pauses while hovered. */
+@keyframes bioblitz-marquee-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes bioblitz-marquee-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.bioblitz-marquee-track {
+  will-change: transform;
+}
+.bioblitz-marquee-left {
+  animation: bioblitz-marquee-left var(--bioblitz-marquee-duration, 64s) linear infinite;
+}
+.bioblitz-marquee-right {
+  animation: bioblitz-marquee-right var(--bioblitz-marquee-duration, 64s) linear infinite;
+}
+.bioblitz-marquee:hover .bioblitz-marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bioblitz-marquee-left,
+  .bioblitz-marquee-right {
+    animation: none;
+  }
+}
+
+/* Hide scrollbars on horizontal rails (tab strips, chips) while keeping
+   keyboard + swipe scroll. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 
-/* Mobile nav drawer — slide in from the right */
-@keyframes drawerIn {
-  from { transform: translateX(20px); opacity: 0; }
-  to   { transform: translateX(0);    opacity: 1; }
+/* Detail drawer + scrim. The drawer slides from the right and the body
+   beneath it dims. */
+@keyframes scrimIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes sheetIn {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+.drawer-scrim {
+  animation: scrimIn 0.2s ease-out both;
+}
+.drawer-sheet {
+  animation: sheetIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .drawer-scrim,
+  .drawer-sheet {
+    animation: none;
+  }
 }
 
-/* (The react-globe.gl skeleton + .scene-tooltip overrides that lived
-   here were removed in July 2026 with <LiveGlobe> itself — every globe
-   now runs the MapLibre port in `_components/partners-globe/`, whose
-   popup styling lives in that folder's globe.css.) */
+/* Custom scrollbar inside the detail drawer / JSON view. */
+.thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.thin-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+}
+
+/* ── GainForest account/profile animations ─────────────────────────────── */
+.scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+.scroll-mask-right {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent);
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+}
+
+@keyframes org-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes org-fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.org-animate {
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+  animation-duration: 0.6s;
+}
+.org-fade-in { animation-name: org-fade-in; }
+.org-fade-in-up { animation-name: org-fade-in-up; }
+.org-delay-0 { animation-delay: 0s; }
+.org-delay-1 { animation-delay: 0.1s; }
+.org-delay-2 { animation-delay: 0.2s; }
+.org-delay-3 { animation-delay: 0.3s; }
+.org-delay-4 { animation-delay: 0.4s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .org-animate {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Map markers + clusters (Leaflet + markercluster). A single record is a small
+   sage pin; nearby records collapse into a count bubble so a dense survey site
+   reads as one labelled cluster rather than a confusing pile of overlapping
+   dots. Click a cluster to zoom in; fully-overlapping points spiderfy.
+--------------------------------------------------------------------------- */
+.gf-pin {
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: var(--primary);
+  border: 2px solid var(--surface);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--primary) 30%, transparent),
+    0 1px 6px color-mix(in srgb, var(--primary) 35%, transparent);
+  transition: transform 0.12s ease;
+}
+.gf-pin:hover {
+  transform: scale(1.25);
+}
+.gf-pin--picker {
+  cursor: grab;
+}
+.gf-pin--picker:active {
+  cursor: grabbing;
+}
+
+/* The divIcon wrapper Leaflet creates around our cluster markup. */
+.gf-cluster-wrap {
+  background: transparent;
+  border: 0;
+}
+.gf-cluster {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--primary-foreground);
+  background: color-mix(in srgb, var(--primary) 92%, transparent);
+  border: 2px solid var(--surface);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--primary) 18%, transparent),
+    0 4px 14px color-mix(in srgb, var(--primary) 30%, transparent);
+  transition: transform 0.14s ease;
+}
+.gf-cluster:hover {
+  transform: scale(1.07);
+}
+.gf-cluster--sm {
+  font-size: 12px;
+}
+.gf-cluster--md {
+  font-size: 13px;
+}
+.gf-cluster--lg,
+.gf-cluster--xl {
+  font-size: 14px;
+}
+
+/* Spiderfy legs + cluster animations recoloured to the sage palette. */
+.leaflet-cluster-anim .leaflet-marker-icon,
+.leaflet-cluster-anim .leaflet-marker-shadow {
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.28s ease;
+}
+.marker-cluster-spider-leg {
+  stroke: color-mix(in srgb, var(--primary) 55%, transparent);
+  stroke-width: 1.5;
+}
+
+/* ── Leaflet chrome (zoom controls, attribution, tooltips) ────────────────
+   Leaflet ships utilitarian white-box controls that ignore the theme and look
+   dated against the app. Restyle them onto the design tokens so they read as
+   modern, glassy surface chips that follow light/dark automatically. */
+.leaflet-bar,
+.leaflet-control-zoom {
+  border: 0 !important;
+  border-radius: var(--radius-md) !important;
+  overflow: hidden;
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--foreground) 8%, transparent),
+    0 6px 18px color-mix(in srgb, var(--foreground) 10%, transparent) !important;
+  background: color-mix(in srgb, var(--popover) 88%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.leaflet-bar a,
+.leaflet-control-zoom a {
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  color: color-mix(in srgb, var(--foreground) 72%, transparent);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  font-size: 17px;
+  font-weight: 500;
+  transition:
+    background-color 0.14s ease,
+    color 0.14s ease;
+}
+.leaflet-bar a:last-child,
+.leaflet-control-zoom a:last-child {
+  border-bottom: 0;
+}
+.leaflet-bar a:hover,
+.leaflet-control-zoom a:hover {
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary);
+}
+.leaflet-bar a.leaflet-disabled,
+.leaflet-control-zoom a.leaflet-disabled {
+  color: color-mix(in srgb, var(--foreground) 28%, transparent);
+  background: transparent;
+}
+
+/* Attribution: a subtle glass chip rather than the default opaque white bar. */
+.leaflet-control-attribution {
+  padding: 2px 8px;
+  border-radius: var(--radius-full) 0 0 0;
+  font-size: 10.5px;
+  color: color-mix(in srgb, var(--foreground) 45%, transparent);
+  background: color-mix(in srgb, var(--popover) 78%, transparent) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.leaflet-control-attribution a {
+  color: color-mix(in srgb, var(--foreground) 62%, transparent);
+}
+.leaflet-control-attribution a:hover {
+  color: var(--primary);
+}
+
+/* Marker tooltips: themed pill matching the app surface, with a colour-matched
+   arrow on every side instead of the default white box. */
+.leaflet-tooltip {
+  padding: 4px 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--popover-foreground);
+  background: var(--popover);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow:
+    0 2px 6px color-mix(in srgb, var(--foreground) 10%, transparent),
+    0 8px 22px color-mix(in srgb, var(--foreground) 12%, transparent);
+}
+.leaflet-tooltip-top::before {
+  border-top-color: var(--popover);
+}
+.leaflet-tooltip-bottom::before {
+  border-bottom-color: var(--popover);
+}
+.leaflet-tooltip-left::before {
+  border-left-color: var(--popover);
+}
+.leaflet-tooltip-right::before {
+  border-right-color: var(--popover);
+}
+
+/* ── Rich preview tooltip (hyperscan-style card) ──────────────────────────
+   A hovered marker shows a photo + name + context badges + date + coords
+   instead of a plain text pill. Shared by the stream map and the single-pin
+   detail map (see app/_lib/map-tooltip.ts). */
+.leaflet-tooltip.gf-occ-tip {
+  width: 218px;
+  padding: 0 !important;
+  overflow: hidden;
+  white-space: normal;
+  border: 1px solid var(--border-soft) !important;
+  border-radius: 12px !important;
+  background: var(--surface) !important;
+  color: var(--foreground);
+  box-shadow: 0 10px 30px -12px color-mix(in srgb, var(--foreground) 40%, transparent) !important;
+}
+.leaflet-tooltip.gf-occ-tip::before {
+  display: none !important;
+}
+.gf-occ-media {
+  width: 100%;
+  background: var(--surface-sunken);
+}
+.gf-occ-img {
+  display: block;
+  width: 100%;
+  height: 118px;
+  object-fit: cover;
+}
+.gf-occ-ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 86px;
+  color: color-mix(in srgb, var(--primary) 45%, transparent);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+.gf-occ-body {
+  padding: 10px 11px 11px;
+}
+.gf-occ-title {
+  font-family: var(--font-instrument), Georgia, serif;
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.22;
+  color: var(--foreground);
+}
+.gf-occ-sub {
+  margin-top: 2px;
+  font-size: 11px;
+  color: color-mix(in srgb, var(--foreground) 58%, transparent);
+}
+.gf-occ-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+.gf-occ-badge {
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.gf-occ-badge.k {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+}
+.gf-occ-badge.f {
+  color: color-mix(in srgb, var(--foreground) 62%, transparent);
+  background: color-mix(in srgb, var(--foreground) 7%, transparent);
+}
+.gf-occ-when {
+  font-size: 10px;
+  color: color-mix(in srgb, var(--foreground) 48%, transparent);
+}
+.gf-occ-coords {
+  margin-top: 6px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 9px;
+  color: color-mix(in srgb, var(--foreground) 42%, transparent);
+}
+
+/* ── Dual-handle range timeline (stream map scrubber) ─────────────────────
+   A date-range selector with a density histogram behind the track and a play
+   head that reveals records over time (see app/_components/MapTimeline.tsx). */
+.gf-tl {
+  cursor: pointer;
+}
+.gf-tl-bar {
+  flex: 1 1 0;
+  min-width: 0;
+  align-self: flex-end;
+  border-radius: 2px 2px 0 0;
+  background: color-mix(in srgb, var(--foreground) 12%, transparent);
+  transition: background 0.18s ease;
+}
+.gf-tl-bar[data-in="true"] {
+  background: color-mix(in srgb, var(--primary) 55%, transparent);
+}
+.gf-tl-mask {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: color-mix(in srgb, var(--background) 62%, transparent);
+  border-radius: 6px;
+  pointer-events: none;
+}
+.gf-tl-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: color-mix(in srgb, var(--primary) 9%, transparent);
+  border-left: 2px solid color-mix(in srgb, var(--primary) 55%, transparent);
+  border-right: 2px solid color-mix(in srgb, var(--primary) 55%, transparent);
+  cursor: grab;
+}
+.gf-tl-band:active {
+  cursor: grabbing;
+}
+.gf-tl-head {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--primary-dark);
+  border-radius: 2px;
+  box-shadow: 0 0 7px color-mix(in srgb, var(--primary) 55%, transparent);
+  pointer-events: none;
+}
+.gf-tl-head::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: var(--primary-dark);
+  transform: translateX(-50%);
+}
+.gf-tl-handle {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 30px;
+  transform: translate(-50%, -50%);
+  border-radius: 7px;
+  background: var(--surface);
+  border: 1.5px solid color-mix(in srgb, var(--primary) 70%, transparent);
+  box-shadow: 0 1px 6px color-mix(in srgb, var(--primary) 28%, transparent);
+  cursor: ew-resize;
+  touch-action: none;
+  transition:
+    border-color 0.12s ease,
+    transform 0.12s ease;
+}
+.gf-tl-handle::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 13px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--primary) 65%, transparent);
+  transform: translate(-50%, -50%);
+  box-shadow:
+    3px 0 0 color-mix(in srgb, var(--primary) 32%, transparent),
+    -3px 0 0 color-mix(in srgb, var(--primary) 32%, transparent);
+}
+.gf-tl-handle:hover {
+  border-color: var(--primary);
+  transform: translate(-50%, -50%) scale(1.08);
+}
+.gf-tl-handle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gf-pin,
+  .gf-cluster,
+  .gf-tl-bar,
+  .gf-tl-handle,
+  .leaflet-bar a,
+  .leaflet-control-zoom a {
+    transition: none;
+  }
+  .leaflet-cluster-anim .leaflet-marker-icon,
+  .leaflet-cluster-anim .leaflet-marker-shadow {
+    transition: none;
+  }
+}
+

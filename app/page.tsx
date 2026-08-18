@@ -1,140 +1,106 @@
-import { TopNav } from "./_components/TopNav";
-import { Hero } from "./_components/Hero";
-import { AwardsStrip } from "./_components/AwardsStrip";
-import { ChoosePath } from "./_components/ChoosePath";
-import { HowItWorks } from "./_components/HowItWorks";
-import { IWantTo } from "./_components/IWantTo";
-import { DataCommons } from "./_components/DataCommons";
-import { EquitableAI } from "./_components/EquitableAI";
-import { TainaFeature } from "./_components/TainaFeature";
-import { Research } from "./_components/Research";
-import { NatureGuild } from "./_components/NatureGuild";
-import { Partners } from "./_components/Partners";
-import { ImpactReport } from "./_components/ImpactReport";
-import { Media } from "./_components/Media";
-import { Supporters } from "./_components/Supporters";
-import { Footer } from "./_components/Footer";
-import { BumicertsCard } from "./_components/BumicertsCard";
-import { DraggableGlobeCard } from "./_components/DraggableGlobeCard";
-import { GlobeCard } from "./_components/GlobeCard";
-import { fetchLiveBumicerts } from "./_lib/bumicerts";
-import { fetchPartnerOrgs } from "./_lib/partner-orgs";
-import { fetchSubstackPosts } from "./_lib/blog";
+import type { Metadata } from "next";
+import { unstable_cache } from "next/cache";
+import { getTranslations } from "next-intl/server";
+import { localizedAlternates, socialPreviewMetadata } from "@/app/_lib/seo-metadata";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { BrowseGrid } from "./_components/BrowseGrid";
+import { HomeLanding } from "./_components/HomeLanding";
+import { fetchAuthSession } from "./_lib/auth-server";
+import { fetchKpis } from "./_lib/kpis";
 
-// Re-fetch live Bumicerts at most every 15 minutes via the
-// `next: { revalidate }` option in the GraphQL call. The page can be
-// pre-rendered, then refreshed in the background as new projects land.
-export const revalidate = 900;
+export const revalidate = 300;
 
-// Page composition (May 2026 — narrative-flow pass).
-//
-// Audit feedback called out two structural issues with the prior
-// ordering: the page didn't explain what a Bumicert IS before asking
-// the visitor to "Choose a path", and the sequence jumped between
-// route pickers (ChoosePath / IWantTo) and explainers (DataCommons /
-// HowItWorks / EquitableAI) without a coherent thread. The new order
-// reads as a single narrative:
-//
-//   1.  Hero ........................ promise + live data windows
-//   2.  AwardsStrip ................. credibility (logo wall now)
-//   3.  ChoosePath .................. WHAT — pick a surface, see a real
-//                                     Bumicert preview, learn what
-//                                     a Bumicert actually is
-//   4.  HowItWorks .................. HOW — four-step flow (moved
-//                                     up so the explanation lands
-//                                     immediately after the Bumicert
-//                                     preview)
-//   5.  IWantTo ..................... ROUTES — two-audience strip
-//                                     ("For communities" / "For
-//                                     supporters"), brought back so
-//                                     the page makes both audiences
-//                                     feel routed, not just donors
-//   6.  DataCommons ................. WHY — 1% biodiversity claim
-//                                     (ink band)
-//   6.  EquitableAI ................. THE TECH — three research pillars
-//   7.  TainaFeature ................ THE SHOWCASE — Indigenous AI
-//                                     assistant
-//   8.  Research .................... HACKATHONS — how we iterate
-//   9.  NatureGuild ................. THE COMMUNITY — Guild members
-//  11.  Partners ................... live globe + community spotlight
-//  12.  ImpactReport ............... 24/25 report card
-//  13.  Media ...................... selected press
-//  14.  Supporters ................. Merci to our supporters
-//  15.  Footer ..................... merged closing CTA + legal (ink)
-//
-// IWantTo restored: the strip was briefly dropped as a duplicate
-// router, but the new audience-split version is a different cut from
-// ChoosePath. ChoosePath answers "which surface" (Globe vs Bumicerts);
-// IWantTo answers "which audience" (community vs supporter) — the two
-// complement each other instead of overlapping.
-//
-// Cream / ink rhythm: most sections sit on cream so the page reads as
-// a long editorial scroll, with two intentional dark "punches" —
-// DataCommons (mid-page WHY) and the integrated closing Footer.
-export default async function Page() {
-  const [snapshot, partnerOrgs, blogPosts] = await Promise.all([
-    fetchLiveBumicerts(12),
-    fetchPartnerOrgs(),
-    fetchSubstackPosts(3),
-  ]);
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("common.seo");
+
+  const title = t("title");
+  const description = t("description");
+
+  return {
+    title,
+    description,
+    alternates: await localizedAlternates("/"),
+    ...socialPreviewMetadata("/", title, description),
+  };
+}
+
+const fetchHomeKpis = unstable_cache(fetchKpis, ["home-page-kpis"], {
+  revalidate: 60 * 15,
+});
+
+// HomePage stays synchronous so the home segment never suspends at the route
+// level — that lets us drop the catch-all app/loading.tsx (which used to shadow
+// every section's tailored loading.tsx as the outermost Suspense boundary). The
+// kpis fetch is wrapped in its own Suspense with a home-shaped fallback instead.
+export default async function HomePage() {
+  // Already signed in? Skip the marketing landing and go straight to the
+  // activity feed — the app's logged-in home base. The locale prefix (e.g. /en)
+  // is added by the proxy middleware.
+  const session = await fetchAuthSession();
+  if (session.isLoggedIn) {
+    redirect("/feed");
+  }
+
   return (
-    <div id="top" className="min-h-screen bg-background">
-      <TopNav />
-      <main>
-        <Hero
-          snapshot={snapshot}
-          // Mobile / tablet (< lg): inline live windows beneath the hero
-          // copy. Hidden on lg+ where the desktopCards take over.
-          inlineCards={
-            <>
-              <DraggableGlobeCard pinCount={partnerOrgs.length} inline>
-                <GlobeCard diameter={250} caption={false} />
-              </DraggableGlobeCard>
-              <BumicertsCard snapshot={snapshot} inline />
-            </>
-          }
-          // Desktop (lg+): live windows render inside the Hero's right
-          // column with column-relative absolute positioning. The
-          // earlier document-coordinate variant drifted to the page's
-          // left edge at non-100% browser zoom; this anchors them to
-          // the column instead so they stay put at any zoom level.
-          desktopCards={
-            <>
-              <BumicertsCard
-                snapshot={snapshot}
-                position={{ top: 140, left: 0, width: 400 }}
-              />
-              {/* Globe diameter is tuned so:
-                  (1) the sphere nearly fills the (narrower, 280px)
-                      card body, leaving only a slim cream margin
-                      on each side; and
-                  (2) the card's total height (header 54 + body
-                      ~258 + footer 31 ≈ 343 px) lands inside
-                      Bumicerts' ≈ 345 px height. */}
-              <DraggableGlobeCard
-                pinCount={partnerOrgs.length}
-                position={{ top: 20, right: -35, width: 280 }}
-              >
-                <GlobeCard diameter={250} caption={false} />
-              </DraggableGlobeCard>
-            </>
-          }
-        />
-        <AwardsStrip />
-        <ChoosePath snapshot={snapshot} />
-        <HowItWorks />
-        <IWantTo />
-        <DataCommons />
-        <EquitableAI />
-        <TainaFeature />
-        <Research />
-        <NatureGuild />
-        <Partners />
-        <ImpactReport />
-        <Media blogPosts={blogPosts} />
-        <Supporters />
-      </main>
-      <Footer />
-    </div>
+    <Suspense fallback={<HomeFallback />}>
+      <HomeContent />
+    </Suspense>
+  );
+}
+
+async function HomeContent() {
+  const kpis = await fetchHomeKpis();
+
+  return (
+    <>
+      <HomeLanding />
+      <BrowseGrid kpis={kpis} />
+    </>
+  );
+}
+
+function HomeFallback() {
+  return (
+    <>
+      <section className="px-6 pt-16 pb-12 sm:px-12">
+        <div className="mx-auto max-w-6xl space-y-6">
+          <Skeleton className="h-4 w-32 rounded-full" />
+          <Skeleton className="h-16 w-full max-w-2xl" />
+          <Skeleton className="h-5 w-full max-w-xl rounded-full" />
+          <Skeleton className="h-5 w-2/3 max-w-md rounded-full" />
+          <div className="flex flex-wrap gap-3 pt-2">
+            <Skeleton className="h-11 w-44 rounded-full" />
+            <Skeleton className="h-11 w-44 rounded-full" />
+          </div>
+        </div>
+      </section>
+      <BrowseGridFallback />
+    </>
+  );
+}
+
+function BrowseGridFallback() {
+  return (
+    <section className="bg-background px-6 pt-10 pb-14 sm:px-12 sm:pt-12 md:px-6 md:pt-10 md:pb-16">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-6 flex flex-col items-center md:mb-8">
+          <Skeleton className="h-12 w-64 rounded-full" />
+          <Skeleton className="mt-4 h-5 w-full max-w-xl rounded-full" />
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="min-h-[230px] rounded-2xl border border-border bg-card p-6 shadow-lg shadow-foreground/5">
+              <Skeleton className="h-6 w-28 rounded-full" />
+              <Skeleton className="mt-5 h-9 w-40 rounded-full" />
+              <Skeleton className="mt-4 h-3 w-full rounded-full" />
+              <Skeleton className="mt-2 h-3 w-2/3 rounded-full" />
+              <Skeleton className="mt-10 h-20 rounded-3xl" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }

@@ -1,0 +1,27 @@
+{
+  "lexicon": 1,
+  "id": "app.gainforest.moderation.blockedDomain",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "A moderation record that keeps every account hosted on one server address out of the public GainForest surfaces (explorer, search, globe, feed, public counts). It does not hide, delete, or invalidate anything on the server itself, and a newer append-only event can lift the block.",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["domain", "createdAt"],
+        "properties": {
+          "domain": {
+            "type": "string",
+            "maxLength": 253,
+            "description": "The lowercase host of the blocked server, e.g. \"dev.certified.app\"."
+          },
+          "blocked": {
+            "type": "boolean",
+            "description": "Whether the address is blocked. Missing means true for backwards compatibility; false lifts the block through a newer append-only event."
+          },
+          "createdAt": { "type": "string", "format": "datetime" }
+        }
+      }
+    }
+  }
+}

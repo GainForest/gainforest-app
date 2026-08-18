@@ -1,0 +1,129 @@
+{
+  "metadata": {
+    "title": "Kebijakan Privasi",
+    "description": "Cara GainForest menangani informasi di gainforest.app, Taina Field, dan layanan terkait."
+  },
+  "title": "Kebijakan Privasi",
+  "effectiveDate": "Tanggal berlaku: 2 Juli 2026",
+  "lastUpdated": "Terakhir diperbarui: 2 Juli 2026",
+  "intro": {
+    "p1": "Kebijakan Privasi ini menjelaskan bagaimana GainForest (\"GainForest\", \"kami\", atau \"milik kami\") mengumpulkan, menggunakan, membagikan, dan melindungi informasi saat Anda menggunakan gainforest.app, aplikasi seluler Taina Field, dan layanan terkait (bersama-sama disebut \"Layanan\").",
+    "p2": "GainForest adalah organisasi nirlaba yang membangun teknologi terbuka untuk lingkungan — alat untuk mengukur, memverifikasi, dan memberi penghargaan atas pengelolaan ekosistem, sering kali bekerja sama dengan komunitas lokal dan Masyarakat Adat. Melindungi orang dan tempat di balik data yang kami tangani adalah bagian dari misi kami, bukan hal tambahan."
+  },
+  "sections": {
+    "whoWeAre": {
+      "title": "1. Siapa kami",
+      "paragraphs": {
+        "p1": "GainForest adalah GainForest e.V., asosiasi nirlaba bebas pajak yang terdaftar di Swiss (UID: CHE-181.901.605), dengan kantor terdaftar di Schwandenacker 35, 8052 Zurich, Swiss.",
+        "p2": "Untuk pertanyaan privasi apa pun, atau untuk menggunakan hak Anda, hubungi kami di team@gainforest.net."
+      }
+    },
+    "scope": {
+      "title": "2. Cakupan",
+      "paragraphs": {
+        "p1": "Kebijakan ini mencakup:",
+        "p2": "gainforest.app — aplikasi web, dasbor, dan layanan terkait kami, yang juga berjalan di AT Protocol (ATProto).",
+        "p3": "Taina Field — aplikasi seluler kami untuk pengumpulan data lapangan, yang berjalan menggunakan AT Protocol (ATProto) dan penyimpanan lokal (di perangkat).",
+        "p4": "Kebijakan ini tidak mencakup situs web, protokol, atau layanan pihak ketiga yang kami tautkan atau interoperasikan, yang memiliki kebijakannya sendiri (lihat Bagian 11)."
+      }
+    },
+    "informationWeCollect": {
+      "title": "3. Informasi yang kami kumpulkan",
+      "paragraphs": {
+        "p1": "Informasi yang Anda berikan secara langsung. Detail akun seperti nama, alamat email, organisasi, dan informasi profil apa pun; konten yang Anda kirimkan; serta pesan yang Anda kirim kepada kami.",
+        "p2": "Data lingkungan dan lapangan (Taina Field). Tujuan utama Taina Field adalah mengumpulkan data ekologi dan konservasi. Ini dapat mencakup geolokasi dan koordinat GPS, cap waktu, foto, rekaman audio, pengamatan spesies dan keanekaragaman hayati, catatan habitat, serta pengukuran lapangan serupa. Sebagian data ini sengaja dikumpulkan untuk dibagikan sebagai data lingkungan terbuka (lihat Bagian 6).",
+        "p3": "Data yang disimpan secara lokal di perangkat Anda. Taina Field dirancang agar dapat bekerja offline dan mengutamakan penyimpanan lokal. Sebagian besar data yang Anda kumpulkan disimpan di perangkat Anda dan tetap berada di bawah kendali Anda sampai Anda memilih untuk menyinkronkan atau memublikasikannya. Data yang tetap lokal tidak dapat diakses oleh kami.",
+        "p4": "Data yang dipublikasikan melalui AT Protocol. Saat Anda memilih untuk menyinkronkan atau memublikasikan, catatan dapat ditulis ke repositori AT Protocol Anda dan disebarkan ke seluruh jaringan ATProto. Harap baca Bagian 5 dengan saksama — sifat jaringan ini memengaruhi seberapa publik dan seberapa permanen data Anda.",
+        "p5": "Data teknis dan penggunaan. Jenis perangkat, sistem operasi, versi aplikasi, alamat IP, pengaturan bahasa, dan informasi penggunaan atau diagnostik dasar, yang membantu kami menjaga Layanan tetap berjalan dan aman.",
+        "p6": "Kami berupaya meminimalkan data pribadi dan hanya mengumpulkan apa yang benar-benar dibutuhkan oleh Layanan."
+      }
+    },
+    "howWeUse": {
+      "title": "4. Cara kami menggunakan informasi",
+      "paragraphs": {
+        "p1": "Kami menggunakan informasi untuk mengoperasikan, memelihara, dan meningkatkan Layanan; memungkinkan pengumpulan, verifikasi, dan publikasi terbuka data lingkungan; berkomunikasi dengan Anda; memastikan keamanan dan mencegah penyalahgunaan; melakukan dan mendukung penelitian konservasi; serta mematuhi kewajiban hukum. Kami tidak menjual informasi pribadi Anda."
+      }
+    },
+    "atProtocolDeletion": {
+      "title": "5. AT Protocol, federasi, dan apa arti \"hapus\" yang bisa dan tidak bisa dijamin",
+      "paragraphs": {
+        "p1": "Baik gainforest.app maupun Taina Field dibangun di atas AT Protocol — protokol terbuka dan terfederasi tempat Anda memiliki data Anda sendiri. Catatan Anda berada di repositori pribadi Anda, yang dihosting di Personal Data Server (PDS), dan Anda mengendalikannya. Memahami cara kerjanya penting:",
+        "p2": "Anda memegang data Anda. Catatan yang Anda buat disimpan di repositori AT Protocol Anda sendiri, yang diidentifikasi oleh akun Anda (DID). GainForest beroperasi sebagai aplikasi di atas jaringan ini; kami membaca dan mengindeks catatan yang Anda publikasikan, tetapi salinan yang berwenang berada di repositori Anda, di bawah kendali Anda.",
+        "p3": "Data dapat bersifat publik. Catatan yang dipublikasikan ke jaringan, secara desain, sering kali dapat dibaca publik. Siapa pun — bukan hanya GainForest — dapat mengakses, mengindeks, atau menyimpannya.",
+        "p4": "Data direplikasi. Protokol mendistribusikan catatan ke relay, server, pembuat feed, dan aplikasi independen. Setelah sebuah catatan masuk ke jaringan, salinannya dapat berada di infrastruktur yang tidak dioperasikan atau dikendalikan oleh GainForest.",
+        "p5": "Penghapusan dimulai oleh Anda. Karena Anda memiliki repositori Anda, menghapus catatan — atau menghapus akun Anda — adalah tindakan yang Anda lakukan di sumbernya (melalui PDS/akun Anda). Penghapusan tersebut memancarkan sinyal ke seluruh jaringan, dan relay serta layanan yang patuh diharapkan menghapus data terkait. GainForest akan menghapus atau mengeluarkan data dari indeks pada sistem yang kami kendalikan ketika kami menerima atau mengamati penghapusan tersebut.",
+        "p6": "Penghapusan tidak dapat dijamin sepenuhnya. Karena jaringan ini terbuka dan terfederasi, GainForest tidak dapat menjamin bahwa setiap salinan hilir yang disimpan oleh pihak ketiga independen akan terhapus. Ini adalah sifat dari protokol, bukan batasan yang kami pilih.",
+        "p7": "Untuk detail resmi tentang bagaimana protokol menangani data dan penghapusan, lihat dokumentasi AT Protocol di https://atproto.com/.",
+        "p8": "Kami menyampaikan ini secara jelas agar Anda dapat membuat keputusan yang tepat tentang apa yang Anda publikasikan. Informasi sensitif — termasuk lokasi persis situs yang dilindungi, spesies rentan, atau anggota komunitas yang dapat diidentifikasi — sebaiknya dipublikasikan hanya dengan kehati-hatian dan persetujuan yang sesuai."
+      }
+    },
+    "openDataSharing": {
+      "title": "6. Data terbuka dan berbagi data",
+      "paragraphs": {
+        "p1": "Misi GainForest mencakup membuat data lingkungan tertentu tersedia secara terbuka untuk konservasi, transparansi, dan penelitian. Jika data ditetapkan sebagai terbuka, data tersebut dapat dipublikasikan, dibagikan dengan mitra penelitian dan konservasi, serta dibuat dapat diakses publik.",
+        "p2": "Kami hanya membagikan informasi pribadi: dengan persetujuan Anda; dengan penyedia layanan yang bertindak atas nama kami berdasarkan kewajiban kerahasiaan; dengan mitra penelitian atau konservasi jika sesuai dan sah; ketika diwajibkan oleh hukum; atau untuk melindungi hak, keselamatan, dan integritas Layanan.",
+        "p3": "Data agregat atau yang telah dihilangkan identitasnya dapat dibagikan untuk penelitian dan pelaporan."
+      }
+    },
+    "communitySensitiveData": {
+      "title": "7. Data komunitas, Masyarakat Adat, dan lokasi sensitif",
+      "paragraphs": {
+        "p1": "Sebagian besar kerja lapangan kami berlangsung bersama atau dekat komunitas lokal dan Masyarakat Adat serta di wilayah yang sensitif secara ekologis. Kami berkomitmen untuk menghormati kedaulatan data dan memperoleh persetujuan yang sesuai. Jika data menyangkut individu yang dapat diidentifikasi, pengetahuan yang dimiliki komunitas, atau lokasi ekosistem atau spesies yang rentan, kami menerapkan kehati-hatian yang lebih tinggi dan mendukung kontrol akses, penyamaran koordinat sensitif, atau publikasi terbatas bila sesuai. Jika Anda mengumpulkan data tersebut melalui Taina Field, Anda bertanggung jawab untuk memperoleh persetujuan yang diperlukan dalam konteks Anda."
+      }
+    },
+    "legalBases": {
+      "title": "8. Dasar hukum pemrosesan (FADP Swiss / GDPR)",
+      "paragraphs": {
+        "p1": "Kami mengandalkan: persetujuan Anda; pelaksanaan kontrak dengan Anda; kepentingan sah kami dalam mengoperasikan dan meningkatkan Layanan serta memajukan misi konservasi kami (diseimbangkan dengan hak Anda); dan kepatuhan terhadap kewajiban hukum. Jika pemrosesan bergantung pada persetujuan, Anda dapat menariknya kapan saja."
+      }
+    },
+    "retention": {
+      "title": "9. Retensi data",
+      "paragraphs": {
+        "p1": "Kami menyimpan informasi pribadi hanya selama diperlukan untuk tujuan yang dijelaskan di sini, lalu menghapus atau menghilangkan identitasnya — tunduk pada batas federasi yang dijelaskan di Bagian 5 dan persyaratan retensi hukum apa pun. Data yang disimpan secara lokal tetap berada di perangkat Anda sampai Anda menghapusnya atau mencopot aplikasi."
+      }
+    },
+    "rights": {
+      "title": "10. Hak Anda",
+      "paragraphs": {
+        "p1": "Tergantung tempat tinggal Anda, Anda mungkin memiliki hak untuk mengakses, memperbaiki, menghapus, membatasi, atau menolak pemrosesan informasi pribadi Anda; atas portabilitas data; dan untuk menarik persetujuan. Anda juga dapat mengajukan keluhan kepada otoritas perlindungan data Anda (di Swiss, FDPIC). Untuk menggunakan salah satu hak ini, hubungi team@gainforest.net. Perhatikan bahwa untuk data yang dipublikasikan melalui AT Protocol, penghapusan dilakukan dari repositori dan akun Anda sendiri — lihat Bagian 5 tentang cara kerjanya dan batasannya. Kami akan merespons dalam jangka waktu yang diwajibkan oleh hukum yang berlaku."
+      }
+    },
+    "thirdParties": {
+      "title": "11. Layanan dan tautan pihak ketiga",
+      "paragraphs": {
+        "p1": "Layanan berinteroperasi dengan jaringan AT Protocol dan dapat bergantung pada penyedia pihak ketiga (misalnya hosting, analitik, atau infrastruktur) serta menautkan ke situs eksternal. Semua itu diatur oleh kebijakan privasi masing-masing, yang kami sarankan untuk Anda tinjau."
+      }
+    },
+    "children": {
+      "title": "12. Privasi anak-anak",
+      "paragraphs": {
+        "p1": "Layanan tidak ditujukan untuk anak di bawah usia 16 tahun, dan kami tidak dengan sengaja mengumpulkan informasi pribadi mereka. Jika Anda yakin seorang anak telah memberikan data kepada kami, hubungi kami dan kami akan mengambil langkah yang sesuai untuk menghapusnya."
+      }
+    },
+    "security": {
+      "title": "13. Keamanan",
+      "paragraphs": {
+        "p1": "Kami menggunakan langkah teknis dan organisasi yang wajar untuk melindungi informasi, termasuk enkripsi saat transit jika memungkinkan. Tidak ada sistem yang sepenuhnya aman; penyimpanan yang mengutamakan lokal berarti keamanan sebagian besar data Anda juga bergantung pada keamanan perangkat Anda sendiri."
+      }
+    },
+    "internationalTransfers": {
+      "title": "14. Transfer data internasional",
+      "paragraphs": {
+        "p1": "GainForest beroperasi secara internasional dan — terutama mengingat sifat ATProto yang terfederasi — data dapat diproses di negara selain negara Anda. Jika diwajibkan, kami mengandalkan perlindungan yang sesuai untuk transfer tersebut."
+      }
+    },
+    "changes": {
+      "title": "15. Perubahan pada kebijakan ini",
+      "paragraphs": {
+        "p1": "Kami dapat memperbarui kebijakan ini dari waktu ke waktu. Kami akan memposting versi revisi di sini dan memperbarui tanggal \"Terakhir diperbarui\", serta memberikan pemberitahuan yang lebih jelas untuk perubahan material."
+      }
+    },
+    "contact": {
+      "title": "16. Hubungi kami",
+      "paragraphs": {
+        "p1": "Pertanyaan atau permintaan: team@gainforest.net GainForest e.V. Schwandenacker 35, 8052 Zurich, Swiss UID: CHE-181.901.605"
+      }
+    }
+  }
+}

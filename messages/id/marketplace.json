@@ -1,0 +1,2309 @@
+{
+  "map": {
+    "play": "Putar lini masa",
+    "pause": "Jeda lini masa",
+    "from": "Dari",
+    "to": "Sampai",
+    "shown": "{count} ditampilkan",
+    "dragHint": "Seret pegangan untuk memilih rentang waktu",
+    "startAria": "Tanggal mulai — {date}",
+    "endAria": "Tanggal akhir — {date}",
+    "unidentified": "Tak teridentifikasi",
+    "finding": "Menemukan lokasi peta…",
+    "mappedItems": "{count} item dengan lokasi peta",
+    "mappedSites": "{count} situs dengan lokasi peta",
+    "noLocations": "Belum ada item yang ditampilkan dengan lokasi peta.",
+    "speed": "Kecepatan pemutaran"
+  },
+  "explore": {
+    "metadata": {
+      "title": "Jelajahi sertifikat",
+      "description": "Jelajahi catatan lingkungan dari penjaga alam di seluruh dunia, dengan foto, tempat, dan bukti di balik setiap sertifikat."
+    },
+    "structuredData": {
+      "name": "Jelajahi sertifikat",
+      "description": "Sertifikat dampak lingkungan terverifikasi dari penjaga alam di seluruh dunia."
+    },
+    "hero": {
+      "eyebrow": "Jelajahi sertifikat",
+      "titlePrefix": "Temukan",
+      "titleEmphasis": "Dampak regeneratif",
+      "description": "Jelajahi sertifikat dari komunitas dan organisasi yang memulihkan ekosistem, memperkuat penghidupan, dan membangun masa depan yang lebih tangguh."
+    },
+    "actions": {
+      "createBumicert": "Buat sertifikat",
+      "allProjects": "Semua proyek",
+      "allFilters": "Semua filter",
+      "clearAll": "Hapus semua",
+      "applyFilters": "Terapkan filter",
+      "applyFiltersWithCount": "Terapkan filter ({count})",
+      "clearCategory": "Hapus {category}"
+    },
+    "filters": {
+      "allTitle": "Urutkan dan filter",
+      "sortLabel": "Urutkan",
+      "description": "Tampilkan Cert berdasarkan lencana sumber, foto, lokasi proyek, orang yang disebutkan, tanggal kerja, atau donasi.",
+      "sightingsDescription": "Tampilkan pengamatan berdasarkan sumber, jenis media, atau kelompok alam.",
+      "organization": "Organisasi",
+      "bioregion": "Wilayah hayati",
+      "country": "Negara",
+      "impactArea": "Area dampak",
+      "allBumicerts": "Semua sertifikat",
+      "allFilters": "Urutkan dan filter",
+      "allFiltersAria": "Urutkan dan filter",
+      "updateHint": "Filter diperbarui saat Anda memilih.",
+      "images": "Menampilkan foto",
+      "locations": "Menampilkan tempat proyek",
+      "contributors": "Menampilkan orang yang disebutkan",
+      "active": "Menampilkan tanggal kerja",
+      "donations": "Menerima donasi",
+      "badges": {
+        "all": "Semua",
+        "gainforest": "GainForest",
+        "maearth": "Di platform Ma Earth",
+        "maearthRound1": "Ma Earth Putaran 1",
+        "maearthRound2": "Ma Earth Putaran 2"
+      }
+    },
+    "sort": {
+      "newest": "Terbaru",
+      "oldest": "Terlama",
+      "az": "A → Z",
+      "za": "Z → A"
+    },
+    "search": {
+      "ariaLabel": "Cari sertifikat",
+      "placeholder": "Cari sertifikat berdasarkan nama atau deskripsi",
+      "sortAriaLabel": "Urutkan proyek"
+    },
+    "empty": {
+      "eyebrow": "Tidak ada hasil",
+      "title": "Tidak ada sertifikat ditemukan",
+      "description": "Coba sesuaikan pencarian atau filter untuk menemukan lebih banyak cerita proyek."
+    },
+    "resultsFound": "{count, plural, one {# proyek ditemukan} other {# proyek ditemukan}}",
+    "view": {
+      "cards": "Kartu",
+      "list": "Daftar",
+      "map": "Peta"
+    },
+    "stats": {
+      "published": "sertifikat yang diterbitkan",
+      "withLocations": "sertifikat dengan lokasi",
+      "contributors": "Kontributor di seluruh sertifikat",
+      "withCover": "sertifikat dengan sampul"
+    },
+    "footer": {
+      "showing": "Menampilkan {shown} dari {total} sertifikat.",
+      "showMore": "Tampilkan lebih banyak",
+      "end": "Anda telah mencapai akhir."
+    },
+    "card": {
+      "open": "Buka proyek: {title}",
+      "noCover": "Tidak ada gambar sampul",
+      "showDetails": "Tampilkan detail",
+      "missingImage": "Gambar hilang",
+      "projectSteward": "Pengelola proyek",
+      "peopleNamed": "{count, plural, one {# orang disebutkan} other {# orang disebutkan}}",
+      "projectPlaces": "{count, plural, one {# tempat proyek} other {# tempat proyek}}",
+      "natureSightings": "{count, plural, one {# temuan alam} other {# temuan alam}}",
+      "natureSightingsShared": "{count, plural, one {# temuan alam dibagikan oleh organisasi ini} other {# temuan alam dibagikan oleh organisasi ini}}",
+      "datesAdded": "Tanggal proyek ditambahkan",
+      "raised": "{amount} terkumpul",
+      "donations": "Donasi",
+      "acceptingDonations": "Menerima donasi",
+      "acceptingDonationsRaised": "Menerima donasi — {amount} terkumpul sejauh ini"
+    }
+  },
+  "organizations": {
+    "metadata": {
+      "title": "Organisasi",
+      "description": "Jelajahi organisasi penjaga alam yang membagikan observasi lapangan, proyek, dan bukti bersama GainForest."
+    },
+    "hero": {
+      "imageAltLight": "Hutan pegunungan berkabut saat matahari terbit",
+      "imageAltDark": "Hutan pegunungan berkabut saat senja",
+      "eyebrow": "Organisasi",
+      "titleAriaLabel": "Penjaga alam",
+      "titleFirst": "Alam",
+      "titleSecond": "Penjaga",
+      "description": "Temukan organisasi yang memimpin penjagaan lingkungan dan perubahan berbasis komunitas."
+    },
+    "search": {
+      "placeholder": "Cari organisasi",
+      "sortAriaLabel": "Urutkan"
+    },
+    "sort": {
+      "bumicerts": "sertifikat terbanyak",
+      "alpha": "Alfabetis",
+      "newest": "Terbaru dulu",
+      "oldest": "Terlama dulu",
+      "az": "A → Z",
+      "za": "Z → A"
+    },
+    "empty": {
+      "title": "Tidak ada organisasi ditemukan",
+      "description": "Coba sesuaikan pencarian atau filter."
+    },
+    "error": {
+      "title": "Terjadi kesalahan",
+      "description": "Kami tidak dapat memuat organisasi. Coba segarkan halaman."
+    },
+    "view": {
+      "cards": "Kartu",
+      "list": "Daftar",
+      "map": "Peta"
+    },
+    "list": {
+      "colOrganization": "Organisasi",
+      "colType": "Tipe",
+      "colPlace": "Tempat",
+      "colJoined": "Bergabung"
+    },
+    "filters": {
+      "description": "Tampilkan organisasi berdasarkan sumber, donasi, observasi, kategori, atau negara."
+    },
+    "quickFilters": {
+      "observations": "Memiliki observasi",
+      "donations": "Menerima donasi",
+      "donationsGainforest": "Donasi GainForest",
+      "donationsMaearth": "Donasi Ma Earth"
+    },
+    "facets": {
+      "category": "Kategori",
+      "country": "Negara"
+    },
+    "stats": {
+      "profiles": "Profil organisasi publik",
+      "withBumicerts": "Organisasi dengan cerita proyek",
+      "withObservations": "Organisasi dengan temuan alam",
+      "locations": "Lokasi di seluruh organisasi"
+    },
+    "actions": {
+      "clear": "Hapus",
+      "clearFilters": "Hapus filter",
+      "showMore": "Tampilkan lebih banyak"
+    },
+    "footer": {
+      "showing": "Menampilkan {shown} dari {total} organisasi.",
+      "end": "Anda telah mencapai akhir."
+    },
+    "card": {
+      "joined": "Bergabung {year}",
+      "publicProfile": "Profil publik",
+      "showDetails": "Tampilkan detail",
+      "descriptionWithType": "{types} yang memajukan penjagaan lingkungan berbasis komunitas{where}.",
+      "descriptionDefault": "Penjaga alam yang melindungi dan memulihkan ekosistem lokal{where}.",
+      "where": " di {country}"
+    },
+    "loading": "Memuat organisasi"
+  },
+  "leaderboard": {
+    "metadata": {
+      "title": "Papan peringkat — GainForest",
+      "description": "Lihat donatur teratas yang memberi dampak di GainForest. Para Juara Dampak kami diperingkat berdasarkan total kontribusi pendanaan mereka."
+    },
+    "hero": {
+      "eyebrow": "Papan peringkat",
+      "titlePrefix": "Dampak",
+      "titleEmphasis": "Juara",
+      "description": "Mengapresiasi para kontributor dermawan yang mendorong perubahan regeneratif bagi komunitas dan planet."
+    },
+    "periods": {
+      "all": "Sepanjang waktu",
+      "month": "Bulan ini",
+      "week": "Minggu ini"
+    },
+    "donorFilters": {
+      "all": "Semua donatur",
+      "anonymous": "Hanya anonim",
+      "known": "Hanya dikenal"
+    },
+    "sort": {
+      "label": "Urutkan berdasarkan",
+      "totalRaised": "Total terkumpul",
+      "donationCount": "Jumlah donasi",
+      "recentDonation": "Donasi terbaru"
+    },
+    "stats": {
+      "totalRaised": "Total terkumpul",
+      "totalRaisedDetail": "Sepanjang waktu di platform",
+      "totalDonors": "Total donatur",
+      "totalDonorsDetail": "Juara dampak yang murah hati",
+      "projectsSupported": "Proyek yang didukung",
+      "projectsSupportedDetail": "Memulihkan ekosistem dan penghidupan",
+      "uniqueDonors": "Donatur unik",
+      "bumicertsFunded": "sertifikat yang didanai",
+      "donationCount": "Jumlah donasi"
+    },
+    "empty": {
+      "title": "Belum ada donasi",
+      "description": "Jadilah yang pertama memberi dampak."
+    },
+    "card": {
+      "rankAriaLabel": "Peringkat {rank}",
+      "anonymous": "Anonim ({address})",
+      "donationSummary": "{count, plural, one {# donasi} other {# donasi}}",
+      "lastDonation": "Donasi terakhir {relativeTime}",
+      "topDonor": "Donatur teratas",
+      "natureChampion": "Juara alam",
+      "consistentGiver": "Pemberi konsisten",
+      "risingSupporter": "Pendukung baru",
+      "openWallet": "Buka {wallet} di Etherscan",
+      "openAccount": "Buka akun donatur di tab baru",
+      "anonymousSupporter": "Pendukung anonim",
+      "donationSummaryWithTime": "{count, plural, one {# donasi} other {# donasi}} · Donasi terakhir {relativeTime}",
+      "openPayment": "Buka detail pembayaran",
+      "openSupporter": "Buka profil pendukung di tab baru"
+    },
+    "donorFiltersShort": {
+      "all": "Semua",
+      "anonymous": "Anonim",
+      "known": "Dikenal"
+    },
+    "error": {
+      "title": "Tidak dapat memuat papan peringkat",
+      "description": "Coba lagi sebentar lagi."
+    }
+  },
+  "bioblitz": {
+    "metadata": {
+      "title": "Tantangan BioBlitz mingguan",
+      "description": "Pergilah ke luar dan foto keanekaragaman hayati liar. Setiap pengamatan yang valid harus memiliki foto unggahan; orang dan tanaman dalam pot tidak dihitung."
+    },
+    "banner": {
+      "message": "Tantangan BioBlitz Mingguan sedang berlangsung. Foto alam dan menangkan hadiah.",
+      "cta": "Pelajari selengkapnya",
+      "dismiss": "Tutup spanduk ini",
+      "close": "Tutup"
+    },
+    "hero": {
+      "eyebrow": "Tantangan BioBlitz Mingguan",
+      "titlePrefix": "Tantangan",
+      "titleEmphasis": "BioBlitz",
+      "description": "Lomba mingguan yang menyenangkan untuk mencatat keanekaragaman hayati di luar ruangan dengan foto yang kamu unggah sendiri. Mulai Ronde 8, foto hewan bernilai 2 poin, foto tanaman 1 poin, dan menamai spesies menambah 0,5 poin ekstra. Orang dan tanaman dalam pot tidak dihitung.",
+      "program": "Bagian dari program Klarna AI for Climate Resilience, bersama GainForest."
+    },
+    "rsvp": {
+      "button": "Daftar untuk ikut serta",
+      "note": "Daftar agar kami bisa mencatat kontribusimu dan mengirim hadiah jika kamu menang.",
+      "registering": "Mendaftar…",
+      "registered": "Kamu sudah terdaftar",
+      "registeredNote": "Kami akan mencatat kontribusimu dan mengirim hadiah jika kamu menang.",
+      "error": "Gagal mendaftar sekarang. Silakan coba lagi.",
+      "postText": "Aku ikut Tantangan BioBlitz Mingguan — {label}! Aku akan keluar memotret alam demi keanekaragaman hayati. 🌿🔭 #BioBlitz",
+      "legalConsent": "Dengan mendaftar, kamu menyetujui <terms>Ketentuan BioBlitz</terms> dan memahami <privacy>Pemberitahuan Privasi</privacy>."
+    },
+    "legal": {
+      "programLabel": "Tantangan BioBlitz",
+      "back": "Kembali ke BioBlitz",
+      "links": {
+        "terms": "Ketentuan BioBlitz",
+        "privacy": "Pemberitahuan Privasi BioBlitz",
+        "generalPrivacy": "Kebijakan Privasi GainForest"
+      },
+      "terms": {
+        "metadata": {
+          "title": "Ketentuan BioBlitz",
+          "description": "Kelayakan, partisipasi, kiriman, hadiah, dan aturan lain untuk Tantangan BioBlitz GainForest."
+        },
+        "title": "Ketentuan BioBlitz",
+        "effectiveDate": "Berlaku mulai 18 Juli 2026",
+        "intro": {
+          "p1": "Ketentuan ini mengatur partisipasi dalam Tantangan BioBlitz GainForest. Dengan mendaftar untuk suatu ronde, kamu menyetujui ketentuan ini.",
+          "p2": "GainForest e.V., organisasi nirlaba Swiss, menyelenggarakan tantangan ini. Tidak diperlukan pembelian atau pembayaran untuk ikut serta."
+        },
+        "sections": {
+          "eligibility": {
+            "title": "1. Kelayakan dan negara yang didukung",
+            "paragraphs": {
+              "p1": "BioBlitz terbuka bagi orang berusia 18 tahun atau lebih di seluruh dunia selama partisipasi dan penerimaan hadiah diizinkan oleh hukum setempat. Peserta berusia 16 atau 17 tahun hanya dapat ikut dengan persetujuan orang tua atau wali hukum. Tantangan ini tidak ditujukan bagi anak di bawah 16 tahun.",
+              "p2": "Suatu negara atau wilayah didukung ketika GainForest dan penyedia pembayarannya dapat secara sah menawarkan tantangan dan mengirim hadiah ke sana. Kamu tidak berhak menerima hadiah jika tinggal atau biasanya menetap di negara atau wilayah yang dikenai sanksi menyeluruh atau embargo berdasarkan tindakan Swiss, Perserikatan Bangsa-Bangsa, atau Uni Eropa yang berlaku, atau jika partisipasi maupun pengiriman hadiah dilarang oleh hukum atau aturan penyedia pembayaran.",
+              "p3": "Namamu tidak boleh tercantum dalam daftar sanksi, orang yang dibatasi, atau pihak yang ditolak yang berlaku. Karena aturan ini dapat berubah, GainForest dapat memeriksa kelayakan sebelum mengirim hadiah dan dapat menahan atau membatalkan hadiah jika diwajibkan oleh hukum."
+            }
+          },
+          "participation": {
+            "title": "2. Cara berpartisipasi",
+            "paragraphs": {
+              "p1": "Kamu memerlukan akun GainForest dan harus mendaftar untuk setiap ronde. Pengamatan yang valid harus ditambahkan pada tanggal yang ditampilkan, menunjukkan keanekaragaman hayati di luar ruangan, dan memiliki foto yang diunggah langsung bersama pengamatan. Orang dan tanaman dalam pot tidak dihitung.",
+              "p2": "Setiap orang hanya boleh menggunakan satu akun. Kiriman otomatis, duplikat, dimanipulasi, diberi tanggal mundur, menyesatkan, atau curang dapat dihapus dari tantangan."
+            }
+          },
+          "submissions": {
+            "title": "3. Kirimanmu",
+            "paragraphs": {
+              "p1": "Kamu harus memiliki foto dan konten lain yang dikirim, atau memiliki izin untuk menggunakan dan menerbitkannya. Kepemilikan konten tetap berada padamu.",
+              "p2": "Kamu memberi GainForest izin untuk menampilkan, mengindeks, meninjau, dan membagikan kiriman tantanganmu guna menjalankan dan mempromosikan BioBlitz serta misi lingkungan GainForest, dengan mencantumkan atribusi jika memungkinkan secara wajar.",
+              "p3": "Jangan mengganggu satwa liar, merusak habitat, memasuki tempat tanpa izin, atau membahayakan siapa pun demi membuat kiriman. Hindari menerbitkan lokasi tepat spesies rentan, ekosistem sensitif, atau tempat yang dapat terdampak oleh pengungkapan."
+            }
+          },
+          "winners": {
+            "title": "4. Pemilihan pemenang",
+            "paragraphs": {
+              "p1": "Mulai Ronde 8, hadiah Poin Tertinggi didasarkan pada skor total tertinggi dari pengamatan valid selama ronde: setiap foto hewan yang valid bernilai 2 poin, setiap foto tanaman yang valid bernilai 1 poin, dan keduanya mendapat 0,5 poin ekstra jika spesiesnya teridentifikasi, bukan dibiarkan tanpa identifikasi. Pada ronde-ronde sebelumnya, hadiah ini didasarkan pada jumlah pengamatan valid tertinggi. Hadiah Foto Terbaik dipilih berdasarkan kriteria di halaman BioBlitz, termasuk kualitas gambar, subjek, dan keterlibatan komunitas jika relevan.",
+              "p2": "GainForest dapat meninjau kiriman, menyelesaikan hasil seri, memperbaiki kesalahan hitung, dan mendiskualifikasi kiriman yang tidak valid. Keputusan bersifat final sejauh diizinkan oleh hukum."
+            }
+          },
+          "prizes": {
+            "title": "5. Hadiah",
+            "paragraphs": {
+              "p1": "Nilai hadiah ditampilkan di halaman BioBlitz. Pemenang harus menanggapi GainForest dan memberikan informasi yang secara wajar diperlukan untuk memastikan kelayakan dan mengirim hadiah. Jika pemenang tidak merespons dalam 14 hari, tidak memenuhi syarat, atau tidak dapat menerima hadiah secara sah, GainForest dapat memilih pemenang lain.",
+              "p2": "Pemenang bertanggung jawab atas pajak, biaya, dan kewajiban pelaporan yang berlaku. Hadiah tidak dapat dipindahtangankan, dan uang tunai atau metode pembayaran dapat diganti jika diperlukan secara wajar."
+            }
+          },
+          "conduct": {
+            "title": "6. Partisipasi yang adil",
+            "paragraphs": {
+              "p1": "GainForest dapat menghapus kiriman atau akun yang melibatkan penipuan, pelecehan, konten berbahaya, pelanggaran hak, gangguan layanan, atau perilaku yang merusak tantangan yang adil dan aman."
+            }
+          },
+          "publicContent": {
+            "title": "7. Konten publik dan privasi",
+            "paragraphs": {
+              "p1": "Pendaftaran membuat kiriman BioBlitz publik di akun GainForest milikmu. Pengamatan yang kamu terbitkan dapat mencakup nama profil, foto, informasi spesies, tanggal, dan data lokasi serta dapat diakses publik melalui jaringan Protokol AT.",
+              "p2": "Pemberitahuan Privasi BioBlitz menjelaskan cara data tantangan digunakan. Kebijakan Privasi GainForest secara umum juga berlaku."
+            }
+          },
+          "changes": {
+            "title": "8. Perubahan, penangguhan, atau pembatalan",
+            "paragraphs": {
+              "p1": "GainForest dapat mengubah, menangguhkan, atau membatalkan ronde jika kegagalan teknis, masalah keselamatan, persyaratan hukum, penipuan, atau keadaan di luar kendali wajar kami menghalangi pelaksanaan yang adil. Kami akan mengumumkan perubahan penting di halaman BioBlitz jika memungkinkan."
+            }
+          },
+          "liability": {
+            "title": "9. Tanggung jawab",
+            "paragraphs": {
+              "p1": "Kamu berpartisipasi secara sukarela dan bertanggung jawab untuk mematuhi hukum setempat serta mengambil keputusan aman di lapangan. Sejauh diizinkan hukum, GainForest tidak bertanggung jawab atas cedera, kerugian, atau kerusakan akibat kegiatan lapangan yang tidak aman, layanan pihak ketiga, atau peristiwa di luar kendali wajar kami. Ketentuan ini tidak mengecualikan tanggung jawab yang secara hukum tidak dapat dikecualikan."
+            }
+          },
+          "law": {
+            "title": "10. Hukum yang berlaku",
+            "paragraphs": {
+              "p1": "Ketentuan ini diatur oleh hukum Swiss. Pengadilan di Zurich, Swiss, memiliki yurisdiksi, dengan tetap menghormati hak konsumen wajib atau perlindungan setempat yang berlaku bagimu."
+            }
+          },
+          "contact": {
+            "title": "11. Kontak",
+            "paragraphs": {
+              "p1": "Pertanyaan tentang ketentuan ini atau kelayakan hadiah dapat dikirim ke team@gainforest.net."
+            }
+          }
+        }
+      },
+      "privacy": {
+        "metadata": {
+          "title": "Pemberitahuan Privasi BioBlitz",
+          "description": "Cara GainForest menangani pendaftaran, pengamatan, data pemenang, dan informasi lain untuk Tantangan BioBlitz."
+        },
+        "title": "Pemberitahuan Privasi BioBlitz",
+        "effectiveDate": "Berlaku mulai 18 Juli 2026",
+        "intro": {
+          "p1": "Pemberitahuan ini menjelaskan cara GainForest menggunakan informasi pribadi untuk Tantangan BioBlitz. Pemberitahuan ini melengkapi Kebijakan Privasi GainForest secara umum.",
+          "p2": "GainForest e.V. bertanggung jawab menjalankan tantangan. Hubungi team@gainforest.net untuk pertanyaan atau permintaan privasi."
+        },
+        "sections": {
+          "data": {
+            "title": "1. Informasi yang digunakan untuk tantangan",
+            "paragraphs": {
+              "p1": "Kami menggunakan pengenal akun, nama dan gambar profil, bahasa, serta kiriman pendaftaran BioBlitz publik untuk memastikan bahwa kamu mengikuti suatu ronde.",
+              "p2": "Kami menggunakan pengamatan yang dikirim selama ronde, termasuk foto atau media lain, informasi spesies, waktu, data lokasi, catatan, dan keterlibatan terkait seperti suka, untuk menjalankan papan peringkat dan memilih pemenang.",
+              "p3": "Jika menang, kami dapat meminta nama, detail kontak, negara tempat tinggal, konfirmasi usia atau wali, informasi pemeriksaan sanksi jika diwajibkan hukum, dan detail pembayaran yang diperlukan untuk mengirim hadiah."
+            }
+          },
+          "use": {
+            "title": "2. Mengapa kami menggunakannya",
+            "paragraphs": {
+              "p1": "Kami menggunakan informasi ini untuk mendaftarkan peserta, memvalidasi kiriman, menjalankan papan peringkat, memilih dan menghubungi pemenang, mengirim hadiah, mencegah penipuan, menjaga keamanan tantangan, menjawab pertanyaan, serta membagikan hasil dan sorotan BioBlitz."
+            }
+          },
+          "public": {
+            "title": "3. Informasi yang bersifat publik",
+            "paragraphs": {
+              "p1": "Kiriman pendaftaran, profil, dan pengamatan yang diterbitkan bersifat publik. Semuanya dapat muncul di halaman, peta, galeri, papan peringkat, dan pengumuman pemenang GainForest.",
+              "p2": "GainForest menggunakan Protokol AT yang terbuka dan terfederasi. Catatan publik dapat disalin atau diindeks oleh layanan independen yang tidak dikendalikan GainForest. Menghapus catatan sumber memberi sinyal kepada layanan yang patuh untuk menghapusnya, tetapi penghapusan setiap salinan pihak ketiga tidak dapat dijamin."
+            }
+          },
+          "location": {
+            "title": "4. Lokasi dan data alam sensitif",
+            "paragraphs": {
+              "p1": "Lokasi pengamatan dapat ditampilkan secara publik. Gunakan kontrol lokasi perkiraan jika diperlukan dan jangan menerbitkan lokasi tepat spesies rentan, habitat sensitif, atau komunitas tanpa izin yang sesuai."
+            }
+          },
+          "prizes": {
+            "title": "5. Pemenang dan penyedia layanan",
+            "paragraphs": {
+              "p1": "Kami dapat membagikan informasi minimum yang diperlukan kepada penyedia pembayaran, identitas, kepatuhan, hosting, dan komunikasi yang membantu menjalankan tantangan serta mengirim hadiah.",
+              "p2": "Kami dapat menerbitkan nama dan gambar profil pemenang, konten pemenang, kategori hadiah, dan jumlah pengamatan. Kami akan meminta izin sebelum menggunakan detail biografi pribadi lainnya."
+            }
+          },
+          "legalBases": {
+            "title": "6. Dasar hukum",
+            "paragraphs": {
+              "p1": "Kami memproses informasi tantangan untuk menjalankan perjanjian denganmu, berdasarkan persetujuan jika diperlukan, untuk kepentingan sah kami dalam menjalankan tantangan konservasi yang adil, dan untuk memenuhi kewajiban hukum. Kamu dapat menarik persetujuan jika pemrosesan bergantung padanya tanpa memengaruhi pemrosesan sah sebelumnya."
+            }
+          },
+          "retention": {
+            "title": "7. Penyimpanan",
+            "paragraphs": {
+              "p1": "Kami menyimpan catatan pribadi pengiriman dan kelayakan hadiah hanya selama diperlukan untuk pembayaran, pembukuan, pencegahan penipuan, dan kewajiban hukum. Pengamatan dan kiriman pendaftaran publik tetap ada di akunmu sampai kamu menghapusnya, dengan tunduk pada batasan jaringan terfederasi."
+            }
+          },
+          "rights": {
+            "title": "8. Pilihan dan hakmu",
+            "paragraphs": {
+              "p1": "Tergantung tempat tinggalmu, kamu dapat meminta akses, koreksi, penghapusan, pembatasan, atau keberatan atas penggunaan informasi pribadi, meminta portabilitas, atau menarik persetujuan. Hubungi team@gainforest.net. Kamu dapat mengelola atau menghapus catatan publik dari akun GainForest."
+            }
+          },
+          "children": {
+            "title": "9. Peserta muda",
+            "paragraphs": {
+              "p1": "Tantangan ini tidak ditujukan bagi anak di bawah 16 tahun. Peserta berusia 16 atau 17 tahun memerlukan persetujuan orang tua atau wali hukum. Jika kami mengetahui informasi dikirim oleh anak tanpa persetujuan yang sesuai, kami akan mengambil langkah wajar untuk menghapusnya."
+            }
+          },
+          "changes": {
+            "title": "10. Perubahan pada pemberitahuan ini",
+            "paragraphs": {
+              "p1": "Kami dapat memperbarui pemberitahuan ini dan akan mencantumkan tanggal revisi di sini. Kami akan memberikan pemberitahuan yang lebih jelas jika perubahan berdampak besar pada peserta."
+            }
+          },
+          "contact": {
+            "title": "11. Kontak",
+            "paragraphs": {
+              "p1": "Pertanyaan dan permintaan privasi dapat dikirim ke team@gainforest.net atau GainForest e.V., Schwandenacker 35, 8052 Zurich, Swiss."
+            }
+          }
+        }
+      }
+    },
+    "help": {
+      "prompt": "Ada pertanyaan?",
+      "officeHours": "Ikuti jam konsultasi",
+      "community": "Tanya di obrolan grup"
+    },
+    "status": {
+      "live": "Berlangsung",
+      "upcoming": "Segera dimulai",
+      "ended": "Selesai"
+    },
+    "rounds": {
+      "title": "Ronde",
+      "current": "Saat ini"
+    },
+    "round": {
+      "startsIn": "Mulai dalam",
+      "endsIn": "Berakhir dalam",
+      "ended": "Ronde selesai",
+      "days": "{count, plural, one {# hari} other {# hari}}",
+      "hours": "{count, plural, one {# jam} other {# jam}}",
+      "minutes": "{count, plural, one {# menit} other {# menit}}"
+    },
+    "prizes": {
+      "title": "Hadiah setiap ronde",
+      "badgeNote": "Plus lencana pemenang permanen di profilmu.",
+      "mostObservations": {
+        "title": "Pengamatan terbanyak",
+        "blurb": "Untuk pengumpul dengan pengamatan valid terbanyak dalam ronde."
+      },
+      "highestPoints": {
+        "title": "Poin tertinggi",
+        "blurb": "Untuk pengumpul dengan skor tertinggi dalam ronde: 2 poin per foto hewan, 1 per foto tanaman, +0,5 jika spesies dinamai."
+      },
+      "bestPicture": {
+        "title": "Foto terbaik",
+        "blurb": "Untuk foto alam paling memukau minggu ini, dipilih oleh tim."
+      }
+    },
+    "how": {
+      "title": "Cara kerjanya",
+      "steps": {
+        "outside": {
+          "title": "Keluarlah",
+          "blurb": "Catat keanekaragaman hayati di luar ruangan. Orang dan tanaman dalam pot tidak dihitung."
+        },
+        "upload": {
+          "title": "Unggah foto kamu",
+          "blurb": "Setiap pengamatan memerlukan foto unggahannya sendiri. Tambahkan di Observasi saya atau lewat Tainá."
+        },
+        "review": {
+          "title": "Periksa nama spesies",
+          "blurb": "Konfirmasi atau perbaiki nama yang disarankan — mulai Ronde 8, spesies yang dinamai mendapat 0,5 poin ekstra."
+        }
+      },
+      "proof": {
+        "title": "Datamu bukan cuma untuk menang hadiah",
+        "intro": "Setiap observasi yang kamu kirim tersimpan di akunmu, jadi kamu bisa memakainya nanti sebagai bukti untuk proyekmu sendiri.",
+        "uses": "Kamu bisa melapor kembali kepada pemberi dana dengan catatan kerja yang jelas. Kamu juga bisa menunjukkan kepada mitra dan pemangku kepentingan bahwa apa yang kamu lakukan membawa perubahan.",
+        "outro": "Tanpa kerja tambahan — cukup terus mengamati. Seiring waktu, ini membangun bukti nyata yang bisa kamu pakai kapan pun kamu perlukan."
+      }
+    },
+    "board": {
+      "title": "Papan ronde ini",
+      "live": "Langsung",
+      "subtitleLive": "Siapa yang memimpin dengan pengamatan foto yang valid saat ini.",
+      "subtitleLivePoints": "Siapa yang memimpin poin dengan pengamatan foto yang valid saat ini.",
+      "subtitleEnded": "Klasemen akhir ronde ini.",
+      "subtitleUpcoming": "Jadilah yang pertama di papan saat ronde dibuka.",
+      "subtitleAll": "Pengamatan foto valid terbanyak sepanjang tantangan.",
+      "scope": {
+        "round": "Ronde ini",
+        "all": "Sepanjang waktu"
+      },
+      "leader": "Memimpin",
+      "observations": "{count, plural, one {# pengamatan} other {# pengamatan}}",
+      "points": "{points} poin",
+      "pointsFull": "{points, plural, other {# poin}}",
+      "openCollector": "Buka profil pengumpul di tab baru",
+      "rankAriaLabel": "Peringkat {rank}",
+      "org": {
+        "label": "Organisasi",
+        "account": "Akun pribadi",
+        "members": "{count, plural, one {# anggota} other {# anggota}}",
+        "types": {
+          "nonprofit": "Nirlaba",
+          "business": "Bisnis",
+          "company": "Perusahaan",
+          "community": "Kelompok komunitas",
+          "government": "Pemerintah",
+          "academic": "Akademik"
+        }
+      },
+      "stats": {
+        "observations": "Pengamatan ronde ini",
+        "observationsAll": "Pengamatan (sepanjang waktu)",
+        "animals": "Hewan",
+        "plants": "Tanaman",
+        "named": "Spesies dinamai",
+        "collectors": "Pengumpul",
+        "timeLeft": "Sisa waktu"
+      },
+      "eligibility": {
+        "title": "Gambar yang diperiksa",
+        "eligibleOnly": "Hanya gambar valid yang dihitung",
+        "wildlife": "Satwa liar",
+        "plants": "Tanaman luar ruangan",
+        "people": "Orang",
+        "potted": "Tanaman dalam pot",
+        "other": "Lainnya dikecualikan",
+        "explainer": "Hanya pengamatan jelas tentang satwa liar atau tanaman luar ruangan dengan foto yang diunggah langsung yang dihitung. Orang, tanaman dalam pot atau di dalam ruangan, subjek yang tidak jelas, dan pengamatan tanpa foto unggahan dikecualikan."
+      },
+      "empty": {
+        "title": "Belum ada pengamatan",
+        "description": "Jadilah yang pertama menambahkan pengamatan di ronde ini."
+      },
+      "error": {
+        "title": "Tidak dapat memuat papan",
+        "description": "Coba lagi sebentar lagi."
+      },
+      "cta": "Tambahkan pengamatanmu",
+      "pointsGuide": {
+        "title": "Cara poin dihitung",
+        "animalValue": "2 poin",
+        "animalLabel": "Per foto hewan",
+        "plantValue": "1 poin",
+        "plantLabel": "Per foto tanaman",
+        "namedValue": "+0,5 poin",
+        "namedLabel": "Spesies dinamai",
+        "note": "Poin dimulai pada Ronde 8. Total seorang pengumpul adalah foto hewan × 2, ditambah foto tanaman × 1, ditambah 0,5 untuk setiap spesies yang dinamai. Ketuk sebuah baris di papan untuk melihat perhitungannya."
+      },
+      "breakdown": {
+        "toggle": "Cara poin dihitung",
+        "animals": "{count, plural, other {# foto hewan}} × 2",
+        "plants": "{count, plural, other {# foto tanaman}} × 1",
+        "labeled": "{count, plural, other {# spesies dinamai}} × 0,5",
+        "ineligible": "{count, plural, other {# foto tidak memenuhi syarat}}",
+        "total": "Total poin",
+        "profile": "Buka profil"
+      }
+    },
+    "winners": {
+      "title": "Pemenang sebelumnya",
+      "description": "Catatan permanen para juara setiap ronde.",
+      "mostObservations": "Pengamatan terbanyak",
+      "bestPicture": "Foto terbaik",
+      "pending": "Akan diumumkan",
+      "final": "Resmi",
+      "provisional": "Sementara",
+      "finalHint": "Pemenang ini sudah dikonfirmasi dan tidak akan berubah.",
+      "provisionalHint": "Klasemen saat ini — masih bisa berubah sampai pemenang dikonfirmasi.",
+      "compact": "Terbaru",
+      "newer": "Ronde lebih baru",
+      "older": "Ronde lebih lama",
+      "page": "{page} dari {total}",
+      "mostSubmitted": "Kiriman terbanyak",
+      "highestPoints": "Poin tertinggi",
+      "mostLiked": "Paling disukai",
+      "award": {
+        "action": "Berikan lencana pemenang",
+        "actionMissing": "Berikan lencana yang tersisa",
+        "done": "Lencana pemenang telah diberikan",
+        "error": "Tidak dapat memperbarui lencana atau status email. Coba lagi.",
+        "notification": {
+          "mostObservations": "Email observasi terbanyak",
+          "highestPoints": "Email poin tertinggi",
+          "bestPicture": "Email foto terbaik",
+          "sent": "Terkirim",
+          "delayed": "Tertunda — kami akan terus mencoba",
+          "missing_email": "Email akun tidak ditemukan; hubungi pemenang secara langsung",
+          "lookup_failed": "Pencarian email gagal; coba nanti atau hubungi pemenang",
+          "cannot_send": "Tidak dapat dikirim otomatis",
+          "handled_manually": "Ditangani secara manual",
+          "not_prepared": "Email belum disiapkan; coba lagi atau tangani secara langsung",
+          "notification_setup_failed": "Pengaturan email gagal; coba lagi atau tangani secara langsung",
+          "retry": "Coba lagi notifikasi",
+          "retrying": "Mencoba lagi…",
+          "markHandled": "Tandai sudah ditangani",
+          "marking": "Menandai…"
+        }
+      }
+    },
+    "map": {
+      "title": "Observasi minggu ini",
+      "heading": "Tempat foto ronde ini diambil",
+      "subtitle": "Setiap temuan berfoto dengan lokasi yang diunggah selama ronde ini. Seret lini masa dan tekan putar untuk melihatnya muncul sepanjang minggu.",
+      "loading": "Memetakan temuan minggu ini…",
+      "empty": "Belum ada temuan berfoto dengan lokasi pada ronde ini.",
+      "error": "Tidak dapat memuat peta observasi."
+    },
+    "gallery": {
+      "heading": "Foto yang diunggah ronde ini",
+      "subtitle": "Dinding langsung berisi pengamatan terbaru begitu diunggah. Ketuk foto mana pun untuk melihat detailnya.",
+      "subtitleAll": "Semua pengamatan yang diunggah pada ronde ini. Ketuk foto mana pun untuk membukanya, menyukainya, dan memberi komentar.",
+      "count": "{count, plural, =0 {Tidak ada kiriman} one {# kiriman} other {# kiriman}}",
+      "empty": "Belum ada foto yang diunggah pada ronde ini. Jadilah yang pertama menambahkannya.",
+      "error": "Tidak dapat memuat dinding foto.",
+      "openPhoto": "Buka pengamatan ini: {name}",
+      "unnamed": "Pengamatan tak teridentifikasi",
+      "view": {
+        "wall": "Dinding foto",
+        "all": "Semua kiriman"
+      }
+    },
+    "bestPicture": {
+      "heading": "Unggulan foto terbaik",
+      "subtitle": "Foto dengan suka terbanyak ronde ini — yang bersaing untuk hadiah foto terbaik. Ketuk foto mana pun untuk melihat detailnya.",
+      "prize": "{amount} foto terbaik",
+      "leader": "Memimpin",
+      "likes": "{count, plural, one {# suka} other {# suka}}",
+      "empty": "Belum ada suka pada ronde ini. Sukai sebuah foto agar ikut bersaing.",
+      "error": "Tidak dapat memuat unggulan.",
+      "openPhoto": "Buka pengamatan ini: {name}",
+      "unnamed": "Pengamatan tak teridentifikasi"
+    }
+  },
+  "dashboard": {
+    "metadata": {
+      "title": "Ikhtisar donasi — GainForest",
+      "description": "Aktivitas donasi di GainForest: total terkumpul, pendukung, tren pendanaan, dan donasi terbaru.",
+      "measurementTechnique": "Tanda terima donasi yang diindeks dari catatan org.hypercerts.funding.receipt."
+    },
+    "hero": {
+      "eyebrow": "Aktivitas Donasi",
+      "title": "Donasi",
+      "accent": "Ikhtisar",
+      "imageAlt": "Lanskap regeneratif berkabut untuk aktivitas donasi",
+      "lede": "Lacak donasi di GainForest: total terkumpul, aktivitas pendukung, tempat yang dijangkau, tren pendanaan, dan donasi terbaru."
+    },
+    "periods": {
+      "all": "Sepanjang waktu",
+      "month": "30 hari terakhir",
+      "week": "7 hari terakhir"
+    },
+    "kpis": {
+      "totalRaised": "Total terkumpul",
+      "totalRaisedSub": "Semua donasi USD",
+      "totalDonations": "Total donasi",
+      "totalDonationsSub": "Tanda terima tercatat",
+      "uniqueDonors": "Donatur unik",
+      "uniqueDonorsSub": "Berdasarkan DID atau dompet",
+      "avgDonation": "Rata-rata donasi",
+      "avgDonationSub": "Per transaksi",
+      "activeBumicerts": "sertifikat aktif",
+      "activeBumicertsSub": "Telah menerima dana",
+      "totalDonated": "Total didonasikan",
+      "completedDonations": "Donasi selesai",
+      "donors": "donatur",
+      "bumicertsWithDonations": "sertifikat dengan donasi",
+      "averageDonation": "Rata-rata jumlah donasi",
+      "countriesWithBumicerts": "Negara dengan sertifikat"
+    },
+    "geo": {
+      "title": "Jangkauan geografis",
+      "countriesRepresented": "Negara terwakili",
+      "topCountries": "Negara teratas",
+      "empty": "Tidak ada data geografis.",
+      "organizationCount": "{count, plural, one {# organisasi} other {# organisasi}}"
+    },
+    "chart": {
+      "title": "Donasi dari waktu ke waktu",
+      "raisedPer": "USD terkumpul per {granularity}",
+      "empty": "Tidak ada data donasi untuk periode ini.",
+      "donationCount": "{count, plural, one {# donasi} other {# donasi}}",
+      "granularities": {
+        "day": "Harian",
+        "week": "Mingguan",
+        "month": "Bulanan"
+      }
+    },
+    "tables": {
+      "topDonors": "Donatur teratas",
+      "byOrganization": "Berdasarkan organisasi",
+      "recentTransactions": "Transaksi terbaru",
+      "noDonations": "Belum ada donasi.",
+      "noTransactions": "Belum ada transaksi.",
+      "donor": "Donatur",
+      "totalDonated": "Total didonasikan",
+      "donations": "Donasi",
+      "lastDonation": "Donasi terakhir",
+      "organization": "Organisasi",
+      "totalRaised": "Total terkumpul",
+      "bumicerts": "sertifikat",
+      "donors": "Donatur",
+      "date": "Tanggal",
+      "amount": "Jumlah",
+      "bumicert": "sertifikat",
+      "txHash": "Hash tx",
+      "anonymous": "Anonim",
+      "anonymousWallet": "Anonim ({address})",
+      "allTimeDonations": "Sepanjang waktu · {count, plural, one {# donasi} other {# donasi}}",
+      "showingLatest": "menampilkan {count} terbaru",
+      "viewBumicert": "Lihat sertifikat",
+      "topCountries": "Negara teratas",
+      "recentDonations": "Donasi terbaru",
+      "showingAll": "menampilkan semua",
+      "anonymousSupporter": "Pendukung anonim",
+      "view": "Lihat",
+      "showFirst": "Tampilkan {count} pertama",
+      "showAll": "Tampilkan semua {count}",
+      "loadingCountries": "Memuat negara"
+    },
+    "error": {
+      "title": "Data donasi tidak tersedia",
+      "description": "Kami tidak dapat memuat informasi donasi. Coba lagi sebentar lagi.",
+      "action": "Buka ikhtisar donasi"
+    }
+  },
+  "donationsHub": {
+    "tabs": {
+      "overview": "Ikhtisar",
+      "leaderboard": "Papan peringkat",
+      "ariaLabel": "Tampilan donasi"
+    }
+  },
+  "grants": {
+    "metadata": {
+      "title": "Hibah",
+      "description": "Ajukan program hibah yang mendanai kedaulatan data dan keputusan untuk komunitas berbasis alam."
+    },
+    "hero": {
+      "eyebrow": "Pendanaan",
+      "title": "Hibah",
+      "accent": "Program",
+      "imageAlt": "Lanskap regeneratif berkabut",
+      "lede": "Program hibah terbuka untuk komunitas yang membangun kedaulatan data dan keputusan. Ajukan dengan salah satu proyek Anda."
+    },
+    "rewilding": {
+      "title": "Meliarkan Kembali Web",
+      "slots": "10 hibah tersedia",
+      "amount": "Hingga $1.000 per hibah",
+      "description": "Program hibah yang mendanai perekam AudioMoth dan perangkat pengumpulan data lapangan lainnya, agar komunitas dapat mengumpulkan data keanekaragaman hayati mereka sendiri di lapangan.",
+      "support": "Didukung oleh hibah Klarna AI for Climate Resilience.",
+      "server": {
+        "aria": "Ilustrasi interaktif perangkat pengumpulan data lapangan",
+        "caption": "Pengumpulan data lapangan"
+      },
+      "kits": {
+        "audiomoths": {
+          "title": "Perekam AudioMoth",
+          "description": "Perekam akustik yang menangkap suara keanekaragaman hayati di lapangan."
+        },
+        "tools": {
+          "title": "Perangkat pengumpulan data",
+          "description": "Perangkat lapangan untuk mengumpulkan observasi dan bukti di lapangan."
+        }
+      },
+      "apply": "Ajukan dengan Satu Klik",
+      "applicationsUnderReview": "Pengajuan sedang ditinjau. Penerima hibah terpilih akan segera diumumkan.",
+      "details": "Baca detail hibah",
+      "appliedTitle": "Pengajuan terkirim",
+      "appliedNote": "Pengajuan Anda untuk {project} kini telah diposting ke feed.",
+      "postText": "Mengajukan hibah Meliarkan Kembali Web dengan proyek saya \"{project}\" demi kedaulatan data dan keputusan. 🌱"
+    },
+    "applyModal": {
+      "title": "Pilih proyek untuk diajukan",
+      "subtitle": "Pilih salah satu proyek Anda untuk mengirim pengajuan.",
+      "searchPlaceholder": "Cari proyek Anda",
+      "searchAria": "Cari proyek Anda",
+      "loading": "Memuat proyek Anda…",
+      "errorTitle": "Tidak dapat memuat proyek Anda.",
+      "retry": "Coba lagi",
+      "noProjectsTitle": "Belum ada proyek",
+      "noProjectsDescription": "Buat proyek terlebih dahulu, lalu kembali untuk mengajukannya.",
+      "createProject": "Buat proyek",
+      "noMatch": "Tidak ada proyek yang cocok dengan pencarian Anda.",
+      "untitledProject": "Proyek tanpa judul",
+      "applyWith": "Ajukan dengan {project}",
+      "submitError": "Tidak dapat mengirim pengajuan Anda. Silakan coba lagi.",
+      "successTitle": "Pengajuan terkirim",
+      "successBody": "Terima kasih telah mengajukan dengan {project}. Kami akan segera menghubungi Anda tentang langkah selanjutnya.",
+      "successClose": "Selesai"
+    },
+    "interoperable": {
+      "category": "Program Hibah Interoperabel",
+      "grantName": "Ma Earth Putaran 3",
+      "fundingType": "Pendanaan kuadratik",
+      "description": "Putaran pendanaan Ma Earth yang didukung komunitas menggunakan pendanaan kuadratik: banyak donasi kecil disepadankan dan diperkuat lebih dari sedikit donasi besar. Pendaftaran telah ditutup dan putaran kini sedang berlangsung — jelajahi proyek yang ikut serta dan dukung mereka.",
+      "browseProjects": "Jelajahi proyek di putaran ini",
+      "logoAlt": "Ma Earth"
+    },
+    "rewildingDashboard": {
+      "grant": {
+        "navLabel": "Hibah saya",
+        "nextStepEyebrow": "Langkah berikutnya",
+        "dueBy": "tenggat {date}",
+        "openRecorders": "Tambah perekam",
+        "statsLabel": "Kemajuan hibah",
+        "stats": {
+          "audioUploaded": "Audio terunggah",
+          "audioValue": "{minutes} mnt",
+          "recorders": "Perekam",
+          "recordersYours": "{count} milik Anda",
+          "recordersShipped": "{count} dikirim",
+          "speciesTagged": "Spesies tertandai",
+          "audioTargetBy": "Target {target} mnt pada {date}",
+          "audioBehindPace": "{minutes} mnt di belakang laju · {days} hari lagi",
+          "audioAheadPace": "{minutes} mnt di depan laju · {days} hari lagi",
+          "audioTargetMet": "Target tercapai",
+          "audioGrantClosed": "Periode hibah ditutup",
+          "audioStartsIn": "Dimulai dalam {days} hari · butuh {rate} mnt/hari"
+        },
+        "milestones": {
+          "title": "Tonggak hibah",
+          "progress": "{done} dari {total} terkonfirmasi",
+          "viewRecorders": "Buka inventaris",
+          "notStarted": "Belum dimulai",
+          "empty": "Belum ada tonggak pencapaian. Semuanya muncul di sini setelah hibah Anda disiapkan.",
+          "confirmed": "Terkonfirmasi",
+          "payout": "Mencairkan ${amount} · pembayaran {tranche}",
+          "reviewNote": "GainForest mengonfirmasi setiap tonggak — setiap tonggak yang dikonfirmasi mencairkan bagian hibah berikutnya.",
+          "pending": "Belum dikonfirmasi",
+          "dueOn": "Tenggat {date}",
+          "overdue": "Lewat tenggat {date}"
+        },
+        "metadata": {
+          "title": "Hibah saya",
+          "description": "Hibah Rewilding the Web Anda: langkah berikutnya, kemajuan, dan tonggak pencapaian."
+        },
+        "untitled": "Hibah Anda",
+        "amount": "Hibah ${amount}",
+        "pace": {
+          "title": "Audio terunggah vs laju yang dibutuhkan",
+          "summary": "{current} dari target {target} mnt · laju untuk mencapainya pada {date}",
+          "rangeLabel": "Pilih periode",
+          "ranges": {
+            "1w": "Minggu",
+            "1m": "Bulan",
+            "6m": "6 bulan",
+            "all": "Sejak hibah",
+            "allUpcoming": "Semua unggahan"
+          },
+          "phrases": {
+            "1w": "minggu ini",
+            "1m": "bulan ini",
+            "6m": "dalam 6 bulan terakhir",
+            "all": "sejak hibah Anda dimulai"
+          },
+          "vsPaceNeeded": "vs laju yang dibutuhkan · {range}",
+          "behindPhrase": "di belakang laju yang dibutuhkan {phrase}",
+          "aheadPhrase": "di depan laju yang dibutuhkan {phrase}",
+          "upcomingEyebrow": "keunggulan awal · {range}",
+          "upcomingPhrase": "terkumpul sebelum jendela hibah dibuka {date}",
+          "upcomingNeeded": "0 dibutuhkan sampai {date}",
+          "upcomingRates": "{actual} aktual · {needed} dibutuhkan mulai {date}",
+          "actual": "aktual",
+          "needed": "dibutuhkan",
+          "perDay": "{rate}/hari",
+          "rates": "{actual} aktual · {needed} dibutuhkan",
+          "legendActual": "Aktual",
+          "legendNeeded": "Laju dibutuhkan",
+          "focus": "{minutes} mnt pada {date}",
+          "overallBehind": "Secara keseluruhan {minutes} mnt di belakang laju seluruh hibah",
+          "overallAhead": "Secara keseluruhan {minutes} mnt di depan laju seluruh hibah",
+          "overallUpcoming": "Jendela hibah dibuka {date} · setiap menit sejauh ini adalah keunggulan awal",
+          "overallMet": "Target perekaman tercapai"
+        }
+      },
+      "recorders": {
+        "navLabel": "Perekam saya",
+        "title": "Perekam saya",
+        "add": "Tambah perekam",
+        "addShort": "Tambah",
+        "filtersLabel": "Saring perekam menurut asal",
+        "filters": {
+          "all": "Semua {count}",
+          "owned": "Milik Anda {count}",
+          "shipped": "Dari GainForest {count}"
+        },
+        "origin": {
+          "owned": "milik Anda",
+          "shipped": "dari GainForest"
+        },
+        "status": {
+          "recording": "Merekam",
+          "idle": "Belum dipasang",
+          "arriving": "Tiba ~{date}",
+          "inTransit": "Dalam perjalanan",
+          "requested": "Sedang dipesan"
+        },
+        "emptyFilter": "Belum ada perekam yang cocok dengan filter ini.",
+        "unknownPrompt": "Punya perekam yang belum kami ketahui? Tambahkan di sini.",
+        "metadata": {
+          "title": "Perekam saya",
+          "description": "Semua perekam pada hibah Rewilding the Web Anda dan asal masing-masing."
+        },
+        "empty": "Belum ada perekam.",
+        "addNotBuilt": "Penambahan perekam belum dibuat — fitur ini aktif setelah kami dapat menyimpannya ke akun Anda."
+      },
+      "addForm": {
+        "title": "Tambah perekam",
+        "close": "Tutup",
+        "originLegend": "Dari mana asalnya",
+        "originOwned": "Saya sudah punya",
+        "originOwnedHint": "Daftarkan perekam milik Anda.",
+        "originRequest": "Kirimkan satu",
+        "originRequestHint": "Minta GainForest mengirimkannya kepada Anda.",
+        "deviceType": "Jenis perangkat",
+        "deviceOther": "Perekam lain…",
+        "deviceOtherLabel": "Nama perangkat",
+        "deviceOtherPlaceholder": "Merek dan model perangkat",
+        "quantity": "Berapa banyak",
+        "condition": "Kondisi",
+        "conditionOptions": {
+          "fieldWorking": "Berfungsi, di lapangan",
+          "working": "Berfungsi, belum dipasang",
+          "needsRepair": "Perlu perbaikan"
+        },
+        "requestNote": "Kami mengonfirmasi jumlahnya dengan hibah Anda sebelum pengiriman.",
+        "location": "Tempat ia mendengarkan",
+        "locationPlaceholder": "Nama lokasi atau penanda",
+        "mapComingSoon": "Pemilih titik peta segera hadir",
+        "save": "Simpan perekam",
+        "saveRequest": "Ajukan pengiriman",
+        "milestoneNote": "Dihitung untuk tonggak inventaris Anda."
+      },
+      "shell": {
+        "eyebrow": "Rewilding the Web · pratinjau admin",
+        "placeholderNotice": "Angka perekam dan spesies di halaman ini belum terhubung ke catatan nyata, jadi masih nol. Audio terunggah, tonggak, dan dokumen hibah sudah aktif.",
+        "granteeEyebrow": "Meliarkan Kembali Web"
+      }
+    }
+  },
+  "account": {
+    "metadata": {
+      "accountTitle": "Akun — sertifikat",
+      "bumicertsTitle": "sertifikat — sertifikat",
+      "donationsTitle": "Riwayat donasi — sertifikat",
+      "accountFallback": "Akun",
+      "profileDescription": "{displayName} di sertifikat",
+      "organizationDescription": "{displayName} di sertifikat.",
+      "bumicertsPageTitle": "sertifikat {displayName} — sertifikat",
+      "bumicertsPageDescription": "Jelajahi semua sertifikat yang dibuat oleh {displayName}.",
+      "donationsPageTitle": "Riwayat donasi {displayName} — sertifikat",
+      "donationsPageDescription": "Jelajahi riwayat donasi publik untuk {displayName}."
+    },
+    "errors": {
+      "loadOwnTitle": "Tidak dapat memuat akun Anda",
+      "loadOwnDescription": "Kami kesulitan mengambil data akun Anda. Coba lagi.",
+      "loadAccountTitle": "Tidak dapat memuat akun ini",
+      "loadAccountDescription": "Kami kesulitan mengambil data akun ini. Coba lagi.",
+      "loadBumicertsTitle": "Tidak dapat memuat sertifikat akun ini",
+      "loadBumicertsDescription": "Kami kesulitan mengambil sertifikat akun ini. Coba lagi."
+    },
+    "onboarding": {
+      "title": "Orientasi diperlukan",
+      "description": "Anda sudah masuk, tetapi akun sertifikat Anda belum disiapkan. Selesaikan orientasi untuk melanjutkan.",
+      "action": "Mulai orientasi"
+    },
+    "tabs": {
+      "home": "Beranda",
+      "bumicerts": "sertifikat",
+      "donationHistory": "Riwayat donasi",
+      "evidenceTimeline": "Pembaruan proyek",
+      "settings": "Pengaturan",
+      "leaderboard": "Papan peringkat"
+    },
+    "setupPrompt": {
+      "title": "Siapkan organisasi Anda",
+      "description": "Sebelum mengunggah konten, Anda perlu menyiapkan profil organisasi. Ini hanya memerlukan beberapa menit.",
+      "action": "Siapkan organisasi"
+    },
+    "wallet": {
+      "setUpDonations": "Siapkan donasi",
+      "signInDescription": "Masuk untuk menautkan dompet Anda dan menerima donasi.",
+      "enabled": "Donasi diaktifkan ✓",
+      "walletLabel": "Dompet:",
+      "enabledDescription": "Donatur kini dapat mengirim USDC ke organisasi Anda melalui sertifikat.",
+      "setupDescription": "Tautkan dompet untuk menerima donasi USDC dari pendukung.",
+      "stepConnect": "Langkah 1: Hubungkan dompet Anda",
+      "connectWallet": "Hubungkan dompet",
+      "stepSwitch": "Langkah 2: Beralih ke jaringan Ethereum",
+      "switching": "Beralih...",
+      "switchToEthereum": "Beralih ke Ethereum",
+      "linkedSuccess": "✓ Dompet berhasil ditautkan!",
+      "linkedSuccessDescription": "Pengindeks mungkin memerlukan waktu untuk memproses attestasi Anda.",
+      "refresh": "Segarkan",
+      "stepLink": "Langkah 3: Tautkan dompet Anda",
+      "waitingSignature": "Menunggu tanda tangan…",
+      "writingAttestation": "Menulis attestasi…",
+      "errorLinking": "Kesalahan menautkan dompet",
+      "signInWallet": "Tanda tangan di dompet…",
+      "writingToAtproto": "Menulis ke ATProto…",
+      "retry": "Coba lagi",
+      "signAndLink": "Tandatangani & tautkan dompet",
+      "signing": "Menandatangani…",
+      "saving": "Menyimpan…"
+    },
+    "bumicerts": {
+      "emptyEyebrow": "Tidak ada sertifikat",
+      "emptyDescription": "Akun ini belum menerbitkan sertifikat.",
+      "unknownCreator": "Tidak diketahui"
+    },
+    "sidebar": {
+      "achievements": "Pencapaian",
+      "viewAllAchievements": "Lihat semua pencapaian",
+      "donationUnavailable": "Catatan donasi tidak tersedia saat ini",
+      "noPublicDonationsRecorded": "Belum ada donasi publik tercatat",
+      "supportedOrganizations": "Mendukung {count} {count, plural, one {organisasi} other {organisasi}}",
+      "noPublicDonationsReceived": "Belum ada donasi publik diterima",
+      "receivedDonations": "Menerima {count} {count, plural, one {donasi} other {donasi}}",
+      "setupPublicProfile": "Siapkan profil sertifikat publik",
+      "completedProfileDetails": "Menyelesaikan {count} {count, plural, one {detail} other {detail}} profil",
+      "bumicertUnavailable": "Catatan sertifikat tidak tersedia saat ini",
+      "publishedBumicerts": "Menerbitkan {count} {count, plural, one {sertifikat} other {sertifikat}}",
+      "noBumicertsPublished": "Belum ada sertifikat diterbitkan",
+      "profileReady": "Profil siap",
+      "bumicertSteward": "Penjaga sertifikat",
+      "creatorSeed": "Benih kreator",
+      "communityBacked": "Didukung komunitas",
+      "impactSupporter": "Pendukung dampak",
+      "inviteCollaborators": "Undang kolaborator",
+      "inviteCollaboratorsDescription": "Ajak pendukung dan kolaborator ke karya sertifikat Anda dan tumbuhkan dampak regeneratif bersama.",
+      "inviteFriends": "Undang teman",
+      "inviteFriendsDescription": "Undang teman Anda bergabung dengan sertifikat dan menciptakan dampak positif bersama.",
+      "shareProfileTitle": "Bagikan profil Anda",
+      "shareProfileTitleOrganization": "Bagikan profil ini",
+      "shareProfileBody": "Salin tautan profil Anda dan bagikan kepada siapa saja.",
+      "shareProfileBodyOrganization": "Salin tautan profil ini dan bagikan kepada kolaborator dan pendana.",
+      "copyProfileLink": "Salin tautan profil",
+      "profileLinkCopied": "Tersalin",
+      "shareOrganization": "Jelajahi profil sertifikat {displayName}: {pageUrl}",
+      "shareUser": "Bergabunglah dengan saya di sertifikat dan dukung dampak regeneratif: {pageUrl}",
+      "totalBumicerts": "Jumlah sertifikat",
+      "donationsReceived": "Donasi diterima",
+      "totalDonations": "Total donasi"
+    },
+    "hero": {
+      "coverImageAlt": "Gambar sampul {displayName}",
+      "copyLink": "Salin tautan",
+      "copied": "Tersalin!",
+      "share": "Bagikan",
+      "editProfile": "Edit profil",
+      "edit": "Sunting",
+      "since": "Sejak {date}"
+    },
+    "settings": {
+      "profile": {
+        "title": "Edit Profil",
+        "description": "Perbarui nama tampilan, bio, dan gambar profil Anda.",
+        "displayNameLabel": "Nama Tampilan",
+        "displayNamePlaceholder": "Nama Anda",
+        "bioLabel": "Biografi",
+        "bioPlaceholder": "Perkenalan singkat tentang diri Anda.",
+        "changeBanner": "Ganti spanduk",
+        "addBanner": "Tambah spanduk",
+        "changeAvatar": "Ganti avatar",
+        "avatarEditorDescription": "Pilih avatar yang jelas untuk profil Anda.",
+        "bannerEditorDescription": "Pilih spanduk yang mencerminkan profil Anda.",
+        "saveChanges": "Simpan Perubahan",
+        "saving": "Menyimpan...",
+        "saved": "Tersimpan!"
+      },
+      "account": {
+        "title": "Akun",
+        "description": "Identifikasi akun Anda di jaringan AT Protocol.",
+        "handleLabel": "Handle",
+        "didLabel": "Pengidentifikasi Terdesentralisasi (DID)"
+      },
+      "password": {
+        "title": "Kata Sandi",
+        "description": "Setel ulang kata sandi akun melalui kode verifikasi yang dikirim ke email Anda.",
+        "emailLabel": "Alamat email",
+        "emailPlaceholder": "anda@contoh.com",
+        "sendCodeDescription": "Kami akan mengirim kode reset ke alamat email akun Anda.",
+        "sendCode": "Kirim Kode",
+        "sending": "Mengirim...",
+        "codeSent": "Kode telah dikirim ke {email}. Periksa kotak masuk Anda.",
+        "codeLabel": "Kode Reset",
+        "codePlaceholder": "Masukkan kode dari email Anda",
+        "newPasswordLabel": "Kata Sandi Baru",
+        "newPasswordPlaceholder": "Min. 8 karakter",
+        "confirmPasswordLabel": "Konfirmasi Kata Sandi",
+        "confirmPasswordPlaceholder": "Ulangi kata sandi baru",
+        "changePassword": "Ganti Kata Sandi",
+        "saving": "Menyimpan...",
+        "cancel": "Batal",
+        "confirmMismatch": "Kata sandi tidak cocok.",
+        "lengthError": "Kata sandi harus antara 8 dan 256 karakter.",
+        "requestError": "Gagal mengirim email reset. Coba lagi.",
+        "resetError": "Gagal mengatur ulang kata sandi. Periksa kodenya.",
+        "successMessage": "Kata sandi berhasil diubah."
+      },
+      "wallets": {
+        "title": "Dompet Terhubung",
+        "addWallet": "Tambah Dompet",
+        "empty": "Belum ada dompet yang terhubung.",
+        "verified": "Terverifikasi",
+        "unverified": "Tidak terverifikasi",
+        "description": "Hubungkan dompet Ethereum Anda untuk menerima donasi USDC.",
+        "edit": "Ubah dompet",
+        "delete": "Hapus dompet"
+      }
+    }
+  },
+  "sidebar": {
+    "sections": {
+      "explore": "JELAJAHI",
+      "manage": "KELOLA"
+    },
+    "items": {
+      "bumicerts": "sertifikat",
+      "organizations": "Organisasi",
+      "leaderboard": "Papan peringkat",
+      "organization": "Organisasi",
+      "sites": "Situs",
+      "audio": "Audio",
+      "trees": "Pohon",
+      "profile": "Profil"
+    },
+    "createBumicert": "Buat sertifikat",
+    "prompts": {
+      "signInDescription": "Masuk untuk mengelola akun dan konten Anda.",
+      "signInAction": "Masuk",
+      "accountError": "Tidak dapat memuat akun Anda saat ini.",
+      "checkingAccount": "Memeriksa akun Anda...",
+      "onboardingDescription": "Selesaikan orientasi untuk mengelola akun Anda.",
+      "onboardingAction": "Orientasi"
+    },
+    "social": {
+      "documentation": "Dokumentasi",
+      "github": "GitHub",
+      "twitter": "X (Twitter)",
+      "gainforest": "GainForest"
+    }
+  },
+  "maEarthFundingRound": {
+    "metadata": {
+      "title": "Daftar ke Putaran Pendanaan Ma Earth 3 — sertifikat",
+      "description": "Pelajari bagaimana komunitas GainForest dapat menggunakan sertifikat untuk bersiap mengikuti Putaran Pendanaan Ma Earth 3 dan dana pencocokan $500.000."
+    },
+    "hero": {
+      "logoAlt": "Ma Earth",
+      "title": "Siapkan sertifikat Anda untuk Putaran Pendanaan Ma Earth 3",
+      "description": "Ma Earth menjalankan putaran pendanaan yang didukung komunitas dengan dana pencocokan $500.000 untuk proyek berbasis alam. Jika organisasi Anda sudah mendokumentasikan dampak melalui sertifikat, gunakan sertifikat publik Anda sebagai referensi saat mendaftar di Ma Earth."
+    },
+    "actions": {
+      "applyOnMaEarth": "Daftar di Ma Earth",
+      "createBumicertFirst": "Buat sertifikat terlebih dahulu"
+    },
+    "matchingPool": {
+      "value": "$500.000",
+      "label": "Dana pencocokan",
+      "description": "Ma Earth menggunakan pendanaan kuadratik: partisipasi pendukung yang lebih luas dapat lebih berarti daripada satu kontribusi besar."
+    },
+    "facts": {
+      "matchingPool": {
+        "label": "Dana pendamping",
+        "value": "$500,000",
+        "description": "Dukungan komunitas diperkuat melalui model pendampingan Ma Earth."
+      },
+      "fundingRange": {
+        "label": "Rentang pendanaan proyek",
+        "value": "$2k–$15k",
+        "description": "Untuk pekerjaan berbasis alam yang spesifik, layak, dan memiliki pelaporan yang jelas."
+      },
+      "applicationWindow": {
+        "label": "Periode pendaftaran",
+        "value": "Dibuka hingga 31 Mei",
+        "description": "Pendaftaran dibuka hingga 31 Mei 2026."
+      }
+    },
+    "why": {
+      "eyebrow": "Mengapa bersiap dengan sertifikat?",
+      "title": "Catatan dampak Anda seharusnya ikut bersama aplikasi Anda.",
+      "description": "sertifikat mengumpulkan cerita proyek, konteks organisasi, lokasi, foto, dan bukti yang dibutuhkan pemberi dana untuk memercayai pekerjaan tersebut. Ini membantu menjembatani kerja komunitas terverifikasi dengan proses pendanaan Ma Earth."
+    },
+    "includeItems": {
+      "story": "Cerita proyek dan deskripsi singkat",
+      "identity": "Identitas organisasi dan profil publik",
+      "evidence": "Foto, bukti, dan klaim dampak terdokumentasi",
+      "location": "Referensi lokasi atau situs jika tersedia",
+      "publicLink": "Tautan sertifikat publik yang dapat Anda sertakan dalam aplikasi"
+    },
+    "eligibility": {
+      "title": "Siapa yang memenuhi syarat?",
+      "items": {
+        "nature": "Proyek restorasi, konservasi, pertanian, air, tanah, biodiversitas, atau komunitas berbasis alam.",
+        "plan": "Rencana spesifik dengan tujuan, kerangka waktu, kapasitas pelaporan, dan klaim keberhasilan yang autentik.",
+        "fundingNeed": "Kebutuhan pendanaan antara USD $2,000 dan $15,000 untuk pekerjaan khusus proyek.",
+        "stripe": "Pengaturan di negara yang didukung Stripe atau mitra host fiskal yang dapat menerima dana."
+      }
+    },
+    "timeline": {
+      "title": "Linimasa putaran",
+      "items": {
+        "applicationsClose": {
+          "date": "31 Mei",
+          "event": "Pendaftaran ditutup"
+        },
+        "applicantsNotified": {
+          "date": "15 Juni",
+          "event": "Pelamar diberi tahu"
+        },
+        "acceptedProjects": {
+          "date": "1 Juli",
+          "event": "Proyek yang diterima bergabung dalam putaran"
+        },
+        "roundCloses": {
+          "date": "21 Juli",
+          "event": "Putaran ditutup dan pendanaan dibayarkan"
+        }
+      }
+    },
+    "flow": {
+      "eyebrow": "Alur aplikasi",
+      "title": "Daftar langsung di Ma Earth, dengan sertifikat Anda siap.",
+      "description": "sertifikat tidak dapat mengirimkan aplikasi Anda secara otomatis. Buka halaman penggalangan dana Ma Earth, daftar di sana, dan sertakan tautan sertifikat publik Anda di mana pun itu membantu menjelaskan proyek dan bukti Anda."
+    }
+  },
+  "projects": {
+    "metadata": {
+      "title": "Proyek alam — bukti lapangan dan catatan dampak",
+      "description": "Jelajahi proyek komunitas dan organisasi dengan tempat, pembaruan, observasi, dan bukti kerja regeneratif."
+    },
+    "hero": {
+      "eyebrow": "Jelajahi proyek",
+      "title": "Jelajahi",
+      "accent": "Proyek",
+      "description": "Setiap proyek adalah pekerjaan yang terfokus — dengan tujuan yang jelas, jangka waktu, dan hasil yang diharapkan."
+    },
+    "search": {
+      "ariaLabel": "Cari proyek",
+      "placeholder": "Cari proyek berdasarkan nama atau kata kunci",
+      "sortAriaLabel": "Urutkan proyek",
+      "action": "Cari"
+    },
+    "categories": {
+      "eyebrow": "Jelajahi berdasarkan minat",
+      "title": "Jelajahi kategori proyek",
+      "description": "Mulai dengan sebuah tema, lalu temukan orang dan tempat yang mewujudkannya.",
+      "items": {
+        "all": "Semua proyek",
+        "forests": "Hutan dan pepohonan",
+        "biodiversity": "Keanekaragaman hayati",
+        "foodWater": "Pangan, air, dan tanah",
+        "communities": "Komunitas",
+        "climate": "Ketahanan iklim"
+      }
+    },
+    "featured": {
+      "eyebrow": "Proyek unggulan",
+      "title": "Cerita untuk memulai",
+      "description": "Pilihan proyek yang terdokumentasi lengkap dari para penjaga alam di seluruh dunia.",
+      "badge": "Unggulan",
+      "action": "Jelajahi proyek",
+      "previous": "Proyek unggulan sebelumnya",
+      "next": "Proyek unggulan berikutnya",
+      "goTo": "Buka {title}",
+      "manage": {
+        "add": "Jadikan proyek unggulan",
+        "remove": "Hapus dari proyek unggulan",
+        "error": "Tidak dapat memperbarui proyek unggulan. Silakan coba lagi."
+      }
+    },
+    "support": {
+      "eyebrow": "Terbuka untuk dukungan",
+      "title": "Bantu karya baik berkembang",
+      "description": "Dukung proyek yang sedang menerima kontribusi dari komunitas mereka."
+    },
+    "catalog": {
+      "eyebrow": "Jelajahi proyek",
+      "title": "Jelajahi semua proyek",
+      "description": "Jelajahi proyek dalam kategori ini.",
+      "count": "{count, plural, other {# proyek untuk dijelajahi}}"
+    },
+    "view": {
+      "cards": "Kartu",
+      "list": "Daftar",
+      "map": "Peta"
+    },
+    "list": {
+      "colProject": "Proyek",
+      "colSteward": "Pengelola",
+      "colPlace": "Tempat",
+      "colFocus": "Fokus"
+    },
+    "sort": {
+      "newest": "Terbaru",
+      "oldest": "Terlama",
+      "az": "A → Z",
+      "za": "Z → A"
+    },
+    "stats": {
+      "projects": "Proyek",
+      "withBumicerts": "Proyek dengan sertifikat",
+      "bumicerts": "sertifikat dalam proyek",
+      "withImages": "Proyek dengan gambar"
+    },
+    "filters": {
+      "allProjects": "Semua proyek",
+      "allFilters": "Urutkan dan filter",
+      "description": "Tampilkan proyek berdasarkan lencana sumber, donasi, gambar, atau tempat proyek.",
+      "updateHint": "Filter diperbarui saat Anda memilih.",
+      "images": "Menampilkan gambar",
+      "locations": "Memiliki tempat",
+      "timeline": "Punya linimasa",
+      "donations": "Menerima donasi",
+      "donationsGainforest": "Donasi GainForest",
+      "donationsMaearth": "Donasi Ma Earth"
+    },
+    "empty": {
+      "eyebrow": "Tidak ada hasil",
+      "title": "Tidak ada proyek ditemukan",
+      "description": "Coba sesuaikan pencarian atau filter untuk menemukan lebih banyak koleksi proyek."
+    },
+    "footer": {
+      "showing": "Menampilkan {shown} dari {total} proyek.",
+      "showMore": "Tampilkan lebih banyak",
+      "end": "Anda telah mencapai akhir."
+    },
+    "card": {
+      "open": "Buka proyek: {title}",
+      "projectSteward": "Pengelola proyek",
+      "bumicertCount": "{count, plural, one {# sertifikat} other {# sertifikat}}",
+      "projectPlace": "Tempat proyek",
+      "showDetails": "Tampilkan detail",
+      "loading": "Memuat proyek",
+      "donate": "Donasi",
+      "gainforestBadge": "Donasi di GainForest",
+      "acceptsDonations": "Menerima donasi",
+      "openForSupport": "Terbuka untuk dukungan",
+      "donationSummary": "{amount} dari {donors, plural, other {# pendukung}}",
+      "donationSummaryShort": "{amount} · {donors, plural, other {# pendukung}}",
+      "donationWays": "{count} cara",
+      "maEarth": "Ma Earth",
+      "round": "Putaran {round}",
+      "byDonors": "dari {donors, plural, other {# donatur}}",
+      "view": "Lihat proyek"
+    },
+    "actions": {
+      "clearAll": "Hapus semua"
+    },
+    "evidence": {
+      "boundaries": "{count, plural, =0 {Belum ada batas lokasi} other {# batas lokasi dipetakan}}",
+      "sightings": "{count, plural, =0 {Belum ada pengamatan alam} other {# pengamatan alam}}",
+      "timeline": "{count, plural, =0 {Belum ada pembaruan proyek} other {# pembaruan proyek}}",
+      "reviews": "{count, plural, =0 {Belum ada ulasan} other {# ulasan}}"
+    }
+  },
+  "ownerFilter": {
+    "button": "Pemilik",
+    "ariaLabel": "Saring berdasarkan penerbit",
+    "searchPlaceholder": "Cari orang & organisasi",
+    "hint": "Ketik nama untuk menyaring berdasarkan penerbit",
+    "searching": "Mencari…",
+    "noResults": "Tidak ada orang atau organisasi yang cocok",
+    "showAll": "Tampilkan semua",
+    "showing": "Menampilkan {name}",
+    "clear": "Hapus saringan pemilik",
+    "selectedFallback": "Akun terpilih",
+    "filterByThis": "Tampilkan hanya pemilik ini"
+  },
+  "browseGrid": {
+    "heading": "Cara menjelajah",
+    "description": "Cara menjelajahi karya di GainForest, dirancang untuk penjelajah, penjaga, dan tim lapangan.",
+    "cards": {
+      "bumicerts": {
+        "label": "Proyek terverifikasi",
+        "title": "sertifikat",
+        "blurb": "Jelajahi cerita proyek dengan foto, tempat, orang, dan konteks.",
+        "statLabel": "cerita"
+      },
+      "organizations": {
+        "label": "Penjaga alam",
+        "title": "Organisasi",
+        "blurb": "Temukan komunitas dan organisasi yang merawat ekosistem di seluruh dunia.",
+        "statLabel": "profil"
+      },
+      "observations": {
+        "label": "Biodiversitas",
+        "title": "Observasi",
+        "blurb": "Jelajahi temuan spesies, tempat, dan foto atau suara dari GainForest.",
+        "statLabel": "temuan"
+      },
+      "leaderboard": {
+        "label": "Juara dampak",
+        "title": "Papan peringkat",
+        "blurb": "Lihat para donatur yang membantu komunitas melalui sertifikat.",
+        "statLabel": "terkumpul"
+      }
+    }
+  },
+  "recordExplorer": {
+    "kind": {
+      "occurrence": {
+        "eyebrow": "Temuan alam",
+        "title": "Jelajahi",
+        "accent": "temuan alam",
+        "lede": "Jelajahi tumbuhan, hewan, foto, dan rekaman suara lapangan yang dibagikan dari tempat proyek.",
+        "search": "Cari berdasarkan nama umum, tempat, atau tumbuhan/hewan"
+      },
+      "site": {
+        "eyebrow": "Situs proyek",
+        "title": "Proyek",
+        "accent": "situs",
+        "lede": "Jelajahi kelompok penjaga alam, tempat mereka bekerja, dan cerita yang mereka bagikan.",
+        "search": "Filter berdasarkan organisasi atau negara"
+      },
+      "bumicert": {
+        "eyebrow": "Jelajahi proyek",
+        "title": "Temukan",
+        "accent": "Dampak regeneratif",
+        "lede": "Jelajahi proyek dari komunitas dan organisasi yang memulihkan ekosistem, memperkuat penghidupan, dan membangun masa depan yang lebih tangguh.",
+        "search": "Filter sertifikat berdasarkan judul atau deskripsi"
+      },
+      "project": {
+        "eyebrow": "Proyek",
+        "title": "Jelajahi",
+        "accent": "koleksi proyek",
+        "lede": "Jelajahi koleksi proyek dan sertifikat yang dikelompokkannya.",
+        "search": "Filter proyek berdasarkan judul atau deskripsi"
+      }
+    },
+    "view": {
+      "cards": "Kartu",
+      "list": "Daftar",
+      "map": "Peta"
+    },
+    "sort": {
+      "newest": "Terbaru dulu",
+      "oldest": "Terlama dulu",
+      "az": "A → Z",
+      "za": "Z → A",
+      "aria": "Urutkan temuan"
+    },
+    "filters": {
+      "photos": "Foto",
+      "fieldSounds": "Suara lapangan",
+      "allMedia": "Semua media",
+      "allNature": "Semua alam",
+      "plants": "Tumbuhan",
+      "trees": "Pohon",
+      "birds": "Burung",
+      "flowers": "Bunga"
+    },
+    "empty": {
+      "loadTitle": "Tidak dapat memuat halaman ini",
+      "loadBody": "GainForest tidak merespons. Ini mungkin masalah sementara; kunjungi halaman status dan coba lagi.",
+      "noMatchesTitle": "Tidak ada kecocokan di sini",
+      "noMatchesBody": "Coba nama, tempat, atau negara lain; atau tampilkan lebih banyak untuk memperluas pencarian.",
+      "clearSearch": "Hapus pencarian",
+      "noCategoryTitle": "Tidak ada temuan {category} dalam tampilan ini",
+      "noCategoryBody": "Coba semua temuan alam atau tampilkan lebih banyak hasil untuk memperluas tampilan.",
+      "showAllNature": "Tampilkan semua alam",
+      "noMediaTitle": "Tidak ada temuan {media} di sekitar sini",
+      "photo": "foto",
+      "fieldSound": "suara lapangan",
+      "noMediaBody": "Temuan terbaru tidak selalu menyertakan foto atau rekaman suara lapangan. Hapus filter untuk menelusuri semuanya.",
+      "removeFilters": "Hapus filter",
+      "nothingTitle": "Belum ada apa pun di sini",
+      "nothingBody": "Tidak ada yang dapat ditampilkan saat ini."
+    },
+    "loadingMore": "Memuat lagi…",
+    "showMore": "Tampilkan lebih banyak",
+    "end": "Anda telah mencapai akhir.",
+    "card": {
+      "shared": "Dibagikan {date}",
+      "showDetails": "Tampilkan detail",
+      "playSound": "Putar suara",
+      "pauseSound": "Jeda suara",
+      "verified": "Terverifikasi",
+      "gainforest": "GainForest",
+      "project": "Proyek",
+      "bumicert": "sertifikat",
+      "projectPlace": "Tempat proyek",
+      "noCover": "Tidak ada gambar sampul",
+      "peopleNamed": "{count, plural, one {# orang disebutkan} other {# orang disebutkan}}",
+      "projectPlaces": "{count, plural, one {# tempat proyek} other {# tempat proyek}}",
+      "natureSoundRecording": "Rekaman suara alam",
+      "unidentifiedSighting": "Temuan tak teridentifikasi",
+      "media": {
+        "image": "Foto",
+        "audio": "Suara lapangan",
+        "video": "Video",
+        "spectrogram": "Tampilan suara"
+      }
+    }
+  },
+  "recordDrawer": {
+    "actions": {
+      "donate": "Donasi",
+      "view": "Lihat",
+      "viewProfile": "Lihat profil",
+      "copyLink": "Salin tautan",
+      "copied": "Tersalin!",
+      "close": "Tutup",
+      "edit": "Ubah",
+      "cancel": "Batal",
+      "saveChanges": "Simpan perubahan",
+      "viewObservation": "Lihat halaman pengamatan",
+      "viewProject": "Lihat halaman proyek",
+      "openFullPage": "Buka halaman penuh"
+    },
+    "kind": {
+      "occurrence": "Temuan alam",
+      "bumicert": "sertifikat",
+      "project": "Proyek",
+      "site": "Situs proyek",
+      "organization": "Organisasi"
+    },
+    "bumicertStats": {
+      "peopleNamed": "Orang yang disebutkan",
+      "locations": "Lokasi",
+      "workPeriod": "Periode kerja"
+    },
+    "projectEvidence": {
+      "title": "Bukti"
+    },
+    "projectGallery": {
+      "title": "Foto",
+      "count": "{count, plural, one {# foto} other {# foto}}"
+    },
+    "projectUpdates": {
+      "title": "Pembaruan terbaru",
+      "seeAll": "Lihat semua",
+      "fallback": "Pembaruan"
+    },
+    "projectBumicerts": {
+      "title": "sertifikat dalam proyek ini",
+      "view": "Lihat sertifikat",
+      "showing": "Menampilkan {shown} dari {total} sertifikat tertaut.",
+      "empty": "Proyek ini belum memiliki sertifikat tertaut.",
+      "loading": "Memuat sertifikat tertaut"
+    },
+    "observation": {
+      "ownerTitle": "Detail observasi",
+      "ownerDescription": "Ubah detail yang tersimpan atau hapus observasi ini jika Anda memiliki izin.",
+      "saved": "Temuan disimpan.",
+      "saveError": "Temuan ini tidak dapat disimpan. Coba lagi.",
+      "deleteError": "Temuan ini tidak dapat dihapus. Coba lagi.",
+      "deleteTitle": "Hapus temuan ini?",
+      "deleteDescription": "Ini menghapus temuan serta foto, suara lapangan, dan detail tersimpan yang tertaut. Tindakan ini tidak dapat dibatalkan.",
+      "keep": "Simpan temuan",
+      "delete": "Hapus temuan",
+      "fields": {
+        "scientificName": "Nama tumbuhan atau hewan",
+        "vernacularName": "Nama umum",
+        "eventDate": "Tanggal terlihat",
+        "recordedBy": "Dibagikan oleh",
+        "latitude": "Lintang",
+        "longitude": "Bujur",
+        "place": "Tempat",
+        "country": "Negara",
+        "habitat": "Habitat",
+        "notes": "Catatan",
+        "kind": "Tumbuhan atau hewan",
+        "mapLocation": "Lokasi peta",
+        "basisOfRecord": "Ini jenis catatan apa?"
+      },
+      "validation": {
+        "name": "Masukkan nama tumbuhan atau hewan.",
+        "date": "Masukkan kapan terlihat.",
+        "location": "Masukkan lokasi peta yang valid.",
+        "kind": "Pilih apakah ini tumbuhan atau hewan."
+      },
+      "kindOptions": {
+        "plant": "Tumbuhan",
+        "animal": "Hewan"
+      },
+      "chooseOne": "Pilih satu",
+      "chooseMapLocation": "Pilih lokasi di peta.",
+      "chooseOnMap": "Pilih di peta",
+      "chooseMapLocationTitle": "Pilih lokasi peta",
+      "closeMapLocationChooser": "Tutup pemilih lokasi peta",
+      "movePin": "Klik peta untuk memindahkan pin pengamatan.",
+      "noMapLocation": "Belum ada lokasi peta yang dipilih.",
+      "useLocation": "Gunakan lokasi",
+      "natureSoundRecording": "Rekaman suara alam",
+      "unidentifiedSighting": "Pengamatan tidak teridentifikasi",
+      "mediaTitle": "Media dalam observasi ini",
+      "mediaCount": "{count, plural, one {# item} other {# item}}",
+      "primaryMedia": "Media utama",
+      "fieldSound": "Suara lapangan",
+      "mediaThumbnail": "Media observasi",
+      "previousPhoto": "Foto sebelumnya",
+      "nextPhoto": "Foto berikutnya",
+      "showPhoto": "Tampilkan foto",
+      "reanalyze": "Analisis ulang",
+      "reanalyzeHint": "Dapatkan identifikasi AI baru dari foto",
+      "reanalyzeApplied": "Diperbarui dengan saran AI baru — tinjau dan simpan.",
+      "reanalyzeUnsure": "AI tidak dapat mengidentifikasinya dengan yakin. Coba tambahkan nama sendiri.",
+      "reanalyzeError": "Kami tidak dapat menjalankan ulang AI saat ini. Silakan coba lagi.",
+      "reanalyzeNoImage": "Tidak ada foto untuk dianalisis pada pengamatan ini.",
+      "basisOptions": {
+        "human": "Dilihat langsung",
+        "machine": "Deteksi AI atau perangkat",
+        "preserved": "Spesimen yang diawetkan",
+        "material": "Sampel material",
+        "living": "Spesimen hidup"
+      }
+    },
+    "media": {
+      "image": "Foto",
+      "audio": "Suara lapangan",
+      "video": "Video",
+      "spectrogram": "Tampilan suara"
+    },
+    "fields": {
+      "family": "Famili",
+      "genus": "Genus",
+      "kingdom": "Kerajaan",
+      "basisOfRecord": "Yang terlihat",
+      "count": "Jumlah",
+      "sharedBy": "Dibagikan oleh",
+      "location": "Lokasi",
+      "mapLocation": "Lokasi peta",
+      "observed": "Diamati",
+      "media": "Foto atau suara lapangan",
+      "remarks": "Catatan",
+      "peopleNamed": "Orang yang disebutkan",
+      "projectPlaces": "Tempat proyek",
+      "start": "Mulai",
+      "end": "Selesai",
+      "bumicerts": "sertifikat",
+      "projectPlace": "Tempat proyek",
+      "added": "Ditambahkan",
+      "country": "Negara",
+      "type": "Jenis"
+    },
+    "audioHero": "Putar suara untuk {title}",
+    "detailLabels": {
+      "nameDetails": "Detail nama",
+      "nameRank": "Peringkat nama",
+      "natureGroup": "Kelompok alam",
+      "sightingDetails": "Detail pengamatan",
+      "sightingType": "Jenis pengamatan",
+      "lifeStage": "Tahap hidup",
+      "sex": "Jenis kelamin",
+      "reproductiveCondition": "Kondisi reproduksi",
+      "behavior": "Perilaku",
+      "placeName": "Nama tempat",
+      "cityOrTown": "Kota atau desa",
+      "area": "Wilayah",
+      "stateProvince": "Negara bagian / provinsi",
+      "elevation": "Ketinggian",
+      "sharedDetails": "Detail berbagi",
+      "observedBy": "Diamati oleh",
+      "namedBy": "Diidentifikasi oleh",
+      "dateNamed": "Tanggal identifikasi",
+      "shared": "Dibagikan",
+      "sourceDetails": "Detail sumber",
+      "sourceName": "Nama sumber",
+      "organizationCode": "Kode organisasi",
+      "sourceGroup": "Kelompok sumber",
+      "surveyMethod": "Metode survei",
+      "license": "Lisensi",
+      "rightsHolder": "Pemegang hak",
+      "sightingId": "ID pengamatan"
+    }
+  },
+  "projectPage": {
+    "back": "Semua proyek",
+    "edit": "Edit proyek",
+    "kind": "Proyek",
+    "ledBy": "Proyek oleh",
+    "viewProfile": "Lihat profil",
+    "created": "Dibuat",
+    "certs": "Sertifikat",
+    "overviewTitle": "Ringkasan",
+    "overviewLead": "Ringkasan dari {certs, plural, other {# sertifikat}} dalam proyek ini.",
+    "contributors": "Kontributor",
+    "places": "Lokasi",
+    "focusAreasLabel": "Area fokus",
+    "whereLabel": "Di mana",
+    "activePeriodLabel": "Periode aktif",
+    "observations": "Observasi",
+    "photos": "Foto",
+    "galleryTitle": "Galeri",
+    "observationsTitle": "Observasi",
+    "certsTitle": "Sertifikat di proyek ini",
+    "noCerts": "Belum ada sertifikat yang ditambahkan ke proyek ini.",
+    "metaTitle": "{name} — Proyek",
+    "metaFallback": "Sebuah proyek yang dibagikan di GainForest.",
+    "timelineTitle": "Lini Masa",
+    "publishingBadge": "Memublikasikan",
+    "publishingTitle": "Proyek Anda sedang diproses",
+    "publishingBody": "Kami sedang memublikasikan proyek Anda. Ini biasanya memakan waktu sekitar satu menit — halaman akan diperbarui secara otomatis."
+  },
+  "observationPage": {
+    "back": "Semua pengamatan",
+    "kind": "Pengamatan alam",
+    "sharedBy": "Dibagikan oleh",
+    "viewProfile": "Lihat profil",
+    "observed": "Diamati",
+    "shared": "Dibagikan",
+    "place": "Tempat",
+    "notRecorded": "Tidak tercatat",
+    "detailsTitle": "Detail",
+    "notesTitle": "Catatan",
+    "fieldSound": "Suara lapangan",
+    "previous": "Foto sebelumnya",
+    "next": "Foto berikutnya",
+    "showPhoto": "Tampilkan foto {number}",
+    "zoom": "Perbesar foto",
+    "close": "Tutup",
+    "audioUnsupported": "Browser Anda tidak mendukung pemutaran audio.",
+    "metaTitle": "{name} — Pengamatan alam",
+    "metaFallback": "Pengamatan alam yang dibagikan di GainForest.",
+    "natureSound": "Rekaman suara alam",
+    "unidentified": "Pengamatan tidak teridentifikasi",
+    "suggestions": {
+      "title": "Saran spesies",
+      "description": "Usulan identifikasi dari pakar ekologi. Pengamat dapat meninjaunya sebelum mengubah pengamatan ini.",
+      "expertFallback": "Pakar komunitas",
+      "status": "Menunggu tinjauan"
+    }
+  },
+  "labeler": {
+    "meta": {
+      "title": "Pelabel pengamatan",
+      "description": "Tinjau pengamatan alam terbaru dan sarankan identifikasi spesies."
+    },
+    "hero": {
+      "title": "Identifikasi",
+      "accent": "spesies"
+    },
+    "eyebrow": "Tinjauan ekologi",
+    "title": "Pelabel pengamatan",
+    "description": "Jelajahi pengamatan terbaru dan yang belum teridentifikasi, periksa data lapangannya, lalu usulkan nama spesies yang konkret.",
+    "unidentified": "Belum teridentifikasi",
+    "filters": {
+      "searchLabel": "Cari pengamatan",
+      "searchPlaceholder": "Cari spesies, genus, famili, atau tempat…",
+      "taxonLabel": "Takson",
+      "allTaxa": "Semua takson",
+      "genusLabel": "Genus",
+      "allGenera": "Semua genus",
+      "countryLabel": "Negara",
+      "allCountries": "Semua negara",
+      "regionLabel": "Wilayah",
+      "allRegions": "Semua wilayah",
+      "mediaLabel": "Jenis bukti",
+      "allMedia": "Semua bukti",
+      "photos": "Foto",
+      "audio": "Audio"
+    },
+    "queue": {
+      "unidentified": "Perlu identifikasi",
+      "recent": "Pengamatan terbaru",
+      "count": "{count, plural, =0 {Tidak ada pengamatan} =1 {1 pengamatan} other {# pengamatan}}",
+      "ariaLabel": "Pengamatan untuk ditinjau",
+      "loadMore": "Muat pengamatan lainnya",
+      "loading": "Memuat pengamatan…"
+    },
+    "empty": {
+      "title": "Tidak ada pengamatan yang cocok",
+      "description": "Coba takson, genus, negara, wilayah, atau pencarian lain."
+    },
+    "review": {
+      "selectPrompt": "Pilih pengamatan untuk memeriksa bukti dan data lapangannya.",
+      "currentIdentification": "Identifikasi saat ini",
+      "openObservation": "Buka halaman pengamatan",
+      "family": "Famili",
+      "genus": "Genus",
+      "observer": "Pengamat",
+      "communityObserver": "Pengamat komunitas",
+      "observed": "Diamati"
+    },
+    "proposal": {
+      "title": "Sarankan identifikasi",
+      "description": "Saran Anda akan tampil pada pengamatan dan memberi tahu pengamatnya. Nama saat ini tidak akan diganti secara otomatis.",
+      "scientificName": "Nama ilmiah",
+      "scientificPlaceholder": "mis. Panthera onca",
+      "commonNameOptional": "Nama umum (opsional)",
+      "commonPlaceholder": "mis. Jaguar",
+      "noteOptional": "Catatan bukti (opsional)",
+      "notePlaceholder": "Jelaskan ciri yang terlihat atau konteks yang mendukung identifikasi ini.",
+      "recordSuggestion": "Saran spesies",
+      "commonName": "Nama umum",
+      "noteLabel": "Catatan bukti",
+      "submit": "Kirim saran",
+      "submitting": "Mengirim saran…",
+      "success": "Menyarankan {name}. Pengamat akan diberi tahu.",
+      "error": "Saran tidak dapat dikirim. Silakan coba lagi.",
+      "signInDescription": "Masuk untuk mengirim saran dari akun Anda. Semua orang tetap dapat menjelajahi antrean tinjauan.",
+      "signIn": "Masuk untuk menyarankan"
+    }
+  },
+  "manageProjects": {
+    "hero": {
+      "title": "Proyek Saya",
+      "description": "Buat dan kelola proyek Anda. Setiap proyek menceritakan kisah kerja Anda dan dapat didukung oleh pendana."
+    },
+    "metadata": {
+      "title": "Kelola Proyek — GainForest",
+      "description": "Buat dan kelola proyek Anda di GainForest."
+    },
+    "actions": {
+      "editProject": "Edit proyek",
+      "editProjectFor": "Ubah {title}",
+      "viewProjectFor": "Buka {title}",
+      "manageGallery": "Kelola galeri",
+      "manageGalleryFor": "Kelola galeri untuk {title}",
+      "manageObservations": "Observasi",
+      "manageObservationsFor": "Observasi untuk {title}",
+      "manageSites": "Situs",
+      "manageSitesFor": "Situs untuk {title}",
+      "manageTimeline": "Lini Masa",
+      "manageTimelineFor": "Lini masa untuk {title}"
+    },
+    "editor": {
+      "hero": {
+        "eyebrow": "Studio kisah dampak",
+        "title": "Buat proyek",
+        "subtitle": "Ubah kerja lapangan, bukti restorasi, dan penjagaan komunitas menjadi proyek yang dapat dipublikasikan — tanpa meninggalkan GainForest."
+      },
+      "backToProjects": "Kembali ke Proyek Saya",
+      "startOver": "Mulai ulang",
+      "createTitle": "Buat proyek baru",
+      "editTitle": "Edit proyek",
+      "cancel": "Batal",
+      "close": "Tutup",
+      "saving": "Menyimpan…",
+      "saveChanges": "Simpan perubahan",
+      "saveProject": "Simpan proyek",
+      "delete": "Hapus proyek",
+      "errors": {
+        "checkFields": "Periksa kolom yang ditandai.",
+        "cannotSave": "Anda tidak dapat menyimpan proyek ini.",
+        "saveFailed": "Proyek tidak dapat disimpan."
+      },
+      "fields": {
+        "name": {
+          "label": "Nama proyek",
+          "hint": "gunakan nama yang mudah dipahami orang",
+          "placeholder": "Restorasi hutan komunitas"
+        },
+        "summary": {
+          "label": "Ringkasan singkat",
+          "hint": "satu atau dua kalimat",
+          "placeholder": "Penjaga setempat memulihkan petak hutan, memantau pertumbuhan pohon, dan berbagi kabar dari lapangan."
+        },
+        "story": {
+          "label": "Kisah",
+          "hint": "opsional — pekerjaan, metode, dan hasilnya",
+          "placeholder": "Apa yang terjadi? Bagaimana dampak diukur? Siapa yang diuntungkan dan apa langkah berikutnya?"
+        },
+        "scope": {
+          "label": "Area fokus",
+          "hint": "pilih semua hasil yang sesuai",
+          "customPlaceholder": "Tambahkan area lain, mis. tata kelola masyarakat adat"
+        },
+        "startDate": {
+          "label": "Tanggal mulai"
+        },
+        "endDate": {
+          "label": "Tanggal selesai",
+          "ongoing": "Pekerjaan ini sedang berlangsung"
+        },
+        "people": {
+          "label": "Orang & kelompok",
+          "hint": "cari nama atau @handle",
+          "placeholderFirst": "Cari mis. “Penjaga Rufiji” atau @handle",
+          "placeholder": "Nama atau @handle",
+          "remove": "Hapus orang atau kelompok",
+          "add": "Tambah orang atau kelompok",
+          "change": "Ganti orang atau kelompok",
+          "selectedProfile": "Profil terpilih",
+          "suggestionsStart": "Mulai mengetik untuk melihat saran.",
+          "suggestionsLoading": "Memuat saran…",
+          "suggestionsEmpty": "Belum ada kecocokan. Anda dapat terus mengetik nama."
+        },
+        "sites": {
+          "label": "Tempat",
+          "hint": "opsional — lampirkan tempat dari akun Anda",
+          "loading": "Memuat tempat Anda…",
+          "error": "Tidak dapat memuat tempat Anda.",
+          "empty": "Belum ada tempat. Gambar satu di peta untuk menambahkannya ke proyek Anda.",
+          "unnamed": "Tempat tanpa nama",
+          "fallback": "Tempat proyek",
+          "add": "Tambah tempat",
+          "manage": "Kelola semua tempat"
+        },
+        "photo": {
+          "label": "Foto proyek",
+          "optional": "opsional",
+          "cta": "Pilih foto",
+          "formats": "JPG, PNG, WebP, HEIC, atau HEIF.",
+          "change": "Ganti foto",
+          "remove": "Hapus foto"
+        }
+      },
+      "success": {
+        "back": "Kembali ke Proyek Saya",
+        "titleCreate": "Proyek dibuat",
+        "titleEdit": "Proyek disimpan",
+        "description": "Proyek Anda siap.",
+        "descriptionNamed": "“{title}” siap dibagikan dan menerima dukungan.",
+        "view": "Lihat proyek"
+      },
+      "deleteModal": {
+        "title": "Hapus proyek?",
+        "description": "Ini akan menghapus “{title}” dari akun Anda. Tindakan ini tidak dapat dibatalkan.",
+        "manageHeading": "Kelola",
+        "button": "Hapus proyek",
+        "hint": "Menghapus akan menghilangkan proyek ini untuk semua orang.",
+        "prompt": "Untuk mengonfirmasi, ketik nama proyek persis seperti yang ditampilkan:",
+        "inputAria": "Ketik nama proyek untuk mengonfirmasi penghapusan",
+        "mismatch": "Nama belum cocok.",
+        "cancel": "Batal",
+        "confirm": "Hapus proyek",
+        "error": "Proyek tidak dapat dihapus."
+      },
+      "discardModal": {
+        "title": "Buang proyek ini?",
+        "description": "Menutup jendela ini akan menghapus progres pembuatan proyek Anda.",
+        "keepEditing": "Lanjutkan mengedit",
+        "discard": "Buang progres"
+      },
+      "wizard": {
+        "back": "Kembali",
+        "next": "Lanjut",
+        "start": "Mulai",
+        "create": "Buat proyek"
+      },
+      "steps": {
+        "basics": {
+          "title": "Apa nama proyek Anda?",
+          "subtitle": "Beri nama yang jelas dan ringkasan satu baris yang mudah dipahami."
+        },
+        "focus": {
+          "title": "Jenis pekerjaan apa ini?",
+          "subtitle": "Pilih area fokus yang paling menggambarkan proyek Anda."
+        },
+        "timeline": {
+          "title": "Kapan pekerjaan ini dilakukan?",
+          "subtitle": "Tambahkan tanggal mulai, dan tanggal selesai jika sudah berakhir."
+        },
+        "story": {
+          "title": "Ceritakan kisah proyek Anda",
+          "subtitle": "Bagikan pekerjaan, metode, bukti, dan apa yang berubah."
+        },
+        "network": {
+          "title": "Siapa dan di mana?",
+          "subtitle": "Beri penghargaan kepada orang di balik pekerjaan dan lampirkan tempatnya."
+        },
+        "photo": {
+          "title": "Tambahkan foto proyek",
+          "subtitle": "Foto yang baik membantu orang mengenali dan memercayai proyek Anda."
+        },
+        "review": {
+          "title": "Tinjau proyek Anda",
+          "subtitle": "Pastikan semuanya benar, lalu buat proyek Anda."
+        }
+      },
+      "review": {
+        "name": "Nama",
+        "summary": "Ringkasan",
+        "focus": "Area fokus",
+        "timeline": "Periode",
+        "people": "Orang & kelompok",
+        "places": "Tempat",
+        "photo": "Foto",
+        "none": "Belum ditambahkan",
+        "ongoing": "berlangsung",
+        "added": "Ditambahkan",
+        "notAdded": "Belum ditambahkan"
+      }
+    },
+    "emptyHero": {
+      "description": "Proyek menyatukan kerja dampak Anda — orang, tempat, periode waktu, serta foto atau catatan pendukung — dalam satu halaman yang dapat diikuti dan didanai oleh pendukung.",
+      "cta": "Buat proyek"
+    },
+    "publish": {
+      "alwaysPublicTitle": "Siapa pun yang punya tautannya bisa membuka proyek Anda",
+      "alwaysPublicBody": "Sejak Anda menyimpan proyek, halamannya bisa dibuka oleh siapa pun yang Anda beri tautannya. Apakah orang bisa menemukannya tanpa tautan, itu keputusan Anda.",
+      "listedTitle": "Tampil di halaman jelajah",
+      "listedBody": "Orang yang menjelajahi GainForest dapat menemukan akun ini dan proyeknya, dan mesin pencari dapat menampilkannya.",
+      "unlistedTitle": "Belum tampil di halaman jelajah",
+      "unlistedBody": "Proyek Anda tidak muncul saat orang menjelajahi GainForest, dan tidak dimasukkan ke hasil pencarian. Hanya orang yang Anda kirimi tautan yang bisa membukanya.",
+      "action": "Tampilkan di halaman jelajah",
+      "publishing": "Menambahkan…",
+      "justListedBody": "Selesai. Mungkin perlu beberapa menit untuk muncul di halaman jelajah.",
+      "memberBlocked": "Hanya pemilik dan admin organisasi yang dapat mengubah ini.",
+      "error": "Tidak berhasil. Silakan coba lagi nanti.",
+      "unavailable": "Ini tidak dapat diubah saat ini. Silakan coba lagi nanti.",
+      "statusUnknown": "Kami tidak dapat memeriksa apakah akun ini tampil di halaman jelajah."
+    }
+  },
+  "manageBumicerts": {
+    "actions": {
+      "delete": "Hapus Cert",
+      "deleteAria": "Hapus {title}"
+    },
+    "deleteModal": {
+      "title": "Hapus Cert?",
+      "description": "Ini akan menghapus “{title}” secara permanen dari akun Anda. Tindakan ini tidak dapat dibatalkan.",
+      "cancel": "Batal",
+      "confirm": "Hapus Cert",
+      "error": "Cert ini tidak dapat dihapus. Silakan coba lagi."
+    }
+  },
+  "observations": {
+    "footer": {
+      "showing": "Menampilkan {shown} dari {total} observasi alam."
+    },
+    "list": {
+      "colSighting": "Observasi",
+      "colObserver": "Pengamat",
+      "colDate": "Tanggal"
+    },
+    "metadata": {
+      "title": "Temuan alam",
+      "description": "Jelajahi temuan alam di GainForest dengan foto lapangan, rekaman suara, nama spesies, dan lokasi dari kerja lapangan nyata."
+    },
+    "view": {
+      "compact": "Ringkas",
+      "comfortable": "Nyaman",
+      "density": "Kepadatan kartu"
+    }
+  },
+  "manageProjectCerts": {
+    "metadata": {
+      "title": "Cert proyek — GainForest",
+      "description": "Terbitkan dan kelola sertifikat dampak untuk sebuah proyek."
+    },
+    "nav": {
+      "projects": "Proyek",
+      "refresh": "Muat ulang"
+    },
+    "hero": {
+      "description": "Sertifikat dampak (Cert) yang Anda terbitkan dari proyek ini. Masing-masing menggabungkan bukti — foto, lokasi, tanggal, dan kontributor — agar pendana dapat mendukung pekerjaan ini."
+    },
+    "stats": {
+      "linked": "{count, plural, one {# Cert tertaut} other {# Cert tertaut}}",
+      "available": "{count, plural, one {# Cert dapat ditautkan} other {# Cert dapat ditautkan}}",
+      "minted": "{count, plural, one {# Cert diterbitkan} other {# Cert diterbitkan}}"
+    },
+    "search": {
+      "ariaLabel": "Cari Cert",
+      "placeholder": "Cari Cert"
+    },
+    "actions": {
+      "create": "Buat Cert",
+      "retry": "Coba lagi",
+      "add": "Tambah",
+      "saving": "Menyimpan…",
+      "view": "Lihat",
+      "unlink": "Putuskan tautan",
+      "mint": "Terbitkan Cert",
+      "mintFirst": "Terbitkan Cert pertama Anda",
+      "link": "Tautkan"
+    },
+    "errors": {
+      "loadTitle": "Cert tidak dapat dimuat",
+      "loadFallback": "Gagal memuat Cert proyek.",
+      "network": "Tidak dapat menjangkau server.",
+      "noPermission": "Anda tidak dapat mengubah proyek ini.",
+      "projectUnavailable": "Kami belum dapat menyiapkan proyek ini. Muat ulang halaman dan coba lagi.",
+      "updateFallback": "Gagal memperbarui Cert proyek."
+    },
+    "status": {
+      "linked": "Tertaut"
+    },
+    "card": {
+      "noSummary": "Belum ada ringkasan."
+    },
+    "empty": {
+      "noCertsTitle": "Belum ada Cert yang diterbitkan",
+      "noCertsDescription": "Sertifikat dampak (Cert) mengubah proyek ini menjadi kisah yang dapat didanai — bukti satu kontribusi, dengan foto, tanggal, lokasi, dan orang-orang yang terlibat. Terbitkan yang pertama untuk mengajukan pendanaan.",
+      "noMatchingTitle": "Tidak ada Cert yang cocok",
+      "noMatchingDescription": "Coba kata pencarian lain atau kosongkan kolom pencarian."
+    },
+    "details": {
+      "sites": "{count, plural, one {# lokasi} other {# lokasi}}",
+      "contributors": "{count, plural, one {# kontributor} other {# kontributor}}",
+      "impactPeriod": "Periode dampak",
+      "created": "Dibuat {date}"
+    },
+    "linkExisting": {
+      "toggle": "Tautkan Cert yang sudah ada",
+      "hide": "Sembunyikan",
+      "title": "Tautkan Cert yang sudah ada",
+      "description": "Sudah menerbitkan Cert di tempat lain? Tautkan ke proyek ini. Ini memperbarui halaman proyek; tidak memindahkan atau menghapus Cert.",
+      "empty": "Anda belum punya Cert lain untuk ditautkan saat ini."
+    }
+  },
+  "newCert": {
+    "gate": {
+      "title": "Cert ini untuk proyek yang mana?",
+      "subtitle": "Cert adalah sertifikat dampak yang Anda terbitkan dari sebuah proyek. Pilih proyek yang menjadi induknya.",
+      "searchPlaceholder": "Cari proyek Anda",
+      "searchAria": "Cari proyek Anda",
+      "loading": "Memuat proyek Anda…",
+      "errorTitle": "Tidak dapat memuat proyek Anda",
+      "retry": "Coba lagi",
+      "mintFrom": "Terbitkan Cert dari proyek ini",
+      "noMatch": "Tidak ada proyek yang cocok",
+      "noProjectsTitle": "Buat proyek terlebih dahulu",
+      "noProjectsDescription": "Cert diterbitkan dari sebuah proyek. Buat proyek untuk menjelaskan pekerjaan Anda, lalu terbitkan sertifikat dampak untuk mengajukan pendanaan.",
+      "createProject": "Buat proyek",
+      "skip": "Terbitkan tanpa menautkan ke proyek"
+    }
+  },
+  "observationGrid": {
+    "sectionTitle": "Observasi",
+    "openDetails": "Buka detail observasi: {name}",
+    "openAction": "Buka",
+    "mediaCount": "{count, plural, one {# item media} other {# item media}}",
+    "selectObservation": "Pilih observasi",
+    "deselectObservation": "Batalkan pilihan observasi",
+    "selectObservationNamed": "Pilih observasi: {name}",
+    "deselectObservationNamed": "Batalkan pilihan observasi: {name}",
+    "playSound": "Putar suara",
+    "pauseSound": "Jeda suara",
+    "natureSoundRecording": "Rekaman suara alam",
+    "unidentifiedSighting": "Penampakan belum teridentifikasi"
+  },
+  "measurements": {
+    "title": "Pengukuran",
+    "count": "{count, plural, other {# pengukuran}}",
+    "fields": {
+      "dbh": "DBH",
+      "height": "Tinggi",
+      "rootCollarDiameter": "Diameter leher akar",
+      "canopyCover": "Tutupan kanopi",
+      "girth": "Lingkar batang",
+      "stemCount": "Jumlah batang",
+      "estimatedAge": "Perkiraan usia",
+      "bodyMass": "Massa tubuh",
+      "totalLength": "Panjang total",
+      "groupSize": "Ukuran kelompok"
+    }
+  },
+  "globe": {
+    "metadata": {
+      "title": "Globe — Jelajahi Proyek Konservasi di Bumi 3D",
+      "description": "Jelajahi globe 3D yang hidup berisi organisasi dan lokasi proyek mereka, dengan lapisan tutupan lahan dan data konservasi.",
+      "orgTitle": "{name} di Globe",
+      "orgDescription": "Jelajahi lokasi proyek {name} di globe 3D.",
+      "projectTitle": "{name} di Globe",
+      "projectDescription": "Jelajahi batas lokasi {name} di globe 3D."
+    },
+    "title": "Bola Dunia",
+    "subtitle": "Organisasi dan lokasi proyek mereka di Bumi 3D yang hidup.",
+    "viewOnGlobe": "Lihat di Globe",
+    "tabs": {
+      "details": "Organisasi",
+      "layers": "Lapisan",
+      "popup": "Buka sebagai popup melayang",
+      "dock": "Sematkan ke sisi"
+    },
+    "panel": {
+      "searchPlaceholder": "Cari organisasi…",
+      "treeFilter": "Data pohon",
+      "treesEmpty": "Belum ada data pohon yang diunggah.",
+      "treesFailed": "Data pohon tidak tersedia saat ini.",
+      "toggleList": "Tampilkan daftar organisasi",
+      "loading": "Memuat organisasi…",
+      "count": "{count, plural, other {# organisasi}}",
+      "empty": "Tidak ada organisasi yang cocok dengan pencarian Anda.",
+      "maEarth": "Ma Earth",
+      "dataFilter": "Lapisan drone & data",
+      "dataBadge": "{count, plural, other {# lapisan data peta}}"
+    },
+    "focus": {
+      "organizationLabel": "Organisasi",
+      "projectLabel": "Proyek",
+      "clear": "Kembali ke semua organisasi",
+      "viewProfile": "Lihat profil",
+      "openGlobe": "Halaman globe",
+      "orgGlobe": "Globe organisasi",
+      "viewProject": "Lihat proyek",
+      "backToGlobe": "Kembali ke tampilan global",
+      "recenter": "Pusatkan ulang peta",
+      "sites": "{count, plural, other {# lokasi terpetakan}}",
+      "boundaries": "{count, plural, other {# batas lokasi}}",
+      "allSites": "Semua lokasi",
+      "orgLocationHeading": "Lokasi organisasi",
+      "projectSitesHeading": "Lokasi proyek",
+      "noSites": "Belum ada lokasi proyek yang dipetakan.",
+      "noBoundaries": "Proyek ini belum memiliki batas lokasi yang dipetakan.",
+      "projectPill": "Proyek: {name}",
+      "moreProjects": "+{count} lainnya",
+      "projectHint": "Batas yang disorot menunjukkan tempat proyek ini bekerja."
+    },
+    "layers": {
+      "button": "Lapisan",
+      "title": "Jelajahi lapisan",
+      "landcover": "Tutupan lahan",
+      "landcoverSource": "ESA WorldCover 2021",
+      "measuredTrees": "Pohon terukur",
+      "measuredTreesCount": "{count, plural, other {# pohon}}",
+      "projectCategory": "Lapisan proyek",
+      "noProjectLayers": "Organisasi ini belum memiliki lapisan peta tambahan.",
+      "landcoverClasses": {
+        "treeCover": "Tutupan pohon",
+        "shrubland": "Semak belukar",
+        "grassland": "Padang rumput",
+        "cropland": "Lahan pertanian",
+        "builtUp": "Kawasan terbangun",
+        "bareVegetation": "Lahan terbuka",
+        "water": "Air",
+        "wetland": "Lahan basah",
+        "mangroves": "Bakau"
+      },
+      "visibleDetails": "Di peta",
+      "visibleNow": "{count, plural, other {# lapisan di peta}}",
+      "flyTo": "Perbesar ke {name}",
+      "hide": "Sembunyikan {name}"
+    },
+    "timeline": {
+      "seriesFlights": "{count, plural, other {# penerbangan drone}} di area yang sama",
+      "seriesHint": "Area yang sama dipotret pada tanggal berbeda — aktifkan garis waktu untuk melihat perubahannya.",
+      "toggle": "Lihat {name} dari waktu ke waktu",
+      "title": "Perubahan dari waktu ke waktu",
+      "close": "Sembunyikan penggeser waktu",
+      "play": "Putar garis waktu",
+      "pause": "Jeda garis waktu",
+      "previous": "Citra sebelumnya",
+      "next": "Citra berikutnya",
+      "slider": "Tanggal pengambilan",
+      "step": "{current} dari {total}"
+    },
+    "tree": {
+      "title": "Pohon",
+      "close": "Tutup",
+      "species": "Spesies",
+      "height": "Tinggi",
+      "dbh": "DBH",
+      "measured": "Diukur:",
+      "unknown": "Tidak diketahui",
+      "unknownSpecies": "Spesies tidak diketahui",
+      "photo": "Foto {index}"
+    },
+    "loadingGlobe": "Menyiapkan globe…",
+    "sheet": {
+      "expand": "Tampilkan detail",
+      "collapse": "Sembunyikan detail"
+    }
+  }
+}

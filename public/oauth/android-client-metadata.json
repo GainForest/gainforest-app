@@ -1,0 +1,13 @@
+{
+  "client_id": "https://www.gainforest.app/oauth/android-client-metadata.json",
+  "client_name": "GainForest for Android",
+  "client_uri": "https://www.gainforest.app",
+  "logo_uri": "https://www.gainforest.app/icons/icon-192.png",
+  "application_type": "native",
+  "redirect_uris": ["app.gainforest.www:/oauth-callback"],
+  "scope": "atproto transition:generic",
+  "grant_types": ["authorization_code", "refresh_token"],
+  "response_types": ["code"],
+  "token_endpoint_auth_method": "none",
+  "dpop_bound_access_tokens": true
+}

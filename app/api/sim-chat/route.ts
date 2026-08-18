@@ -1,31 +1,24 @@
-import { NextRequest } from "next/server";
-import {
-  buildSystemPrompt,
-  getTainaPersona,
-  TAINA_SIM,
-} from "../../_lib/taina-sim";
-import { openRouterChat } from "../../_lib/openrouter";
-import { asLocale, LOCALE_LABELS } from "../../_lib/i18n";
+import { buildGuideSystemPrompt, buildSystemPrompt, getTaináPersona, TAINA_SIM } from "@/app/_lib/taina-sim";
+import { buildGuideKnowledge } from "@/app/_lib/taina-guides";
+import { openRouterChat } from "@/app/_lib/openrouter";
 
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// `/api/sim-chat` — streams a chat reply in the Taina sim's voice.
+// `/api/sim-chat` — streams a chat reply in the Tainá sim's voice.
 //
-// Trimmed port of `simocracy-v2/app/api/feedback-chat/route.ts`. Differences:
-//   - No auth gate. The landing's floating companion is for any visitor.
-//     (Anonymous traffic still costs OpenRouter credits; see `MAX_PER_MIN`
-//     below for the basic rate cap.)
-//   - The companion is fixed to one sim (Taina). No companion-picker
-//     payload, no per-user companion record.
-//   - The system prompt is built fresh per request but the persona fetch
-//     is cached by Next ISR via fetch() revalidate inside `getTainaPersona`.
+// Ported from gainforest-app's `app/api/sim-chat/route.ts`, trimmed for this
+// app: the Bumicert authoring companion is English-only, so the locale /
+// language-directive machinery is dropped. The system prompt is built fresh
+// per request, but the persona fetch is cached by Next ISR via fetch()
+// revalidate inside `getTaináPersona`.
 
 const MAX_MESSAGES = 20;
 const MAX_CONTENT_CHARS = 4000;
 const MAX_PER_MIN = 30; // very rough per-IP throttle
 
-// In-memory per-IP rate counter. Resets every minute. Good enough for a
-// landing-page anti-abuse barrier; a real deployment would use Redis.
+// In-memory per-IP rate counter. Resets every minute. Good enough for an
+// anti-abuse barrier; a real deployment would use Redis.
 const buckets = new Map<string, { count: number; windowStart: number }>();
 function rateLimit(ip: string): boolean {
   const now = Date.now();
@@ -38,39 +31,29 @@ function rateLimit(ip: string): boolean {
   return entry.count <= MAX_PER_MIN;
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const ip =
       request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
       request.headers.get("x-real-ip") ??
       "anon";
     if (!rateLimit(ip)) {
-      return new Response(
-        JSON.stringify({ error: "Slow down; too many messages this minute." }),
-        { status: 429, headers: { "Content-Type": "application/json" } },
+      return Response.json(
+        { error: "Slow down; too many messages this minute." },
+        { status: 429 },
       );
     }
 
     const body = await request.json().catch(() => null);
     if (!body || typeof body !== "object") {
-      return new Response(JSON.stringify({ error: "Invalid request body" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return Response.json({ error: "I could not read that message." }, { status: 400 });
     }
 
     const rawMessages = (body as {
       messages?: Array<{ role: string; content: string }>;
-      locale?: string;
     }).messages;
-    const locale = asLocale(
-      (body as { locale?: string }).locale ?? null,
-    );
     if (!rawMessages || !Array.isArray(rawMessages) || rawMessages.length === 0) {
-      return new Response(JSON.stringify({ error: "No messages provided" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return Response.json({ error: "Please write a message first." }, { status: 400 });
     }
 
     const messages = rawMessages
@@ -81,27 +64,25 @@ export async function POST(request: NextRequest) {
         content: String(m.content).slice(0, MAX_CONTENT_CHARS),
       }));
 
-    const persona = await getTainaPersona();
-    let systemPrompt = buildSystemPrompt(persona);
-    // Append a language directive when the visitor is not on English so
-    // Taina replies match the page they're reading. The directive goes
-    // AFTER the persona reminder so it carries the most recency weight;
-    // the persona itself stays untouched. (Taina's constitution
-    // already says she speaks EN/PT/ES/Bahasa/Swahili by default, so
-    // this directive is mostly a hint about *which* of those to lean
-    // into for the current page render.)
-    if (locale !== "en") {
-      const languageName = LOCALE_LABELS[locale].english;
-      systemPrompt += `\n\n## Language\nThe visitor has switched the page to ${languageName} (${LOCALE_LABELS[locale].native}). Reply in ${languageName}, in your own voice. Keep brand names (GainForest, Certs, Taina) as-is. If the visitor writes in a different language, mirror theirs.`;
-    }
+    // Two callers share this route: the Cert-creation writing companion
+    // (default) and the floating tutorial guide (`mode: "guide"`), which
+    // adds the platform how-to reference and replies in the UI language.
+    const mode = (body as { mode?: unknown }).mode === "guide" ? "guide" : "cert";
+    const rawLocale = (body as { locale?: unknown }).locale;
+    const locale = typeof rawLocale === "string" && /^[a-z]{2}$/.test(rawLocale) ? rawLocale : undefined;
+
+    const persona = await getTaináPersona();
+    const systemPrompt =
+      mode === "guide"
+        ? buildGuideSystemPrompt(persona, buildGuideKnowledge(), locale)
+        : buildSystemPrompt(persona);
 
     if (!process.env.OPENROUTER_API_KEY) {
-      return new Response(
-        JSON.stringify({
-          error:
-            "Chat is not configured on this server; set OPENROUTER_API_KEY in .env.local.",
-        }),
-        { status: 503, headers: { "Content-Type": "application/json" } },
+      return Response.json(
+        {
+          error: "Tainá is not set up on this server yet.",
+        },
+        { status: 503 },
       );
     }
 
@@ -115,10 +96,7 @@ export async function POST(request: NextRequest) {
     if (!res.ok) {
       const err = await res.text().catch(() => "");
       console.error("[sim-chat] OpenRouter error", res.status, err);
-      return new Response(JSON.stringify({ error: "AI service unavailable" }), {
-        status: 502,
-        headers: { "Content-Type": "application/json" },
-      });
+      return Response.json({ error: "Tainá is briefly unreachable." }, { status: 502 });
     }
 
     return new Response(res.body, {
@@ -130,9 +108,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (err) {
     console.error("[sim-chat] failed", err);
-    return new Response(JSON.stringify({ error: "Chat failed" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return Response.json({ error: "Tainá could not reply right now." }, { status: 500 });
   }
 }

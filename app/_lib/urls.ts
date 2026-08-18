@@ -1,84 +1,144 @@
-// Outbound product URLs.
-//
-// July 2026: green_globe (data.gainforest.app) and Bumicerts
-// (certs.gainforest.app) were merged into ONE app at gainforest.app
-// ("the GainForest app", repo: GainForest/gainforest-explorer). Both
-// legacy hosts still exist — certs.gainforest.app 308-redirects
-// path-preserving into gainforest.app, and data.gainforest.app still
-// serves the old green_globe deployment (we keep depending on its
-// `/api/list-organizations` endpoint, which the merged app does NOT
-// expose) — but every visitor-facing link on this landing points at
-// the merged app.
-//
-// Route map of the merged app (verified 2026-07-03):
-//   /projects              project list (old /bumicerts redirects here)
-//   /cert/<did>/<rkey>     cert detail (old /bumicert/<did>-<rkey> still 200)
-//   /globe                 the merged green_globe
-//   /organizations         org directory
-//   /observations          biodiversity observations feed
-//   /manage/organizations  steward dashboard (the "showcase your work" CTA;
-//                          the old /bumicert/create route is a 404 upstream)
-const GAINFOREST_APP_FALLBACK = "https://gainforest.app";
-const GREEN_GLOBE_API_FALLBACK = "https://data.gainforest.app";
-// Documentation portal. Community onboarding ("Tell my impact story"
-// in IWantTo) points here now that this landing itself lives at
-// gainforest.earth (a self-link would be pointless).
-export const DOCS_URL = "https://docs.gainforest.earth";
-
-function normalizeBaseUrl(
-  value: string | undefined,
-  fallback: string,
-  legacyHosts: ReadonlyArray<string>,
-): string {
-  const raw = value?.trim() || fallback;
-  const withoutTrailingSlash = raw.replace(/\/+$/, "");
-  return legacyHosts.includes(withoutTrailingSlash)
-    ? fallback
-    : withoutTrailingSlash;
-}
-
-/** The merged GainForest app. Old env overrides that still point at the
- *  pre-merge hosts are treated as legacy and snapped to the fallback. */
-export const GAINFOREST_APP_URL = normalizeBaseUrl(
-  process.env.NEXT_PUBLIC_GAINFOREST_APP_URL,
-  GAINFOREST_APP_FALLBACK,
-  [
-    "https://alpha.fund.gainforest.app",
-    "https://certs.gainforest.app",
-    "https://data.gainforest.app",
-  ],
-);
-
-// Visitor-facing routes inside the merged app.
-export const PROJECTS_URL = `${GAINFOREST_APP_URL}/projects`;
-export const GLOBE_URL = `${GAINFOREST_APP_URL}/globe`;
-export const ORGANIZATIONS_URL = `${GAINFOREST_APP_URL}/organizations`;
-export const OBSERVATIONS_URL = `${GAINFOREST_APP_URL}/observations`;
-/** Steward dashboard — the merged app's "showcase your regenerative
- *  work" entry point (replaces the retired /bumicert/create flow). */
-export const MANAGE_URL = `${GAINFOREST_APP_URL}/manage/organizations`;
-
-/** Cert detail page: /cert/<url-encoded did>/<rkey> (the merged app's
- *  canonical pattern; the legacy /bumicert/<did>-<rkey> path still
- *  resolves upstream but new links should use this one). */
-export function certUrl(did: string, rkey: string): string {
-  return `${GAINFOREST_APP_URL}/cert/${encodeURIComponent(did)}/${encodeURIComponent(rkey)}`;
-}
-
-/** Display host for UI captions, e.g. "gainforest.app". */
-export const GAINFOREST_APP_HOST = GAINFOREST_APP_URL.replace(
-  /^https?:\/\//,
-  "",
-);
-
 /**
- * Data-API origin for `fetchProjectPins()` ONLY. The merged app does
- * not serve green_globe's `/api/list-organizations` route (verified:
- * 404 on gainforest.app), so the pin fetcher keeps reading from the
- * still-deployed data.gainforest.app. Do NOT use this for links.
+ * External GainForest surfaces the explorer links out to, plus the shared
+ * data endpoints. Kept in one place so a host change is a single edit.
  */
-export const GREEN_GLOBE_API_URL = normalizeBaseUrl(
-  process.env.NEXT_PUBLIC_GREEN_GLOBE_URL,
-  GREEN_GLOBE_API_FALLBACK,
-  ["https://gainforest.app"],
-);
+
+const DEFAULT_INDEXER_URL = "https://api.hi.gainforest.app/graphql";
+
+/** Hyperindex GraphQL endpoint. Serves `access-control-allow-origin: *`
+ *  so the browser can query it directly (no API proxy needed). Set
+ *  `NEXT_PUBLIC_INDEXER_URL` at build time to point previews or local builds at
+ *  another indexer; blank values fall back to the production API. */
+export const INDEXER_URL = process.env.NEXT_PUBLIC_INDEXER_URL?.trim() || DEFAULT_INDEXER_URL;
+
+/** Green Globe live map (data.gainforest.app). */
+export const GLOBE_URL = "https://data.gainforest.app";
+
+/** Drone/orthophoto/point-cloud viewer. */
+const DRONE_APP_URL = (process.env.NEXT_PUBLIC_DRONE_APP_URL || "https://drone.gainforest.app").replace(/\/$/, "");
+
+export function droneAppHref(options?: {
+  projectDid?: string | null;
+  siteUri?: string | null;
+  view3d?: boolean;
+  demo?: boolean;
+}): string {
+  const query = new URLSearchParams();
+
+  if (options?.projectDid && !options.demo) {
+    query.set("atprotoProject", options.projectDid);
+    query.set("view3d", String(options.view3d ?? false));
+    query.set("basemap", "false");
+    if (options.siteUri) query.set("project-site-id", options.siteUri);
+  } else {
+    query.set("p", "drone-demo");
+    query.set("view3d", String(options?.view3d ?? true));
+  }
+
+  return `${DRONE_APP_URL}/project/Showcase?${query.toString()}`;
+}
+
+const LOCAL_GREEN_GLOBE_PREVIEW_BASE_URL = "http://localhost:8910";
+
+/** Green Globe embedded preview base URL. Override for hosted Green Globe testing. */
+const GREEN_GLOBE_PREVIEW_URL =
+  process.env.NEXT_PUBLIC_GREEN_GLOBE_URL?.trim().replace(/\/$/, "") ||
+  (process.env.NEXT_PUBLIC_VERCEL_ENV === "production" ? GLOBE_URL : LOCAL_GREEN_GLOBE_PREVIEW_BASE_URL);
+
+export function greenGlobeTreePreviewHref(
+  did: string,
+  options?: {
+    treeUri?: string | null;
+    datasetRef?: string | null;
+    datasetRefs?: string[] | null;
+    siteRef?: string | null;
+  },
+): string {
+  const query = new URLSearchParams();
+
+  if (options?.treeUri) query.set("tree-uri", options.treeUri);
+  if (options?.siteRef) query.set("project-site-id", options.siteRef);
+
+  const datasetRefs = Array.from(new Set([...(options?.datasetRef ? [options.datasetRef] : []), ...(options?.datasetRefs ?? [])]));
+  for (const datasetRef of datasetRefs) {
+    if (datasetRef.length > 0) query.append("dataset-ref", datasetRef);
+  }
+
+  const queryString = query.toString();
+  const basePath = `${GREEN_GLOBE_PREVIEW_URL}/embed/${encodeURIComponent(did)}`;
+  return queryString ? `${basePath}?${queryString}` : basePath;
+}
+
+/** Hyperscan ATProto explorer (hyperscan.dev). */
+/** GainForest non-profit site. */
+export const GAINFOREST_URL = "https://gainforest.earth";
+
+/** Instatus status page (public mirror + JSON endpoints). */
+export const STATUS_URL = "https://gainforest-status.instatus.com";
+
+/** The facilitator repo that records every Bumicerts funding receipt. All
+ *  donations across every org land in this DID's PDS, so the donations
+ *  dashboard reads `orgHypercertsFundingReceipt(where: { did: { eq } })`
+ *  against it. Mirrors the bumicerts monorepo's NEXT_PUBLIC_FACILITATOR_DID
+ *  (apps/certs/app/(marketplace)/dashboard/_components/DashboardClient.tsx). */
+export const FACILITATOR_DID = process.env.NEXT_PUBLIC_FACILITATOR_DID || "did:plc:edod7rboajioq3jbyxsgeicc";
+
+/** The platform (facilitator) wallet address that signs the EVM-link platform
+ *  attestation. When set, a linked wallet only counts as "trusted" for
+ *  receiving donations if its `platformAttestation.platformAddress` matches
+ *  this. Mirrors the monorepo's NEXT_PUBLIC_FACILITATOR_WALLET_ADDRESS. */
+export const FACILITATOR_WALLET_ADDRESS = process.env.NEXT_PUBLIC_FACILITATOR_WALLET_ADDRESS;
+
+/** WalletConnect Cloud project id, required by RainbowKit's getDefaultConfig
+ *  for mobile wallet (deep-link) support. Mirrors the monorepo's
+ *  NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID. RainbowKit refuses to initialise with
+ *  an empty id (it throws during SSR/prerender), so we fall back to a
+ *  placeholder when unset: injected/browser wallets (MetaMask, Rainbow,
+ *  Coinbase) still work; only mobile WalletConnect deep-links need the real id. */
+export const WALLETCONNECT_PROJECT_ID =
+  process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "00000000000000000000000000000000";
+
+/** Prefer a handle for public URLs when one is known, while keeping DID fallback support. */
+export function preferredDidIdentifier(did: string, handle?: string | null): string {
+  const cleanHandle = handle?.trim().replace(/^@/, "");
+  return cleanHandle && !cleanHandle.startsWith("did:") ? cleanHandle : did;
+}
+
+/** Build a Cert detail page URL in this app from a DID/handle + rkey. */
+export function localBumicertHref(didOrHandle: string, rkey: string): string {
+  return `/cert/${encodeURIComponent(didOrHandle)}/${encodeURIComponent(rkey)}`;
+}
+
+/** Build a local GainForest account page URL from a DID or handle. */
+export function accountHref(didOrHandle: string): string {
+  return `/account/${encodeURIComponent(didOrHandle)}`;
+}
+
+/** Build a dedicated nature-sighting (occurrence) detail page URL in this app
+ *  from a DID/handle + rkey. */
+export function localObservationHref(didOrHandle: string, rkey: string): string {
+  return `/observations/${encodeURIComponent(didOrHandle)}/${encodeURIComponent(rkey)}`;
+}
+
+/** Build a dedicated project detail page URL in this app from a DID/handle +
+ *  rkey. */
+export function localProjectHref(didOrHandle: string, rkey: string): string {
+  return `/projects/${encodeURIComponent(didOrHandle)}/${encodeURIComponent(rkey)}`;
+}
+
+/** Block-explorer transaction URLs by payment network. Mirrors the
+ *  bumicerts dashboard's BLOCK_EXPLORERS map. */
+const BLOCK_EXPLORERS: Record<string, (tx: string) => string> = {
+  ethereum: (tx) => `https://etherscan.io/tx/${tx}`,
+  base: (tx) => `https://basescan.org/tx/${tx}`,
+  celo: (tx) => `https://celoscan.io/tx/${tx}`,
+};
+
+export function blockExplorerUrl(
+  txHash: string | null | undefined,
+  network: string | null | undefined,
+): string | null {
+  if (!txHash || !network) return null;
+  const builder = BLOCK_EXPLORERS[network.toLowerCase()];
+  return builder ? builder(txHash) : null;
+}
