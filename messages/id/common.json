@@ -3988,6 +3988,8 @@
     "description": "Setiap akun yang telah membuat dompet donasi di aplikasi, dari yang terbaru.",
     "unavailable": "Statistik tidak dapat dimuat saat ini. Coba lagi sebentar lagi.",
     "empty": "Belum ada dompet yang dibuat.",
+    "searchPlaceholder": "Cari berdasarkan nama atau alamat…",
+    "noMatches": "Tidak ada akun yang cocok dengan pencarian Anda.",
     "person": "Orang",
     "organization": "Organisasi",
     "unnamed": "Akun tanpa nama",

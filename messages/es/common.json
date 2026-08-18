@@ -3988,6 +3988,8 @@
     "description": "Cada cuenta que ha creado una cartera de donaciones en la aplicación, de la más reciente a la más antigua.",
     "unavailable": "La estadística no se pudo cargar en este momento. Inténtalo de nuevo en un momento.",
     "empty": "Todavía no se ha creado ninguna cartera.",
+    "searchPlaceholder": "Buscar por nombre o identificador…",
+    "noMatches": "No se encontró ninguna cuenta que coincida con tu búsqueda.",
     "person": "Persona",
     "organization": "Organización",
     "unnamed": "Cuenta sin nombre",

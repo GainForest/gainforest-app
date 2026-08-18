@@ -3988,6 +3988,8 @@
     "description": "Every account that has created a donation wallet in the app, newest first.",
     "unavailable": "The statistic couldn't be loaded right now. Try again in a moment.",
     "empty": "No wallets have been created yet.",
+    "searchPlaceholder": "Search by name or handle…",
+    "noMatches": "No account found that matches your search.",
     "person": "Person",
     "organization": "Organization",
     "unnamed": "Unnamed account",

@@ -3988,6 +3988,8 @@
     "description": "Kila akaunti iliyounda pochi ya mchango kwenye programu, kuanzia mpya zaidi.",
     "unavailable": "Takwimu haikuweza kupakiwa kwa sasa. Jaribu tena baada ya muda.",
     "empty": "Hakuna pochi iliyoundwa bado.",
+    "searchPlaceholder": "Tafuta kwa jina au kitambulishi…",
+    "noMatches": "Hakuna akaunti inayolingana na utafutaji wako.",
     "person": "Mtu",
     "organization": "Shirika",
     "unnamed": "Akaunti isiyo na jina",

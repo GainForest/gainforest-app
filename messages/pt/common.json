@@ -3988,6 +3988,8 @@
     "description": "Cada conta que criou uma carteira de doações no aplicativo, da mais recente para a mais antiga.",
     "unavailable": "A estatística não pôde ser carregada agora. Tente novamente em instantes.",
     "empty": "Nenhuma carteira foi criada ainda.",
+    "searchPlaceholder": "Pesquisar por nome ou identificador…",
+    "noMatches": "Nenhuma conta correspondeu à sua pesquisa.",
     "person": "Pessoa",
     "organization": "Organização",
     "unnamed": "Conta sem nome",

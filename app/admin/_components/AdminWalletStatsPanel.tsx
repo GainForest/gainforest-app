@@ -1,10 +1,12 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
-import { Building2Icon, ShieldCheckIcon, WalletIcon } from "lucide-react";
+import { Building2Icon, SearchIcon, ShieldCheckIcon, WalletIcon } from "lucide-react";
 import type { WalletStatRow } from "@/app/admin/_lib/wallet-stats";
 import { accountPath } from "@/app/account/_lib/account-route";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { AdminAvatar, AdminEmptyState } from "./AdminPanel";
 
@@ -20,6 +22,19 @@ function shortAddress(address: string): string {
  */
 export function AdminWalletStatsPanel({ rows }: { rows: WalletStatRow[] | null }) {
   const t = useTranslations("common.adminWalletStats");
+  const [query, setQuery] = useState("");
+
+  // The full set is already in the browser (a few dozen rows), so filtering by
+  // name or handle is instant and needs no server round-trip.
+  const term = query.trim().toLowerCase();
+  const filtered = useMemo(() => {
+    if (!term) return rows ?? [];
+    return (rows ?? []).filter((row) => {
+      const name = row.displayName?.toLowerCase() ?? "";
+      const handle = row.handle?.toLowerCase() ?? "";
+      return name.includes(term) || handle.includes(term);
+    });
+  }, [rows, term]);
 
   if (rows === null) {
     return (
@@ -34,11 +49,28 @@ export function AdminWalletStatsPanel({ rows }: { rows: WalletStatRow[] | null }
   }
 
   return (
-    <ul className="divide-y divide-border/70">
-      {rows.map((row) => (
-        <WalletStatRowItem key={row.did} row={row} />
-      ))}
-    </ul>
+    <div className="space-y-4">
+      <div className="relative">
+        <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder={t("searchPlaceholder")}
+          className="pl-9"
+          aria-label={t("searchPlaceholder")}
+        />
+      </div>
+
+      {filtered.length === 0 ? (
+        <AdminEmptyState>{t("noMatches")}</AdminEmptyState>
+      ) : (
+        <ul className="divide-y divide-border/70">
+          {filtered.map((row) => (
+            <WalletStatRowItem key={row.did} row={row} />
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 
