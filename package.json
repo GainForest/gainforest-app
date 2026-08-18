@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --port 3040 --turbopack",
-    "dev:proxy": "caddy run --config Caddyfile --watch",
+    "dev:proxy": "bash scripts/dev-proxy.sh",
     "build": "next build",
     "check:i18n": "node scripts/check-i18n-untranslated.mjs",
     "test:unit": "vitest run",
