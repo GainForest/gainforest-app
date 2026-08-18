@@ -11,6 +11,7 @@ import { fetchRewildingAdminGrantees } from "../_lib/rewilding-admin";
 import { isRewildingDocumentStorageConfigured } from "../_lib/rewilding-documents";
 import { AdminPageHeader } from "../_components/AdminPageHeader";
 import { AdminPanel } from "../_components/AdminPanel";
+import { AdminCollapsiblePanel } from "../_components/AdminCollapsiblePanel";
 import { AdminSectionTabs } from "../_components/AdminSectionTabs";
 import { AdminGrantApplicantsList } from "../_components/AdminGrantApplicantsList";
 import { AdminBioblitzDashboard } from "../_components/AdminBioblitzDashboard";
@@ -55,23 +56,6 @@ export default async function AdminGrantsPage({
         initialTab={tab}
         tabs={[
           {
-            id: "grants",
-            label: t("tabs.grants"),
-            icon: <SproutIcon className="size-4" />,
-            count: grantApplicants.length,
-            content: (
-              <AdminPanel
-                Icon={SproutIcon}
-                title={t("grants.title")}
-                description={t("grants.description")}
-                count={grantApplicants.length}
-                footer={t("awardHint")}
-              >
-                <AdminGrantApplicantsList applicants={grantApplicants} />
-              </AdminPanel>
-            ),
-          },
-          {
             // Trees rather than a leaf: BioBlitz already owns the leaf in this
             // same pill bar, and two identical icons side by side read as a bug.
             id: "rewilding",
@@ -79,18 +63,29 @@ export default async function AdminGrantsPage({
             icon: <TreesIcon className="size-4" />,
             count: rewildingGrantees.length,
             content: (
-              <AdminPanel
-                Icon={TreesIcon}
-                title={t("rewilding.title")}
-                description={t("rewilding.description")}
-                count={rewildingGrantees.length}
-                footer={t("rewilding.footer")}
-              >
-                <AdminRewildingPanel
-            grantees={rewildingGrantees}
-            documentStorageConfigured={isRewildingDocumentStorageConfigured()}
-          />
-              </AdminPanel>
+              <div className="flex flex-col gap-5">
+                <AdminPanel
+                  Icon={TreesIcon}
+                  title={t("rewilding.title")}
+                  description={t("rewilding.description")}
+                  count={rewildingGrantees.length}
+                  footer={t("rewilding.footer")}
+                >
+                  <AdminRewildingPanel
+                    grantees={rewildingGrantees}
+                    documentStorageConfigured={isRewildingDocumentStorageConfigured()}
+                  />
+                </AdminPanel>
+                <AdminCollapsiblePanel
+                  Icon={SproutIcon}
+                  title={t("grants.title")}
+                  description={t("grants.description")}
+                  count={grantApplicants.length}
+                  footer={t("awardHint")}
+                >
+                  <AdminGrantApplicantsList applicants={grantApplicants} />
+                </AdminCollapsiblePanel>
+              </div>
             ),
           },
           {
