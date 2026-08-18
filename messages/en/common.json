@@ -3996,6 +3996,7 @@
     "empty": "No wallets have been created yet.",
     "searchPlaceholder": "Search by name or handle…",
     "noMatches": "No account found that matches your search.",
+    "keyboardHint": "↑ ↓ to navigate · Enter to open",
     "person": "Person",
     "organization": "Organization",
     "unnamed": "Unnamed account",

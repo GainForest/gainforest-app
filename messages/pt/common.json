@@ -3996,6 +3996,7 @@
     "empty": "Nenhuma carteira foi criada ainda.",
     "searchPlaceholder": "Pesquisar por nome ou identificador…",
     "noMatches": "Nenhuma conta correspondeu à sua pesquisa.",
+    "keyboardHint": "↑ ↓ para navegar · Enter para abrir",
     "person": "Pessoa",
     "organization": "Organização",
     "unnamed": "Conta sem nome",

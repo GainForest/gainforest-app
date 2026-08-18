@@ -3996,6 +3996,7 @@
     "empty": "Belum ada dompet yang dibuat.",
     "searchPlaceholder": "Cari berdasarkan nama atau alamat…",
     "noMatches": "Tidak ada akun yang cocok dengan pencarian Anda.",
+    "keyboardHint": "↑ ↓ untuk menavigasi · Enter untuk membuka",
     "person": "Orang",
     "organization": "Organisasi",
     "unnamed": "Akun tanpa nama",
