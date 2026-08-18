@@ -1359,7 +1359,8 @@
       "facilitator": "Dompet fasilitator",
       "dataJobs": "Batch data",
       "blockedDomains": "Alamat diblokir",
-      "walletConnections": "Dompet terhubung"
+      "walletConnections": "Dompet terhubung",
+      "walletsCreated": "Dompet yang dibuat"
     },
     "unnamed": "Akun tanpa nama",
     "awardHint": "Buka profil untuk memberikan lencana.",
@@ -1450,6 +1451,10 @@
       "data": {
         "title": "Data & keuangan",
         "subtitle": "Batch data mitra dan dompet fasilitator."
+      },
+      "statistics": {
+        "title": "Statistik",
+        "subtitle": "Angka di seluruh aplikasi, dimulai dari dompet yang telah dibuat oleh akun."
       }
     }
   },
@@ -3977,5 +3982,17 @@
     "legacy": "lama",
     "signers": "{count} penandatangan",
     "unverified": "belum diverifikasi"
+  },
+  "adminWalletStats": {
+    "title": "Dompet yang dibuat",
+    "description": "Setiap akun yang telah membuat dompet donasi di aplikasi, dari yang terbaru.",
+    "unavailable": "Statistik tidak dapat dimuat saat ini. Coba lagi sebentar lagi.",
+    "empty": "Belum ada dompet yang dibuat.",
+    "person": "Orang",
+    "organization": "Organisasi",
+    "unnamed": "Akun tanpa nama",
+    "signers": "{count} penandatangan",
+    "legacy": "lama",
+    "created": "dibuat {date}"
   }
 }

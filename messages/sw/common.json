@@ -1359,7 +1359,8 @@
       "facilitator": "Pochi ya uwezeshaji",
       "dataJobs": "Makundi ya data",
       "blockedDomains": "Anwani zilizozuiwa",
-      "walletConnections": "Pochi zilizounganishwa"
+      "walletConnections": "Pochi zilizounganishwa",
+      "walletsCreated": "Pochi zilizoundwa"
     },
     "unnamed": "Akaunti isiyo na jina",
     "awardHint": "Fungua wasifu ili kutoa beji.",
@@ -1450,6 +1451,10 @@
       "data": {
         "title": "Data na fedha",
         "subtitle": "Makundi ya data ya washirika na pochi ya uwezeshaji."
+      },
+      "statistics": {
+        "title": "Takwimu",
+        "subtitle": "Nambari kutoka kote kwenye programu, kuanzia na pochi ambazo akaunti zimeunda."
       }
     }
   },
@@ -3977,5 +3982,17 @@
     "legacy": "ya zamani",
     "signers": "watia saini {count}",
     "unverified": "hajathibitishwa"
+  },
+  "adminWalletStats": {
+    "title": "Pochi zilizoundwa",
+    "description": "Kila akaunti iliyounda pochi ya mchango kwenye programu, kuanzia mpya zaidi.",
+    "unavailable": "Takwimu haikuweza kupakiwa kwa sasa. Jaribu tena baada ya muda.",
+    "empty": "Hakuna pochi iliyoundwa bado.",
+    "person": "Mtu",
+    "organization": "Shirika",
+    "unnamed": "Akaunti isiyo na jina",
+    "signers": "watia saini {count}",
+    "legacy": "ya zamani",
+    "created": "iliundwa {date}"
   }
 }

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ChevronRightIcon, DatabaseIcon, ShieldCheckIcon, SproutIcon, UsersIcon } from "lucide-react";
+import { ChartColumnIcon, ChevronRightIcon, DatabaseIcon, ShieldCheckIcon, SproutIcon, UsersIcon } from "lucide-react";
 import { AdminPageHeader } from "./_components/AdminPageHeader";
 
 export const metadata: Metadata = {
@@ -77,6 +77,12 @@ export default async function AdminPage({
       Icon: DatabaseIcon,
       title: t("pages.data.title"),
       items: [t("tabs.dataJobs"), t("tabs.facilitator")],
+    },
+    {
+      href: "/admin/statistics",
+      Icon: ChartColumnIcon,
+      title: t("pages.statistics.title"),
+      items: [t("tabs.walletsCreated")],
     },
   ];
 

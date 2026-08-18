@@ -1359,7 +1359,8 @@
       "facilitator": "Billetera facilitadora",
       "dataJobs": "Lotes de datos",
       "blockedDomains": "Direcciones bloqueadas",
-      "walletConnections": "Carteras conectadas"
+      "walletConnections": "Carteras conectadas",
+      "walletsCreated": "Carteras creadas"
     },
     "unnamed": "Cuenta sin nombre",
     "awardHint": "Abre un perfil para otorgar una insignia.",
@@ -1450,6 +1451,10 @@
       "data": {
         "title": "Datos y dinero",
         "subtitle": "Lotes de datos de socios y la billetera facilitadora."
+      },
+      "statistics": {
+        "title": "Estadísticas",
+        "subtitle": "Cifras de toda la aplicación, empezando por las carteras que han creado las cuentas."
       }
     }
   },
@@ -3977,5 +3982,17 @@
     "legacy": "heredada",
     "signers": "{count} firmantes",
     "unverified": "sin verificar"
+  },
+  "adminWalletStats": {
+    "title": "Carteras creadas",
+    "description": "Cada cuenta que ha creado una cartera de donaciones en la aplicación, de la más reciente a la más antigua.",
+    "unavailable": "La estadística no se pudo cargar en este momento. Inténtalo de nuevo en un momento.",
+    "empty": "Todavía no se ha creado ninguna cartera.",
+    "person": "Persona",
+    "organization": "Organización",
+    "unnamed": "Cuenta sin nombre",
+    "signers": "{count} firmantes",
+    "legacy": "heredada",
+    "created": "creada el {date}"
   }
 }

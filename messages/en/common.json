@@ -1359,7 +1359,8 @@
       "facilitator": "Facilitator wallet",
       "dataJobs": "Data batches",
       "blockedDomains": "Blocked addresses",
-      "walletConnections": "Wallet connections"
+      "walletConnections": "Wallet connections",
+      "walletsCreated": "Wallets created"
     },
     "unnamed": "Unnamed account",
     "awardHint": "Open a profile to award a badge.",
@@ -1450,6 +1451,10 @@
       "data": {
         "title": "Data & money",
         "subtitle": "Partner data batches and the facilitator wallet."
+      },
+      "statistics": {
+        "title": "Statistics",
+        "subtitle": "Numbers across the app, starting with the wallets accounts have created."
       }
     }
   },
@@ -3977,5 +3982,17 @@
     "legacy": "legacy",
     "signers": "{count} signers",
     "unverified": "unverified"
+  },
+  "adminWalletStats": {
+    "title": "Wallets created",
+    "description": "Every account that has created a donation wallet in the app, newest first.",
+    "unavailable": "The statistic couldn't be loaded right now. Try again in a moment.",
+    "empty": "No wallets have been created yet.",
+    "person": "Person",
+    "organization": "Organization",
+    "unnamed": "Unnamed account",
+    "signers": "{count} signers",
+    "legacy": "legacy",
+    "created": "created {date}"
   }
 }
