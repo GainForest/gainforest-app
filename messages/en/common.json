@@ -2279,6 +2279,7 @@
       "metadataTitle": "{name} — Deployment",
       "detailBack": "Back to recordings",
       "mapTitle": "Deployment location",
+      "mapExpand": "See this location on a larger map",
       "equipmentUsedLabel": "AudioMoth used",
       "protocolLabel": "Protocol",
       "recordedByLabel": "Recorded by",

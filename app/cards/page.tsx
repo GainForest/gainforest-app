@@ -1,45 +1,24 @@
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-import { fetchAuthSession } from "@/app/_lib/auth-server";
-import { MyCardsView } from "./_components/MyCardsView";
-import { fetchEarnedCards } from "./_lib/receipt-cards";
+import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-
-type CardsSearchParams = Promise<{ receipt?: string | string[] }>;
-
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("cart.myCards");
-  return { title: t("title"), robots: { index: false } };
-}
-
-export default async function MyCardsPage({ searchParams }: { searchParams: CardsSearchParams }) {
-  const [authSession, params, t] = await Promise.all([
-    fetchAuthSession(),
-    searchParams,
-    getTranslations("cart.myCards"),
-  ]);
-
-  if (!authSession.isLoggedIn) {
-    return <MyCardsView cards={[]} status="signedOut" />;
+/**
+ * Legacy alias for the Bumicerts collection. The route moved to /bumicerts to
+ * match the "My Bumicerts" naming used across the app; this stub keeps old
+ * links (and the receipt query from checkout) working without a regression.
+ */
+export default async function LegacyCardsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (Array.isArray(value)) {
+      for (const item of value) query.append(key, item);
+    } else if (typeof value === "string") {
+      query.append(key, value);
+    }
   }
-
-  const recentReceiptUris = Array.isArray(params.receipt)
-    ? params.receipt
-    : typeof params.receipt === "string"
-      ? [params.receipt]
-      : [];
-
-  try {
-    const result = await fetchEarnedCards(authSession.did, recentReceiptUris, {
-      projectTitle: t("fallbackProject"),
-      organizationName: t("fallbackOrganization"),
-      recipientName: t("fallbackRecipient"),
-      personContext: t("fallbackPersonContext"),
-    });
-    return <MyCardsView cards={result.cards} status="ready" partial={result.partial} />;
-  } catch (error) {
-    console.error("[cards] Failed to load receipt-backed cards:", error);
-    return <MyCardsView cards={[]} status="unavailable" />;
-  }
+  const suffix = query.size > 0 ? `?${query.toString()}` : "";
+  redirect(`/bumicerts${suffix}`);
 }

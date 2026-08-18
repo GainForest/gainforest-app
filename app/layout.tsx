@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { Cormorant_Garamond, Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { Suspense } from "react";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
@@ -23,6 +24,7 @@ import { getCanonicalPathname, getSeoLocalizedPathnames, withLocalePrefix } from
 import { fetchAuthSession } from "./_lib/auth-server";
 import { getRequestOrigin } from "./_lib/request-origin";
 import { scheduleUserEmailSync } from "./_lib/user-emails";
+import { scheduleOrganizationMembershipSync } from "./_lib/organization-memberships";
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -194,19 +196,21 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // The session is resolved server-side (in parallel with i18n setup) so the
   // shell renders with the real signed-in state on first paint — no
   // signed-out flash, no client-side session fetch waterfall.
-  const [locale, messages, authSession, origin, seoT, navT] = await Promise.all([
+  const [locale, messages, authSession, origin, seoT, navT, requestHeaders] = await Promise.all([
     getLocale(),
     getMessages(),
     fetchAuthSession(),
     getRequestOrigin(),
     getTranslations("common.seo"),
     getTranslations("landing.nav"),
+    headers(),
   ]);
 
   const supportedLocale = resolveSupportedLanguage(locale);
   // A DID's first successful email sync marks its first authenticated use of
   // GainForest. Existing identities remain portable regardless of account age.
   scheduleUserEmailSync(authSession, supportedLocale);
+  scheduleOrganizationMembershipSync(authSession, requestHeaders.get("cookie"));
 
   const navigationItems = PUBLIC_NAVIGATION_ROUTES.map((item) => ({
     name: navT(item.key),

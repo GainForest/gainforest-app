@@ -16,6 +16,11 @@ export type CgsMembersResponse = {
   cursor?: string;
 };
 
+export type CgsServerGroupMembership = {
+  groupDid: string;
+  role: CgsServerRole;
+};
+
 export class CgsRequestError extends Error {
   status: number;
 
@@ -25,6 +30,9 @@ export class CgsRequestError extends Error {
     this.status = status;
   }
 }
+
+const CGS_REQUEST_TIMEOUT_MS = 10_000;
+const MAX_CGS_ROSTER_PAGES = 100;
 
 type RawMember = {
   did?: unknown;
@@ -40,6 +48,17 @@ type RawMembersResponse = {
   error?: unknown;
   message?: unknown;
 };
+
+type RawGroupsResponse = {
+  groups?: unknown;
+  cursor?: unknown;
+  error?: unknown;
+  message?: unknown;
+};
+
+function isCgsRole(value: unknown): value is CgsServerRole {
+  return value === "owner" || value === "admin" || value === "member";
+}
 
 function normalizeRole(value: unknown): CgsServerRole {
   return value === "owner" || value === "admin" ? value : "member";
@@ -61,13 +80,34 @@ function normalizeMembers(value: unknown): CgsServerMember[] {
   });
 }
 
-function errorMessage(payload: RawMembersResponse | null, fallback: string): string {
+function normalizeGroupMemberships(value: unknown): CgsServerGroupMembership[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((entry) => {
+    if (typeof entry !== "object" || entry === null) return [];
+    const group = entry as { groupDid?: unknown; role?: unknown };
+    if (typeof group.groupDid !== "string" || !group.groupDid.startsWith("did:") || !isCgsRole(group.role)) return [];
+    return [{ groupDid: group.groupDid, role: group.role }];
+  });
+}
+
+function errorMessage(payload: RawMembersResponse | RawGroupsResponse | null, fallback: string): string {
   const raw = typeof payload?.message === "string"
     ? payload.message
     : typeof payload?.error === "string"
       ? payload.error
       : fallback;
   return formatCgsErrorMessage(raw, fallback);
+}
+
+async function fetchCgsRosterPage(url: URL, init: RequestInit, fallback: string): Promise<Response> {
+  try {
+    return await fetch(url, {
+      ...init,
+      signal: AbortSignal.timeout(CGS_REQUEST_TIMEOUT_MS),
+    });
+  } catch {
+    throw new CgsRequestError(fallback, 502);
+  }
 }
 
 async function resolveCgsRepoIdentifier(repo: string): Promise<string> {
@@ -82,6 +122,105 @@ async function resolveCgsRepoIdentifier(repo: string): Promise<string> {
 
   const payload = (await response.json().catch(() => null)) as { did?: unknown } | null;
   return typeof payload?.did === "string" && payload.did.startsWith("did:") ? payload.did : trimmed;
+}
+
+type CgsGroupMembershipPage = {
+  groups: CgsServerGroupMembership[];
+  cursor: string | null;
+};
+
+async function fetchCgsGroupMembershipPage(
+  authCookie: string,
+  cursor: string | null,
+): Promise<CgsGroupMembershipPage> {
+  const upstreamUrl = new URL("/api/cgs/groups", getAuthBaseUrl());
+  upstreamUrl.searchParams.set("limit", "100");
+  if (cursor) upstreamUrl.searchParams.set("cursor", cursor);
+
+  const upstream = await fetchCgsRosterPage(upstreamUrl, {
+    headers: { cookie: authCookie },
+    cache: "no-store",
+  }, "Could not load organizations. Try again later.");
+  const payload = (await upstream.json().catch(() => null)) as RawGroupsResponse | null;
+  if (!upstream.ok || payload?.error) {
+    throw new CgsRequestError(errorMessage(payload, "Could not load organizations."), upstream.status || 502);
+  }
+  if (!Array.isArray(payload?.groups)) {
+    throw new CgsRequestError("The group service returned invalid organization membership data. Try again later.", 502);
+  }
+  if (payload !== null && Object.prototype.hasOwnProperty.call(payload, "cursor") && typeof payload.cursor !== "string") {
+    throw new CgsRequestError(
+      "The group service returned an invalid organization pagination cursor. Nothing was stored; try again later.",
+      502,
+    );
+  }
+
+  const groups = normalizeGroupMemberships(payload.groups);
+  if (groups.length !== payload.groups.length) {
+    throw new CgsRequestError("The group service returned invalid organization membership data. Try again later.", 502);
+  }
+  return {
+    groups,
+    cursor: typeof payload.cursor === "string" && payload.cursor ? payload.cursor : null,
+  };
+}
+
+function appendUniqueGroupMemberships({
+  groups,
+  pageGroups,
+  seenGroupDids,
+}: {
+  groups: CgsServerGroupMembership[];
+  pageGroups: CgsServerGroupMembership[];
+  seenGroupDids: Set<string>;
+}): void {
+  for (const group of pageGroups) {
+    if (seenGroupDids.has(group.groupDid)) {
+      throw new CgsRequestError("The group service repeated an organization across pages. Nothing was stored; try again later.", 502);
+    }
+    seenGroupDids.add(group.groupDid);
+    groups.push(group);
+  }
+}
+
+function rememberGroupMembershipCursor(cursor: string | null, seenCursors: Set<string>): void {
+  if (!cursor) return;
+  if (seenCursors.has(cursor)) {
+    throw new CgsRequestError(
+      "Could not completely load organizations because the group service repeated a pagination cursor. Try again later.",
+      502,
+    );
+  }
+  seenCursors.add(cursor);
+}
+
+export async function fetchAllCgsGroupMembershipsWithCookie(cookie: string | null): Promise<CgsServerGroupMembership[]> {
+  const authCookie = getAuthForwardCookie(cookie);
+  if (!authCookie) throw new CgsRequestError("Please sign in and try again.", 401);
+
+  const groups: CgsServerGroupMembership[] = [];
+  const seenGroupDids = new Set<string>();
+  const seenCursors = new Set<string>();
+  let cursor: string | null = null;
+
+  for (let pageCount = 0; ; pageCount += 1) {
+    if (pageCount >= MAX_CGS_ROSTER_PAGES) {
+      throw new CgsRequestError(
+        "Could not completely load organizations because the group service exceeded the 100-page limit. Nothing was stored; try again later.",
+        502,
+      );
+    }
+
+    const page = await fetchCgsGroupMembershipPage(authCookie, cursor);
+    appendUniqueGroupMemberships({
+      groups,
+      pageGroups: page.groups,
+      seenGroupDids,
+    });
+    rememberGroupMembershipCursor(page.cursor, seenCursors);
+    if (!page.cursor) return groups;
+    cursor = page.cursor;
+  }
 }
 
 export async function fetchCgsMembersWithCookie({
@@ -101,7 +240,7 @@ export async function fetchCgsMembersWithCookie({
 
   const resolvedRepo = await resolveCgsRepoIdentifier(repo);
 
-  const upstream = await fetch(new URL("/api/cgs/mutation", getAuthBaseUrl()), {
+  const upstream = await fetchCgsRosterPage(new URL("/api/cgs/mutation", getAuthBaseUrl()), {
     method: "POST",
     headers: {
       "content-type": "application/json",
@@ -114,20 +253,90 @@ export async function fetchCgsMembersWithCookie({
       ...(cursor ? { cursor } : {}),
     }),
     cache: "no-store",
-  });
+  }, "Could not load organization members. Try again later.");
 
   const payload = (await upstream.json().catch(() => null)) as RawMembersResponse | null;
   if (!upstream.ok || payload?.error) {
     throw new CgsRequestError(errorMessage(payload, "Could not load members."), upstream.status || 502);
   }
+  if (!Array.isArray(payload?.members) || payload.members.some((entry) => {
+    if (typeof entry !== "object" || entry === null) return true;
+    const member = entry as RawMember;
+    const did = typeof member.did === "string" ? member.did : member.memberDid;
+    return typeof did !== "string" || !did.startsWith("did:") || !isCgsRole(member.role);
+  })) {
+    throw new CgsRequestError(
+      "The group service returned invalid organization member data. Nothing was stored; try again later.",
+      502,
+    );
+  }
+  if (payload !== null && Object.prototype.hasOwnProperty.call(payload, "cursor") && typeof payload.cursor !== "string") {
+    throw new CgsRequestError(
+      "The group service returned an invalid organization member pagination cursor. Nothing was stored; try again later.",
+      502,
+    );
+  }
 
   return {
-    members: normalizeMembers(payload?.members),
-    cursor: typeof payload?.cursor === "string" ? payload.cursor : undefined,
+    members: normalizeMembers(payload.members),
+    cursor: typeof payload.cursor === "string" ? payload.cursor : undefined,
   };
 }
 
-/** Resolve one member's current role across every group-service page. */
+/** Load the complete roster for one organization across every group-service page. */
+export async function fetchAllCgsMembersWithCookie({
+  repo,
+  cookie,
+}: {
+  repo: string;
+  cookie: string | null;
+}): Promise<CgsServerMember[]> {
+  const members: CgsServerMember[] = [];
+  const seenMemberDids = new Set<string>();
+  const seenCursors = new Set<string>();
+  let cursor: string | null = null;
+
+  for (let pageCount = 0; ; pageCount += 1) {
+    if (pageCount >= MAX_CGS_ROSTER_PAGES) {
+      throw new CgsRequestError(
+        "Could not completely load organization members because the group service exceeded the 100-page limit. Nothing was stored; try again later.",
+        502,
+      );
+    }
+
+    const page = await fetchCgsMembersWithCookie({ repo, cookie, cursor, limit: 100 });
+    for (const member of page.members) {
+      if (seenMemberDids.has(member.did)) {
+        throw new CgsRequestError(
+          "The group service repeated an organization member across pages. Nothing was stored; try again later.",
+          502,
+        );
+      }
+      seenMemberDids.add(member.did);
+      members.push(member);
+    }
+
+    const next = page.cursor ?? null;
+    if (next && seenCursors.has(next)) {
+      throw new CgsRequestError(
+        "Could not completely load organization members because the group service repeated a pagination cursor. Try again later.",
+        502,
+      );
+    }
+    if (next) seenCursors.add(next);
+    if (!next) break;
+    cursor = next;
+  }
+
+  if (members.length === 0) {
+    throw new CgsRequestError(
+      "The group service returned an empty organization roster. Nothing was stored; try again later.",
+      502,
+    );
+  }
+  return members;
+}
+
 export async function fetchCgsMemberRoleWithCookie({
   repo,
   cookie,

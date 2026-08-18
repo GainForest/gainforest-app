@@ -308,7 +308,7 @@
   "myCards": {
     "eyebrow": "Colecionáveis",
     "title": "Meus Bumicerts",
-    "description": "Cada Bumicert vem de um recibo verificado de doação a projeto vinculado à sua conta.",
+    "description": "Cada Bumicert vem de um recibo de doação verificado vinculado à sua conta.",
     "count": "{count, plural, one {# Bumicert} other {# Bumicerts}}",
     "emptyTitle": "Ainda não há Bumicerts",
     "emptyBody": "Doe para um projeto com a sessão iniciada e mostrando seu nome para ganhar seu primeiro Bumicert.",
@@ -323,6 +323,7 @@
     "fallbackOrganization": "Equipe do projeto",
     "fallbackRecipient": "Uma pessoa da comunidade",
     "fallbackPersonContext": "Apoio direto",
+    "fallbackAccount": "Uma conta que você apoiou",
     "verifiedDonation": "Doação verificada",
     "viewProject": "Ver projeto",
     "viewProfile": "Ver perfil",
