@@ -20,6 +20,7 @@ export function DeploymentLocationMap({
   label,
   className,
   heightClass = "h-64",
+  compact = false,
 }: {
   lat: number;
   lon: number;
@@ -29,6 +30,10 @@ export function DeploymentLocationMap({
   /** Height of the map canvas. Defaults to the roomy detail-page size; pass a
    *  shorter one where the map is a compact aside beside another panel. */
   heightClass?: string;
+  /** Thumbnail mode: drop the header and zoom control and make the map
+   *  non-interactive — a small pinned preview to sit inline beside other
+   *  content, e.g. an empty deployment's "no recordings yet" note. */
+  compact?: boolean;
 }) {
   const t = useTranslations("common.audiomoth.deployments");
   const elRef = useRef<HTMLDivElement>(null);
@@ -65,8 +70,13 @@ export function DeploymentLocationMap({
           minZoom: 1,
           zoomControl: false,
           scrollWheelZoom: false,
+          dragging: !compact,
+          doubleClickZoom: !compact,
+          boxZoom: !compact,
+          keyboard: !compact,
+          attributionControl: !compact,
         }).setView([lat, lon], 12);
-        L.control.zoom({ position: "bottomright" }).addTo(map);
+        if (!compact) L.control.zoom({ position: "bottomright" }).addTo(map);
         tileRef.current = L.tileLayer(mapTileUrl(dark), {
           attribution:
             '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
@@ -87,7 +97,7 @@ export function DeploymentLocationMap({
     return () => {
       cancelled = true;
     };
-  }, [lat, lon, label]);
+  }, [lat, lon, label, compact]);
 
   useEffect(() => {
     return () => {
@@ -97,6 +107,16 @@ export function DeploymentLocationMap({
       tileRef.current = null;
     };
   }, []);
+
+  // Thumbnail: no header or zoom control, just the pinned canvas in a small
+  // rounded frame the caller sizes.
+  if (compact) {
+    return (
+      <div className={cn("relative overflow-hidden rounded-lg border border-border bg-muted/40", className)}>
+        <div ref={elRef} className={cn("w-full", heightClass)} style={{ zIndex: 0 }} aria-label={t("mapTitle")} />
+      </div>
+    );
+  }
 
   return (
     <section className={cn("overflow-hidden rounded-2xl border border-border bg-foreground/[0.04]", className)}>
