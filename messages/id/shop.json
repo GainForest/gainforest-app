@@ -8,13 +8,9 @@
     "accent": "alam",
     "titleEnd": "katakan",
     "lede": "Perekam saku yang mendengarkan di atas jangkauan pendengaran manusia, mencatat cuaca di sekitarnya, dan bertahan berbulan-bulan dengan tiga baterai AA.",
-    "preOrder": "Pre-order",
+    "preOrder": "Pesan di muka",
     "hearSample": "Dengar sampel",
     "tagline": "Dirakit dan diuji. Hardware terbuka. Dikirim dari Zurich."
-  },
-  "forest": {
-    "title": "La mayor parte de la voz de un bosque es una frecuencia que nunca escucharás",
-    "body": "Los murciélagos, los grillos de arbusto y gran parte de la vida de los insectos se comunican en ultrasonido. Contarlos ha significado equipos que un equipo de campo solo puede permitirse unos pocos — así que la mayoría de los sitios quedan sin escuchar."
   },
   "forest": {
     "title": "Sebagian besar suara hutan adalah frekuensi yang tidak akan pernah kamu dengar",
@@ -86,7 +82,7 @@
       "increase": "Tambah jumlah"
     },
     "total": "Total",
-    "preOrder": "Pre-order"
+    "preOrder": "Pesan di muka"
   },
   "specifications": {
     "title": "Spesifikasi",
@@ -120,6 +116,6 @@
   },
   "stickyBar": {
     "boardOnly": "papan saja",
-    "preOrder": "Pre-order"
+    "preOrder": "Pesan di muka"
   }
 }
