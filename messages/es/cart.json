@@ -178,6 +178,26 @@
     },
     "myCardsTitle": "Galería Mis cartas",
     "myCardsDescription": "Previsualiza la galería de cartas coleccionadas con coleccionables de muestra.",
+    "projectUpdates": {
+      "title": "Compositor de actualizaciones del proyecto",
+      "description": "El editor WYSIWYG para escribir actualizaciones del proyecto, y la línea de tiempo que las muestra, exactamente como aparecen en la página de un Cert.",
+      "mockNote": "Publicar una actualización crea un registro en una cuenta real, así que esta vista previa nunca lo hace. Las actualizaciones escritas aquí usan el compositor, la validación y la línea de tiempo de producción, pero se quedan en esta página y desaparecen al recargar.",
+      "mockBadge": "Modo de prueba · nada se publica",
+      "cardTitle": "Actualizaciones del proyecto",
+      "cardDescription": "Escriba una actualización con formato (negrita, títulos, listas, citas, enlaces) y véala en la línea de tiempo.",
+      "composerLabel": "Escribir una actualización",
+      "timelineLabel": "Actualizaciones publicadas",
+      "seedTitle": "Tercera semana de plantación: informe del dosel",
+      "seedHeading": "Informe del vivero",
+      "seedIntro": "Esta semana el equipo de campo plantó",
+      "seedIntroBold": "1.200 plántulas",
+      "seedIntroTail": "en el sitio de restauración del norte.",
+      "seedListOne": "La tasa de supervivencia se mantiene en 94%",
+      "seedListTwo": "Se sumaron dos nuevos voluntarios de la comunidad",
+      "seedQuote": "El bosque está volviendo más rápido de lo que cualquiera esperaba.",
+      "seedPlainTitle": "Las lluvias llegaron temprano",
+      "seedPlainBody": "Actualización breve en texto plano escrita antes de que existiera el formato. Debe mostrarse sin cambios."
+    },
     "projectVisibility": {
       "title": "Tarjeta de visibilidad del proyecto",
       "description": "La tarjeta de Gestionar → Proyectos que indica a una cuenta qué es público y si aparece en las páginas de exploración, en cada uno de sus estados.",
@@ -261,8 +281,22 @@
       "cardDescription": "Mi subvención con su gráfico de ritmo de audio, por detrás y por delante de la meta.",
       "upcoming": {
         "title": "Antes de que empiece la subvención",
-        "description": "El periodo aún no ha comenzado, así que no hay veredicto de ritmo ni gráfico: solo cuándo empieza y qué pedirá."
+        "description": "El periodo aún no ha comenzado, así que el gráfico presenta cada subida como ventaja inicial: la línea requerida sigue plana hasta que abra."
       }
+    },
+    "communityEvents": {
+      "title": "Eventos comunitarios",
+      "description": "El descubrimiento de eventos, la página del evento y el formulario de organización de producción con datos de prueba — confirmar, listas de espera, publicar y cancelar funcionan en memoria.",
+      "cardTitle": "Eventos comunitarios",
+      "cardDescription": "Explora, confirma, únete a una lista de espera y organiza un evento — componentes de producción con datos en memoria, incluido un modo sin sesión.",
+      "mockBadge": "Modo de prueba · sin escrituras",
+      "eyebrow": "Registro de experiencias de UI",
+      "tabDiscovery": "Descubrimiento",
+      "tabDetail": "Página del evento",
+      "tabHost": "Formulario de organización",
+      "signedInToggle": "Con sesión",
+      "signInPrompt": "Esta acción pediría iniciar sesión. Activa “Con sesión” para simular una sesión.",
+      "dismiss": "Descartar"
     }
   },
   "myCards": {

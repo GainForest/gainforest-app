@@ -13,7 +13,7 @@
  * Nothing is downloaded until somebody asks to listen.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   AlertTriangleIcon,
@@ -32,7 +32,6 @@ import {
   soundscapePoints,
   sourceForMinute,
   type PublishedSoundscape,
-  type SoundscapeSource,
 } from "@/lib/soundscape/record";
 import {
   FULL_DAY_WINDOW,
@@ -45,35 +44,63 @@ import {
   formatWindowMinute,
   type TimeWindow,
 } from "@/lib/soundscape/zoom";
-import { resolvePlayableRecording } from "@/app/_lib/soundscape-record";
-import { registerAudioElement, playExclusiveAudio } from "@/app/_lib/audio-coordinator";
 import { cn } from "@/lib/utils";
 import { BAND_COLORS, SoundscapeClock } from "./SoundscapeClock";
+import { useSoundscapePlayback } from "./useSoundscapePlayback";
+import { fetchRecordingByUri, type AcAudioListItem } from "@/app/_lib/ac-audio";
+import { resolvePdsHost } from "@/app/_lib/pds";
+import { RecordingsPlayerList } from "@/app/_components/RecordingsPlayerList";
 
 /** One notch of the zoom buttons — matches the workbench dial. */
 const ZOOM_STEP = 1.6;
 
-type PlayerState = {
-  audioUri: string;
-  minuteOfDay: number;
-  name: string;
-  status: "loading" | "playing";
-};
-
 export function PublishedSoundscapeView({
   soundscape,
+  did,
   className,
 }: {
   soundscape: PublishedSoundscape;
+  /** The owner's DID — every source recording lives in this repo, and it's how
+   *  each in-view recording's full record (spectrogram, preview, original) is
+   *  fetched to render the list below. */
+  did: string;
   className?: string;
 }) {
   const t = useTranslations("common.soundscape");
   const [zoom, setZoom] = useState<TimeWindow>(FULL_DAY_WINDOW);
   const [visibleBands, setVisibleBands] = useState<boolean[]>(() => soundscape.bands.map(() => true));
-  const [player, setPlayer] = useState<PlayerState | null>(null);
-  const [playbackFailed, setPlaybackFailed] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const playTokenRef = useRef(0);
+  /* Playback is the one shared soundscape player: preview-blob-first, one
+     recording at a time across the page. Aliased to the names this view has
+     always used so the rest of the component reads unchanged. */
+  const {
+    audioProps,
+    player,
+    failed: playbackFailed,
+    stop: stopPlayback,
+    toggle: playSource,
+  } = useSoundscapePlayback();
+
+  /* The owner's PDS host + each in-view recording's full record, resolved on
+     demand so the list below can show spectrograms, play, and download — the
+     soundscape record stores only a pointer per source. */
+  const [host, setHost] = useState<string | null>(null);
+  const [recordItems, setRecordItems] = useState<Map<string, AcAudioListItem>>(() => new Map());
+
+  /* Resolve the owner's PDS host once (a cached DID-doc lookup, shared with the
+     per-recording reads below). */
+  useEffect(() => {
+    const controller = new AbortController();
+    let cancelled = false;
+    void resolvePdsHost(did, controller.signal)
+      .then((resolved) => {
+        if (!cancelled) setHost(resolved);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [did]);
 
   const points = useMemo(() => soundscapePoints(soundscape.sources), [soundscape.sources]);
   const dateRange = useMemo(() => formatSoundscapeDateRange(soundscape.sources), [soundscape.sources]);
@@ -101,74 +128,6 @@ export function PublishedSoundscapeView({
   const bandLabels = useMemo(
     () => FREQUENCY_BANDS.map((band, index) => `${t(`bands.${band.labelKey}`)} \u00b7 ${bandRanges[index]}`),
     [bandRanges, t],
-  );
-
-  /* One shared <audio> element, registered with the page-wide coordinator so
-     starting a recording here stops whatever else was playing. */
-  useEffect(() => {
-    const element = audioRef.current;
-    if (!element) return;
-    return registerAudioElement(element);
-  }, []);
-
-  const stopPlayback = useCallback(() => {
-    playTokenRef.current++;
-    const element = audioRef.current;
-    if (element) {
-      element.pause();
-      element.removeAttribute("src");
-      element.load();
-    }
-    setPlayer(null);
-  }, []);
-
-  useEffect(() => stopPlayback, [stopPlayback]);
-
-  const playSource = useCallback(
-    (source: SoundscapeSource) => {
-      if (player?.audioUri === source.audioUri) {
-        stopPlayback();
-        return;
-      }
-      stopPlayback();
-      setPlaybackFailed(false);
-      const token = ++playTokenRef.current;
-      setPlayer({
-        audioUri: source.audioUri,
-        minuteOfDay: source.minuteOfDay,
-        name: source.name,
-        status: "loading",
-      });
-      void (async () => {
-        const playable = await resolvePlayableRecording(source.audioUri).catch(() => null);
-        if (token !== playTokenRef.current) return;
-        const element = audioRef.current;
-        if (!playable || !element) {
-          setPlayer(null);
-          setPlaybackFailed(true);
-          return;
-        }
-        // Try each candidate URL in turn: the compact preview blob first, the
-        // archival original as a fallback for recordings uploaded before
-        // previews were generated.
-        for (const url of playable.urls) {
-          element.src = url;
-          try {
-            await playExclusiveAudio(element);
-            if (token !== playTokenRef.current) return;
-            setPlayer((current) =>
-              current?.audioUri === source.audioUri ? { ...current, status: "playing" } : current,
-            );
-            return;
-          } catch {
-            if (token !== playTokenRef.current) return;
-          }
-        }
-        setPlayer(null);
-        setPlaybackFailed(true);
-      })();
-    },
-    [player, stopPlayback],
   );
 
   const handlePointClick = useCallback(
@@ -217,11 +176,46 @@ export function PublishedSoundscapeView({
     [soundscape.sources, zoom],
   );
 
-  const multiDay = useMemo(() => new Set(soundscape.sources.map((s) => s.date)).size > 1, [soundscape.sources]);
+  /* Hydrate the in-view recordings from their own records — just the handful
+     inside the current zoom window, each fetched once and kept. */
+  useEffect(() => {
+    const missing = sourcesInView
+      .map((source) => source.audioUri)
+      .filter((uri) => !recordItems.has(uri));
+    if (missing.length === 0) return;
+    const controller = new AbortController();
+    void (async () => {
+      const resolved = await Promise.all(
+        missing.map((uri) => fetchRecordingByUri(uri, controller.signal).catch(() => null)),
+      );
+      if (controller.signal.aborted) return;
+      setRecordItems((current) => {
+        let changed = false;
+        const next = new Map(current);
+        resolved.forEach((item, index) => {
+          if (item && !next.has(missing[index])) {
+            next.set(missing[index], item);
+            changed = true;
+          }
+        });
+        return changed ? next : current;
+      });
+    })();
+    return () => controller.abort();
+  }, [sourcesInView, recordItems]);
+
+  /** In-view recordings whose records have resolved, kept in dial order. */
+  const inViewItems = useMemo(
+    () =>
+      sourcesInView
+        .map((source) => recordItems.get(source.audioUri))
+        .filter((item): item is AcAudioListItem => Boolean(item)),
+    [sourcesInView, recordItems],
+  );
 
   return (
     <div className={cn("flex flex-col gap-4", className)}>
-      <audio ref={audioRef} preload="none" className="hidden" onEnded={() => setPlayer(null)} />
+      <audio {...audioProps} />
 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
@@ -376,44 +370,16 @@ export function PublishedSoundscapeView({
           </div>
           {sourcesInView.length === 0 ? (
             <p className="px-3 py-6 text-center text-sm text-muted-foreground">{t("zoom.recordingsEmpty")}</p>
+          ) : inViewItems.length === 0 ? (
+            <div className="flex flex-col gap-1.5 p-3" aria-hidden>
+              {sourcesInView.slice(0, 4).map((source) => (
+                <div key={source.audioUri} className="h-[4.5rem] animate-pulse rounded-xl bg-muted" />
+              ))}
+            </div>
           ) : (
-            <ul className="max-h-56 divide-y overflow-y-auto">
-              {sourcesInView.map((source) => {
-                const isPlaying = player?.audioUri === source.audioUri;
-                return (
-                  <li key={source.audioUri}>
-                    <button
-                      type="button"
-                      onClick={() => playSource(source)}
-                      aria-pressed={isPlaying}
-                      className={cn(
-                        "flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors hover:bg-muted",
-                        isPlaying && "bg-primary/5",
-                      )}
-                    >
-                      <span className="grid size-7 shrink-0 place-items-center rounded-full border border-border text-muted-foreground">
-                        {isPlaying ? (
-                          player?.status === "loading" ? (
-                            <Loader2Icon className="size-3.5 animate-spin text-primary" />
-                          ) : (
-                            <SquareIcon className="size-3 fill-current text-primary" />
-                          )
-                        ) : (
-                          <Volume2Icon className="size-3.5" />
-                        )}
-                      </span>
-                      <span className="w-14 shrink-0 font-medium tabular-nums text-foreground">
-                        {formatMinuteOfDay(source.minuteOfDay)}
-                      </span>
-                      <span className="min-w-0 flex-1 truncate text-muted-foreground">
-                        {multiDay ? `${source.date} \u00b7 ` : ""}
-                        {source.name}
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+            <div className="p-3">
+              <RecordingsPlayerList did={did} host={host} items={inViewItems} onPlay={stopPlayback} />
+            </div>
           )}
         </div>
       ) : null}

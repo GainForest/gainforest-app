@@ -129,7 +129,7 @@ export default async function PublishedSoundscapePage({ params }: { params: Soun
         ) : null}
 
         <section className="mt-8 rounded-2xl border bg-background p-4 shadow-sm sm:p-6">
-          <PublishedSoundscapeView soundscape={soundscape} />
+          <PublishedSoundscapeView soundscape={soundscape} did={did} />
         </section>
       </div>
     </main>

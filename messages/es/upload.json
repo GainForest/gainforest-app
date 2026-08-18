@@ -753,9 +753,9 @@
         "recordingFromLabel": "Grabado con",
         "deviceNew": "nuevo",
         "newDeviceNote": "{device} aún no está en tu registro de equipos — lo añadiremos cuando empiece esta subida.",
-        "folderLabel": "Carpeta de grabaciones",
+        "folderLabel": "Despliegue",
         "folderAutoMatched": "{name} — detectado desde la tarjeta",
-        "folderNew": "Nueva carpeta · {name}",
+        "folderNew": "Añadir despliegue · {name}",
         "noDeployments": "Este dispositivo no tiene despliegues — el lote seguirá subiéndose y se adjuntará al que crees.",
         "setUpDeployment": "Configura uno ↗",
         "defaultFolderName": "Grabaciones {date}",
@@ -769,8 +769,7 @@
         "dedupChecking": "Comprobando si hay grabaciones ya en esta cuenta…",
         "dedupSkipped": "{count, plural, one {# grabación ya está en esta cuenta — omitida} other {# grabaciones ya están en esta cuenta — omitidas}}",
         "allUploaded": "Todo lo de esta tarjeta ya está subido",
-        "matchedCount": "{count, plural, one {# grabación coincidió con su despliegue desde la tarjeta} other {# grabaciones coincidieron con sus despliegues desde la tarjeta}}",
-        "eventOption": "Despliegue · {name}"
+        "matchedCount": "{count, plural, one {# grabación coincidió con su despliegue desde la tarjeta} other {# grabaciones coincidieron con sus despliegues desde la tarjeta}}"
       }
     },
     "csvUpload": {

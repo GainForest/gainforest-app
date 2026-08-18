@@ -9,11 +9,19 @@ import {
   parseRewildingGranteeRecord,
   type RewildingGranteeRecord,
 } from "./rewilding-grantees";
+import { isDueDatePast } from "@/app/grants/_components/rewilding/model";
 import {
   REWILDING_MILESTONES,
   doneRewildingMilestoneIds,
   effectiveRewildingMilestones,
+  effectiveRewildingMilestonePlans,
+  isCustomRewildingMilestoneId,
+  isRewildingDueDate,
+  newCustomRewildingMilestoneId,
+  parseRewildingMilestonePlanRecord,
   parseRewildingMilestoneRecord,
+  resolveRewildingMilestonePlan,
+  type RewildingMilestonePlanRecord,
   type RewildingMilestoneRecord,
 } from "./rewilding-milestones";
 
@@ -139,6 +147,19 @@ describe("parseRewildingMilestoneRecord", () => {
     expect(parsed?.done).toBe(true);
   });
 
+  it("accepts confirmations for custom milestone ids", () => {
+    const parsed = parseRewildingMilestoneRecord({
+      uri,
+      value: {
+        subject: GRANTEE_A,
+        milestoneId: "cabc123",
+        done: true,
+        createdAt: "2026-01-01T00:00:00.000Z",
+      },
+    });
+    expect(parsed?.milestoneId).toBe("cabc123");
+  });
+
   it("rejects records that are not usable", () => {
     const createdAt = "2026-01-01T00:00:00.000Z";
     expect(parseRewildingMilestoneRecord(null)).toBeNull();
@@ -154,6 +175,182 @@ describe("parseRewildingMilestoneRecord", () => {
     expect(
       parseRewildingMilestoneRecord({ uri, value: { subject: GRANTEE_A, milestoneId: "m1" } }),
     ).toBeNull();
+  });
+});
+
+describe("milestone plans", () => {
+  const planUri = "at://did:plc:moderation/app.gainforest.grant.rewilding.milestonePlan/";
+
+  const plan = (
+    subjectDid: string,
+    milestoneId: string,
+    rkey: string,
+    createdAt: string,
+    extra: Partial<
+      Pick<RewildingMilestonePlanRecord, "title" | "description" | "dueDate" | "removed">
+    > = {},
+  ): RewildingMilestonePlanRecord => ({
+    rkey,
+    uri: `${planUri}${rkey}`,
+    subjectDid,
+    milestoneId,
+    title: extra.title ?? null,
+    description: extra.description ?? null,
+    dueDate: extra.dueDate ?? null,
+    removed: extra.removed ?? false,
+    createdAt,
+  });
+
+  it("generates ids in the custom namespace, apart from program ids", () => {
+    const id = newCustomRewildingMilestoneId();
+    expect(isCustomRewildingMilestoneId(id)).toBe(true);
+    for (const definition of REWILDING_MILESTONES) {
+      expect(isCustomRewildingMilestoneId(definition.id)).toBe(false);
+    }
+  });
+
+  it("validates due dates as real calendar dates", () => {
+    expect(isRewildingDueDate("2026-10-15")).toBe(true);
+    expect(isRewildingDueDate("2026-02-30")).toBe(false);
+    expect(isRewildingDueDate("15-10-2026")).toBe(false);
+    expect(isRewildingDueDate("2026-10-15T00:00:00.000Z")).toBe(false);
+  });
+
+  it("parses a program due-date event and a custom milestone event", () => {
+    const program = parseRewildingMilestonePlanRecord({
+      uri: `${planUri}a1`,
+      value: { subject: GRANTEE_A, milestoneId: "m2", dueDate: "2026-10-01", createdAt: "2026-01-01T00:00:00.000Z" },
+    });
+    expect(program).toMatchObject({ milestoneId: "m2", dueDate: "2026-10-01", title: null, description: null });
+
+    const custom = parseRewildingMilestonePlanRecord({
+      uri: `${planUri}a2`,
+      value: {
+        subject: GRANTEE_A,
+        milestoneId: "cabc123",
+        title: "Community training",
+        description: "Half-day session with rangers.",
+        dueDate: "2026-11-10",
+        createdAt: "2026-01-01T00:00:00.000Z",
+      },
+    });
+    expect(custom).toMatchObject({
+      milestoneId: "cabc123",
+      title: "Community training",
+      description: "Half-day session with rangers.",
+      dueDate: "2026-11-10",
+    });
+  });
+
+  it("keeps per-grantee name and description overrides on program milestones", () => {
+    const parsed = parseRewildingMilestonePlanRecord({
+      uri: `${planUri}a1`,
+      value: {
+        subject: GRANTEE_A,
+        milestoneId: "m1",
+        title: "Sign the SORALO agreement",
+        description: "Countersigned copy uploaded to the shared drive.",
+        createdAt: "2026-01-01T00:00:00.000Z",
+      },
+    });
+    expect(parsed).toMatchObject({
+      title: "Sign the SORALO agreement",
+      description: "Countersigned copy uploaded to the shared drive.",
+    });
+
+    const resolved = resolveRewildingMilestonePlan(
+      [plan(GRANTEE_A, "m1", "a1", "2026-01-01T00:00:00.000Z", {
+        title: "Sign the SORALO agreement",
+        description: "Countersigned copy uploaded to the shared drive.",
+      })],
+      GRANTEE_A,
+    );
+    expect(resolved.find((entry) => entry.id === "m1")).toMatchObject({
+      code: "M1",
+      title: "Sign the SORALO agreement",
+      description: "Countersigned copy uploaded to the shared drive.",
+      isCustom: false,
+    });
+    // The other program milestones keep their translated-copy fallback.
+    expect(resolved.find((entry) => entry.id === "m2")).toMatchObject({ title: null, description: null });
+  });
+
+  it("rejects a custom milestone without a name, unless it is a tombstone", () => {
+    const createdAt = "2026-01-01T00:00:00.000Z";
+    expect(
+      parseRewildingMilestonePlanRecord({
+        uri: `${planUri}a1`,
+        value: { subject: GRANTEE_A, milestoneId: "cabc123", createdAt },
+      }),
+    ).toBeNull();
+    expect(
+      parseRewildingMilestonePlanRecord({
+        uri: `${planUri}a2`,
+        value: { subject: GRANTEE_A, milestoneId: "cabc123", removed: true, createdAt },
+      }),
+    ).toMatchObject({ removed: true });
+  });
+
+  it("ignores malformed due dates instead of dropping the event", () => {
+    const parsed = parseRewildingMilestonePlanRecord({
+      uri: `${planUri}a1`,
+      value: { subject: GRANTEE_A, milestoneId: "m1", dueDate: "soon", createdAt: "2026-01-01T00:00:00.000Z" },
+    });
+    expect(parsed?.dueDate).toBeNull();
+  });
+
+  it("lets the newest plan event win per grantee and milestone", () => {
+    const records = [
+      plan(GRANTEE_A, "m1", "a1", "2026-01-01T00:00:00.000Z", { dueDate: "2026-09-01" }),
+      plan(GRANTEE_A, "m1", "a2", "2026-02-01T00:00:00.000Z", { dueDate: "2026-09-15" }),
+    ];
+    const current = effectiveRewildingMilestonePlans(records);
+    expect(current).toHaveLength(1);
+    expect(current[0]?.dueDate).toBe("2026-09-15");
+  });
+
+  it("resolves program milestones with due dates and appends custom ones in first-added order", () => {
+    const records = [
+      plan(GRANTEE_A, "m2", "a1", "2026-01-05T00:00:00.000Z", { dueDate: "2026-10-01" }),
+      plan(GRANTEE_A, "cfirst1", "a2", "2026-01-01T00:00:00.000Z", { title: "First custom" }),
+      plan(GRANTEE_A, "csecond", "a3", "2026-01-02T00:00:00.000Z", { title: "Second custom", dueDate: "2026-11-01" }),
+      // Editing the first custom later must not move it after the second.
+      plan(GRANTEE_A, "cfirst1", "a4", "2026-03-01T00:00:00.000Z", { title: "First custom, renamed", dueDate: "2026-10-20" }),
+      // Another grantee's plan stays out of this one.
+      plan(GRANTEE_B, "cother1", "b1", "2026-01-01T00:00:00.000Z", { title: "Elsewhere" }),
+    ];
+
+    const resolved = resolveRewildingMilestonePlan(records, GRANTEE_A);
+    expect(resolved.map((entry) => entry.id)).toEqual(["m1", "m2", "m3", "m4", "cfirst1", "csecond"]);
+    expect(resolved.find((entry) => entry.id === "m2")?.dueDate).toBe("2026-10-01");
+    // Custom milestones continue the numbering after the program's.
+    expect(resolved.find((entry) => entry.id === "cfirst1")).toMatchObject({
+      title: "First custom, renamed",
+      dueDate: "2026-10-20",
+      isCustom: true,
+      code: "M5",
+    });
+    expect(resolved.find((entry) => entry.id === "csecond")?.code).toBe("M6");
+  });
+
+  it("drops removed custom milestones and renumbers the ones after them", () => {
+    const records = [
+      plan(GRANTEE_A, "cgone12", "a1", "2026-01-01T00:00:00.000Z", { title: "Short-lived" }),
+      plan(GRANTEE_A, "cstays1", "a2", "2026-01-02T00:00:00.000Z", { title: "Stays" }),
+      plan(GRANTEE_A, "cgone12", "a3", "2026-01-03T00:00:00.000Z", { removed: true }),
+    ];
+    const resolved = resolveRewildingMilestonePlan(records, GRANTEE_A);
+    expect(resolved.map((entry) => entry.id)).toEqual(["m1", "m2", "m3", "m4", "cstays1"]);
+    // With the first custom milestone gone, the remaining one becomes M5.
+    expect(resolved.find((entry) => entry.id === "cstays1")?.code).toBe("M5");
+  });
+
+  it("treats due dates as UTC calendar dates when deciding overdue", () => {
+    const during = new Date("2026-10-15T12:00:00.000Z");
+    expect(isDueDatePast("2026-10-14", during)).toBe(true);
+    // Not overdue on the due day itself.
+    expect(isDueDatePast("2026-10-15", during)).toBe(false);
+    expect(isDueDatePast("2026-10-16", during)).toBe(false);
   });
 });
 

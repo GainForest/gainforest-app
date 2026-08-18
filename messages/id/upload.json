@@ -753,9 +753,9 @@
         "recordingFromLabel": "Direkam dengan",
         "deviceNew": "baru",
         "newDeviceNote": "{device} belum ada di daftar peralatan Anda — kami akan menambahkannya saat unggahan ini dimulai.",
-        "folderLabel": "Folder rekaman",
+        "folderLabel": "Penempatan",
         "folderAutoMatched": "{name} — dikenali dari kartu",
-        "folderNew": "Folder baru · {name}",
+        "folderNew": "Tambahkan penempatan · {name}",
         "noDeployments": "Perangkat ini belum punya penempatan — batch akan terus diunggah dan melekat ke penempatan yang Anda buat.",
         "setUpDeployment": "Siapkan satu ↗",
         "defaultFolderName": "Rekaman {date}",
@@ -769,8 +769,7 @@
         "dedupChecking": "Memeriksa rekaman yang sudah ada di akun ini…",
         "dedupSkipped": "{count, plural, other {# rekaman sudah ada di akun ini — dilewati}}",
         "allUploaded": "Semua isi kartu ini sudah diunggah",
-        "matchedCount": "{count, plural, other {# rekaman cocok dengan penempatannya dari kartu}}",
-        "eventOption": "Penempatan · {name}"
+        "matchedCount": "{count, plural, other {# rekaman cocok dengan penempatannya dari kartu}}"
       }
     },
     "csvUpload": {

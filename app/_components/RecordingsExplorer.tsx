@@ -25,6 +25,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AcAudioListItem } from "@/app/_lib/ac-audio";
 import { RecordingsPlayerList } from "./RecordingsPlayerList";
+import { DeploymentLocationMap } from "./DeploymentLocationMap";
 
 /** Below this many recordings the calendar is overkill — show the flat list. */
 const FLAT_THRESHOLD = 30;
@@ -67,6 +68,7 @@ export function RecordingsExplorer({
   did,
   host,
   items,
+  location,
   selectable = false,
   selectedUris,
   onToggleSelect,
@@ -74,6 +76,10 @@ export function RecordingsExplorer({
   did: string;
   host: string | null;
   items: AcAudioListItem[];
+  /** Where the recorder stood, when the deployment behind these recordings
+   *  has coordinates. When set, a small pinned map is shown beneath the
+   *  calendar so the place is visible alongside its recordings. */
+  location?: { lat: number; lon: number; label?: string } | null;
   /** When true, player rows show checkboxes so recordings can be selected. */
   selectable?: boolean;
   selectedUris?: ReadonlySet<string>;
@@ -186,72 +192,86 @@ export function RecordingsExplorer({
       <p className="mt-1 text-xs text-muted-foreground">{t("explorerHint")}</p>
 
       <div className="mt-4 flex flex-col gap-5 md:flex-row md:items-start">
-        {/* ── Calendar ─────────────────────────────────────────────────── */}
-        <div className="w-full shrink-0 rounded-xl border border-border/70 p-3 md:w-[264px]">
-          <div className="flex items-center justify-between gap-2">
-            <button
-              type="button"
-              className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
-              disabled={month <= minMonth}
-              onClick={() => setMonthState(shiftMonth(month, -1))}
-              aria-label={t("prevMonth")}
-            >
-              <ChevronLeftIcon className="size-4" />
-            </button>
-            <p className="text-sm font-medium capitalize text-foreground">{monthFormat.format(firstOfMonth)}</p>
-            <button
-              type="button"
-              className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
-              disabled={month >= maxMonth}
-              onClick={() => setMonthState(shiftMonth(month, 1))}
-              aria-label={t("nextMonth")}
-            >
-              <ChevronRightIcon className="size-4" />
-            </button>
-          </div>
+        {/* ── Calendar (+ location map when the recorder's place is known) ─ */}
+        <div className="flex w-full shrink-0 flex-col gap-3 md:w-[264px]">
+          <div className="rounded-xl border border-border/70 p-3">
+            <div className="flex items-center justify-between gap-2">
+              <button
+                type="button"
+                className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
+                disabled={month <= minMonth}
+                onClick={() => setMonthState(shiftMonth(month, -1))}
+                aria-label={t("prevMonth")}
+              >
+                <ChevronLeftIcon className="size-4" />
+              </button>
+              <p className="text-sm font-medium capitalize text-foreground">{monthFormat.format(firstOfMonth)}</p>
+              <button
+                type="button"
+                className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
+                disabled={month >= maxMonth}
+                onClick={() => setMonthState(shiftMonth(month, 1))}
+                aria-label={t("nextMonth")}
+              >
+                <ChevronRightIcon className="size-4" />
+              </button>
+            </div>
 
-          <div className="mt-2 grid grid-cols-7 gap-1">
-            {weekdayLetters.map((letter, i) => (
-              <span key={i} className="grid h-6 place-items-center text-[10px] font-medium uppercase text-muted-foreground">
-                {letter}
-              </span>
-            ))}
-            {Array.from({ length: leadingBlanks }).map((_, i) => (
-              <span key={`blank-${i}`} />
-            ))}
-            {Array.from({ length: daysInMonth }, (_, i) => {
-              const key = `${month}-${String(i + 1).padStart(2, "0")}`;
-              const count = dayMap.get(key)?.length ?? 0;
-              const selected = key === selectedDay;
-              if (count === 0) {
+            <div className="mt-2 grid grid-cols-7 gap-1">
+              {weekdayLetters.map((letter, i) => (
+                <span key={i} className="grid h-6 place-items-center text-[10px] font-medium uppercase text-muted-foreground">
+                  {letter}
+                </span>
+              ))}
+              {Array.from({ length: leadingBlanks }).map((_, i) => (
+                <span key={`blank-${i}`} />
+              ))}
+              {Array.from({ length: daysInMonth }, (_, i) => {
+                const key = `${month}-${String(i + 1).padStart(2, "0")}`;
+                const count = dayMap.get(key)?.length ?? 0;
+                const selected = key === selectedDay;
+                if (count === 0) {
+                  return (
+                    <span
+                      key={key}
+                      className="grid aspect-square place-items-center rounded-md text-xs text-muted-foreground/40"
+                    >
+                      {i + 1}
+                    </span>
+                  );
+                }
                 return (
-                  <span
+                  <button
                     key={key}
-                    className="grid aspect-square place-items-center rounded-md text-xs text-muted-foreground/40"
+                    type="button"
+                    onClick={() => selectDay(key)}
+                    className={cn(
+                      "grid aspect-square place-items-center rounded-md text-xs font-medium transition-shadow",
+                      densityClass(count, maxDayCount),
+                      selected ? "ring-2 ring-primary ring-offset-1 ring-offset-background" : "hover:ring-1 hover:ring-primary/50",
+                    )}
+                    aria-label={`${dayFormat.format(parseDayKey(key))} · ${t("groupCount", { count })}`}
+                    aria-pressed={selected}
+                    title={t("groupCount", { count })}
                   >
                     {i + 1}
-                  </span>
+                  </button>
                 );
-              }
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => selectDay(key)}
-                  className={cn(
-                    "grid aspect-square place-items-center rounded-md text-xs font-medium transition-shadow",
-                    densityClass(count, maxDayCount),
-                    selected ? "ring-2 ring-primary ring-offset-1 ring-offset-background" : "hover:ring-1 hover:ring-primary/50",
-                  )}
-                  aria-label={`${dayFormat.format(parseDayKey(key))} · ${t("groupCount", { count })}`}
-                  aria-pressed={selected}
-                  title={t("groupCount", { count })}
-                >
-                  {i + 1}
-                </button>
-              );
-            })}
+              })}
+            </div>
           </div>
+
+          {/* A compact, pinned preview of where the recorder stood, matching
+              the themed map used on the deployment detail page. */}
+          {location ? (
+            <DeploymentLocationMap
+              lat={location.lat}
+              lon={location.lon}
+              label={location.label}
+              className="rounded-xl border-border/70"
+              heightClass="h-44"
+            />
+          ) : null}
         </div>
 
         {/* ── Selected day ─────────────────────────────────────────────── */}

@@ -49,6 +49,23 @@ function firstParam(value: string | string[] | undefined): string | null {
   return typeof raw === "string" && raw.trim().length > 0 ? raw.trim() : null;
 }
 
+/** Forwards a legacy manage URL's query to its new home, so deep links that
+ *  open a specific tool (notably the tree upload flow) keep working. */
+function withQuery(
+  path: string,
+  searchParams: { [key: string]: string | string[] | undefined },
+  extra?: Record<string, string>,
+): string {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(searchParams)) {
+    const raw = Array.isArray(value) ? value[0] : value;
+    if (typeof raw === "string" && raw.length > 0) query.set(key, raw);
+  }
+  for (const [key, value] of Object.entries(extra ?? {})) query.set(key, value);
+  const queryString = query.toString();
+  return queryString ? `${path}?${queryString}` : path;
+}
+
 /**
  * Management now lives on the account profile (/account/<id> and its tabs). This
  * route keeps two things alive:
@@ -93,20 +110,17 @@ export default async function AccountManagePage({ params, searchParams }: PagePr
   if (first === "projects" && second && third === "sites") redirect(accountProjectSitesPath(id, decodeURIComponent(second)));
   if (first === "projects" && second && third === "timeline") redirect(accountProjectTimelinePath(id, decodeURIComponent(second)));
   if (first === "certs" && second === "new") {
-    const sp = await searchParams;
-    const query = new URLSearchParams();
-    for (const [key, value] of Object.entries(sp)) {
-      const raw = Array.isArray(value) ? value[0] : value;
-      if (typeof raw === "string" && raw.length > 0) query.set(key, raw);
-    }
-    const queryString = query.toString();
-    redirect(queryString ? `${accountNewCertPath(id)}?${queryString}` : accountNewCertPath(id));
+    redirect(withQuery(accountNewCertPath(id), await searchParams));
   }
 
   // Top-level sections → their profile tab.
   if (first === "projects" && !second) redirect(accountProjectsPath(id));
   if (first === "sites" && !second) redirect(accountSitesPath(id));
-  if (first === "trees" && !second) redirect(`${accountObservationsPath(id)}?layer=measurements`);
+  // The query rides along so /manage/trees?mode=upload still opens the upload
+  // flow instead of dropping you on the plain list.
+  if (first === "trees" && !second) {
+    redirect(withQuery(accountObservationsPath(id), await searchParams, { layer: "measurements" }));
+  }
   if (first === "audio" && !second) redirect(accountAudioPath(id));
   if (first === "drone" && !second) redirect(accountDronePath(id));
   if (first === "certs" && !second) redirect(accountBumicertsPath(id));

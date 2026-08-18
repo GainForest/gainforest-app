@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { LeafletLinearDocument } from "@/app/_lib/leaflet-richtext";
 import { TreesIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type {
@@ -42,6 +43,7 @@ export function TreeEvidencePicker({
   timelineAttachmentsUnavailable,
   occurrenceCoverageIncomplete,
   caption,
+  captionDocument,
   captionTitle,
   isSubmitting,
   submitDrafts,
@@ -53,6 +55,7 @@ export function TreeEvidencePicker({
   timelineAttachmentsUnavailable: boolean;
   occurrenceCoverageIncomplete: boolean;
   caption: string;
+  captionDocument: LeafletLinearDocument | null;
   captionTitle: string | null;
   isSubmitting: boolean;
   submitDrafts: EvidenceSubmitter;
@@ -134,6 +137,7 @@ export function TreeEvidencePicker({
         contentType: CONTENT_TYPE_TREE_DATASET,
         contents: group.datasetUris,
         note: caption,
+        textDocument: captionDocument,
         contextualSubjects: [group.siteSubject],
       }) satisfies AttachmentDraft,
   );

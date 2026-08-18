@@ -19,7 +19,7 @@ import { getDeploymentEvent, linkedEquipmentUri, parseAtUri } from "@/app/_lib/d
 import { equipmentDetailPath } from "@/app/_lib/equipment";
 import { getCertifiedProfileCard } from "@/app/account/_lib/account-route";
 import { accountEquipmentPath, accountPath } from "@/app/account/_lib/account-route";
-import { DeploymentLocationMap } from "./DeploymentLocationMap";
+import { DeploymentLocationMap } from "@/app/_components/DeploymentLocationMap";
 import { DeploymentDetailActions } from "./DeploymentDetailActions";
 import { DeploymentRecordings } from "./DeploymentRecordings";
 
@@ -89,7 +89,7 @@ export default async function DeploymentDetailPage({ params }: { params: Deploym
   return (
     <main className="mx-auto w-full max-w-3xl px-6 pb-20 pt-8 md:pt-12">
       <Link
-        href="/observations/audio?tab=deployments"
+        href="/observations/audio?tab=library"
         className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden />

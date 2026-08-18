@@ -4,7 +4,7 @@ import { ArrowRightIcon, CheckIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { GrantMilestone, GrantOverview, Recorder } from "./model";
-import { countByOrigin } from "./model";
+import { countByOrigin, isDueDatePast } from "./model";
 import { AudioPaceChart } from "./AudioPaceChart";
 import { Sparkline } from "./Sparkline";
 
@@ -101,13 +101,10 @@ export function MyGrantView({
         />
       </section>
 
-      {/* Pace against the recording target. Needs at least one upload to plot
-          and a window that has actually opened — before the grant starts there
-          is no elapsed time to chart a pace over. */}
-      {overview.audioSeries &&
-      overview.audioPace &&
-      overview.audioGrantStart &&
-      overview.audioPace.status !== "upcoming" ? (
+      {/* Pace against the recording target. Needs at least one upload to plot;
+          before the window opens the chart still draws, presenting uploads as
+          a head start rather than a pace verdict. */}
+      {overview.audioSeries && overview.audioPace && overview.audioGrantStart ? (
         <AudioPaceChart
           series={overview.audioSeries}
           pace={overview.audioPace}
@@ -248,6 +245,20 @@ function StatCard({
   );
 }
 
+/** Milestone due dates are calendar dates: formatted in UTC — like the grant
+ *  deadline — so the named day never shifts with the viewer's timezone. The
+ *  year appears only when it isn't the current one. */
+function formatDueDate(format: ReturnType<typeof useFormatter>, dueDate: string): string {
+  const date = new Date(`${dueDate}T00:00:00.000Z`);
+  const sameYear = dueDate.slice(0, 4) === new Date().toISOString().slice(0, 4);
+  return format.dateTime(date, {
+    day: "numeric",
+    month: "short",
+    ...(sameYear ? {} : { year: "numeric" }),
+    timeZone: "UTC",
+  });
+}
+
 function MilestoneRow({
   milestone,
   onOpenRecorders,
@@ -256,10 +267,18 @@ function MilestoneRow({
   onOpenRecorders: () => void;
 }) {
   const t = useTranslations("marketplace.grants.rewildingDashboard.grant.milestones");
-  // Each milestone's name and description are program copy, translated per
-  // locale and keyed by milestone id.
+  // Program milestones carry no title of their own — their name and
+  // description are translated copy keyed by milestone id. Custom milestones
+  // carry the name the grant team wrote for this grantee.
   const program = useTranslations("common.rewildingProgram.milestones");
   const format = useFormatter();
+  const overdue =
+    milestone.state !== "done" && !!milestone.dueDate && isDueDatePast(milestone.dueDate);
+  // The grant team's wording wins; program milestones fall back to the
+  // translated program copy. Custom milestones have no copy to fall back to.
+  const title = milestone.title ?? (milestone.isCustom ? "" : program(`${milestone.id}.title`));
+  const description =
+    milestone.description ?? (milestone.isCustom ? null : program(`${milestone.id}.description`));
 
   return (
     <li
@@ -289,8 +308,22 @@ function MilestoneRow({
               milestone.state === "done" ? "text-muted-foreground" : "text-foreground",
             )}
           >
-            {program(`${milestone.id}.title`)}
+            {title}
           </span>
+          {milestone.dueDate ? (
+            <span
+              className={cn(
+                "rounded-full border px-2 py-px text-[10px] font-medium",
+                overdue
+                  ? "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400"
+                  : "border-border text-muted-foreground",
+              )}
+            >
+              {overdue
+                ? t("overdue", { date: formatDueDate(format, milestone.dueDate) })
+                : t("dueOn", { date: formatDueDate(format, milestone.dueDate) })}
+            </span>
+          ) : null}
           {milestone.payout ? (
             <span className="rounded-full border border-border px-2 py-px text-[10px] font-medium text-muted-foreground">
               {t("payout", {
@@ -300,9 +333,9 @@ function MilestoneRow({
             </span>
           ) : null}
         </div>
-        <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
-          {program(`${milestone.id}.description`)}
-        </p>
+        {description ? (
+          <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{description}</p>
+        ) : null}
         {milestone.isRecorderInventory && milestone.state !== "done" ? (
           <button
             type="button"

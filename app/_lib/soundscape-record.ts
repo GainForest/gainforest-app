@@ -49,6 +49,32 @@ export async function createSoundscapeRecord(
   return { uri: created.uri, cid: created.cid, rkey: rkeyOf(created.uri), did: didOf(created.uri) };
 }
 
+/**
+ * Create-or-update a soundscape at a fixed rkey — how a folder's *living*
+ * record is maintained. The workbench keeps one soundscape per folder at the
+ * folder's own rkey, updating it as analysis progresses, so writing is an
+ * idempotent put rather than a pile of near-identical creates.
+ */
+export async function putSoundscapeRecord(
+  rkey: string,
+  draft: SoundscapeDraft,
+  options?: { repo?: string },
+): Promise<CreatedSoundscape> {
+  const { putRecord } = await import("@/app/(manage)/manage/_lib/mutations");
+  const saved = await putRecord(SOUNDSCAPE_COLLECTION, rkey, buildSoundscapeRecord(draft), options);
+  return { uri: saved.uri, cid: saved.cid, rkey: rkeyOf(saved.uri), did: didOf(saved.uri) };
+}
+
+/**
+ * Remove a soundscape record. Used when a folder is deleted — its living
+ * record would otherwise keep drawing a dial whose recordings are gone.
+ * Best-effort by nature: the record may never have existed.
+ */
+export async function deleteSoundscapeRecord(rkey: string, options?: { repo?: string }): Promise<void> {
+  const { deleteRecord } = await import("@/app/(manage)/manage/_lib/mutations");
+  await deleteRecord(SOUNDSCAPE_COLLECTION, rkey, options);
+}
+
 /** Read a published soundscape from its owner's PDS. Null when it is gone,
  *  unreachable, or not a usable soundscape. */
 export async function fetchPublishedSoundscape(

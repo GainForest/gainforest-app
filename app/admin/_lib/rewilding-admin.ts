@@ -6,10 +6,10 @@ import {
 } from "@/app/_lib/indexer";
 import { resolveDidHandle } from "@/app/_lib/pds";
 import {
-  REWILDING_MILESTONES,
   effectiveRewildingMilestones,
+  fetchRewildingMilestonePlans,
   fetchRewildingMilestones,
-  type RewildingMilestoneId,
+  resolveRewildingMilestonePlan,
 } from "@/app/_lib/rewilding-milestones";
 import {
   effectiveRewildingGrantees,
@@ -30,10 +30,19 @@ import { listRewildingDocuments } from "./rewilding-documents";
  */
 
 export type RewildingAdminMilestone = {
-  /** Program milestone id ("m1"…"m4"). Also the key its name is looked up
-   *  under in `common.rewildingProgram.milestones`. */
-  id: RewildingMilestoneId;
+  /** Program milestone id ("m1"…"m4", named in translated copy under
+   *  `common.rewildingProgram.milestones`) or a custom milestone id. */
+  id: string;
+  /** Short code: "M1"…"M4" for program milestones, "M5"+ for custom ones. */
   code: string;
+  /** Admin-written name: override for a program milestone (null falls back
+   *  to program copy), the name itself for a custom one. */
+  title: string | null;
+  /** Admin-written description; same fallback rule as `title`. */
+  description: string | null;
+  /** Calendar date (YYYY-MM-DD) this milestone is due for this grantee. */
+  dueDate: string | null;
+  isCustom: boolean;
   payout: { tranche: number; amountUsd: number } | null;
   done: boolean;
   /** When the current state was set, when any event exists. */
@@ -71,9 +80,10 @@ export async function fetchRewildingAdminGrantees(): Promise<RewildingAdminGrant
   const enrolled = effectiveRewildingGrantees(enrollmentRecords);
   if (enrolled.length === 0) return [];
 
-  const [applicants, milestoneRecords, documentRecords] = await Promise.all([
+  const [applicants, milestoneRecords, milestonePlanRecords, documentRecords] = await Promise.all([
     fetchGrantApplicants().catch(() => []),
     fetchRewildingMilestones().catch(() => []),
+    fetchRewildingMilestonePlans().catch(() => []),
     listRewildingDocuments().catch(() => []),
   ]);
 
@@ -96,7 +106,7 @@ export async function fetchRewildingAdminGrantees(): Promise<RewildingAdminGrant
     dids.map(async (did): Promise<RewildingAdminGrantee> => {
       const applicant = applicantByDid.get(did);
       const profile = extraProfiles.get(did);
-      const doneStates = new Map<RewildingMilestoneId, { done: boolean; createdAt: string }>();
+      const doneStates = new Map<string, { done: boolean; createdAt: string }>();
       for (const record of currentMilestones) {
         if (record.subjectDid === did) {
           doneStates.set(record.milestoneId, { done: record.done, createdAt: record.createdAt });
@@ -120,12 +130,16 @@ export async function fetchRewildingAdminGrantees(): Promise<RewildingAdminGrant
         hasGrantBadge: badges.get(did)?.has("rewilding-grant") ?? false,
         applicationText: applicant?.applicationText || null,
         enrolledAt: enrolledAtByDid.get(did) ?? "",
-        milestones: REWILDING_MILESTONES.map((definition) => ({
-          id: definition.id,
-          code: definition.code,
-          payout: definition.payout ?? null,
-          done: doneStates.get(definition.id)?.done ?? false,
-          updatedAt: doneStates.get(definition.id)?.createdAt ?? null,
+        milestones: resolveRewildingMilestonePlan(milestonePlanRecords, did).map((resolved) => ({
+          id: resolved.id,
+          code: resolved.code,
+          title: resolved.title,
+          description: resolved.description,
+          dueDate: resolved.dueDate,
+          isCustom: resolved.isCustom,
+          payout: resolved.payout,
+          done: doneStates.get(resolved.id)?.done ?? false,
+          updatedAt: doneStates.get(resolved.id)?.createdAt ?? null,
         })),
         documents,
       };

@@ -5,6 +5,7 @@ import { DatabaseIcon, LeafIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { OccurrenceRecord, UploadTreeDatasetRecord } from "@/app/_lib/indexer";
 import { formatDate } from "@/app/_lib/format";
+import type { LeafletLinearDocument } from "@/app/_lib/leaflet-richtext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -45,6 +46,7 @@ export function NatureEvidencePicker({
   datasets,
   linkedUris,
   caption,
+  captionDocument,
   captionTitle,
   isSubmitting,
   submitDrafts,
@@ -53,6 +55,7 @@ export function NatureEvidencePicker({
   datasets: UploadTreeDatasetRecord[];
   linkedUris: ReadonlySet<string>;
   caption: string;
+  captionDocument: LeafletLinearDocument | null;
   captionTitle: string | null;
   isSubmitting: boolean;
   submitDrafts: EvidenceSubmitter;
@@ -247,6 +250,7 @@ export function NatureEvidencePicker({
           contentType: CONTENT_TYPE_NATURE_DATASET,
           contents: [uri],
           note: caption,
+          textDocument: captionDocument,
         } satisfies AttachmentDraft,
       ];
     });
@@ -259,6 +263,7 @@ export function NatureEvidencePicker({
               contentType: CONTENT_TYPE_NATURE,
               contents: occurrenceUris,
               note: caption,
+              textDocument: captionDocument,
             } satisfies AttachmentDraft,
           ]
         : []),

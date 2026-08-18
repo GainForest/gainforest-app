@@ -59,6 +59,7 @@ import {
 import { computeFileCid } from "@/app/_lib/audiomoth/content-cid";
 import { createStallTimer, UPLOAD_STALL_TIMEOUT_MS } from "@/app/_lib/audiomoth/stall-timeout";
 import { planNamedUploadFolder } from "@/app/_lib/audiomoth/upload-folder";
+import { companionFolderDraft } from "@/app/_lib/unified-deployments";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -288,14 +289,7 @@ export function UploadTrayProvider({ children }: { children: React.ReactNode }) 
         if (existing) return existing.uri;
         try {
           const created = await createAcDeployment(
-            {
-              name: event.locality ?? `AudioMoth ${event.eventID}`,
-              deployedAt: new Date(event.eventDate),
-              lat: event.decimalLatitude ? Number(event.decimalLatitude) : undefined,
-              lon: event.decimalLongitude ? Number(event.decimalLongitude) : undefined,
-              eventUri: event.uri,
-              remarks: t("deploymentFallback"),
-            },
+            companionFolderDraft(event, t("deploymentFallback")),
             repoOption,
           );
           acDeploymentsRef.current.delete(ownerDid);

@@ -111,6 +111,16 @@ export function accountObservationsPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/observations`;
 }
 
+/**
+ * Where the account's own sightings are managed — adding, editing, grouping.
+ * The profile's Observations tab is the public view of the same records, so
+ * managing them gets its own address instead of the tab quietly turning into an
+ * editor for whoever happens to own it.
+ */
+export function accountObservationsManagePath(didOrHandle: string): string {
+  return `${accountObservationsPath(didOrHandle)}/manage`;
+}
+
 export function accountFollowersPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/followers`;
 }
@@ -161,6 +171,23 @@ export function accountSitesPath(didOrHandle: string): string {
 
 export function accountAudioPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/audio`;
+}
+
+/**
+ * Where the account's own recordings are managed — uploading, renaming,
+ * deleting. Stands alongside the observations workspace; the profile's Audio
+ * tab is the listening view of the same recordings.
+ */
+export function accountAudioManagePath(didOrHandle: string): string {
+  return `${accountAudioPath(didOrHandle)}/manage`;
+}
+
+/**
+ * The Audio tab's Soundscapes view — the account's published 24-hour sound
+ * portraits, standing beside the raw recordings at the tab's own address.
+ */
+export function accountAudioSoundscapesPath(didOrHandle: string): string {
+  return `${accountAudioPath(didOrHandle)}/soundscapes`;
 }
 
 export function accountDronePath(didOrHandle: string): string {

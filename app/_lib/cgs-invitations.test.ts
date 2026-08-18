@@ -22,6 +22,11 @@ vi.mock("@/lib/supabase/rest", () => ({
 
 import { createGroupInvitation, GroupInvitationError, retryGroupInvitation } from "./cgs-invitations";
 
+// Pin the clock inside the fixture's validity window: invitation status is
+// derived by comparing expires_at against the real clock, so without this the
+// suite starts failing the day the calendar passes the fixture's expiry date.
+const NOW = new Date("2026-08-06T01:00:00.000Z");
+
 const invitationId = "81000000-0000-4000-8000-000000000001";
 const rawInvitation = {
   id: invitationId,
@@ -50,6 +55,7 @@ const session = {
 };
 
 beforeEach(() => {
+  vi.useFakeTimers({ now: NOW, toFake: ["Date"] });
   vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.test");
   fetchCgsMemberRoleWithCookie.mockReset();
   getCertifiedProfileCard.mockReset();
@@ -64,6 +70,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.restoreAllMocks();
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();

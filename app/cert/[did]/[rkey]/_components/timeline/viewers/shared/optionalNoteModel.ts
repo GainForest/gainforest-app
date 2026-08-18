@@ -68,19 +68,22 @@ function featureHref(feature: JsonRecord): string | null {
   if (type === "app.bsky.richtext.facet#link" || type === "AppBskyRichtextFacetLink") {
     return safeHttpHref(stringField(feature, "uri"));
   }
-  if (type === "PubLeafletRichtextFacetLink") {
+  if (type === "PubLeafletRichtextFacetLink" || type === "pub.leaflet.richtext.facet#link") {
     return safeHttpHref(stringField(feature, "uri"));
   }
   return null;
 }
 
+// Facet features arrive under two names for the same thing: the canonical
+// lexicon `$type` (raw records, including what our composer writes) and the
+// GraphQL `__typename` the indexer emits. Both must style the span.
 function applyFeature(span: TimelineOptionalNoteSpan, feature: JsonRecord): void {
   const type = featureType(feature);
-  if (type === "PubLeafletRichtextFacetBold") span.bold = true;
-  if (type === "PubLeafletRichtextFacetItalic") span.italic = true;
-  if (type === "PubLeafletRichtextFacetUnderline") span.underline = true;
-  if (type === "PubLeafletRichtextFacetStrikethrough") span.strike = true;
-  if (type === "PubLeafletRichtextFacetCode") span.code = true;
+  if (type === "PubLeafletRichtextFacetBold" || type === "pub.leaflet.richtext.facet#bold") span.bold = true;
+  if (type === "PubLeafletRichtextFacetItalic" || type === "pub.leaflet.richtext.facet#italic") span.italic = true;
+  if (type === "PubLeafletRichtextFacetUnderline" || type === "pub.leaflet.richtext.facet#underline") span.underline = true;
+  if (type === "PubLeafletRichtextFacetStrikethrough" || type === "pub.leaflet.richtext.facet#strikethrough") span.strike = true;
+  if (type === "PubLeafletRichtextFacetCode" || type === "pub.leaflet.richtext.facet#code") span.code = true;
   const href = featureHref(feature);
   if (href) span.href = href;
 }
@@ -151,10 +154,18 @@ function childListItems(block: JsonRecord): TimelineOptionalNoteSpan[][] {
   const children = Array.isArray(block.children) ? block.children : [];
   return children.flatMap((child) => {
     if (!isRecord(child)) return [];
+    const items: TimelineOptionalNoteSpan[][] = [];
     const content = child.content;
-    if (!isRecord(content)) return [];
-    const spans = spansFromText(blockText(content), blockFacets(content));
-    return spans.length > 0 ? [spans] : [];
+    if (isRecord(content)) {
+      const spans = spansFromText(blockText(content), blockFacets(content));
+      if (spans.length > 0) items.push(spans);
+    }
+    // Raw records may nest items (listItem.children); flatten them so nested
+    // bullets written elsewhere still show up.
+    if (Array.isArray(child.children)) {
+      items.push(...childListItems(child));
+    }
+    return items;
   });
 }
 

@@ -178,6 +178,26 @@
     },
     "myCardsTitle": "My Cards gallery",
     "myCardsDescription": "Preview the collected-cards gallery, populated with sample collectibles.",
+    "projectUpdates": {
+      "title": "Project update composer",
+      "description": "The WYSIWYG editor used to write project updates, and the timeline that renders them — exactly as they appear on a Cert page.",
+      "mockNote": "Posting an update publishes a record on a real account, so this preview never does. Updates written here run the production composer, validation, and timeline display, but stay on this page and disappear on reload.",
+      "mockBadge": "Mock mode · nothing is published",
+      "cardTitle": "Project updates",
+      "cardDescription": "Write a formatted update — bold, headings, lists, quotes, links — and see it rendered on the timeline.",
+      "composerLabel": "Write an update",
+      "timelineLabel": "Published updates",
+      "seedTitle": "Planting week three — canopy update",
+      "seedHeading": "Nursery report",
+      "seedIntro": "This week the field team planted",
+      "seedIntroBold": "1,200 saplings",
+      "seedIntroTail": "across the northern restoration site.",
+      "seedListOne": "Survival rate holding at 94%",
+      "seedListTwo": "Two new community volunteers joined",
+      "seedQuote": "The forest is coming back faster than any of us expected.",
+      "seedPlainTitle": "Rains arrived early",
+      "seedPlainBody": "Short plain-text update written before formatting existed. It must render unchanged."
+    },
     "projectVisibility": {
       "title": "Project visibility card",
       "description": "The card on Manage → Projects that tells an account what is public and whether it shows on the explore pages, in each state it can be in.",
@@ -261,8 +281,22 @@
       "cardDescription": "My grant with its audio pace chart, behind and ahead of the target.",
       "upcoming": {
         "title": "Before the grant opens",
-        "description": "The window has not started, so there is no pace verdict and no chart — just when it begins and what it will ask for."
+        "description": "The window has not started, so the chart presents every upload as a head start — the required line stays flat until it opens."
       }
+    },
+    "communityEvents": {
+      "title": "Community events",
+      "description": "The production events discovery, event page and host form on fixture data — RSVP, waitlists, publishing and cancelling all work in memory.",
+      "cardTitle": "Community events",
+      "cardDescription": "Browse, RSVP, join a waitlist, and host an event — production components on in-memory fixtures, with a signed-out mode.",
+      "mockBadge": "Mock mode · no writes",
+      "eyebrow": "UI experience registry",
+      "tabDiscovery": "Discovery",
+      "tabDetail": "Event page",
+      "tabHost": "Host form",
+      "signedInToggle": "Signed in",
+      "signInPrompt": "This action would ask you to sign in. Toggle “Signed in” to simulate a session.",
+      "dismiss": "Dismiss"
     }
   },
   "myCards": {

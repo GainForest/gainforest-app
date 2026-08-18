@@ -1,4 +1,10 @@
 import type { TimelineAttachmentItem } from "@/app/_lib/indexer";
+import {
+  leafletDocumentFromPlainText,
+  leafletDocumentHasText,
+  leafletDocumentPlaintext,
+  type LeafletLinearDocument,
+} from "@/app/_lib/leaflet-richtext";
 import { parseAtUri } from "./atUri";
 import {
   createOrderedAttachmentSubjects,
@@ -32,6 +38,12 @@ export type AttachmentDraft = {
    * may have no `contents` at all.
    */
   textBody?: string;
+  /**
+   * Rich body from the WYSIWYG composer, already in Leaflet's block model.
+   * Preferred over `textBody`/`note` when present, so formatting written in
+   * the editor is stored exactly as `pub.leaflet.pages.linearDocument`.
+   */
+  textDocument?: LeafletLinearDocument | null;
   contextualSubjects?: AttachmentSubjectInfo[];
 };
 
@@ -87,17 +99,9 @@ type AttachmentSmallBlobContent = {
 };
 type AttachmentRecordContent = AttachmentUriContent | AttachmentSmallBlobContent;
 
-type AttachmentLinearDocumentDescription = {
-  $type: "pub.leaflet.pages.linearDocument";
-  blocks: Array<{
-    $type: "pub.leaflet.pages.linearDocument#block";
-    block: { $type: "pub.leaflet.blocks.text"; plaintext: string };
-  }>;
-};
-
 type AttachmentDescription =
   | { $type: "org.hypercerts.defs#descriptionString"; value: string }
-  | AttachmentLinearDocumentDescription;
+  | LeafletLinearDocument;
 
 type ContextAttachmentRecord = {
   $type: typeof ATTACHMENT_COLLECTION;
@@ -109,23 +113,12 @@ type ContextAttachmentRecord = {
   createdAt: string;
 };
 
-function buildLinearDocumentDescription(text: string): AttachmentLinearDocumentDescription {
-  const paragraphs = text
-    .split(/\n+/)
-    .map((paragraph) => paragraph.trim())
-    .filter(Boolean);
-  return {
-    $type: "pub.leaflet.pages.linearDocument",
-    blocks: (paragraphs.length > 0 ? paragraphs : [text]).map((plaintext) => ({
-      $type: "pub.leaflet.pages.linearDocument#block",
-      block: { $type: "pub.leaflet.blocks.text", plaintext },
-    })),
-  };
-}
-
-function buildDraftDescription(draft: Pick<AttachmentDraft, "note" | "textBody">): AttachmentDescription | null {
+function buildDraftDescription(
+  draft: Pick<AttachmentDraft, "note" | "textBody" | "textDocument">,
+): AttachmentDescription | null {
+  if (leafletDocumentHasText(draft.textDocument)) return draft.textDocument;
   const textBody = draft.textBody?.trim();
-  if (textBody) return buildLinearDocumentDescription(textBody);
+  if (textBody) return leafletDocumentFromPlainText(textBody);
   const note = draft.note?.trim();
   if (note) return { $type: "org.hypercerts.defs#descriptionString", value: note };
   return null;
@@ -254,12 +247,13 @@ function validateAttachmentDraft(args: {
   const contentType = args.draft.contentType.trim();
   const note = args.draft.note?.trim() ?? "";
   const textBody = args.draft.textBody?.trim() ?? "";
+  const documentText = leafletDocumentPlaintext(args.draft.textDocument);
 
   if (!isValidAttachmentSubjectInfo(args.activitySubject)) {
     throw new AttachmentMutationInputError("invalid-activity");
   }
 
-  if (args.draft.contents.length === 0 && !note && !textBody) {
+  if (args.draft.contents.length === 0 && !note && !textBody && !documentText) {
     throw new AttachmentMutationInputError("empty-content");
   }
 
@@ -284,6 +278,10 @@ function validateAttachmentDraft(args: {
   }
 
   if (textBody.length > MAX_ATTACHMENT_NOTE_LENGTH) {
+    throw new AttachmentMutationInputError("note-too-long");
+  }
+
+  if (documentText.length > MAX_ATTACHMENT_NOTE_LENGTH) {
     throw new AttachmentMutationInputError("note-too-long");
   }
 
@@ -336,9 +334,8 @@ function validateContextAttachmentRecord(record: ContextAttachmentRecord): void 
     if (record.description.$type === "org.hypercerts.defs#descriptionString") {
       if (record.description.value.length > MAX_ATTACHMENT_NOTE_LENGTH) throw new AttachmentMutationInputError("invalid-record");
     } else {
-      const blocks = record.description.blocks;
-      if (blocks.length === 0) throw new AttachmentMutationInputError("invalid-record");
-      const totalLength = blocks.reduce((sum, entry) => sum + entry.block.plaintext.length, 0);
+      if (record.description.blocks.length === 0) throw new AttachmentMutationInputError("invalid-record");
+      const totalLength = leafletDocumentPlaintext(record.description).length;
       if (totalLength === 0 || totalLength > MAX_ATTACHMENT_NOTE_LENGTH) throw new AttachmentMutationInputError("invalid-record");
     }
   }

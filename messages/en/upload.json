@@ -753,9 +753,9 @@
         "recordingFromLabel": "Recording from",
         "deviceNew": "new",
         "newDeviceNote": "{device} isn't in your equipment registry yet — we'll add it when this upload starts.",
-        "folderLabel": "Recordings folder",
+        "folderLabel": "Deployment",
         "folderAutoMatched": "{name} — matched from the card",
-        "folderNew": "New folder · {name}",
+        "folderNew": "Add deployment · {name}",
         "noDeployments": "No deployments for this device — the batch will keep uploading and attach to the one you create.",
         "setUpDeployment": "Set one up ↗",
         "defaultFolderName": "Recordings {date}",
@@ -769,8 +769,7 @@
         "dedupChecking": "Checking for recordings already in this account…",
         "dedupSkipped": "{count, plural, one {# recording is already in this account — skipped} other {# recordings are already in this account — skipped}}",
         "allUploaded": "Everything on this card is already uploaded",
-        "matchedCount": "{count, plural, one {# recording matched its deployment from the card} other {# recordings matched their deployments from the card}}",
-        "eventOption": "Deployment · {name}"
+        "matchedCount": "{count, plural, one {# recording matched its deployment from the card} other {# recordings matched their deployments from the card}}"
       }
     },
     "csvUpload": {

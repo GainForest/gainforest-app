@@ -21,8 +21,14 @@ import {
   fetchOccurrencesByDid,
   fetchTreeDatasetsByDid,
 } from "@/app/_lib/indexer";
+import { leafletDocumentHasText } from "@/app/_lib/leaflet-richtext";
+import {
+  EMPTY_RICH_TEXT_VALUE,
+  RichTextEditor,
+  type RichTextEditorLabels,
+  type RichTextValue,
+} from "@/app/_components/RichTextEditor";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Tooltip,
   TooltipContent,
@@ -75,6 +81,7 @@ export function EvidenceAdder({
   mutationRepo,
   onCreated,
   onChanged,
+  createAttachment = createContextAttachment,
 }: {
   organizationDid: string;
   activityUri: string;
@@ -86,13 +93,22 @@ export function EvidenceAdder({
   mutationRepo?: string;
   onCreated: (entry: TimelineAttachmentItem) => void;
   onChanged: () => void;
+  /** Mockable seam for the `/_test` registry — production always uses the
+   *  real `createContextAttachment` default. */
+  createAttachment?: typeof createContextAttachment;
 }) {
   const evidenceT = useTranslations("bumicert.detail.evidenceAdder");
   const [activeTab, setActiveTab] = useState<EvidenceTab | null>(null);
   // A soundscape is only worth offering when this account has published one;
   // a project with no recordings behind it never grows the extra button.
   const [soundscapesAvailable, setSoundscapesAvailable] = useState(false);
-  const [caption, setCaption] = useState("");
+  // The caption lives in the WYSIWYG editor as a Leaflet document; the editor
+  // is uncontrolled, so bumping `editorKey` is how a posted draft is cleared.
+  const [richText, setRichText] = useState<RichTextValue>(EMPTY_RICH_TEXT_VALUE);
+  const [editorKey, setEditorKey] = useState(0);
+  // The update's title is asked for, never inferred from the body. Blank
+  // falls back to a generic label — body text is never copied into it.
+  const [title, setTitle] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sourceState, setSourceState] = useState<{
@@ -111,6 +127,22 @@ export function EvidenceAdder({
     trees: evidenceT("tabs.trees"),
     nature: evidenceT("tabs.biodiversity"),
     files: evidenceT("tabs.files"),
+  };
+  const editorLabels: RichTextEditorLabels = {
+    bold: evidenceT("editor.bold"),
+    italic: evidenceT("editor.italic"),
+    underline: evidenceT("editor.underline"),
+    strikethrough: evidenceT("editor.strikethrough"),
+    heading: evidenceT("editor.heading"),
+    subheading: evidenceT("editor.subheading"),
+    quote: evidenceT("editor.quote"),
+    bulletedList: evidenceT("editor.bulletedList"),
+    numberedList: evidenceT("editor.numberedList"),
+    addLink: evidenceT("editor.addLink"),
+    removeLink: evidenceT("editor.removeLink"),
+    linkUrlPlaceholder: evidenceT("editor.linkUrlPlaceholder"),
+    applyLink: evidenceT("editor.applyLink"),
+    cancelLink: evidenceT("editor.cancelLink"),
   };
   // Image and file uploads need nothing from the account; the soundscape
   // picker reads its own list. The rest share one load of the org's evidence.
@@ -206,18 +238,16 @@ export function EvidenceAdder({
     }
   }
 
-  function titleFromCaption(value: string): string {
-    const singleLine = value.trim().replace(/\s+/g, " ");
-    if (!singleLine) return evidenceT("updateTitleFallback");
-    return singleLine.length > 80 ? `${singleLine.slice(0, 77)}…` : singleLine;
-  }
 
   async function submitDrafts(
     drafts: AttachmentDraft | AttachmentDraft[],
     onSuccess?: () => void,
   ) {
     const items = (Array.isArray(drafts) ? drafts : [drafts]).filter(
-      (draft) => draft.contents.length > 0 || Boolean(draft.note?.trim()),
+      (draft) =>
+        draft.contents.length > 0 ||
+        Boolean(draft.note?.trim()) ||
+        leafletDocumentHasText(draft.textDocument),
     );
     if (items.length === 0) return;
 
@@ -238,7 +268,7 @@ export function EvidenceAdder({
 
     try {
       for (const draft of items) {
-        const result = await createContextAttachment({
+        const result = await createAttachment({
           draft,
           activitySubject,
           organizationDid,
@@ -248,7 +278,7 @@ export function EvidenceAdder({
         onCreated(result.optimisticItem);
       }
       if (created.length > 0) onChanged();
-      setCaption("");
+      clearCaption();
       onSuccess?.();
     } catch (err) {
       const message = mutationErrorMessage(err);
@@ -261,7 +291,7 @@ export function EvidenceAdder({
           }),
         );
         onChanged();
-        setCaption("");
+        clearCaption();
         onSuccess?.();
       } else {
         setError(message);
@@ -271,14 +301,19 @@ export function EvidenceAdder({
     }
   }
 
+  function clearCaption() {
+    setRichText(EMPTY_RICH_TEXT_VALUE);
+    setEditorKey((value) => value + 1);
+    setTitle("");
+  }
+
   function postTextUpdate() {
-    const note = caption.trim();
-    if (!note) return;
+    if (!leafletDocumentHasText(richText.document)) return;
     submitDrafts({
-      title: titleFromCaption(note),
+      title: captionTitle ?? evidenceT("updateTitleFallback"),
       contentType: "update",
       contents: [],
-      note,
+      textDocument: richText.document,
     });
   }
 
@@ -286,7 +321,9 @@ export function EvidenceAdder({
     (tab) => tab.id !== "soundscape" || soundscapesAvailable,
   );
   const activeConfig = activeTab ? EVIDENCE_TABS.find((tab) => tab.id === activeTab)! : null;
-  const captionTitle = caption.trim() ? titleFromCaption(caption) : null;
+  const caption = richText.plaintext;
+  const captionDocument = richText.document;
+  const captionTitle = title.trim().replace(/\s+/g, " ") || null;
   const activeSources = sourceState.data;
 
   function renderAttachmentPanel() {
@@ -308,6 +345,7 @@ export function EvidenceAdder({
         {activeTab === "image" ? (
           <ImageEvidencePicker
             caption={caption}
+            captionDocument={captionDocument}
             captionTitle={captionTitle}
             isSubmitting={isSubmitting}
             submitDrafts={submitDrafts}
@@ -317,6 +355,7 @@ export function EvidenceAdder({
           <AudioEvidencePicker
             data={activeSources.audio}
             caption={caption}
+            captionDocument={captionDocument}
             captionTitle={captionTitle}
             isSubmitting={isSubmitting}
             submitDrafts={submitDrafts}
@@ -326,6 +365,7 @@ export function EvidenceAdder({
           <SoundscapeEvidencePicker
             organizationDid={organizationDid}
             caption={caption}
+            captionDocument={captionDocument}
             captionTitle={captionTitle}
             isSubmitting={isSubmitting}
             submitDrafts={submitDrafts}
@@ -340,6 +380,7 @@ export function EvidenceAdder({
             timelineAttachmentsUnavailable={attachmentsUnavailable}
             occurrenceCoverageIncomplete={activeSources.occurrencesIncomplete}
             caption={caption}
+            captionDocument={captionDocument}
             captionTitle={captionTitle}
             isSubmitting={isSubmitting}
             submitDrafts={submitDrafts}
@@ -348,6 +389,7 @@ export function EvidenceAdder({
         {activeTab === "nature" ? (
           <NatureCsvUpload
             caption={caption}
+            captionDocument={captionDocument}
             captionTitle={captionTitle}
             isSubmitting={isSubmitting}
             submitDrafts={submitDrafts}
@@ -359,6 +401,7 @@ export function EvidenceAdder({
             datasets={activeSources.treeGroups}
             linkedUris={linkedNatureUris}
             caption={caption}
+            captionDocument={captionDocument}
             captionTitle={captionTitle}
             isSubmitting={isSubmitting}
             submitDrafts={submitDrafts}
@@ -367,6 +410,7 @@ export function EvidenceAdder({
         {activeTab === "files" ? (
           <FileEvidencePicker
             caption={caption}
+            captionDocument={captionDocument}
             captionTitle={captionTitle}
             isSubmitting={isSubmitting}
             submitDrafts={submitDrafts}
@@ -391,12 +435,23 @@ export function EvidenceAdder({
         transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
         className="overflow-hidden rounded-xl border border-input bg-background shadow-xs focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50"
       >
-        <Textarea
-          value={caption}
-          onChange={(event) => setCaption(event.target.value)}
+        <input
+          type="text"
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          disabled={isSubmitting || !createPermission.allowed}
+          placeholder={evidenceT("titlePlaceholder")}
+          aria-label={evidenceT("titlePlaceholder")}
+          maxLength={256}
+          className="w-full border-b border-border/60 bg-transparent px-3 py-2.5 text-base font-medium text-foreground outline-none placeholder:font-normal placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+        />
+        <RichTextEditor
+          key={editorKey}
+          labels={editorLabels}
           disabled={isSubmitting || !createPermission.allowed}
           placeholder={evidenceT("captionPlaceholder")}
-          className="min-h-28 resize-none border-0 bg-transparent shadow-none focus-visible:ring-0"
+          aria-label={evidenceT("title")}
+          onChange={setRichText}
         />
         <div className="flex flex-col gap-2 border-t border-border/60 px-2 py-2 sm:flex-row sm:items-center sm:justify-between">
           <TooltipProvider delayDuration={150}>
@@ -420,15 +475,19 @@ export function EvidenceAdder({
               ))}
             </div>
           </TooltipProvider>
-          <Button
-            type="button"
-            onClick={postTextUpdate}
-            disabled={isSubmitting || !createPermission.allowed || caption.trim().length === 0}
-            className="w-full sm:w-fit"
-          >
-            {isSubmitting ? <Loader2Icon className="h-4 w-4 animate-spin" /> : null}
-            {evidenceT("postUpdate")}
-          </Button>
+          {/* While a picker is open it owns the submit button, so hide this one
+              to avoid two "Post update" buttons competing. */}
+          {activeTab === null ? (
+            <Button
+              type="button"
+              onClick={postTextUpdate}
+              disabled={isSubmitting || !createPermission.allowed || !leafletDocumentHasText(richText.document)}
+              className="w-full sm:w-fit"
+            >
+              {isSubmitting ? <Loader2Icon className="h-4 w-4 animate-spin" /> : null}
+              {evidenceT("postUpdate")}
+            </Button>
+          ) : null}
         </div>
         <AnimatePresence initial={false} mode="wait">
           {activeTab ? (

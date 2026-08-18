@@ -110,6 +110,7 @@
       "settings": "Pengaturan",
       "projects": "Proyek",
       "observations": "Observasi",
+      "events": "Acara",
       "donations": "Donasi",
       "grants": "Hibah",
       "organizationHome": "Beranda organisasi",
@@ -504,6 +505,30 @@
     "endorsementsGiven": "Dukungan",
     "equipment": "Peralatan",
     "more": "Lainnya"
+  },
+  "accountAudio": {
+    "viewsAria": "Tampilan audio",
+    "recordings": "Rekaman",
+    "soundscapes": "Lanskap suara",
+    "soundscapesCount": "{count, plural, other {# lanskap suara}}",
+    "soundscapesLoadError": "Lanskap suara tidak dapat dimuat saat ini.",
+    "soundscapesEmptyTitle": "Belum ada lanskap suara",
+    "soundscapesEmptyBody": "Lanskap suara mengubah rekaman lapangan menjadi potret suara 24 jam. Saat profil ini menerbitkan satu, lanskap itu akan muncul di sini untuk didengarkan semua orang.",
+    "soundscapesBuildCta": "Buat dari rekaman Anda"
+  },
+  "observationsManage": {
+    "metaTitle": "Kelola observasi — {name}",
+    "title": "Kelola observasi",
+    "description": "Tambah, ubah, dan kelompokkan pengamatan alam yang tersimpan di profil ini.",
+    "rowTitle": "Kelola observasi",
+    "rowDescription": "Tambah, ubah, dan kelompokkan pengamatan di profil ini."
+  },
+  "audioManage": {
+    "metaTitle": "Kelola rekaman — {name}",
+    "title": "Kelola rekaman",
+    "description": "Unggah, beri label, dan atur rekaman lapangan yang tersimpan di profil ini.",
+    "rowTitle": "Kelola rekaman",
+    "rowDescription": "Unggah, beri label, dan atur rekaman di profil ini."
   },
   "equipment": {
     "metadataTitle": "Peralatan — {name}",
@@ -1385,7 +1410,24 @@
       "slotsFull": "Kesepuluh slot sudah terisi. Hapus satu penerima sebelum menambahkan yang lain.",
       "remove": "Keluarkan dari hibah",
       "removing": "Mengeluarkan…",
-      "removeConfirm": "Hapus “{name}” dari hibah? Tonggak dan dokumen tetap disimpan, tetapi akun itu kehilangan akses ke dasbor hibah dan slotnya terbuka."
+      "removeConfirm": "Hapus “{name}” dari hibah? Tonggak dan dokumen tetap disimpan, tetapi akun itu kehilangan akses ke dasbor hibah dan slotnya terbuka.",
+      "dueDateLabel": "Tenggat untuk {title}",
+      "overdue": "Lewat tenggat",
+      "customMilestone": "Khusus",
+      "milestoneNameLabel": "Nama tonggak",
+      "milestoneNamePlaceholder": "mis. Sesi pelatihan komunitas",
+      "addMilestone": "Tambah tonggak",
+      "addingMilestone": "Menambahkan…",
+      "addMilestoneDueLabel": "Tenggat",
+      "addMilestoneHint": "Menambahkan langkah khusus untuk penerima ini, dengan nama, deskripsi, dan tenggatnya sendiri. Penerima langsung melihatnya di halaman hibahnya.",
+      "removeMilestone": "Hapus {title}",
+      "removeMilestoneConfirm": "Hapus “{title}” dari tonggak penerima ini? Penerima tidak akan melihatnya lagi.",
+      "editMilestone": "Ubah {title}",
+      "editSave": "Simpan",
+      "editCancel": "Batal",
+      "milestoneDescriptionLabel": "Deskripsi tonggak",
+      "milestoneDescriptionPlaceholder": "Jelaskan apa yang dicakup langkah ini (opsional)",
+      "programCopyHint": "Biarkan nama atau deskripsi kosong untuk memakai teks standar program."
     },
     "pages": {
       "hub": {
@@ -1889,7 +1931,7 @@
       "subtitle": "Unggah rekaman dari kartu SD AudioMoth, susun ke dalam penempatan, dan beri label pada apa yang Anda dengar — observasi audio ada di sini.",
       "metaTitle": "Observasi audio",
       "metaDescription": "Unggah rekaman AudioMoth, kelola penempatan, beri label spesies, dan jelajahi lanskap suara di dalam Observasi.",
-      "librarySubtitle": "Semua folder dan rekaman yang telah Anda unggah, di satu tempat — putar, pindahkan antar folder, ganti nama, atau hapus.",
+      "librarySubtitle": "Semua penempatan dan rekaman yang telah Anda unggah, di satu tempat — putar, pindahkan antar penempatan, ganti nama, atau hapus.",
       "yourRecordings": "Rekaman Anda",
       "soundscapesTitle": "Audio",
       "soundscapesLede": "Rekaman lapangan dan potret suara 24 jam dari perekam di seluruh GainForest. Ketuk jam untuk mendengar suatu tempat pada waktu itu.",
@@ -1923,7 +1965,7 @@
     },
     "library": {
       "signInTitle": "Masuk untuk melihat berkas Anda",
-      "signInBody": "Rekaman dan folder yang Anda unggah akan muncul di sini setelah Anda masuk."
+      "signInBody": "Rekaman dan penempatan yang Anda unggah akan muncul di sini setelah Anda masuk."
     },
     "devicesHub": {
       "title": "Perangkat"
@@ -2096,7 +2138,6 @@
     "mainTabs": {
       "setup": "Penyiapan",
       "library": "Rekaman",
-      "deployments": "Penempatan",
       "upload": "Unggah",
       "label": "Beri label",
       "identifications": "Identifikasi",
@@ -2185,15 +2226,10 @@
     },
     "deployments": {
       "intro": "Penempatan mencatat di mana dan kapan sebuah AudioMoth dipasang di lapangan. Masing-masing memutar nada akustik yang mengatur jam, lokasi, dan ID penempatan perekam.",
+      "sectionTitle": "Penempatan",
+      "deploymentCount": "{count, plural, other {# penempatan}}",
       "createButton": "Buat penempatan",
-      "signInTitle": "Masuk untuk melihat penempatan Anda",
-      "signInBody": "Penempatan Anda disimpan di akun Anda. Masuk untuk membuat dan mengelolanya.",
-      "loadErrorTitle": "Penempatan tidak dapat dimuat",
-      "loadError": "Terjadi kesalahan saat memuat penempatan Anda. Silakan coba lagi.",
-      "emptyTitle": "Belum ada penempatan",
-      "emptyBody": "Buat penempatan pertama Anda untuk menyiapkan AudioMoth di lapangan dengan nada akustik.",
       "untitled": "Penempatan tanpa nama",
-      "copyId": "Salin ID penempatan",
       "delete": "Hapus penempatan",
       "confirmDelete": "Konfirmasi hapus",
       "cancel": "Batal",
@@ -2203,7 +2239,7 @@
       "siteNameLabel": "Nama lokasi (opsional)",
       "siteNamePlaceholder": "Jalur sungai, petak 3…",
       "deploymentIdLabel": "ID penempatan",
-      "newId": "Buat ID baru",
+      "deploymentIdHint": "Dibuat otomatis untuk penempatan ini.",
       "latitudeLabel": "Lintang",
       "longitudeLabel": "Bujur",
       "useLocation": "Gunakan lokasi saya saat ini",
@@ -2236,7 +2272,7 @@
       "deployedLabel": "Ditempatkan",
       "equipmentLinked": "Unit tertaut",
       "metadataTitle": "{name} — Penempatan",
-      "detailBack": "Kembali ke penempatan",
+      "detailBack": "Kembali ke rekaman",
       "mapTitle": "Lokasi penempatan",
       "equipmentUsedLabel": "AudioMoth yang digunakan",
       "protocolLabel": "Protokol",
@@ -2245,8 +2281,8 @@
       "attachWaiting": "{count, plural, other {# rekaman sedang diunggah di latar belakang — akan melekat ke penempatan yang Anda buat.}}",
       "attaching": "Melekatkan {count, plural, other {# rekaman}} ke penempatan baru…",
       "attachDone": "{count, plural, other {# rekaman dilekatkan ke penempatan baru.}}",
-      "attachPartial": "{moved} dilekatkan · {failed} tidak dapat dipindahkan — tetap di folder kartu.",
-      "attachFailed": "Batch tidak dapat dilekatkan — rekaman tetap berada di folder kartu."
+      "attachPartial": "{moved} dilekatkan · {failed} tidak dapat dipindahkan — tetap di penempatan kartu.",
+      "attachFailed": "Batch tidak dapat dilekatkan — rekaman tetap berada di penempatan kartu."
     },
     "upload": {
       "intro": "Masukkan kartu SD AudioMoth dan pilih di bawah. Rekaman dikenali dari ID penempatan yang tertanam di setiap berkas, disimpan aman di penyimpanan arsip, dan dicatat ke akun Anda.",
@@ -2270,8 +2306,6 @@
       "unmatchedTitle": "Penempatan tidak ditemukan di akun Anda",
       "noIdTitle": "Rekaman ini tidak memiliki ID penempatan",
       "groupCount": "{count} rekaman",
-      "assignLabel": "Tautkan ke penempatan (opsional)",
-      "assignNone": "Tanpa penempatan",
       "unreadable": "{count} berkas tidak dapat dibaca sebagai rekaman WAV dan akan dilewati.",
       "moreFiles": "…dan {count} rekaman lainnya",
       "previewToggle": "Simpan pratinjau yang dapat diputar",
@@ -2293,19 +2327,19 @@
       "errorSaveConnection": "File sudah terkirim, tetapi internet terputus sebelum kami selesai. Ketuk “Coba lagi file yang gagal”.",
       "errorSaveFailed": "File sudah terunggah, tetapi tidak dapat disimpan ke akun Anda. Silakan coba lagi.",
       "deploymentFallback": "Dibuat otomatis saat mengunggah rekaman kartu SD.",
-      "groupNameLabel": "Beri nama unggahan ini",
-      "groupNameHelp": "Rekaman ini akan dikelompokkan dengan nama ini di profil Anda, agar mudah ditemukan nanti.",
+      "groupNameLabel": "Beri nama penempatan ini",
+      "groupNameHelp": "Beri nama penempatan asal rekaman ini. Perjalanan lama pun tidak masalah. Rekaman akan dikelompokkan dengan nama ini di profil Anda agar mudah ditemukan nanti.",
       "groupNamePlaceholder": "mis. Tepi hutan — April 2024",
-      "groupNameRequired": "Beri nama unggahan ini terlebih dahulu.",
+      "groupNameRequired": "Beri nama penempatan ini terlebih dahulu.",
       "folderTitle": "Rekaman ini akan disimpan di mana?",
-      "folderExistingHelp": "Tambahkan ke folder yang sudah Anda miliki, agar semua data dari lokasi ini tetap menyatu.",
-      "folderResumedHelp": "Anda sudah punya folder dengan nama ini, jadi rekaman ini akan digabungkan ke sana, bukan membuat folder baru.",
-      "folderExistingAction": "Pilih folder yang ada",
-      "folderNewAction": "Folder baru",
-      "folderSearchPlaceholder": "Cari folder Anda",
-      "folderNoMatch": "Tidak ada folder yang cocok dengan pencarian Anda.",
-      "folderRequired": "Pilih folder terlebih dahulu.",
-      "folderLoading": "Memuat folder Anda…",
+      "folderExistingHelp": "Tambahkan ke penempatan yang sudah Anda miliki, agar semua data dari lokasi ini tetap menyatu.",
+      "folderResumedHelp": "Anda sudah punya penempatan dengan nama ini, jadi rekaman ini akan digabungkan ke sana, bukan membuat penempatan baru.",
+      "folderExistingAction": "Pilih penempatan yang ada",
+      "folderNewAction": "Tambahkan penempatan",
+      "folderSearchPlaceholder": "Cari penempatan Anda",
+      "folderNoMatch": "Tidak ada penempatan yang cocok dengan pencarian Anda.",
+      "folderRequired": "Pilih penempatan terlebih dahulu.",
+      "folderLoading": "Memuat penempatan Anda…",
       "groupRemarks": "Dibuat saat mengunggah folder rekaman.",
       "discovering": "Mencari rekaman… {count} berkas ditemukan",
       "readFailed": "Kartu SD tidak dapat dibaca. Cabut dan masukkan kembali, lalu coba lagi — atau seret folder ke halaman ini.",
@@ -3375,6 +3409,10 @@
     "allUploaded": "{count} terunggah · {size}"
   },
   "soundscape": {
+    "autoPublish": {
+      "note": "Lanskap suara folder ini sudah diterbitkan di profil dan diperbarui seiring analisis berlanjut.",
+      "view": "Buka"
+    },
     "meta": {
       "title": "Lanskap suara",
       "description": "Buat jam lanskap suara 24 jam dari rekaman audio yang sudah diunggah ke akun Anda."
@@ -3413,12 +3451,12 @@
       "tooShort": "Terlalu pendek untuk dianalisis (butuh minimal {seconds} detik)"
     },
     "groups": {
-      "title": "Folder",
-      "hint": "Setiap lanskap suara dibuat dari satu folder rekaman — pilih folder yang ingin dikerjakan.",
-      "hintSingle": "Lanskap suara ini dibuat dari satu-satunya folder rekaman Anda.",
+      "title": "Penempatan",
+      "hint": "Setiap lanskap suara dibuat dari satu penempatan rekaman — pilih penempatan yang ingin dikerjakan.",
+      "hintSingle": "Lanskap suara ini dibuat dari satu-satunya penempatan rekaman Anda.",
       "chip": "{name} · {count, plural, other {# rekaman}}",
-      "unassigned": "Tidak dalam folder",
-      "unknown": "Folder dihapus"
+      "unassigned": "Tidak dalam penempatan",
+      "unknown": "Penempatan dihapus"
     },
     "bands": {
       "rumble": "Gemuruh",
@@ -3523,38 +3561,43 @@
     }
   },
   "recordingFolders": {
+    "editAction": "Ubah",
     "renameAction": "Ganti nama",
     "deleteAction": "Hapus",
-    "emptyFolder": "Belum ada rekaman di folder ini.",
+    "emptyFolder": "Belum ada rekaman di penempatan ini.",
     "moveAction": "Pindahkan",
     "moveTitle": "Pindahkan {count, plural, other {# rekaman}}",
-    "moveBody": "Pilih folder tempat rekaman ini seharusnya berada. Memindahkan tidak mengubah hal lain — audio, analisisnya, dan apa pun yang sudah dibagikan tetap sama.",
+    "moveBody": "Pilih penempatan tempat rekaman ini seharusnya berada. Memindahkan tidak mengubah hal lain — audio, analisisnya, dan apa pun yang sudah dibagikan tetap sama.",
     "moveProgress": "Memindahkan… {done} dari {total}",
     "movePartial": "{count, plural, other {# rekaman}} tidak dapat dipindahkan. Silakan coba lagi.",
     "moveFailed": "Rekaman tidak dapat dipindahkan. Silakan coba lagi.",
-    "newFolderRemarks": "Dibuat saat memindahkan rekaman ke folder baru.",
-    "renameTitle": "Ganti nama folder",
-    "renameBody": "Hanya nama folder yang berubah — rekaman di dalamnya tetap di tempatnya, begitu juga apa pun yang sudah dibagikan dari rekaman itu.",
-    "nameLabel": "Nama folder",
+    "newFolderRemarks": "Dibuat saat memindahkan rekaman ke penempatan baru.",
+    "renameTitle": "Ganti nama penempatan",
+    "renameBody": "Hanya nama penempatan yang berubah — rekaman di dalamnya tetap di tempatnya, begitu juga apa pun yang sudah dibagikan dari rekaman itu.",
+    "nameLabel": "Nama penempatan",
     "namePlaceholder": "mis. Tepi sungai, musim kemarau",
-    "nameRequired": "Beri nama folder ini.",
+    "nameRequired": "Beri nama penempatan ini.",
     "save": "Simpan",
     "saving": "Menyimpan…",
     "cancel": "Batal",
-    "renameFailed": "Nama folder tidak dapat diganti. Silakan coba lagi.",
+    "renameFailed": "Nama penempatan tidak dapat diganti. Silakan coba lagi.",
+    "locationAction": "Atur lokasi",
+    "editLocationAction": "Ubah lokasi",
+    "locationTitle": "Atur lokasi penempatan",
+    "locationBody": "Di mana “{name}” ditempatkan?",
     "deleteTitle": "Hapus “{name}”?",
-    "deleteBody": "{count, plural, =0 {Folder akan dihapus permanen. Ini tidak dapat dibatalkan.} other {Folder beserta # rekaman di dalamnya akan dihapus permanen — file asli yang diarsipkan, pratinjau yang dapat diputar, spektrogram, analisis, dan setiap identifikasi yang ditandai padanya ikut terhapus. Ini tidak dapat dibatalkan.}}",
+    "deleteBody": "{count, plural, =0 {Penempatan akan dihapus permanen. Ini tidak dapat dibatalkan.} other {Penempatan beserta # rekaman di dalamnya akan dihapus permanen — file asli yang diarsipkan, pratinjau yang dapat diputar, spektrogram, analisis, dan setiap identifikasi yang ditandai padanya ikut terhapus. Ini tidak dapat dibatalkan.}}",
     "identificationsIncluded": "{count, plural, other {Ini termasuk # identifikasi tersimpan, yang juga akan dihapus.}}",
     "deleteProgress": "Menghapus… {done} dari {total}",
-    "deletePartial": "{count, plural, other {# rekaman}} tidak dapat dihapus, jadi folder tetap dipertahankan. Silakan coba lagi.",
-    "deleteFailed": "Folder tidak dapat dihapus. Silakan coba lagi.",
+    "deletePartial": "{count, plural, other {# rekaman}} tidak dapat dihapus, jadi penempatan tetap dipertahankan. Silakan coba lagi.",
+    "deleteFailed": "Penempatan tidak dapat dihapus. Silakan coba lagi.",
     "addToProject": {
       "action": "Tambahkan ke proyek",
       "title": "Tambahkan “{name}” ke proyek",
-      "body": "Folder ini bergabung ke linimasa bukti proyek — rekamannya tetap berada di tempatnya.",
+      "body": "Penempatan ini bergabung ke linimasa bukti proyek — rekamannya tetap berada di tempatnya.",
       "noteLabel": "Catatan (opsional)",
       "notePlaceholder": "Apa yang ditunjukkan rekaman ini?",
-      "defaultNote": "{count, plural, =0 {Folder perekam.} other {Folder perekam dengan # rekaman.}}",
+      "defaultNote": "{count, plural, =0 {Penempatan perekam.} other {Penempatan perekam dengan # rekaman.}}",
       "untitledProject": "Proyek tanpa judul",
       "loading": "Memuat proyek Anda…",
       "loadError": "Proyek Anda tidak dapat dimuat. Coba lagi sebentar lagi.",
@@ -3571,7 +3614,7 @@
       "viewProject": "Buka proyek",
       "close": "Tutup",
       "cancel": "Batal",
-      "failed": "Folder tidak dapat ditambahkan. Silakan coba lagi."
+      "failed": "Penempatan tidak dapat ditambahkan. Silakan coba lagi."
     }
   },
   "hypercerts": {

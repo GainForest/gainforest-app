@@ -26,9 +26,10 @@ import {
   REWILDING_GRANT_AMOUNT_USD,
   REWILDING_GRANT_END_ISO,
   REWILDING_GRANT_START_ISO,
-  REWILDING_MILESTONES,
   doneRewildingMilestoneIds,
+  fetchRewildingMilestonePlans,
   fetchRewildingMilestones,
+  resolveRewildingMilestonePlan,
 } from "@/app/_lib/rewilding-milestones";
 import { EMPTY_AUDIO_STATS, buildAudioPace, fetchGranteeAudioStats } from "./rewilding-audio";
 import type { GrantOverview, Recorder } from "../_components/rewilding/model";
@@ -53,11 +54,15 @@ export {
 export async function fetchGrantOverview(viewerDid: string | null): Promise<GrantOverview> {
   // Audio figures degrade to zero on indexer failure rather than breaking the
   // page — milestones are the load-bearing content here.
-  const [milestoneRecords, audio] = await Promise.all([
+  const [milestoneRecords, milestonePlanRecords, audio] = await Promise.all([
     viewerDid ? fetchRewildingMilestones().catch(() => []) : Promise.resolve([]),
+    viewerDid ? fetchRewildingMilestonePlans().catch(() => []) : Promise.resolve([]),
     viewerDid ? fetchGranteeAudioStats(viewerDid).catch(() => EMPTY_AUDIO_STATS) : Promise.resolve(EMPTY_AUDIO_STATS),
   ]);
   const done = viewerDid ? doneRewildingMilestoneIds(milestoneRecords, viewerDid) : new Set<string>();
+  // The grantee's own plan: program milestones with any due dates the grant
+  // team set, plus milestones added just for them.
+  const plan = resolveRewildingMilestonePlan(milestonePlanRecords, viewerDid ?? "");
 
   // One program-wide window, the same for every grantee.
   const audioPace = buildAudioPace({
@@ -83,12 +88,16 @@ export async function fetchGrantOverview(viewerDid: string | null): Promise<Gran
     grantAmountUsd: REWILDING_GRANT_AMOUNT_USD,
     speciesCount: 0,
     speciesTrend: [],
-    milestones: REWILDING_MILESTONES.map((definition) => ({
-      id: definition.id,
-      code: definition.code,
-      state: done.has(definition.id) ? "done" : "todo",
-      ...(definition.payout ? { payout: definition.payout } : {}),
-      ...(definition.isRecorderInventory ? { isRecorderInventory: true } : {}),
+    milestones: plan.map((resolved) => ({
+      id: resolved.id,
+      code: resolved.code,
+      ...(resolved.title ? { title: resolved.title } : {}),
+      ...(resolved.description ? { description: resolved.description } : {}),
+      ...(resolved.isCustom ? { isCustom: true } : {}),
+      ...(resolved.dueDate ? { dueDate: resolved.dueDate } : {}),
+      state: done.has(resolved.id) ? "done" : "todo",
+      ...(resolved.payout ? { payout: resolved.payout } : {}),
+      ...(resolved.isRecorderInventory ? { isRecorderInventory: true } : {}),
     })),
   };
 }

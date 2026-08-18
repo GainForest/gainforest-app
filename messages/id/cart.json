@@ -178,6 +178,26 @@
     },
     "myCardsTitle": "Galeri Kartu Saya",
     "myCardsDescription": "Pratinjau galeri kartu yang telah dikumpulkan dengan contoh koleksi.",
+    "projectUpdates": {
+      "title": "Penyusun pembaruan proyek",
+      "description": "Editor WYSIWYG untuk menulis pembaruan proyek, dan linimasa yang menampilkannya — persis seperti di halaman Cert.",
+      "mockNote": "Memposting pembaruan menerbitkan catatan di akun sungguhan, jadi pratinjau ini tidak pernah melakukannya. Pembaruan yang ditulis di sini menjalankan penyusun, validasi, dan tampilan linimasa produksi, tetapi tetap di halaman ini dan hilang saat dimuat ulang.",
+      "mockBadge": "Mode uji · tidak ada yang diterbitkan",
+      "cardTitle": "Pembaruan proyek",
+      "cardDescription": "Tulis pembaruan berformat — tebal, judul, daftar, kutipan, tautan — dan lihat tampilannya di linimasa.",
+      "composerLabel": "Tulis pembaruan",
+      "timelineLabel": "Pembaruan yang diterbitkan",
+      "seedTitle": "Minggu ketiga penanaman — laporan tajuk",
+      "seedHeading": "Laporan pembibitan",
+      "seedIntro": "Minggu ini tim lapangan menanam",
+      "seedIntroBold": "1.200 bibit",
+      "seedIntroTail": "di lokasi restorasi utara.",
+      "seedListOne": "Tingkat kelangsungan hidup bertahan di 94%",
+      "seedListTwo": "Dua relawan komunitas baru bergabung",
+      "seedQuote": "Hutan kembali lebih cepat dari yang kami duga.",
+      "seedPlainTitle": "Hujan datang lebih awal",
+      "seedPlainBody": "Pembaruan teks biasa singkat yang ditulis sebelum ada pemformatan. Harus tampil tanpa perubahan."
+    },
     "projectVisibility": {
       "title": "Kartu visibilitas proyek",
       "description": "Kartu di Kelola → Proyek yang memberi tahu akun apa yang bersifat publik dan apakah akun tampil di halaman jelajah, dalam setiap keadaannya.",
@@ -261,8 +281,22 @@
       "cardDescription": "Hibah saya dengan grafik laju audionya, di belakang dan di depan target.",
       "upcoming": {
         "title": "Sebelum hibah dimulai",
-        "description": "Periode belum dimulai, jadi tidak ada penilaian laju maupun grafik — hanya kapan dimulai dan apa yang akan dibutuhkan."
+        "description": "Periode belum dimulai, jadi grafik menampilkan setiap unggahan sebagai keunggulan awal — garis yang dibutuhkan tetap datar sampai dibuka."
       }
+    },
+    "communityEvents": {
+      "title": "Acara komunitas",
+      "description": "Penemuan acara, halaman acara, dan formulir penyelenggara produksi dengan data contoh — daftar hadir, daftar tunggu, penerbitan, dan pembatalan semuanya bekerja di memori.",
+      "cardTitle": "Acara komunitas",
+      "cardDescription": "Jelajahi, daftar hadir, masuk daftar tunggu, dan adakan acara — komponen produksi dengan data di memori, termasuk mode tanpa masuk.",
+      "mockBadge": "Mode uji · tanpa penulisan",
+      "eyebrow": "Registri pengalaman UI",
+      "tabDiscovery": "Penemuan",
+      "tabDetail": "Halaman acara",
+      "tabHost": "Formulir penyelenggara",
+      "signedInToggle": "Sudah masuk",
+      "signInPrompt": "Tindakan ini akan meminta masuk. Aktifkan “Sudah masuk” untuk mensimulasikan sesi.",
+      "dismiss": "Tutup"
     }
   },
   "myCards": {

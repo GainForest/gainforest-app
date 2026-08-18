@@ -15,6 +15,11 @@ import enLegacy from "./en/legacy.json";
 import enPrivacy from "./en/privacy.json";
 import enChangelog from "./en/changelog.json";
 import enTainaGuide from "./en/tainaGuide.json";
+import enEvents from "./en/events.json";
+import esEvents from "./es/events.json";
+import ptEvents from "./pt/events.json";
+import swEvents from "./sw/events.json";
+import idEvents from "./id/events.json";
 import esAudioMothGuide from "./es/audiomothGuide.json";
 import esBumicert from "./es/bumicert.json";
 import esCart from "./es/cart.json";
@@ -80,6 +85,7 @@ export const messagesByLocale = {
     deleteAccount: enDeleteAccount,
     changelog: enChangelog,
     tainaGuide: enTainaGuide,
+    events: enEvents,
   },
   es: {
     ...esLanding,
@@ -95,6 +101,7 @@ export const messagesByLocale = {
     deleteAccount: esDeleteAccount,
     changelog: esChangelog,
     tainaGuide: esTainaGuide,
+    events: esEvents,
   },
   pt: {
     ...ptLanding,
@@ -110,6 +117,7 @@ export const messagesByLocale = {
     deleteAccount: ptDeleteAccount,
     changelog: ptChangelog,
     tainaGuide: ptTainaGuide,
+    events: ptEvents,
   },
   sw: {
     ...swLanding,
@@ -125,6 +133,7 @@ export const messagesByLocale = {
     deleteAccount: swDeleteAccount,
     changelog: swChangelog,
     tainaGuide: swTainaGuide,
+    events: swEvents,
   },
   id: {
     ...idLanding,
@@ -140,5 +149,6 @@ export const messagesByLocale = {
     deleteAccount: idDeleteAccount,
     changelog: idChangelog,
     tainaGuide: idTainaGuide,
+    events: idEvents,
   },
 } satisfies Record<SupportedLanguageCode, object>;

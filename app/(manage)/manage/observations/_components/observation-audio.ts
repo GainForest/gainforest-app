@@ -14,6 +14,7 @@ import type { AudioMothRecordingInfo } from "@/app/_lib/audiomoth/wav-metadata";
 import type { DeploymentEventItem } from "@/app/_lib/deployment-events";
 import type { UploadFolderOption } from "@/app/_lib/audiomoth/upload-folder";
 import { findUploadFolderByName } from "@/app/_lib/audiomoth/upload-folder";
+import { chimeDeploymentName } from "@/app/_lib/unified-deployments";
 
 /** One WAV waiting in the modal, with its parsed header (null = unreadable). */
 export type QuickRecording = {
@@ -267,8 +268,19 @@ export function planAudioUploadGroups({
       if (existing) {
         unmatchedPlan = { kind: "existing", uri: existing.uri, name };
       } else {
-        const times = unmatched.map((rec) => quickRecordingTime(rec).getTime());
-        unmatchedPlan = { kind: "named", name, deployedAt: new Date(Math.min(...times)).toISOString() };
+        // A chime deployment already carrying this name is the same
+        // deployment — the recordings join it instead of forking a
+        // second one with the same name beside it.
+        const chime = findUploadFolderByName(
+          (events ?? []).map((event) => ({ uri: event.uri, name: chimeDeploymentName(event), event })),
+          name,
+        );
+        if (chime) {
+          unmatchedPlan = { kind: "event", event: chime.event };
+        } else {
+          const times = unmatched.map((rec) => quickRecordingTime(rec).getTime());
+          unmatchedPlan = { kind: "named", name, deployedAt: new Date(Math.min(...times)).toISOString() };
+        }
       }
     }
     groups.push({ plan: unmatchedPlan, recordings: unmatched });
