@@ -47,7 +47,6 @@ const ModalWrapper = ({
     };
 
     wrapper.addEventListener("keydown", handleKeyDown);
-    if (isActive) firstFocusable?.focus();
 
     return () => {
       wrapper.removeEventListener("keydown", handleKeyDown);
