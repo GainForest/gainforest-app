@@ -23,7 +23,7 @@ export function DeploymentLocationMap({
   className,
   heightClass = "h-64",
   compact = false,
-  interactive = !compact,
+  interactive = false,
   expandable = true,
 }: {
   lat: number;
@@ -38,12 +38,13 @@ export function DeploymentLocationMap({
    *  preview to sit inline beside other content, e.g. an empty deployment's
    *  "no recordings yet" note. */
   compact?: boolean;
-  /** Whether the map itself responds to drag/zoom. Defaults to the full map
-   *  being interactive and compact thumbnails being static. The location
-   *  modal passes `compact interactive` for a headerless but zoomable map. */
+  /** Whether the map itself pans/zooms inline. Off by default: every map is a
+   *  static preview that opens the zoomable modal on click. The modal's own
+   *  map and the deployment detail page's hero map pass `interactive`. */
   interactive?: boolean;
-  /** A static thumbnail opens a larger, zoomable map in a modal when clicked.
-   *  Pass false for a purely decorative preview. */
+  /** A static preview opens a larger, zoomable map in a modal when clicked —
+   *  the compact thumbnail and the full "Deployment location" card alike. Pass
+   *  false for a purely decorative preview (or the modal's own map). */
   expandable?: boolean;
 }) {
   const t = useTranslations("common.audiomoth.deployments");
@@ -81,7 +82,9 @@ export function DeploymentLocationMap({
           worldCopyJump: true,
           minZoom: 1,
           zoomControl: false,
-          scrollWheelZoom: false,
+          // Scroll to zoom the interactive map (the modal, the detail hero) —
+          // no need to reach for the +/- buttons. Static previews stay inert.
+          scrollWheelZoom: interactive,
           dragging: interactive,
           touchZoom: interactive,
           doubleClickZoom: interactive,
@@ -145,43 +148,58 @@ export function DeploymentLocationMap({
     void modal.show();
   }, [modal, lat, lon, label]);
 
-  // Thumbnail: no header or zoom control, just the pinned canvas in a small
-  // rounded frame the caller sizes. A static one opens the zoomable modal on
-  // click, so the small preview is never a dead end.
+  // Every map is a preview that opens the zoomable modal on click, unless the
+  // caller asked for an inline-interactive map (the modal's own map, the detail
+  // page hero). `canExpand` is the preview case, shared by both render paths.
+  const canExpand = expandable && !interactive;
+
+  // Thumbnail: no header, just the pinned canvas in a small rounded frame the
+  // caller sizes, with the expand affordance overlaid.
   if (compact) {
-    const canExpand = expandable && !interactive;
     return (
       <div className={cn("group relative overflow-hidden rounded-lg border border-border bg-muted/40", className)}>
         <div ref={elRef} className={cn("w-full", heightClass)} style={{ zIndex: 0 }} aria-label={t("mapTitle")} />
-        {canExpand ? (
-          <button
-            type="button"
-            onClick={openExpanded}
-            aria-label={t("mapExpand")}
-            className="absolute inset-0 z-10 cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
-          >
-            <span className="pointer-events-none absolute bottom-1 right-1 grid size-6 place-items-center rounded-md border border-border/70 bg-background/85 text-foreground/70 shadow-sm transition-colors group-hover:text-foreground">
-              <Maximize2Icon className="size-3.5" aria-hidden />
-            </span>
-          </button>
-        ) : null}
+        {canExpand ? <MapExpandButton onClick={openExpanded} label={t("mapExpand")} /> : null}
       </div>
     );
   }
 
+  // Full card: the "Deployment location" header over the pinned canvas. As a
+  // preview it carries the same expand affordance as the thumbnail, so both
+  // open the same zoomable modal on click.
   return (
     <section className={cn("overflow-hidden rounded-2xl border border-border bg-foreground/[0.04]", className)}>
       <div className="flex items-center gap-2 px-4 py-3 text-[13px] font-medium text-foreground/75">
         <MapPinIcon className="h-4 w-4 text-primary" aria-hidden />
         {t("mapTitle")}
       </div>
-      <div
-        ref={elRef}
-        className={cn("w-full border-t border-border bg-muted/40", heightClass)}
-        style={{ zIndex: 0 }}
-        aria-label={t("mapTitle")}
-      />
+      <div className="group relative border-t border-border">
+        <div
+          ref={elRef}
+          className={cn("w-full bg-muted/40", heightClass)}
+          style={{ zIndex: 0 }}
+          aria-label={t("mapTitle")}
+        />
+        {canExpand ? <MapExpandButton onClick={openExpanded} label={t("mapExpand")} /> : null}
+      </div>
     </section>
+  );
+}
+
+/** The click-to-zoom affordance shared by the thumbnail and the full card: a
+ *  full-bleed button with a corner "expand" badge that strengthens on hover. */
+function MapExpandButton({ onClick, label }: { onClick: () => void; label: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className="absolute inset-0 z-10 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+    >
+      <span className="pointer-events-none absolute bottom-1 right-1 grid size-6 place-items-center rounded-md border border-border/70 bg-background/85 text-foreground/70 shadow-sm transition-colors group-hover:text-foreground">
+        <Maximize2Icon className="size-3.5" aria-hidden />
+      </span>
+    </button>
   );
 }
 

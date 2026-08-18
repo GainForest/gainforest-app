@@ -111,7 +111,7 @@ export default async function DeploymentDetailPage({ params }: { params: Deploym
 
       {hasCoords ? (
         <div className="mt-8">
-          <DeploymentLocationMap lat={lat} lon={lon} label={name} />
+          <DeploymentLocationMap interactive lat={lat} lon={lon} label={name} />
         </div>
       ) : null}
 
