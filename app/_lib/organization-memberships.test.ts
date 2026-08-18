@@ -100,14 +100,16 @@ describe("syncOrganizationMemberships", () => {
     expect(supabase.supabaseRpc).not.toHaveBeenCalled();
   });
 
-  it("continues syncing other organizations when one roster cannot be completed", async () => {
+  it("logs the failed roster error and continues syncing other organizations", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const error = new Error("CGS page failed");
     cgs.fetchAllCgsGroupMembershipsWithCookie.mockResolvedValue([
       { groupDid: "did:plc:forest", role: "owner" },
       { groupDid: "did:plc:river", role: "member" },
     ]);
     supabase.supabaseSelect.mockResolvedValue([]);
     cgs.fetchAllCgsMembersWithCookie
-      .mockRejectedValueOnce(new Error("CGS page failed"))
+      .mockRejectedValueOnce(error)
       .mockResolvedValueOnce([{ did: "did:plc:bob", role: "owner", addedBy: null, addedAt: null }]);
 
     await expect(syncOrganizationMemberships({ cookie: COOKIE })).resolves.toEqual({
@@ -117,6 +119,10 @@ describe("syncOrganizationMemberships", () => {
       failed: 1,
     });
 
+    expect(consoleError).toHaveBeenCalledWith(
+      "Organization membership synchronization could not refresh the roster for did:plc:forest. Failed rosters are left unchanged and will be retried later.",
+      error,
+    );
     expect(supabase.supabaseRpc).toHaveBeenCalledOnce();
     expect(supabase.supabaseRpc).toHaveBeenCalledWith("organization_memberships_replace_roster", expect.objectContaining({
       p_organization_did: "did:plc:river",
@@ -169,7 +175,7 @@ describe("scheduleOrganizationMembershipSync", () => {
     expect(nextServer.after).not.toHaveBeenCalled();
   });
 
-  it("reports partial roster failures without exposing upstream details", async () => {
+  it("reports partial roster failures after logging their causes", async () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
     cgs.fetchAllCgsGroupMembershipsWithCookie.mockResolvedValue([
       { groupDid: "did:plc:forest", role: "owner" },
@@ -185,13 +191,18 @@ describe("scheduleOrganizationMembershipSync", () => {
     const callback = nextServer.after.mock.calls[0][0];
     await expect(callback()).resolves.toBeUndefined();
     expect(consoleError).toHaveBeenCalledWith(
+      "Organization membership synchronization could not refresh the roster for did:plc:forest. Failed rosters are left unchanged and will be retried later.",
+      expect.any(Error),
+    );
+    expect(consoleError).toHaveBeenCalledWith(
       "Organization membership synchronization could not refresh 1 of 1 organizations. Failed rosters were left unchanged and will be retried later.",
     );
   });
 
-  it("keeps a failed background organization-list request from rejecting after the response", async () => {
+  it("logs the error that causes a failed background organization-list request", async () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    cgs.fetchAllCgsGroupMembershipsWithCookie.mockRejectedValue(new Error("private upstream details"));
+    const error = new Error("private upstream details");
+    cgs.fetchAllCgsGroupMembershipsWithCookie.mockRejectedValue(error);
 
     scheduleOrganizationMembershipSync({
       isLoggedIn: true,
@@ -203,6 +214,7 @@ describe("scheduleOrganizationMembershipSync", () => {
     await expect(callback()).resolves.toBeUndefined();
     expect(consoleError).toHaveBeenCalledWith(
       "Organization membership synchronization failed. It will be retried after a future authenticated app load.",
+      error,
     );
   });
 });

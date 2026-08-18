@@ -65,9 +65,13 @@ export async function syncOrganizationMemberships({
 
       if (applied) result.synced += 1;
       else result.skipped += 1;
-    } catch {
+    } catch (error) {
       // One unavailable organization must not prevent another accessible
       // organization from refreshing its roster.
+      console.error(
+        `Organization membership synchronization could not refresh the roster for ${group.groupDid}. Failed rosters are left unchanged and will be retried later.`,
+        error,
+      );
       result.failed += 1;
     }
   }
@@ -86,9 +90,10 @@ export function scheduleOrganizationMembershipSync(session: AuthSession, cookie:
           `Organization membership synchronization could not refresh ${result.failed} of ${result.organizations} organizations. Failed rosters were left unchanged and will be retried later.`,
         );
       }
-    } catch {
+    } catch (error) {
       console.error(
         "Organization membership synchronization failed. It will be retried after a future authenticated app load.",
+        error,
       );
     }
   });
