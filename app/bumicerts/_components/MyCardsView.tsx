@@ -28,16 +28,12 @@ export function MyCardsView({
   const reduceMotion = useReducedMotion();
 
   return (
-    <div className="min-h-full px-4 py-8 sm:px-6 sm:py-12">
+    <div className="min-h-full px-4 py-10 sm:px-6 sm:py-14">
       <div className="mx-auto max-w-6xl">
-        <div className="flex items-center gap-2 text-primary">
-          <SparklesIcon className="size-5" aria-hidden />
-          <span className="text-xs font-semibold uppercase tracking-[0.18em]">{t("eyebrow")}</span>
-        </div>
-        <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">{t("title")}</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">{t("description")}</p>
+            <h1 className="font-instrument text-4xl italic tracking-tight text-foreground sm:text-5xl">{t("title")}</h1>
+            <p className="mt-3 max-w-prose text-muted-foreground">{t("description")}</p>
           </div>
           {cards.length > 0 ? (
             <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">
@@ -70,7 +66,7 @@ export function MyCardsView({
             <p className="font-instrument text-2xl italic text-foreground">{t("unavailableTitle")}</p>
             <p className="max-w-md text-sm text-muted-foreground">{t("unavailableBody")}</p>
             <Button asChild variant="outline" className="mt-1 shadow-none">
-              <Link href="/cards">{t("tryAgain")}</Link>
+              <Link href="/bumicerts">{t("tryAgain")}</Link>
             </Button>
           </div>
         ) : cards.length === 0 ? (

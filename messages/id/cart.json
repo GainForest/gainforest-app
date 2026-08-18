@@ -308,7 +308,7 @@
   "myCards": {
     "eyebrow": "Koleksi",
     "title": "Bumicerts Saya",
-    "description": "Setiap Bumicert berasal dari tanda terima donasi proyek terverifikasi yang terhubung ke akun Anda.",
+    "description": "Setiap Bumicert berasal dari tanda terima donasi terverifikasi yang tertaut ke akunmu.",
     "count": "{count, plural, one {# Bumicert} other {# Bumicerts}}",
     "emptyTitle": "Belum ada Bumicerts",
     "emptyBody": "Berdonasilah ke proyek saat masuk dan menampilkan nama Anda untuk mendapatkan Bumicert pertama.",
@@ -323,6 +323,7 @@
     "fallbackOrganization": "Tim proyek",
     "fallbackRecipient": "Anggota komunitas",
     "fallbackPersonContext": "Dukungan langsung",
+    "fallbackAccount": "Akun yang kamu dukung",
     "verifiedDonation": "Donasi terverifikasi",
     "viewProject": "Lihat proyek",
     "viewProfile": "Lihat profil",

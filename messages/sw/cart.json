@@ -308,7 +308,7 @@
   "myCards": {
     "eyebrow": "Bumicerts za kukusanya",
     "title": "Bumicerts Zangu",
-    "description": "Kila Bumicert hutokana na risiti ya mchango wa mradi iliyothibitishwa na kuunganishwa na akaunti yako.",
+    "description": "Kila Bumicert hutoka kwa risiti ya mchango iliyothibitishwa iliyounganishwa na akaunti yako.",
     "count": "{count, plural, one {Bumicert #} other {Bumicerts #}}",
     "emptyTitle": "Bado hakuna Bumicerts",
     "emptyBody": "Changia mradi ukiwa umeingia na ukionyesha jina lako ili kupata Bumicert yako ya kwanza.",
@@ -323,6 +323,7 @@
     "fallbackOrganization": "Timu ya mradi",
     "fallbackRecipient": "Mwanajamii",
     "fallbackPersonContext": "Msaada wa moja kwa moja",
+    "fallbackAccount": "Akaunti uliyoisaidia",
     "verifiedDonation": "Mchango uliothibitishwa",
     "viewProject": "Tazama mradi",
     "viewProfile": "Tazama wasifu",

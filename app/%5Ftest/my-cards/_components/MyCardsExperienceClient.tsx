@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ArrowLeftIcon, FlaskConicalIcon, ShieldCheckIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { MyCardsView } from "@/app/cards/_components/MyCardsView";
+import { MyCardsView } from "@/app/bumicerts/_components/MyCardsView";
 import { buildRewardCards, type RewardLine } from "@/app/checkout/_components/reward-model";
 import type { EarnedCard } from "@/app/_components/rewards/earned-card";
 

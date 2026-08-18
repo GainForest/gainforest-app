@@ -1,6 +1,6 @@
 export default function MyCardsLoading() {
   return (
-    <div className="min-h-full px-4 py-8 sm:px-6 sm:py-12" aria-busy="true">
+    <div className="min-h-full px-4 py-10 sm:px-6 sm:py-14" aria-busy="true">
       <div className="mx-auto max-w-6xl">
         <div className="h-4 w-28 animate-pulse rounded-full bg-muted" />
         <div className="mt-4 h-12 w-56 max-w-full animate-pulse rounded-xl bg-muted" />

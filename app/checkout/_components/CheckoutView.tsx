@@ -735,7 +735,7 @@ export function CheckoutView({
   const rewardCards = authSession.isLoggedIn && !anonymous ? buildRewardCards(completed) : [];
   const recentReceiptQuery = new URLSearchParams();
   for (const card of rewardCards) recentReceiptQuery.append("receipt", card.lines[0]?.receiptUri ?? "");
-  const cardsHref = recentReceiptQuery.size > 0 ? `/cards?${recentReceiptQuery.toString()}` : "/cards";
+  const cardsHref = recentReceiptQuery.size > 0 ? `/bumicerts?${recentReceiptQuery.toString()}` : "/bumicerts";
 
   if (!hydrated) {
     return <div className="mx-auto w-full max-w-5xl px-4 py-10" aria-busy="true" />;
