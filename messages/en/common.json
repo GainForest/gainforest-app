@@ -1358,7 +1358,8 @@
       "awardEndorsements": "Award endorsements",
       "facilitator": "Facilitator wallet",
       "dataJobs": "Data batches",
-      "blockedDomains": "Blocked addresses"
+      "blockedDomains": "Blocked addresses",
+      "walletConnections": "Wallet connections"
     },
     "unnamed": "Unnamed account",
     "awardHint": "Open a profile to award a badge.",
@@ -1440,7 +1441,7 @@
       },
       "people": {
         "title": "People",
-        "subtitle": "Everyone running a Tainá field assistant, the organizations that can endorse accounts, and the badges GainForest awards."
+        "subtitle": "Everyone running a Tainá field assistant, the accounts with connected wallets, the organizations that can endorse accounts, and the badges GainForest awards."
       },
       "trust": {
         "title": "Trust & safety",
@@ -3952,5 +3953,24 @@
         "description": "Data labelled and at least one public update posted on Bumicerts."
       }
     }
+  },
+  "adminWalletConnections": {
+    "title": "Connected wallets",
+    "description": "Look up an account by name, handle or DID to see which wallets it has connected — a donation wallet and/or linked EVM wallets.",
+    "prompt": "Search for an account by name, handle or DID to see its wallets.",
+    "minChars": "Type at least {count} characters to search.",
+    "searching": "Searching…",
+    "unavailable": "The search couldn't be completed right now. Try again in a moment.",
+    "searchPlaceholder": "Search by name, handle or DID…",
+    "noMatches": "No account found that matches your search.",
+    "person": "Person",
+    "organization": "Organization",
+    "vaultWallet": "Donation wallet",
+    "linkedWallet": "Linked wallet",
+    "unnamed": "Unnamed account",
+    "noWallet": "No wallet connected.",
+    "legacy": "legacy",
+    "signers": "{count} signers",
+    "unverified": "unverified"
   }
 }

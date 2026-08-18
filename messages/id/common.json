@@ -1358,7 +1358,8 @@
       "awardEndorsements": "Berikan dukungan",
       "facilitator": "Dompet fasilitator",
       "dataJobs": "Batch data",
-      "blockedDomains": "Alamat diblokir"
+      "blockedDomains": "Alamat diblokir",
+      "walletConnections": "Dompet terhubung"
     },
     "unnamed": "Akun tanpa nama",
     "awardHint": "Buka profil untuk memberikan lencana.",
@@ -1440,7 +1441,7 @@
       },
       "people": {
         "title": "Orang",
-        "subtitle": "Semua orang yang menjalankan asisten lapangan Tainá, organisasi yang dapat mendukung akun, dan lencana yang diberikan GainForest."
+        "subtitle": "Semua orang yang menjalankan asisten lapangan Tainá, akun dengan dompet terhubung, organisasi yang dapat mendukung akun, dan lencana yang diberikan GainForest."
       },
       "trust": {
         "title": "Kepercayaan & keamanan",
@@ -3952,5 +3953,24 @@
         "description": "Data diberi label dan setidaknya satu pembaruan publik telah diposting di Bumicerts."
       }
     }
+  },
+  "adminWalletConnections": {
+    "title": "Dompet terhubung",
+    "description": "Cari akun berdasarkan nama, alamat, atau DID untuk melihat dompet yang telah dihubungkan — dompet donasi dan/atau dompet EVM tertaut.",
+    "prompt": "Cari akun berdasarkan nama, alamat, atau DID untuk melihat dompetnya.",
+    "minChars": "Ketik setidaknya {count} karakter untuk mencari.",
+    "searching": "Mencari…",
+    "unavailable": "Pencarian tidak dapat diselesaikan saat ini. Coba lagi sebentar lagi.",
+    "searchPlaceholder": "Cari berdasarkan nama, alamat, atau DID…",
+    "noMatches": "Tidak ada akun yang cocok dengan pencarian Anda.",
+    "person": "Orang",
+    "organization": "Organisasi",
+    "vaultWallet": "Dompet donasi",
+    "linkedWallet": "Dompet tertaut",
+    "unnamed": "Akun tanpa nama",
+    "noWallet": "Tidak ada dompet terhubung.",
+    "legacy": "lama",
+    "signers": "{count} penandatangan",
+    "unverified": "belum diverifikasi"
   }
 }

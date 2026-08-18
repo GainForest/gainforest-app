@@ -1358,7 +1358,8 @@
       "awardEndorsements": "Toa idhini",
       "facilitator": "Pochi ya uwezeshaji",
       "dataJobs": "Makundi ya data",
-      "blockedDomains": "Anwani zilizozuiwa"
+      "blockedDomains": "Anwani zilizozuiwa",
+      "walletConnections": "Pochi zilizounganishwa"
     },
     "unnamed": "Akaunti isiyo na jina",
     "awardHint": "Fungua wasifu ili kutoa beji.",
@@ -1440,7 +1441,7 @@
       },
       "people": {
         "title": "Watu",
-        "subtitle": "Kila mtu anayetumia msaidizi wa uwandani Tainá, mashirika yanayoweza kudhamini akaunti, na beji zinazotolewa na GainForest."
+        "subtitle": "Kila mtu anayetumia msaidizi wa uwandani Tainá, akaunti zilizo na pochi zilizounganishwa, mashirika yanayoweza kudhamini akaunti, na beji zinazotolewa na GainForest."
       },
       "trust": {
         "title": "Uaminifu na usalama",
@@ -3952,5 +3953,24 @@
         "description": "Data imewekwa lebo na angalau sasisho moja la umma limechapishwa kwenye Bumicerts."
       }
     }
+  },
+  "adminWalletConnections": {
+    "title": "Pochi zilizounganishwa",
+    "description": "Tafuta akaunti kwa jina, kitambulishi, au DID ili kuona ni pochi zipi zilizounganishwa — pochi ya mchango na/au pochi za EVM zilizounganishwa.",
+    "prompt": "Tafuta akaunti kwa jina, kitambulishi, au DID ili kuona pochi zake.",
+    "minChars": "Andika angalau herufi {count} kutafuta.",
+    "searching": "Inatafuta…",
+    "unavailable": "Utafutaji haukuweza kukamilika kwa sasa. Jaribu tena baada ya muda.",
+    "searchPlaceholder": "Tafuta kwa jina, kitambulishi, au DID…",
+    "noMatches": "Hakuna akaunti inayolingana na utafutaji wako.",
+    "person": "Mtu",
+    "organization": "Shirika",
+    "vaultWallet": "Pochi ya mchango",
+    "linkedWallet": "Pochi iliyounganishwa",
+    "unnamed": "Akaunti isiyo na jina",
+    "noWallet": "Hakuna pochi iliyounganishwa.",
+    "legacy": "ya zamani",
+    "signers": "watia saini {count}",
+    "unverified": "hajathibitishwa"
   }
 }
