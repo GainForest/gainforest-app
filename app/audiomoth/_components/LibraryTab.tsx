@@ -26,6 +26,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AudioLinesIcon, CheckIcon, Loader2Icon, PlusIcon, UploadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useModal } from "@/components/ui/modal/context";
 import { canDeleteRecord } from "@/app/(manage)/manage/_lib/cgs-permissions";
 import {
   useAccountList,
@@ -50,8 +51,8 @@ export function LibraryTab({ sessionDid }: { sessionDid: string | null }) {
   const acting = useActingRepo(sessionDid);
   const [activeContext] = useActiveAccountContext(sessionDid ?? "");
   const { groups } = useAccountList(sessionDid);
+  const modal = useModal();
 
-  const [creating, setCreating] = useState(false);
   /* Bumped when a deployment is created here, so the viewer refetches and
      the new (still empty) deployment appears in the list right away. */
   const [refreshToken, setRefreshToken] = useState(0);
@@ -102,6 +103,34 @@ export function LibraryTab({ sessionDid }: { sessionDid: string | null }) {
     return canDeleteRecord({ kind: "group", role }).allowed;
   }, [acting.did, activeContext, groups, isGroup]);
 
+  /**
+   * Open the create-deployment dialog through the shared modal, so it gets the
+   * same faded backdrop and chrome as every other dialog. The attach target is
+   * captured now, so a deployment created here still adopts the pending upload.
+   */
+  const openCreate = () => {
+    if (!sessionDid) return;
+    modal.pushModal(
+      {
+        id: "create-deployment",
+        dialogWidth: "max-w-md w-[calc(100%-2rem)]",
+        fullscreenOnMobile: true,
+        content: (
+          <CreateDeploymentDialog
+            sessionDid={sessionDid}
+            repoDid={showAttachPill && attachInfo?.repoDid ? attachInfo.repoDid : (acting.repo ?? null)}
+            onCreated={(created) => {
+              setRefreshToken((value) => value + 1);
+              if (showAttachPill) attachBatchTo(created.acDeploymentUri);
+            }}
+          />
+        ),
+      },
+      true,
+    );
+    void modal.show();
+  };
+
   if (!sessionDid || !acting.did) {
     return (
       <div className="rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-12 text-center">
@@ -136,7 +165,7 @@ export function LibraryTab({ sessionDid }: { sessionDid: string | null }) {
             </span>
           </p>
           {attachState.phase === "waiting" || attachState.phase === "failed" ? (
-            <Button size="sm" variant="outline" className="rounded-full" onClick={() => setCreating(true)}>
+            <Button size="sm" variant="outline" className="rounded-full" onClick={openCreate}>
               <PlusIcon className="size-4" />
               {tDeployments("createButton")}
             </Button>
@@ -174,7 +203,7 @@ export function LibraryTab({ sessionDid }: { sessionDid: string | null }) {
                 </Link>
               </Button>
             ) : null}
-            <Button size="sm" onClick={() => setCreating(true)}>
+            <Button size="sm" onClick={openCreate}>
               <PlusIcon className="size-4" />
               {tDeployments("createButton")}
             </Button>
@@ -196,18 +225,6 @@ export function LibraryTab({ sessionDid }: { sessionDid: string | null }) {
         onStats={setStats}
         embedded
       />
-
-      {creating ? (
-        <CreateDeploymentDialog
-          sessionDid={sessionDid}
-          repoDid={showAttachPill && attachInfo?.repoDid ? attachInfo.repoDid : (acting.repo ?? null)}
-          onClose={() => setCreating(false)}
-          onCreated={(created) => {
-            setRefreshToken((value) => value + 1);
-            if (showAttachPill) attachBatchTo(created.acDeploymentUri);
-          }}
-        />
-      ) : null}
     </div>
   );
 }
