@@ -3519,7 +3519,9 @@
       "reset": "Dia inteiro",
       "empty": "Sem gravações nesta parte do dia",
       "recordingsTitle": "Gravações à vista",
+      "recordingsTitleAll": "Todas as gravações",
       "recordingsCount": "{count, plural, one {# gravação} other {# gravações}}",
+      "recordingsCountOf": "{count} de {total, plural, one {# gravação} other {# gravações}}",
       "recordingsEmpty": "Não há gravações neste horário — reduza o zoom ou use ‹ e › para ver outra parte do dia."
     },
     "published": {

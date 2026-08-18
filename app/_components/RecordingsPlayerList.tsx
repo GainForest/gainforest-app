@@ -50,6 +50,7 @@ export function RecordingsPlayerList({
   selectedUris,
   onToggleSelect,
   onPlay,
+  activeUri,
 }: {
   did: string;
   host: string | null;
@@ -66,6 +67,11 @@ export function RecordingsPlayerList({
   /** Called when a row starts playing, so a sibling player (e.g. a soundscape
    *  dial) can clear its own "now playing" state. */
   onPlay?: () => void;
+  /** AT-URI of a recording playing through a sibling player (a soundscape
+   *  dial). Its row is highlighted and scrolled into view so the listener can
+   *  see the spectrogram of what they hear — without this list taking over
+   *  the playback itself. */
+  activeUri?: string | null;
 }) {
   const t = useTranslations("common.audiomoth.recordings");
 
@@ -164,27 +170,65 @@ export function RecordingsPlayerList({
 
   const shown = useMemo(() => items.slice(0, visible), [items, visible]);
 
-  /* Measure a real row once it's on screen so the cap matches its height. */
+  /* A recording started elsewhere (the dial): reveal its row — page it in if
+     it sits beyond the fold, then bring it into the scroll viewport. Done once
+     per URI, so the reader can still scroll away while it keeps playing. */
+  const revealedUriRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!activeUri) {
+      revealedUriRef.current = null;
+      return;
+    }
+    if (revealedUriRef.current === activeUri) return;
+    const index = items.findIndex((item) => item.uri === activeUri);
+    if (index < 0) return;
+    if (index >= visible) {
+      setVisible(Math.ceil((index + 1) / PAGE_SIZE) * PAGE_SIZE);
+      return; // effect re-runs once the row exists
+    }
+    const list = listRef.current;
+    const row = list?.querySelector<HTMLElement>(`li[data-uri="${CSS.escape(activeUri)}"]`);
+    if (!list || !row) return;
+    const rowTop = row.getBoundingClientRect().top - list.getBoundingClientRect().top + list.scrollTop;
+    const rowHeight = row.offsetHeight;
+    if (rowTop < list.scrollTop || rowTop + rowHeight > list.scrollTop + list.clientHeight) {
+      list.scrollTo({
+        top: Math.max(0, rowTop - (list.clientHeight - rowHeight) / 2),
+        behavior: "smooth",
+      });
+    }
+    revealedUriRef.current = activeUri;
+  }, [activeUri, items, visible]);
+
+  /* Measure a real row once it's on screen so the cap matches its height.
+     Re-observed whenever the rows change — not just their count — because a
+     changed list (zooming a soundscape swaps the items wholesale) unmounts
+     the observed row, and a detached row measures 0. The zero-guard keeps
+     that final observer tick from collapsing the list to nothing. */
   useEffect(() => {
     const first = listRef.current?.firstElementChild as HTMLElement | null;
     if (!first) return;
-    const measure = () => setMaxHeight(rowsCapPx(first.offsetHeight));
+    const measure = () => {
+      if (first.offsetHeight > 0) setMaxHeight(rowsCapPx(first.offsetHeight));
+    };
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(first);
     return () => observer.disconnect();
-  }, [shown.length]);
+  }, [shown]);
 
   return (
     <>
       <ul ref={listRef} className="flex flex-col gap-1.5 overflow-y-auto pr-1" style={{ maxHeight }}>
         {shown.map((item) => {
           const playing = playingUri === item.uri;
+          const active = playing || activeUri === item.uri;
           const progress = playing && trackDuration > 0 ? position / trackDuration : 0;
           const selected = selectable && (selectedUris?.has(item.uri) ?? false);
           return (
             <li
               key={item.uri}
+              data-uri={item.uri}
               onClick={selectable ? (e) => onToggleSelect?.(item, e.shiftKey) : undefined}
               aria-selected={selectable ? selected : undefined}
               className={cn(
@@ -192,7 +236,7 @@ export function RecordingsPlayerList({
                 selectable && "cursor-pointer select-none",
                 selected
                   ? "border-primary/50 bg-primary/[0.07]"
-                  : playing
+                  : active
                     ? "border-primary/40 bg-primary/[0.04]"
                     : selectable
                       ? "border-border/70 hover:bg-muted/50"

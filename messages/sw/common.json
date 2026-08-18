@@ -3519,7 +3519,9 @@
       "reset": "Siku nzima",
       "empty": "Hakuna rekodi katika sehemu hii ya siku",
       "recordingsTitle": "Rekodi zinazoonekana",
+      "recordingsTitleAll": "Rekodi zote",
       "recordingsCount": "{count, plural, one {rekodi #} other {rekodi #}}",
+      "recordingsCountOf": "{count} kati ya {total, plural, one {rekodi #} other {rekodi #}}",
       "recordingsEmpty": "Hakuna rekodi kwa wakati huu — punguza ukuzaji, au tumia ‹ na › kuangalia sehemu nyingine ya siku."
     },
     "published": {

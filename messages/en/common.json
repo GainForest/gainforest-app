@@ -3519,7 +3519,9 @@
       "reset": "Whole day",
       "empty": "No recordings in this part of the day",
       "recordingsTitle": "Recordings in view",
+      "recordingsTitleAll": "All recordings",
       "recordingsCount": "{count, plural, one {# recording} other {# recordings}}",
+      "recordingsCountOf": "{count} of {total, plural, one {# recording} other {# recordings}}",
       "recordingsEmpty": "No recordings at this time — zoom out, or use ‹ and › to look at another part of the day."
     },
     "published": {

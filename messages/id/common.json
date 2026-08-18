@@ -3519,7 +3519,9 @@
       "reset": "Sepanjang hari",
       "empty": "Tidak ada rekaman pada bagian hari ini",
       "recordingsTitle": "Rekaman yang terlihat",
+      "recordingsTitleAll": "Semua rekaman",
       "recordingsCount": "{count, plural, other {# rekaman}}",
+      "recordingsCountOf": "{count} dari {total, plural, other {# rekaman}}",
       "recordingsEmpty": "Tidak ada rekaman pada waktu ini — perkecil, atau gunakan ‹ dan › untuk melihat bagian hari yang lain."
     },
     "published": {

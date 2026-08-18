@@ -7,16 +7,20 @@
  * permalink page.
  *
  * Everything needed to draw the dial is already in the record, so the chart
- * appears instantly for any reader — signed in or not. Audio is the expensive
- * part, so it stays lazy: clicking a time resolves *that* recording's
- * `ac.audio` record from the owner's PDS and plays its compact preview blob.
- * Nothing is downloaded until somebody asks to listen.
+ * appears instantly for any reader — signed in or not. Below it, the
+ * recordings behind the dial are always listed with their spectrograms — the
+ * whole set at first, narrowing to the slice in view as the reader zooms —
+ * with each row's small `ac.audio` record streamed in from the owner's PDS.
+ * Audio stays lazy: a recording's preview blob is only fetched when somebody
+ * asks to listen, from the dial or from a row.
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   AlertTriangleIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   Loader2Icon,
   MinusIcon,
   PlusIcon,
@@ -32,6 +36,7 @@ import {
   soundscapePoints,
   sourceForMinute,
   type PublishedSoundscape,
+  type SoundscapeSource,
 } from "@/lib/soundscape/record";
 import {
   FULL_DAY_WINDOW,
@@ -53,6 +58,37 @@ import { RecordingsPlayerList } from "@/app/_components/RecordingsPlayerList";
 
 /** One notch of the zoom buttons — matches the workbench dial. */
 const ZOOM_STEP = 1.6;
+
+/** How many `ac.audio` records are resolved at once while the list hydrates.
+ *  A soundscape can point at hundreds of recordings; resolving them in small
+ *  waves keeps the owner's PDS comfortable and lets rows appear as they land
+ *  instead of all at once at the end. */
+const HYDRATE_BATCH = 8;
+
+/** A listed recording whose own record can't be fetched (deleted, or its PDS
+ *  unreachable): the soundscape record still knows its name and time, so the
+ *  row is shown unplayable rather than silently dropped — the list must never
+ *  count fewer recordings than the dial draws. */
+function unplayableItem(source: SoundscapeSource, did: string): AcAudioListItem {
+  const hours = String(Math.floor(source.minuteOfDay / 60)).padStart(2, "0");
+  const minutes = String(source.minuteOfDay % 60).padStart(2, "0");
+  return {
+    uri: source.audioUri,
+    rkey: source.audioUri.split("/").pop() ?? "",
+    cid: "",
+    did,
+    name: source.name,
+    recordedAt: `${source.date}T${hours}:${minutes}:00`,
+    durationSeconds: null,
+    sampleRate: null,
+    previewCid: null,
+    previewMimeType: null,
+    spectrogramCid: null,
+    accessUri: null,
+    deploymentRef: null,
+    createdAt: new Date(0).toISOString(),
+  };
+}
 
 export function PublishedSoundscapeView({
   soundscape,
@@ -80,11 +116,13 @@ export function PublishedSoundscapeView({
     toggle: playSource,
   } = useSoundscapePlayback();
 
-  /* The owner's PDS host + each in-view recording's full record, resolved on
-     demand so the list below can show spectrograms, play, and download — the
-     soundscape record stores only a pointer per source. */
+  /* The owner's PDS host + each recording's full record, resolved on demand
+     so the list below can show spectrograms, play, and download — the
+     soundscape record stores only a pointer per source. `null` marks a record
+     that could not be fetched, so it is neither retried forever nor dropped
+     from the list. */
   const [host, setHost] = useState<string | null>(null);
-  const [recordItems, setRecordItems] = useState<Map<string, AcAudioListItem>>(() => new Map());
+  const [recordItems, setRecordItems] = useState<Map<string, AcAudioListItem | null>>(() => new Map());
 
   /* Resolve the owner's PDS host once (a cached DID-doc lookup, shared with the
      per-recording reads below). */
@@ -176,42 +214,62 @@ export function PublishedSoundscapeView({
     [soundscape.sources, zoom],
   );
 
-  /* Hydrate the in-view recordings from their own records — just the handful
-     inside the current zoom window, each fetched once and kept. */
+  /** Every source, in the order it should hydrate: what's inside the zoom
+   *  window first (top of the list first), then the rest of the day so
+   *  zooming back out finds its rows already resolved. */
+  const hydrateQueue = useMemo(() => {
+    const queue: string[] = [];
+    const seen = new Set<string>();
+    for (const source of [...sourcesInView, ...soundscape.sources]) {
+      if (seen.has(source.audioUri)) continue;
+      seen.add(source.audioUri);
+      queue.push(source.audioUri);
+    }
+    return queue;
+  }, [sourcesInView, soundscape.sources]);
+
+  /* Hydrate recordings from their own records, one small wave at a time.
+     Each wave writes its results into `recordItems`, which re-runs this
+     effect for the next wave until nothing is missing — so rows stream in
+     top-down, and changing the zoom mid-stream just reorders what's left.
+     Failures are recorded as `null` so they are not refetched every pass. */
   useEffect(() => {
-    const missing = sourcesInView
-      .map((source) => source.audioUri)
-      .filter((uri) => !recordItems.has(uri));
+    const missing = hydrateQueue.filter((uri) => !recordItems.has(uri));
     if (missing.length === 0) return;
+    const batch = missing.slice(0, HYDRATE_BATCH);
     const controller = new AbortController();
     void (async () => {
       const resolved = await Promise.all(
-        missing.map((uri) => fetchRecordingByUri(uri, controller.signal).catch(() => null)),
+        batch.map((uri) => fetchRecordingByUri(uri, controller.signal).catch(() => null)),
       );
       if (controller.signal.aborted) return;
       setRecordItems((current) => {
-        let changed = false;
         const next = new Map(current);
-        resolved.forEach((item, index) => {
-          if (item && !next.has(missing[index])) {
-            next.set(missing[index], item);
-            changed = true;
-          }
+        batch.forEach((uri, index) => {
+          if (!next.has(uri)) next.set(uri, resolved[index]);
         });
-        return changed ? next : current;
+        return next;
       });
     })();
     return () => controller.abort();
-  }, [sourcesInView, recordItems]);
+  }, [hydrateQueue, recordItems]);
 
-  /** In-view recordings whose records have resolved, kept in dial order. */
+  /** In-view rows in dial order: resolved records as they stream in, plus an
+   *  unplayable stand-in for any record that could not be fetched. Sources
+   *  still being resolved are simply not listed yet. */
   const inViewItems = useMemo(
     () =>
-      sourcesInView
-        .map((source) => recordItems.get(source.audioUri))
-        .filter((item): item is AcAudioListItem => Boolean(item)),
-    [sourcesInView, recordItems],
+      sourcesInView.flatMap((source) => {
+        const settled = recordItems.get(source.audioUri);
+        if (settled) return [settled];
+        if (settled === null) return [unplayableItem(source, did)];
+        return [];
+      }),
+    [sourcesInView, recordItems, did],
   );
+
+  /** In-view sources whose records are still on their way. */
+  const pendingCount = sourcesInView.length - inViewItems.length;
 
   return (
     <div className={cn("flex flex-col gap-4", className)}>
@@ -262,17 +320,41 @@ export function PublishedSoundscapeView({
                 })}
           </span>
           {!isFullDay(zoom) ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="size-8"
-              aria-label={t("zoom.zoomOut")}
-              title={t("zoom.zoomOut")}
-              onClick={() => zoomBy(ZOOM_STEP)}
-            >
-              <MinusIcon className="size-4" />
-            </Button>
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="size-8"
+                aria-label={t("zoom.earlier")}
+                title={t("zoom.earlier")}
+                onClick={() => setZoom((current) => panWindow(current, -current.span / 2))}
+              >
+                <ChevronLeftIcon className="size-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="size-8"
+                aria-label={t("zoom.later")}
+                title={t("zoom.later")}
+                onClick={() => setZoom((current) => panWindow(current, current.span / 2))}
+              >
+                <ChevronRightIcon className="size-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="size-8"
+                aria-label={t("zoom.zoomOut")}
+                title={t("zoom.zoomOut")}
+                onClick={() => zoomBy(ZOOM_STEP)}
+              >
+                <MinusIcon className="size-4" />
+              </Button>
+            </>
           ) : null}
           <Button
             type="button"
@@ -360,29 +442,45 @@ export function PublishedSoundscapeView({
         </aside>
       </div>
 
-      {!isFullDay(zoom) ? (
-        <div className="rounded-xl border bg-card/40">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b px-3 py-2.5">
-            <p className="text-sm font-medium text-foreground">{t("zoom.recordingsTitle")}</p>
-            <p className="text-xs tabular-nums text-muted-foreground">
-              {t("zoom.recordingsCount", { count: sourcesInView.length })}
-            </p>
-          </div>
-          {sourcesInView.length === 0 ? (
-            <p className="px-3 py-6 text-center text-sm text-muted-foreground">{t("zoom.recordingsEmpty")}</p>
-          ) : inViewItems.length === 0 ? (
-            <div className="flex flex-col gap-1.5 p-3" aria-hidden>
-              {sourcesInView.slice(0, 4).map((source) => (
-                <div key={source.audioUri} className="h-[4.5rem] animate-pulse rounded-xl bg-muted" />
-              ))}
-            </div>
-          ) : (
-            <div className="p-3">
-              <RecordingsPlayerList did={did} host={host} items={inViewItems} onPlay={stopPlayback} />
-            </div>
-          )}
+      {/* The recordings themselves — always on show, so the spectrograms can
+          be read against the dial without knowing about the zoom buttons.
+          Whole day: every recording behind the soundscape. Zoomed: just the
+          slice in view, with the count saying how much of the whole that is. */}
+      <div className="rounded-xl border bg-card/40">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b px-3 py-2.5">
+          <p className="text-sm font-medium text-foreground">
+            {isFullDay(zoom) ? t("zoom.recordingsTitleAll") : t("zoom.recordingsTitle")}
+          </p>
+          <p className="flex items-center gap-1.5 text-xs tabular-nums text-muted-foreground">
+            {pendingCount > 0 ? <Loader2Icon aria-hidden className="size-3 animate-spin" /> : null}
+            {isFullDay(zoom)
+              ? t("zoom.recordingsCount", { count: sourcesInView.length })
+              : t("zoom.recordingsCountOf", {
+                  count: sourcesInView.length,
+                  total: soundscape.sources.length,
+                })}
+          </p>
         </div>
-      ) : null}
+        {sourcesInView.length === 0 ? (
+          <p className="px-3 py-6 text-center text-sm text-muted-foreground">{t("zoom.recordingsEmpty")}</p>
+        ) : inViewItems.length === 0 ? (
+          <div className="flex flex-col gap-1.5 p-3" aria-hidden>
+            {sourcesInView.slice(0, 4).map((source) => (
+              <div key={source.audioUri} className="h-[4.5rem] animate-pulse rounded-xl bg-muted" />
+            ))}
+          </div>
+        ) : (
+          <div className="p-3">
+            <RecordingsPlayerList
+              did={did}
+              host={host}
+              items={inViewItems}
+              activeUri={player?.audioUri ?? null}
+              onPlay={stopPlayback}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
