@@ -20,6 +20,7 @@ import {
   type EquipmentStatusTone,
 } from "@/app/_lib/equipment";
 import { EquipmentEditor, NativeSelect, type EquipmentEditorState } from "./EquipmentEditor";
+import { useModal } from "@/components/ui/modal/context";
 import { monogram, resolveDidProfile, type DidProfile } from "@/app/_lib/did-profile";
 import { formatRelative, shortDid } from "@/app/_lib/format";
 import { accountEquipmentPath } from "../_lib/account-route";
@@ -55,7 +56,7 @@ export function EquipmentSection({
 
   const [items, setItems] = useState<EquipmentItem[] | null>(null);
   const [loadError, setLoadError] = useState(false);
-  const [editor, setEditor] = useState<EquipmentEditorState | null>(null);
+  const modal = useModal();
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<EquipmentCategory | "all">("all");
   const [statusFilter, setStatusFilter] = useState<EquipmentStatus | "all">("all");
@@ -87,6 +88,31 @@ export function EquipmentSection({
     reload(ctrl.signal);
     return () => ctrl.abort();
   }, [reload]);
+
+  /**
+   * Open the equipment add/edit dialog through the shared modal, so it gets the
+   * same faded backdrop and chrome as every other dialog. Saving reloads the
+   * list; the dialog closes itself.
+   */
+  const openEditor = (state: EquipmentEditorState) => {
+    modal.pushModal(
+      {
+        id: "equipment-editor",
+        dialogWidth: "max-w-lg w-[calc(100%-2rem)]",
+        fullscreenOnMobile: true,
+        content: (
+          <EquipmentEditor
+            editor={state}
+            onSaved={async () => {
+              await reload();
+            }}
+          />
+        ),
+      },
+      true,
+    );
+    void modal.show();
+  };
 
   // Distinct repo owners (team members), for the member filter on org tabs.
   const owners = useMemo(() => {
@@ -125,7 +151,7 @@ export function EquipmentSection({
           {isOrg ? t("orgIntro") : t("personalIntro")}
         </p>
         {canAdd ? (
-          <Button size="sm" onClick={() => setEditor({ mode: "new" })} className="shrink-0">
+          <Button size="sm" onClick={() => openEditor({ mode: "new" })} className="shrink-0">
             <PlusIcon />
             {t("addEquipment")}
           </Button>
@@ -200,7 +226,7 @@ export function EquipmentSection({
             profiles={profiles}
             viewerDid={viewerDid}
             showMember={isOrg}
-            onEdit={(item) => setEditor({ mode: "edit", item })}
+            onEdit={(item) => openEditor({ mode: "edit", item })}
           />
           <p className="mt-2 text-xs text-muted-foreground">
             {filtered.length === items.length
@@ -210,16 +236,6 @@ export function EquipmentSection({
         </>
       )}
 
-      {editor ? (
-        <EquipmentEditor
-          editor={editor}
-          onClose={() => setEditor(null)}
-          onSaved={async () => {
-            setEditor(null);
-            await reload();
-          }}
-        />
-      ) : null}
     </section>
   );
 }

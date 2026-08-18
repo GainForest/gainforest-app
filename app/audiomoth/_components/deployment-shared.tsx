@@ -16,12 +16,13 @@ import {
   Loader2Icon,
   LocateFixedIcon,
   Volume2Icon,
-  XIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ModalContent, ModalDescription, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
+import { useModal } from "@/components/ui/modal/context";
 import { cn } from "@/lib/utils";
 import {
   generateChime,
@@ -88,7 +89,6 @@ type CreateStage = "form" | "playing" | "done";
 export function CreateDeploymentDialog({
   sessionDid,
   repoDid = null,
-  onClose,
   onCreated,
 }: {
   sessionDid: string;
@@ -99,11 +99,11 @@ export function CreateDeploymentDialog({
    * repo). Null = the signed-in user's own.
    */
   repoDid?: string | null;
-  onClose: () => void;
   /** Reports the companion recorder-deployment record, when it could be saved. */
   onCreated: (created: { acDeploymentUri: string | null }) => void;
 }) {
   const t = useTranslations("common.audiomoth.deployments");
+  const modal = useModal();
 
   const [siteName, setSiteName] = useState("");
   const [deploymentId] = useState(() => randomDeploymentIdHex());
@@ -120,18 +120,12 @@ export function CreateDeploymentDialog({
 
   const busy = stage === "playing" || replaying;
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !busy) onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    const original = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = original;
-    };
-  }, [busy, onClose]);
+  // Closing is the shared modal system's job now — Escape, the built-in X and
+  // an outside click all dismiss it; we just tear down the entry we pushed.
+  const close = useCallback(async () => {
+    await modal.hide();
+    modal.popModal();
+  }, [modal]);
 
   const selectedEquipment = useMemo(
     () => equipment?.find((item) => item.uri === equipmentUri) ?? null,
@@ -268,152 +262,147 @@ export function CreateDeploymentDialog({
   }, [deploymentId, lat, lon, t]);
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]" onClick={() => !busy && onClose()} />
-      <div className="relative flex max-h-full w-full max-w-md flex-col overflow-y-auto rounded-3xl border border-border bg-background shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-5 py-4 backdrop-blur-xl">
-          <h2 className="text-lg font-semibold text-foreground">{t("createTitle")}</h2>
-          <Button variant="ghost" size="icon-sm" onClick={() => !busy && onClose()} aria-label={t("close")}>
-            <XIcon />
-          </Button>
-        </div>
-
-        {stage === "done" ? (
-          <div className="flex flex-col items-center gap-4 px-5 py-10 text-center">
-            <span className="grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
-              <CheckIcon className="size-6" />
-            </span>
-            <div>
-              <p className="text-base font-medium text-foreground">{t("doneTitle")}</p>
-              <p className="mx-auto mt-1 max-w-[340px] text-sm text-muted-foreground">{t("doneBody")}</p>
-            </div>
-            {error ? <p className="text-sm text-destructive">{error}</p> : null}
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={replay} disabled={replaying}>
-                {replaying ? <Loader2Icon className="size-4 animate-spin" /> : <Volume2Icon className="size-4" />}
-                {t("playAgain")}
-              </Button>
-              <Button size="sm" onClick={onClose}>
-                {t("done")}
-              </Button>
-            </div>
+    <ModalContent dismissible={!busy} className="w-full">
+      {stage === "done" ? (
+        <div className="flex flex-col items-center gap-4 py-6 text-center">
+          <span className="grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
+            <CheckIcon className="size-6" />
+          </span>
+          <div>
+            <p data-modal-title className="text-base font-medium text-foreground">
+              {t("doneTitle")}
+            </p>
+            <p className="mx-auto mt-1 max-w-[340px] text-sm text-muted-foreground">{t("doneBody")}</p>
           </div>
-        ) : (
-          <>
-            <div className="flex flex-col gap-4 px-5 py-5">
-              <p className="text-sm text-muted-foreground">{t("createIntro")}</p>
+          {error ? <p className="text-sm text-destructive">{error}</p> : null}
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={replay} disabled={replaying}>
+              {replaying ? <Loader2Icon className="size-4 animate-spin" /> : <Volume2Icon className="size-4" />}
+              {t("playAgain")}
+            </Button>
+            <Button size="sm" onClick={() => void close()}>
+              {t("done")}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <ModalHeader>
+            <ModalTitle className="pr-8">{t("createTitle")}</ModalTitle>
+            <ModalDescription>{t("createIntro")}</ModalDescription>
+          </ModalHeader>
 
+          <div className="mt-4 flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="deploy-site-name">{t("siteNameLabel")}</Label>
+              <Input
+                id="deploy-site-name"
+                value={siteName}
+                onChange={(e) => setSiteName(e.target.value)}
+                placeholder={t("siteNamePlaceholder")}
+                disabled={busy}
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="deploy-id">{t("deploymentIdLabel")}</Label>
+              <Input
+                id="deploy-id"
+                value={deploymentId}
+                readOnly
+                aria-readonly
+                tabIndex={-1}
+                className="cursor-default bg-muted/40 font-mono text-muted-foreground"
+              />
+              <p className="text-xs text-muted-foreground">{t("deploymentIdHint")}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="deploy-site-name">{t("siteNameLabel")}</Label>
+                <Label htmlFor="deploy-lat">{t("latitudeLabel")}</Label>
                 <Input
-                  id="deploy-site-name"
-                  value={siteName}
-                  onChange={(e) => setSiteName(e.target.value)}
-                  placeholder={t("siteNamePlaceholder")}
+                  id="deploy-lat"
+                  value={lat}
+                  onChange={(e) => setLat(e.target.value)}
+                  placeholder="-1.234567"
+                  className="font-mono"
                   disabled={busy}
                 />
               </div>
-
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="deploy-id">{t("deploymentIdLabel")}</Label>
+                <Label htmlFor="deploy-lon">{t("longitudeLabel")}</Label>
                 <Input
-                  id="deploy-id"
-                  value={deploymentId}
-                  readOnly
-                  aria-readonly
-                  tabIndex={-1}
-                  className="cursor-default bg-muted/40 font-mono text-muted-foreground"
+                  id="deploy-lon"
+                  value={lon}
+                  onChange={(e) => setLon(e.target.value)}
+                  placeholder="-77.891234"
+                  className="font-mono"
+                  disabled={busy}
                 />
-                <p className="text-xs text-muted-foreground">{t("deploymentIdHint")}</p>
               </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="deploy-lat">{t("latitudeLabel")}</Label>
-                  <Input
-                    id="deploy-lat"
-                    value={lat}
-                    onChange={(e) => setLat(e.target.value)}
-                    placeholder="-1.234567"
-                    className="font-mono"
-                    disabled={busy}
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="deploy-lon">{t("longitudeLabel")}</Label>
-                  <Input
-                    id="deploy-lon"
-                    value={lon}
-                    onChange={(e) => setLon(e.target.value)}
-                    placeholder="-77.891234"
-                    className="font-mono"
-                    disabled={busy}
-                  />
-                </div>
-              </div>
+            <Button variant="outline" size="sm" onClick={useCurrentLocation} disabled={busy || locating}>
+              {locating ? <Loader2Icon className="size-4 animate-spin" /> : <LocateFixedIcon className="size-4" />}
+              {t("useLocation")}
+            </Button>
 
-              <Button variant="outline" size="sm" onClick={useCurrentLocation} disabled={busy || locating}>
-                {locating ? <Loader2Icon className="size-4 animate-spin" /> : <LocateFixedIcon className="size-4" />}
-                {t("useLocation")}
-              </Button>
-
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="deploy-equipment">{t("equipmentLabel")}</Label>
-                <Select value={equipmentUri} onValueChange={setEquipmentUri} disabled={busy}>
-                  <SelectTrigger id="deploy-equipment">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">{t("equipmentNone")}</SelectItem>
-                    {(equipment ?? []).map((item) => (
-                      <SelectItem key={item.uri} value={item.uri}>
-                        {audioMothOptionLabel(item)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground">
-                  {equipment !== null && equipment.length === 0 ? t("equipmentEmpty") : t("equipmentHint")}
-                </p>
-              </div>
-
-              {selectedEquipment ? (
-                <p className="text-xs text-muted-foreground">
-                  <Link
-                    href={equipmentDetailPath(selectedEquipment.did, selectedEquipment.rkey)}
-                    className="underline underline-offset-2 hover:text-foreground"
-                  >
-                    {t("viewSelectedEquipment")}
-                  </Link>
-                </p>
-              ) : null}
-
-              {error ? (
-                <p className="rounded-xl bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive">{error}</p>
-              ) : null}
-
-              <p className={cn("text-xs text-muted-foreground", stage === "playing" && "text-primary")}>
-                {stage === "playing" ? t("playing") : t("chimeHint")}
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="deploy-equipment">{t("equipmentLabel")}</Label>
+              <Select value={equipmentUri} onValueChange={setEquipmentUri} disabled={busy}>
+                <SelectTrigger id="deploy-equipment">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">{t("equipmentNone")}</SelectItem>
+                  {(equipment ?? []).map((item) => (
+                    <SelectItem key={item.uri} value={item.uri}>
+                      {audioMothOptionLabel(item)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {equipment !== null && equipment.length === 0 ? t("equipmentEmpty") : t("equipmentHint")}
               </p>
             </div>
 
-            <div className="sticky bottom-0 mt-auto flex items-center justify-end gap-2 border-t border-border bg-background/95 px-5 py-4 backdrop-blur-xl">
-              <Button variant="outline" size="sm" onClick={() => !busy && onClose()} disabled={busy}>
-                {t("cancel")}
-              </Button>
-              <Button size="sm" onClick={createAndPlay} disabled={busy}>
-                {stage === "playing" ? (
-                  <Loader2Icon className="size-4 animate-spin" />
-                ) : (
-                  <Volume2Icon className="size-4" />
-                )}
-                {stage === "playing" ? t("playing") : t("playAndSave")}
-              </Button>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
+            {selectedEquipment ? (
+              <p className="text-xs text-muted-foreground">
+                <Link
+                  href={equipmentDetailPath(selectedEquipment.did, selectedEquipment.rkey)}
+                  className="underline underline-offset-2 hover:text-foreground"
+                >
+                  {t("viewSelectedEquipment")}
+                </Link>
+              </p>
+            ) : null}
+
+            {error ? (
+              <p className="rounded-xl bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive">{error}</p>
+            ) : null}
+
+            <p className={cn("text-xs text-muted-foreground", stage === "playing" && "text-primary")}>
+              {stage === "playing" ? t("playing") : t("chimeHint")}
+            </p>
+          </div>
+
+          <div className="mt-6 flex items-center justify-end gap-2">
+            <Button variant="outline" size="sm" onClick={() => void close()} disabled={busy}>
+              {t("cancel")}
+            </Button>
+            <Button size="sm" onClick={createAndPlay} disabled={busy}>
+              {stage === "playing" ? (
+                <Loader2Icon className="size-4 animate-spin" />
+              ) : (
+                <Volume2Icon className="size-4" />
+              )}
+              {stage === "playing" ? t("playing") : t("playAndSave")}
+            </Button>
+          </div>
+        </>
+      )}
+    </ModalContent>
   );
 }
 
@@ -425,15 +414,14 @@ export function CreateDeploymentDialog({
 export function EditDeploymentDialog({
   sessionDid,
   event,
-  onClose,
   onUpdated,
 }: {
   sessionDid: string;
   event: DeploymentEventItem;
-  onClose: () => void;
   onUpdated: (updated: DeploymentEventItem) => void;
 }) {
   const t = useTranslations("common.audiomoth.deployments");
+  const modal = useModal();
   // The picker lists the units of the repo the deployment lives in — the
   // org's when editing an org deployment, the owner's own otherwise.
   const { equipment } = useMyAudioMoths(event.did);
@@ -444,18 +432,12 @@ export function EditDeploymentDialog({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !saving) onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    const original = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = original;
-    };
-  }, [onClose, saving]);
+  // Closing is the shared modal system's job now — Escape, the built-in X and
+  // an outside click all dismiss it; we just tear down the entry we pushed.
+  const close = useCallback(async () => {
+    await modal.hide();
+    modal.popModal();
+  }, [modal]);
 
   // The linked unit may live in a teammate's repo we can't currently read; keep
   // it selectable so saving doesn't silently drop the existing link.
@@ -497,94 +479,88 @@ export function EditDeploymentDialog({
         }
       }
       onUpdated(applyDeploymentEdit(event, edit, cid));
+      await close();
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : t("updateFailed"));
       setSaving(false);
     }
-  }, [currentUri, equipment, equipmentUri, event, onUpdated, sessionDid, siteName, t]);
+  }, [close, currentUri, equipment, equipmentUri, event, onUpdated, sessionDid, siteName, t]);
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]" onClick={() => !saving && onClose()} />
-      <div className="relative flex max-h-full w-full max-w-md flex-col overflow-y-auto rounded-3xl border border-border bg-background shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-5 py-4 backdrop-blur-xl">
-          <h2 className="text-lg font-semibold text-foreground">{t("editTitle")}</h2>
-          <Button variant="ghost" size="icon-sm" onClick={() => !saving && onClose()} aria-label={t("close")}>
-            <XIcon />
-          </Button>
+    <ModalContent dismissible={!saving} className="w-full">
+      <ModalHeader>
+        <ModalTitle className="pr-8">{t("editTitle")}</ModalTitle>
+        <ModalDescription>{t("editIntro")}</ModalDescription>
+      </ModalHeader>
+
+      <div className="mt-4 flex flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="edit-site-name">{t("siteNameLabel")}</Label>
+          <Input
+            id="edit-site-name"
+            value={siteName}
+            onChange={(e) => setSiteName(e.target.value)}
+            placeholder={t("siteNamePlaceholder")}
+            disabled={saving}
+          />
         </div>
 
-        <div className="flex flex-col gap-4 px-5 py-5">
-          <p className="text-sm text-muted-foreground">{t("editIntro")}</p>
-
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="edit-site-name">{t("siteNameLabel")}</Label>
-            <Input
-              id="edit-site-name"
-              value={siteName}
-              onChange={(e) => setSiteName(e.target.value)}
-              placeholder={t("siteNamePlaceholder")}
-              disabled={saving}
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="edit-equipment">{t("equipmentLabel")}</Label>
-            <Select value={equipmentUri} onValueChange={setEquipmentUri} disabled={saving}>
-              <SelectTrigger id="edit-equipment">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">{t("equipmentNone")}</SelectItem>
-                {showOrphanLinkOption ? (
-                  <SelectItem value={currentUri!}>{event.equipmentUsed ?? t("equipmentLinked")}</SelectItem>
-                ) : null}
-                {(equipment ?? []).map((item) => (
-                  <SelectItem key={item.uri} value={item.uri}>
-                    {audioMothOptionLabel(item)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              {equipment !== null && equipment.length === 0 ? t("equipmentEmpty") : t("equipmentHint")}
-            </p>
-          </div>
-
-          {/* Fixed to the chime that was played — shown for reference only. */}
-          <div className="rounded-2xl border border-border bg-muted/30 px-4 py-3">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{t("fixedTitle")}</p>
-            <dl className="mt-2 flex flex-col gap-1.5 text-xs">
-              <div className="flex items-center justify-between gap-3">
-                <dt className="text-muted-foreground">{t("deploymentIdLabel")}</dt>
-                <dd className="truncate font-mono text-foreground">{event.eventID}</dd>
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <dt className="text-muted-foreground">{t("coordinatesLabel")}</dt>
-                <dd className="font-mono text-foreground">{coords}</dd>
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <dt className="text-muted-foreground">{t("deployedLabel")}</dt>
-                <dd className="text-foreground">{formatRelative(event.eventDate)}</dd>
-              </div>
-            </dl>
-          </div>
-
-          {error ? (
-            <p className="rounded-xl bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive">{error}</p>
-          ) : null}
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="edit-equipment">{t("equipmentLabel")}</Label>
+          <Select value={equipmentUri} onValueChange={setEquipmentUri} disabled={saving}>
+            <SelectTrigger id="edit-equipment">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">{t("equipmentNone")}</SelectItem>
+              {showOrphanLinkOption ? (
+                <SelectItem value={currentUri!}>{event.equipmentUsed ?? t("equipmentLinked")}</SelectItem>
+              ) : null}
+              {(equipment ?? []).map((item) => (
+                <SelectItem key={item.uri} value={item.uri}>
+                  {audioMothOptionLabel(item)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            {equipment !== null && equipment.length === 0 ? t("equipmentEmpty") : t("equipmentHint")}
+          </p>
         </div>
 
-        <div className="sticky bottom-0 mt-auto flex items-center justify-end gap-2 border-t border-border bg-background/95 px-5 py-4 backdrop-blur-xl">
-          <Button variant="outline" size="sm" onClick={() => !saving && onClose()} disabled={saving}>
-            {t("cancel")}
-          </Button>
-          <Button size="sm" onClick={save} disabled={saving}>
-            {saving ? <Loader2Icon className="size-4 animate-spin" /> : null}
-            {saving ? t("saving") : t("save")}
-          </Button>
+        {/* Fixed to the chime that was played — shown for reference only. */}
+        <div className="rounded-2xl border border-border bg-muted/30 px-4 py-3">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{t("fixedTitle")}</p>
+          <dl className="mt-2 flex flex-col gap-1.5 text-xs">
+            <div className="flex items-center justify-between gap-3">
+              <dt className="text-muted-foreground">{t("deploymentIdLabel")}</dt>
+              <dd className="truncate font-mono text-foreground">{event.eventID}</dd>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <dt className="text-muted-foreground">{t("coordinatesLabel")}</dt>
+              <dd className="font-mono text-foreground">{coords}</dd>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <dt className="text-muted-foreground">{t("deployedLabel")}</dt>
+              <dd className="text-foreground">{formatRelative(event.eventDate)}</dd>
+            </div>
+          </dl>
         </div>
+
+        {error ? (
+          <p className="rounded-xl bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive">{error}</p>
+        ) : null}
       </div>
-    </div>
+
+      <div className="mt-6 flex items-center justify-end gap-2">
+        <Button variant="outline" size="sm" onClick={() => void close()} disabled={saving}>
+          {t("cancel")}
+        </Button>
+        <Button size="sm" onClick={save} disabled={saving}>
+          {saving ? <Loader2Icon className="size-4 animate-spin" /> : null}
+          {saving ? t("saving") : t("save")}
+        </Button>
+      </div>
+    </ModalContent>
   );
 }
