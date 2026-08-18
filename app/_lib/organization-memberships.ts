@@ -29,6 +29,36 @@ async function latestRosterSync(organizationDid: string): Promise<Date | null> {
   return Number.isFinite(milliseconds) ? new Date(milliseconds) : null;
 }
 
+async function syncOrganizationRoster({
+  organizationDid,
+  cookie,
+  force = false,
+}: {
+  organizationDid: string;
+  cookie: string;
+  force?: boolean;
+}): Promise<boolean> {
+  if (!force) {
+    const lastSyncedAt = await latestRosterSync(organizationDid);
+    if (lastSyncedAt && lastSyncedAt.getTime() > Date.now() - ORGANIZATION_ROSTER_SYNC_INTERVAL_MS) {
+      return false;
+    }
+  }
+
+  // This timestamp represents when the CGS snapshot began. The database
+  // rejects it if a newer concurrent snapshot has already been applied.
+  const observedAt = new Date();
+  const members = await fetchAllCgsMembersWithCookie({
+    repo: organizationDid,
+    cookie,
+  });
+  return supabaseRpc<boolean>("organization_memberships_replace_roster", {
+    p_organization_did: organizationDid,
+    p_members: members.map(member => ({ memberDid: member.did, role: member.role })),
+    p_observed_at: observedAt.toISOString(),
+  });
+}
+
 export async function syncOrganizationMemberships({
   cookie,
 }: {
@@ -44,25 +74,10 @@ export async function syncOrganizationMemberships({
 
   for (const group of groups) {
     try {
-      const lastSyncedAt = await latestRosterSync(group.groupDid);
-      if (lastSyncedAt && lastSyncedAt.getTime() > Date.now() - ORGANIZATION_ROSTER_SYNC_INTERVAL_MS) {
-        result.skipped += 1;
-        continue;
-      }
-
-      // This timestamp represents when the CGS snapshot began. The database
-      // rejects it if a newer concurrent snapshot has already been applied.
-      const observedAt = new Date();
-      const members = await fetchAllCgsMembersWithCookie({
-        repo: group.groupDid,
+      const applied = await syncOrganizationRoster({
+        organizationDid: group.groupDid,
         cookie,
       });
-      const applied = await supabaseRpc<boolean>("organization_memberships_replace_roster", {
-        p_organization_did: group.groupDid,
-        p_members: members.map(member => ({ memberDid: member.did, role: member.role })),
-        p_observed_at: observedAt.toISOString(),
-      });
-
       if (applied) result.synced += 1;
       else result.skipped += 1;
     } catch (error) {
@@ -77,6 +92,26 @@ export async function syncOrganizationMemberships({
   }
 
   return result;
+}
+
+/**
+ * Refresh one known organization after CGS has accepted a membership mutation.
+ * It intentionally bypasses the periodic freshness interval, but never turns a
+ * successful CGS mutation into a failed request when the projection is down.
+ */
+export function scheduleOrganizationRosterSync(organizationDid: string, cookie: string | null): void {
+  if (!organizationDid.startsWith("did:") || !cookie) return;
+
+  after(async () => {
+    try {
+      await syncOrganizationRoster({ organizationDid, cookie, force: true });
+    } catch (error) {
+      console.error(
+        `Organization membership synchronization could not refresh the roster for ${organizationDid} after a membership mutation. The periodic sync will retry later.`,
+        error,
+      );
+    }
+  });
 }
 
 export function scheduleOrganizationMembershipSync(session: AuthSession, cookie: string | null): void {

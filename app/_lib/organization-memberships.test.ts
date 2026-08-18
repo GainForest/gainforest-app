@@ -22,6 +22,7 @@ vi.mock("@/lib/supabase/rest", () => ({
 import {
   ORGANIZATION_ROSTER_SYNC_INTERVAL_MS,
   scheduleOrganizationMembershipSync,
+  scheduleOrganizationRosterSync,
   syncOrganizationMemberships,
 } from "./organization-memberships";
 
@@ -173,6 +174,35 @@ describe("scheduleOrganizationMembershipSync", () => {
     }, null);
 
     expect(nextServer.after).not.toHaveBeenCalled();
+  });
+
+  it("forces a freshly synchronized organization roster to refresh after a membership mutation", async () => {
+    supabase.supabaseSelect.mockResolvedValue([
+      { roster_synced_at: new Date(NOW.getTime() - 1).toISOString() },
+    ]);
+    cgs.fetchAllCgsMembersWithCookie.mockResolvedValue([
+      { did: "did:plc:alice", role: "owner", addedBy: null, addedAt: null },
+      { did: "did:plc:bob", role: "member", addedBy: "did:plc:alice", addedAt: NOW.toISOString() },
+    ]);
+
+    scheduleOrganizationRosterSync("did:plc:forest", COOKIE);
+
+    expect(nextServer.after).toHaveBeenCalledOnce();
+    const callback = nextServer.after.mock.calls[0][0];
+    await expect(callback()).resolves.toBeUndefined();
+
+    expect(cgs.fetchAllCgsMembersWithCookie).toHaveBeenCalledWith({
+      repo: "did:plc:forest",
+      cookie: COOKIE,
+    });
+    expect(supabase.supabaseRpc).toHaveBeenCalledWith("organization_memberships_replace_roster", {
+      p_organization_did: "did:plc:forest",
+      p_members: [
+        { memberDid: "did:plc:alice", role: "owner" },
+        { memberDid: "did:plc:bob", role: "member" },
+      ],
+      p_observed_at: NOW.toISOString(),
+    });
   });
 
   it("reports partial roster failures after logging their causes", async () => {
