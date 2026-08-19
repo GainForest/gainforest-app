@@ -69,7 +69,7 @@ describe("buildWalletStatRows", () => {
   });
 });
 
-describe("loadWalletStats resilience", () => {
+describe("loadWalletStats", () => {
   afterEach(() => {
     vi.mocked(indexerQuery).mockReset();
     vi.mocked(fetchAccountCards).mockReset();
@@ -92,21 +92,15 @@ describe("loadWalletStats resilience", () => {
     return { records: { edges, pageInfo: { hasNextPage: false, endCursor: null } } };
   }
 
-  it("recovers from a transient indexer failure by retrying the record read", async () => {
-    const attempts = new Map<string, number>();
+  it("reads wallet records keyed by the node's top-level did", async () => {
     vi.mocked(indexerQuery).mockImplementation(async (_query, variables) => {
       const collection = (variables as { collection: string }).collection;
-      const n = (attempts.get(collection) ?? 0) + 1;
-      attempts.set(collection, n);
-      if (n === 1) throw new Error("transient indexer blip");
       return edgesFor(collection) as never;
     });
     vi.mocked(fetchAccountCards).mockResolvedValue(new Map());
 
     const { rows } = await loadWalletStats();
     expect(rows.map((row) => row.did)).toEqual(["did:plc:alice"]);
-    // One failure + one success per collection.
-    expect(attempts.get("app.gainforest.wallet.primary")).toBe(2);
   });
 
   it("derives the DID from the record URI when the node has no top-level did", async () => {

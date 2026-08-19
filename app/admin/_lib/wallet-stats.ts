@@ -62,52 +62,6 @@ const GENERIC_RECORDS_QUERY = `
 const PAGE_SIZE = 1000;
 /** Wallet records number in the dozens today; this only bounds a runaway loop. */
 const MAX_PAGES = 20;
-/** A single transient indexer blip must not blank the whole stat; retry briefly. */
-const FETCH_ATTEMPTS = 3;
-const RETRY_DELAY_MS = 300;
-
-function delay(ms: number, signal?: AbortSignal): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (signal?.aborted) return reject(signal.reason ?? new Error("aborted"));
-    const timer = setTimeout(resolve, ms);
-    signal?.addEventListener(
-      "abort",
-      () => {
-        clearTimeout(timer);
-        reject(signal.reason ?? new Error("aborted"));
-      },
-      { once: true },
-    );
-  });
-}
-
-/**
- * One page of records, retried through transient indexer failures (5xx,
- * timeouts, network blips). Only the last error surfaces — the caller lets it
- * throw so the stat renders "unavailable" rather than silently reporting a
- * truncated or empty count.
- */
-async function fetchRecordPage(
-  collection: string,
-  after: string | null,
-  signal?: AbortSignal,
-): Promise<GenericRecordsPayload | null> {
-  let lastError: unknown;
-  for (let attempt = 0; attempt < FETCH_ATTEMPTS; attempt += 1) {
-    try {
-      return await indexerQuery<GenericRecordsPayload>(
-        GENERIC_RECORDS_QUERY,
-        { collection, first: PAGE_SIZE, after },
-        signal,
-      );
-    } catch (error) {
-      lastError = error;
-      if (signal?.aborted || attempt === FETCH_ATTEMPTS - 1) break;
-      await delay(RETRY_DELAY_MS * (attempt + 1), signal);
-    }
-  }
-  throw lastError;
-}
 
 export type RawWalletRecord = {
   did: string;
@@ -134,7 +88,11 @@ async function fetchAllWalletRecords(collection: string, signal?: AbortSignal): 
   const out: RawWalletRecord[] = [];
   let after: string | null = null;
   for (let page = 0; page < MAX_PAGES; page += 1) {
-    const data: GenericRecordsPayload | null = await fetchRecordPage(collection, after, signal);
+    const data: GenericRecordsPayload | null = await indexerQuery<GenericRecordsPayload>(
+      GENERIC_RECORDS_QUERY,
+      { collection, first: PAGE_SIZE, after },
+      signal,
+    );
     const connection: GenericRecordsPayload["records"] = data?.records;
     if (!connection) break;
     for (const edge of connection.edges ?? []) {
