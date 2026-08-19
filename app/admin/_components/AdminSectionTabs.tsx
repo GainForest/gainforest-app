@@ -11,7 +11,9 @@ export type AdminSectionTab = {
   /** Rendered on the server (a React element, not a component) so this stays
    *  passable across the server/client boundary. */
   icon: ReactNode;
-  count: number;
+  /** Optional so panels that load their own data lazily (e.g. wallet
+   *  connections) can omit a badge rather than show a wrong count. */
+  count?: number;
   content: ReactNode;
 };
 
@@ -75,14 +77,16 @@ export function AdminSectionTabs({
                 {entry.icon}
                 {entry.label}
                 <AdminOnlyIndicator />
-                <span
-                  className={cn(
-                    "rounded-full px-1.5 text-xs tabular-nums",
-                    isActive ? "bg-primary-foreground/20" : "bg-muted",
-                  )}
-                >
-                  {entry.count}
-                </span>
+                {entry.count !== undefined ? (
+                  <span
+                    className={cn(
+                      "rounded-full px-1.5 text-xs tabular-nums",
+                      isActive ? "bg-primary-foreground/20" : "bg-muted",
+                    )}
+                  >
+                    {entry.count}
+                  </span>
+                ) : null}
               </button>
             );
           })}

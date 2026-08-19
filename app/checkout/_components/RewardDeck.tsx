@@ -275,7 +275,7 @@ function RewardFlight({
 
 export function RewardDeck({
   cards,
-  cardsHref = "/cards",
+  cardsHref = "/bumicerts",
 }: {
   cards: RewardCard[];
   /** Mock experiences can adapt navigation without replacing production UI. */

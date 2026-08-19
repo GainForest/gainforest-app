@@ -366,17 +366,15 @@ send_welcome "$TMP/membership.json"
 node - "$TMP/membership.json" <<'NODE'
 const fs = require("node:fs");
 const value = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
-if (value?.ok !== true || value?.notification?.status !== "sent" || value?.notification?.duplicate !== false) {
-  throw new Error(`membership welcome event was not sent through the loopback provider: ${JSON.stringify(value)}`);
+if (value?.ok !== true || value?.ignored !== true || value?.reason !== "membership_welcome_uses_invitation_acceptance") {
+  throw new Error(`legacy membership webhook was not accepted as a no-op: ${JSON.stringify(value)}`);
 }
 NODE
-MEMBERSHIP_STATE=$(psql -X -Atq "$DB_URL" -v ON_ERROR_STOP=1 -F '|' -c "
-  select count(*),bool_and(status='sent'),bool_and(template_key='welcome-membership-joined'),
-    bool_and(frozen_to='local-member@example.test'),bool_and(frozen_html like '%Local Forest Circle%')
-  from public.notification_outbox where event_type='membership_joined' and source_id='local-membership-1';
+MEMBERSHIP_STATE=$(psql -X -Atq "$DB_URL" -v ON_ERROR_STOP=1 -c "
+  select count(*) from public.notification_outbox where event_type='membership_joined' and source_id='local-membership-1';
 ")
-[[ "$MEMBERSHIP_STATE" == "1|t|t|t|t" ]] || {
-  echo "test:notifications:local membership persistence assertion failed: $MEMBERSHIP_STATE" >&2
+[[ "$MEMBERSHIP_STATE" == "0" ]] || {
+  echo "test:notifications:local legacy membership webhook unexpectedly created a notification: $MEMBERSHIP_STATE" >&2
   exit 1
 }
 
@@ -574,4 +572,4 @@ HANDLED_STATE=$(psql -X -Atq "$DB_URL" -v ON_ERROR_STOP=1 -F '|' -c "
   exit 1
 }
 
-echo "notification local signup, membership, invitation, BioBlitz, loopback delivery, deduplication, recovery, and manual handling passed"
+echo "notification local legacy webhooks, invitation, BioBlitz, loopback delivery, deduplication, recovery, and manual handling passed"

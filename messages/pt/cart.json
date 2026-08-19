@@ -97,6 +97,7 @@
     "messageHint": "Uma palavra de incentivo ou o motivo da sua doação. Quem receber poderá vê-la.",
     "messagePlaceholder": "Adicione uma mensagem (opcional)…",
     "messageAnonymousNote": "Sua mensagem não será exibida com o seu nome.",
+    "bioblitzAwardNote": "Esta mensagem identifica o pagamento como prémio do BioBlitz e não pode ser alterada.",
     "tipNone": "Sem gorjeta",
     "cardsPreviewTitle": "Bumicerts que você receberá",
     "cardsUnavailableNote": "Os Bumicerts estão disponíveis apenas para doações a projetos qualificados. Esta finalização não inclui nenhum.",
@@ -256,6 +257,13 @@
     },
     "myCardsTitle": "Galeria dos Meus Bumicerts",
     "myCardsDescription": "Veja uma prévia da galeria de Bumicerts colecionados com exemplos.",
+    "shop": {
+      "title": "Página da loja (Bumimic)",
+      "description": "A página do produto Bumimic, um gravador acústico aberto e de baixo custo.",
+      "mockBadge": "Página estática",
+      "cardTitle": "Página da loja Bumimic",
+      "cardDescription": "Prévia da página do produto para o protótipo de gravador acústico Bumimic."
+    },
     "rewildingDashboard": {
       "title": "Painel do subsídio Rewilding",
       "description": "A visão Meu subsídio e seu gráfico de ritmo de áudio, em cada estado possível da meta de gravação.",
@@ -302,7 +310,7 @@
   "myCards": {
     "eyebrow": "Colecionáveis",
     "title": "Meus Bumicerts",
-    "description": "Cada Bumicert vem de um recibo verificado de doação a projeto vinculado à sua conta.",
+    "description": "Cada Bumicert vem de um recibo de doação verificado vinculado à sua conta.",
     "count": "{count, plural, one {# Bumicert} other {# Bumicerts}}",
     "emptyTitle": "Ainda não há Bumicerts",
     "emptyBody": "Doe para um projeto com a sessão iniciada e mostrando seu nome para ganhar seu primeiro Bumicert.",
@@ -317,6 +325,7 @@
     "fallbackOrganization": "Equipe do projeto",
     "fallbackRecipient": "Uma pessoa da comunidade",
     "fallbackPersonContext": "Apoio direto",
+    "fallbackAccount": "Uma conta que você apoiou",
     "verifiedDonation": "Doação verificada",
     "viewProject": "Ver projeto",
     "viewProfile": "Ver perfil",

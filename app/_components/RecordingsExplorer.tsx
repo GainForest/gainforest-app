@@ -140,7 +140,7 @@ export function RecordingsExplorer({
 
   /* ── Small sets keep the plain list ────────────────────────────────────── */
   if (items.length <= FLAT_THRESHOLD || !selectedDay || !month) {
-    return (
+    const list = (
       <RecordingsPlayerList
         did={did}
         host={host}
@@ -149,6 +149,25 @@ export function RecordingsExplorer({
         selectedUris={selectedUris}
         onToggleSelect={onToggleSelect}
       />
+    );
+    // A short set skips the calendar, but the recorder's place is still worth
+    // seeing — keep the same map-beside-content layout the calendar view uses,
+    // so a deployment's location shows whether it holds three clips or three
+    // thousand.
+    if (!location) return list;
+    return (
+      <div className="flex flex-col gap-5 md:flex-row md:items-start">
+        <div className="w-full shrink-0 md:w-[264px]">
+          <DeploymentLocationMap
+            lat={location.lat}
+            lon={location.lon}
+            label={location.label}
+            className="rounded-xl border-border/70"
+            heightClass="h-44"
+          />
+        </div>
+        <div className="min-w-0 flex-1">{list}</div>
+      </div>
     );
   }
 

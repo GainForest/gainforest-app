@@ -50,17 +50,31 @@ describe("receipt-backed card identity", () => {
     expect(receiptCardVariant(receipt({ to: { type: "did", id: "did:plc:winner" } }))).toBe("project");
   });
 
-  it("refuses person cards for wallet recipients, self-payments, and bad amounts", () => {
+  it("earns an account-support (org) card for a wallet recipient with no project link", () => {
+    const support = receipt({ bumicertUri: null, to: { type: "wallet", id: "0x9F6d" } });
+    expect(receiptCardVariant(support)).toBe("org");
+    // Identity is keyed by the lowercased recipient wallet so casing never
+    // splits one payment into two cards.
+    expect(fundingReceiptCardIdentity(support)).toContain("org:0x9f6d");
+  });
+
+  it("earns a card for the owner's own anonymous donation (wallet donor + hash match)", () => {
+    const anon = receipt({ from: { type: "wallet", id: "0xdonor" }, isAnonymous: true });
+    expect(receiptCardVariant(anon)).toBe("project");
+    expect(isCardEligibleReceipt(anon)).toBe(true);
+  });
+
+  it("refuses cards for self-payments, unattributed donors, and bad amounts", () => {
     const base = { bumicertUri: null } as const;
-    // A tip pays a wallet, so it never becomes a collectible.
-    expect(receiptCardVariant(receipt({ ...base, to: { type: "wallet", id: "0x9f6d" } }))).toBeNull();
     expect(receiptCardVariant(receipt({ ...base, to: null }))).toBeNull();
+    // A gift to yourself is not a collectible.
     expect(receiptCardVariant(receipt({ ...base, to: { type: "did", id: "did:plc:alice" } }))).toBeNull();
+    // A wallet donor with no anonymity match is not the owner, so no card.
+    expect(
+      receiptCardVariant(receipt({ ...base, to: { type: "wallet", id: "0x1" }, from: { type: "wallet", id: "0x2" } })),
+    ).toBeNull();
     expect(receiptCardVariant(receipt({ ...base, to: { type: "did", id: "did:plc:winner" }, amount: 0 }))).toBeNull();
     expect(receiptCardVariant(receipt({ ...base, to: { type: "did", id: "did:plc:winner" }, currency: "EUR" }))).toBeNull();
-    expect(
-      receiptCardVariant(receipt({ ...base, to: { type: "did", id: "did:plc:winner" }, from: { type: "wallet", id: "0x1" } })),
-    ).toBeNull();
   });
 
   it("keeps two gifts to different people on the same payment apart", () => {

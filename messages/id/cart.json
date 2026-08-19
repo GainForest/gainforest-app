@@ -97,6 +97,7 @@
     "messageHint": "Kata penyemangat, atau alasan Anda berdonasi. Penerima akan melihatnya.",
     "messagePlaceholder": "Tambahkan pesan (opsional)…",
     "messageAnonymousNote": "Pesan Anda tidak akan ditampilkan atas nama Anda.",
+    "bioblitzAwardNote": "Pesan ini mengidentifikasi pembayaran sebagai hadiah BioBlitz dan tidak dapat diubah.",
     "tipNone": "Tanpa tip",
     "cardsPreviewTitle": "Bumicerts yang akan Anda terima",
     "cardsUnavailableNote": "Bumicerts hanya tersedia untuk donasi proyek yang memenuhi syarat. Pembayaran ini tidak menyertakannya.",
@@ -256,6 +257,13 @@
     },
     "myCardsTitle": "Galeri Bumicerts Saya",
     "myCardsDescription": "Pratinjau galeri Bumicerts yang telah dikumpulkan dengan contoh koleksi.",
+    "shop": {
+      "title": "Halaman toko (Bumimic)",
+      "description": "Halaman produk Bumimic, perekam akustik terbuka dan berbiaya rendah.",
+      "mockBadge": "Halaman statis",
+      "cardTitle": "Halaman toko Bumimic",
+      "cardDescription": "Pratinjau halaman produk untuk prototipe perekam akustik Bumimic."
+    },
     "rewildingDashboard": {
       "title": "Dasbor hibah Rewilding",
       "description": "Ikhtisar Hibah saya dan grafik laju audionya, dalam setiap keadaan target perekaman.",
@@ -302,7 +310,7 @@
   "myCards": {
     "eyebrow": "Koleksi",
     "title": "Bumicerts Saya",
-    "description": "Setiap Bumicert berasal dari tanda terima donasi proyek terverifikasi yang terhubung ke akun Anda.",
+    "description": "Setiap Bumicert berasal dari tanda terima donasi terverifikasi yang tertaut ke akunmu.",
     "count": "{count, plural, one {# Bumicert} other {# Bumicerts}}",
     "emptyTitle": "Belum ada Bumicerts",
     "emptyBody": "Berdonasilah ke proyek saat masuk dan menampilkan nama Anda untuk mendapatkan Bumicert pertama.",
@@ -317,6 +325,7 @@
     "fallbackOrganization": "Tim proyek",
     "fallbackRecipient": "Anggota komunitas",
     "fallbackPersonContext": "Dukungan langsung",
+    "fallbackAccount": "Akun yang kamu dukung",
     "verifiedDonation": "Donasi terverifikasi",
     "viewProject": "Lihat proyek",
     "viewProfile": "Lihat profil",

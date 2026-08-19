@@ -454,6 +454,9 @@ function MilestoneRow({
   const format = useFormatter();
   const [pending, setPending] = useState(false);
   const [planPending, setPlanPending] = useState(false);
+  // The inline due-date control saves on its own, apart from the name/
+  // description edit form, so it tracks its own pending state.
+  const [dueDatePending, setDueDatePending] = useState(false);
   const [editing, setEditing] = useState(false);
   const [titleDraft, setTitleDraft] = useState(milestone.title ?? "");
   const [descriptionDraft, setDescriptionDraft] = useState(milestone.description ?? "");
@@ -514,6 +517,38 @@ function MilestoneRow({
       setFailed(true);
     } finally {
       setPlanPending(false);
+    }
+  };
+
+  /** Set (or clear) just the due date. It is a quick inline control, separate
+   *  from the name/description edit form, so it saves on its own and leaves an
+   *  open edit untouched. The new date is shown straight away — the controlled
+   *  input would otherwise snap back to the stored value while the save is in
+   *  flight — and it keeps its own pending flag so the edit form's Save button
+   *  is never mislabelled "Saving…". On failure the previous date returns. */
+  const saveDueDate = async (value: string | null) => {
+    if (dueDatePending) return;
+    // A native date input only fires this once a full date is entered, but
+    // guard against a no-op save (re-picking the same day) all the same.
+    if (value === (milestone.dueDate ?? null)) return;
+    const previous = milestone;
+    setDueDatePending(true);
+    setFailed(false);
+    onChanged({ ...milestone, dueDate: value });
+    try {
+      await postAction({
+        action: "setMilestonePlan",
+        subjectDid,
+        milestoneId: milestone.id,
+        title: milestone.title ?? "",
+        description: milestone.description ?? "",
+        dueDate: value ?? "",
+      });
+    } catch {
+      onChanged(previous);
+      setFailed(true);
+    } finally {
+      setDueDatePending(false);
     }
   };
 
@@ -649,8 +684,8 @@ function MilestoneRow({
         <input
           type="date"
           value={milestone.dueDate ?? ""}
-          onChange={(event) => void savePlan({ dueDate: event.target.value || null })}
-          disabled={planPending}
+          onChange={(event) => void saveDueDate(event.target.value || null)}
+          disabled={planPending || dueDatePending}
           aria-label={t("dueDateLabel", { title: name })}
           className="h-8 rounded-lg border border-border bg-background px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
         />
@@ -661,7 +696,7 @@ function MilestoneRow({
             setDescriptionDraft(milestone.description ?? "");
             setEditing((value) => !value);
           }}
-          disabled={planPending}
+          disabled={planPending || dueDatePending}
           aria-label={t("editMilestone", { title: name })}
           className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
         >
@@ -671,7 +706,7 @@ function MilestoneRow({
           <button
             type="button"
             onClick={remove}
-            disabled={planPending}
+            disabled={planPending || dueDatePending}
             aria-label={t("removeMilestone", { title: name })}
             className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-destructive disabled:pointer-events-none disabled:opacity-50"
           >

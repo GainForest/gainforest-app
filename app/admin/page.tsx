@@ -59,7 +59,12 @@ export default async function AdminPage({
       href: "/admin/people",
       Icon: UsersIcon,
       title: t("pages.people.title"),
-      items: [t("tabs.taina"), t("tabs.endorsers"), t("tabs.awardEndorsements")],
+      items: [
+        t("tabs.taina"),
+        t("tabs.walletConnections"),
+        t("tabs.endorsers"),
+        t("tabs.awardEndorsements"),
+      ],
     },
     {
       href: "/admin/trust",

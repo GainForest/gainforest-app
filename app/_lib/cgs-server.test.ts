@@ -60,6 +60,54 @@ describe("complete CGS membership reads", () => {
     );
   });
 
+  it.each([
+    ["a group DID without the did: prefix", { groupDid: "forest", role: "owner" }],
+    ["an unknown group role", { groupDid: "did:plc:forest", role: "superadmin" }],
+  ])("rejects %s", async (_description, group) => {
+    fetchMock.mockResolvedValueOnce(Response.json({ groups: [group] }));
+
+    const { fetchAllCgsGroupMembershipsWithCookie } = await import("./cgs-server");
+    await expect(fetchAllCgsGroupMembershipsWithCookie("session=cookie")).rejects.toMatchObject({ status: 502 });
+  });
+
+  it("rejects an organization repeated across pages", async () => {
+    fetchMock
+      .mockResolvedValueOnce(Response.json({
+        groups: [{ groupDid: "did:plc:forest", role: "owner" }],
+        cursor: "page-2",
+      }))
+      .mockResolvedValueOnce(Response.json({
+        groups: [{ groupDid: "did:plc:forest", role: "member" }],
+      }));
+
+    const { fetchAllCgsGroupMembershipsWithCookie } = await import("./cgs-server");
+    await expect(fetchAllCgsGroupMembershipsWithCookie("session=cookie")).rejects.toMatchObject({ status: 502 });
+  });
+
+  it("returns a 502 when loading organization memberships cannot reach CGS", async () => {
+    fetchMock.mockRejectedValueOnce(new TypeError("fetch failed"));
+
+    const { fetchAllCgsGroupMembershipsWithCookie } = await import("./cgs-server");
+    await expect(fetchAllCgsGroupMembershipsWithCookie("session=cookie")).rejects.toMatchObject({
+      name: "CgsRequestError",
+      status: 502,
+    });
+  });
+
+  it("rejects an organization list that exceeds the page limit", async () => {
+    fetchMock.mockImplementation(async () => {
+      if (fetchMock.mock.calls.length > 100) throw new Error("expected the page limit to stop before this request");
+      return Response.json({
+        groups: [{ groupDid: `did:plc:group-${fetchMock.mock.calls.length}`, role: "owner" }],
+        cursor: `page-${fetchMock.mock.calls.length}`,
+      });
+    });
+
+    const { fetchAllCgsGroupMembershipsWithCookie } = await import("./cgs-server");
+    await expect(fetchAllCgsGroupMembershipsWithCookie("session=cookie")).rejects.toMatchObject({ status: 502 });
+    expect(fetchMock).toHaveBeenCalledTimes(100);
+  });
+
   it("loads every member page for an organization", async () => {
     fetchMock
       .mockResolvedValueOnce(Response.json({
@@ -111,6 +159,36 @@ describe("complete CGS membership reads", () => {
     })).rejects.toThrow(
       "Could not completely load organization members because the group service repeated a pagination cursor. Try again later.",
     );
+  });
+
+  it("returns a 502 when loading organization members cannot reach CGS", async () => {
+    fetchMock.mockRejectedValueOnce(new TypeError("fetch failed"));
+
+    const { fetchAllCgsMembersWithCookie } = await import("./cgs-server");
+    await expect(fetchAllCgsMembersWithCookie({
+      repo: "did:plc:forest",
+      cookie: "session=cookie",
+    })).rejects.toMatchObject({
+      name: "CgsRequestError",
+      status: 502,
+    });
+  });
+
+  it("rejects an organization roster that exceeds the page limit", async () => {
+    fetchMock.mockImplementation(async () => {
+      if (fetchMock.mock.calls.length > 100) throw new Error("expected the page limit to stop before this request");
+      return Response.json({
+        members: [{ did: `did:plc:member-${fetchMock.mock.calls.length}`, role: "owner" }],
+        cursor: `page-${fetchMock.mock.calls.length}`,
+      });
+    });
+
+    const { fetchAllCgsMembersWithCookie } = await import("./cgs-server");
+    await expect(fetchAllCgsMembersWithCookie({
+      repo: "did:plc:forest",
+      cookie: "session=cookie",
+    })).rejects.toMatchObject({ status: 502 });
+    expect(fetchMock).toHaveBeenCalledTimes(100);
   });
 
   it("rejects an empty complete roster because every CGS organization has an owner", async () => {

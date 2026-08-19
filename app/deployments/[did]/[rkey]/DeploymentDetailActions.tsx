@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Loader2Icon, PencilIcon, Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useModal } from "@/components/ui/modal/context";
 import { deleteDeploymentEvent, type DeploymentEventItem } from "@/app/_lib/deployment-events";
 import { EditDeploymentDialog } from "@/app/audiomoth/_components/deployment-shared";
 
@@ -23,7 +24,7 @@ export function DeploymentDetailActions({
 }) {
   const t = useTranslations("common.audiomoth.deployments");
   const router = useRouter();
-  const [editing, setEditing] = useState(false);
+  const modal = useModal();
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +45,20 @@ export function DeploymentDetailActions({
     }
   }
 
+  /** Edit through the shared modal, so it matches every other dialog's backdrop
+   *  and chrome. Saving refreshes the page; the dialog closes itself. */
+  const openEdit = () => {
+    modal.pushModal(
+      {
+        id: `edit-deployment-${event.eventID}`,
+        dialogWidth: "max-w-md w-[calc(100%-2rem)]",
+        content: <EditDeploymentDialog sessionDid={sessionDid} event={event} onUpdated={() => router.refresh()} />,
+      },
+      true,
+    );
+    void modal.show();
+  };
+
   return (
     <div className="flex flex-col items-end gap-1.5">
       <div className="flex items-center gap-2">
@@ -59,7 +74,7 @@ export function DeploymentDetailActions({
           </>
         ) : (
           <>
-            <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+            <Button variant="outline" size="sm" onClick={openEdit}>
               <PencilIcon className="size-4" />
               {t("edit")}
             </Button>
@@ -76,18 +91,6 @@ export function DeploymentDetailActions({
         )}
       </div>
       {error ? <p className="text-xs text-destructive">{error}</p> : null}
-
-      {editing ? (
-        <EditDeploymentDialog
-          sessionDid={sessionDid}
-          event={event}
-          onClose={() => setEditing(false)}
-          onUpdated={() => {
-            setEditing(false);
-            router.refresh();
-          }}
-        />
-      ) : null}
     </div>
   );
 }

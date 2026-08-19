@@ -97,6 +97,7 @@
     "messageHint": "Unas palabras de ánimo o por qué donaste. La persona destinataria lo verá.",
     "messagePlaceholder": "Añade un mensaje (opcional)…",
     "messageAnonymousNote": "Tu mensaje no se mostrará con tu nombre.",
+    "bioblitzAwardNote": "Este mensaje identifica el pago como premio de BioBlitz y no se puede cambiar.",
     "tipNone": "Sin propina",
     "cardsPreviewTitle": "Bumicerts que recibirás",
     "cardsUnavailableNote": "Los Bumicerts solo están disponibles para donaciones a proyectos elegibles. Esta compra no incluye ninguno.",
@@ -256,6 +257,13 @@
     },
     "myCardsTitle": "Galería de Mis Bumicerts",
     "myCardsDescription": "Previsualiza la galería de Bumicerts coleccionados con coleccionables de muestra.",
+    "shop": {
+      "title": "Página de la tienda (Bumimic)",
+      "description": "La página del producto Bumimic, una grabadora acústica abierta y de bajo costo.",
+      "mockBadge": "Página estática",
+      "cardTitle": "Página de la tienda Bumimic",
+      "cardDescription": "Vista previa de la página del producto para el prototipo de grabadora acústica Bumimic."
+    },
     "rewildingDashboard": {
       "title": "Panel de la subvención Rewilding",
       "description": "La vista Mi subvención y su gráfico de ritmo de audio, en cada estado posible de la meta de grabación.",
@@ -317,6 +325,7 @@
     "fallbackOrganization": "Equipo del proyecto",
     "fallbackRecipient": "Una persona de la comunidad",
     "fallbackPersonContext": "Apoyo directo",
+    "fallbackAccount": "Una cuenta que apoyaste",
     "verifiedDonation": "Donación verificada",
     "viewProject": "Ver proyecto",
     "viewProfile": "Ver perfil",

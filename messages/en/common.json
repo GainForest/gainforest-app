@@ -1094,6 +1094,7 @@
       "goToOrganization": "Open organization",
       "errorTitle": "Could not accept invitation",
       "acceptError": "Could not accept invitation.",
+      "membershipOutcomeUnknown": "We couldn’t confirm that you joined the organization. Try again.",
       "tryAgain": "Try again",
       "notFoundTitle": "Invitation not found",
       "notFoundDescription": "This invitation link is not valid or has been removed.",
@@ -1358,7 +1359,8 @@
       "awardEndorsements": "Award endorsements",
       "facilitator": "Facilitator wallet",
       "dataJobs": "Data batches",
-      "blockedDomains": "Blocked addresses"
+      "blockedDomains": "Blocked addresses",
+      "walletConnections": "Wallet connections"
     },
     "unnamed": "Unnamed account",
     "awardHint": "Open a profile to award a badge.",
@@ -1440,7 +1442,7 @@
       },
       "people": {
         "title": "People",
-        "subtitle": "Everyone running a Tainá field assistant, the organizations that can endorse accounts, and the badges GainForest awards."
+        "subtitle": "Everyone running a Tainá field assistant, the accounts with connected wallets, the organizations that can endorse accounts, and the badges GainForest awards."
       },
       "trust": {
         "title": "Trust & safety",
@@ -1511,6 +1513,10 @@
     },
     "ignore": "Ignore",
     "countAgain": "Count again",
+    "noWallet": "No wallet",
+    "alreadyPaid": "Paid",
+    "paidAt": "Paid on {date}",
+    "payPrize": "Pay ${amount}",
     "loading": "Loading BioBlitz registrants",
     "empty": "No registrants",
     "loadError": "Couldn't load this round.",
@@ -2137,7 +2143,7 @@
     },
     "mainTabs": {
       "setup": "Setup",
-      "library": "Recordings",
+      "library": "Deployments",
       "upload": "Upload",
       "label": "Label",
       "identifications": "Identifications",
@@ -2274,6 +2280,7 @@
       "metadataTitle": "{name} — Deployment",
       "detailBack": "Back to recordings",
       "mapTitle": "Deployment location",
+      "mapExpand": "See this location on a larger map",
       "equipmentUsedLabel": "AudioMoth used",
       "protocolLabel": "Protocol",
       "recordedByLabel": "Recorded by",
@@ -3952,5 +3959,24 @@
         "description": "Data labelled and at least one public update posted on Bumicerts."
       }
     }
+  },
+  "adminWalletConnections": {
+    "title": "Connected wallets",
+    "description": "Look up an account by name, handle or DID to see which wallets it has connected — a donation wallet and/or linked EVM wallets.",
+    "prompt": "Search for an account by name, handle or DID to see its wallets.",
+    "minChars": "Type at least {count} characters to search.",
+    "searching": "Searching…",
+    "unavailable": "The search couldn't be completed right now. Try again in a moment.",
+    "searchPlaceholder": "Search by name, handle or DID…",
+    "noMatches": "No account found that matches your search.",
+    "person": "Person",
+    "organization": "Organization",
+    "vaultWallet": "Donation wallet",
+    "linkedWallet": "Linked wallet",
+    "unnamed": "Unnamed account",
+    "noWallet": "No wallet connected.",
+    "legacy": "legacy",
+    "signers": "{count} signers",
+    "unverified": "unverified"
   }
 }

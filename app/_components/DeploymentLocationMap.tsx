@@ -7,12 +7,14 @@
  */
 
 import "leaflet/dist/leaflet.css";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Map as LeafletMap, Marker, TileLayer } from "leaflet";
-import { MapPinIcon } from "lucide-react";
+import { MapPinIcon, Maximize2Icon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { mapTileUrl } from "@/app/_lib/coords";
+import { ModalContent, ModalDescription, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
+import { useModal } from "@/components/ui/modal/context";
 
 export function DeploymentLocationMap({
   lat,
@@ -20,6 +22,9 @@ export function DeploymentLocationMap({
   label,
   className,
   heightClass = "h-64",
+  compact = false,
+  interactive = !compact,
+  expandable = true,
 }: {
   lat: number;
   lon: number;
@@ -29,8 +34,20 @@ export function DeploymentLocationMap({
   /** Height of the map canvas. Defaults to the roomy detail-page size; pass a
    *  shorter one where the map is a compact aside beside another panel. */
   heightClass?: string;
+  /** Thumbnail mode: drop the header and zoom control — a small pinned
+   *  preview to sit inline beside other content, e.g. an empty deployment's
+   *  "no recordings yet" note. */
+  compact?: boolean;
+  /** Whether the map itself responds to drag/zoom. Defaults to the full map
+   *  being interactive and compact thumbnails being static. The location
+   *  modal passes `compact interactive` for a headerless but zoomable map. */
+  interactive?: boolean;
+  /** A static thumbnail opens a larger, zoomable map in a modal when clicked.
+   *  Pass false for a purely decorative preview. */
+  expandable?: boolean;
 }) {
   const t = useTranslations("common.audiomoth.deployments");
+  const modal = useModal();
   const elRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const markerRef = useRef<Marker | null>(null);
@@ -65,8 +82,14 @@ export function DeploymentLocationMap({
           minZoom: 1,
           zoomControl: false,
           scrollWheelZoom: false,
+          dragging: interactive,
+          touchZoom: interactive,
+          doubleClickZoom: interactive,
+          boxZoom: interactive,
+          keyboard: interactive,
+          attributionControl: interactive,
         }).setView([lat, lon], 12);
-        L.control.zoom({ position: "bottomright" }).addTo(map);
+        if (interactive) L.control.zoom({ position: "bottomright" }).addTo(map);
         tileRef.current = L.tileLayer(mapTileUrl(dark), {
           attribution:
             '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
@@ -87,7 +110,18 @@ export function DeploymentLocationMap({
     return () => {
       cancelled = true;
     };
-  }, [lat, lon, label]);
+  }, [lat, lon, label, interactive]);
+
+  // The map can mount while its container is still settling — most notably
+  // inside the modal, whose dialog/drawer animates open — so retile whenever
+  // the canvas actually changes size instead of trusting one early timeout.
+  useEffect(() => {
+    const el = elRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(() => mapRef.current?.invalidateSize());
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -97,6 +131,43 @@ export function DeploymentLocationMap({
       tileRef.current = null;
     };
   }, []);
+
+  /** A static thumbnail's click-through: the same spot, blown up and zoomable. */
+  const openExpanded = useCallback(() => {
+    modal.pushModal(
+      {
+        id: "deployment-location-map",
+        dialogWidth: "max-w-2xl w-[calc(100%-2rem)]",
+        content: <DeploymentLocationMapModal lat={lat} lon={lon} label={label} />,
+      },
+      true,
+    );
+    void modal.show();
+  }, [modal, lat, lon, label]);
+
+  // Thumbnail: no header or zoom control, just the pinned canvas in a small
+  // rounded frame the caller sizes. A static one opens the zoomable modal on
+  // click, so the small preview is never a dead end.
+  if (compact) {
+    const canExpand = expandable && !interactive;
+    return (
+      <div className={cn("group relative overflow-hidden rounded-lg border border-border bg-muted/40", className)}>
+        <div ref={elRef} className={cn("w-full", heightClass)} style={{ zIndex: 0 }} aria-label={t("mapTitle")} />
+        {canExpand ? (
+          <button
+            type="button"
+            onClick={openExpanded}
+            aria-label={t("mapExpand")}
+            className="absolute inset-0 z-10 cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+          >
+            <span className="pointer-events-none absolute bottom-1 right-1 grid size-6 place-items-center rounded-md border border-border/70 bg-background/85 text-foreground/70 shadow-sm transition-colors group-hover:text-foreground">
+              <Maximize2Icon className="size-3.5" aria-hidden />
+            </span>
+          </button>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <section className={cn("overflow-hidden rounded-2xl border border-border bg-foreground/[0.04]", className)}>
@@ -111,5 +182,39 @@ export function DeploymentLocationMap({
         aria-label={t("mapTitle")}
       />
     </section>
+  );
+}
+
+/**
+ * The blown-up view behind a thumbnail: the deployment's name and coordinates
+ * over a full-width map with the standard zoom control, drag and pinch — the
+ * same behaviour as every other map in the app.
+ */
+function DeploymentLocationMapModal({ lat, lon, label }: { lat: number; lon: number; label?: string }) {
+  const t = useTranslations("common.audiomoth.deployments");
+  return (
+    <ModalContent className="space-y-4">
+      <ModalHeader>
+        {/* The deployment's name is user-supplied and can be long, so the text
+            wraps beside the icon and clears the dialog's close button. */}
+        <ModalTitle className="flex items-start gap-2 pr-8">
+          <MapPinIcon className="mt-1.5 size-5 shrink-0 text-primary" aria-hidden />
+          <span className="min-w-0 break-words">{label || t("mapTitle")}</span>
+        </ModalTitle>
+        <ModalDescription className="tabular-nums">
+          {lat.toFixed(5)}, {lon.toFixed(5)}
+        </ModalDescription>
+      </ModalHeader>
+      <DeploymentLocationMap
+        compact
+        interactive
+        expandable={false}
+        lat={lat}
+        lon={lon}
+        label={label}
+        className="rounded-xl"
+        heightClass="h-[min(55svh,440px)]"
+      />
+    </ModalContent>
   );
 }

@@ -31,6 +31,9 @@ export class CgsRequestError extends Error {
   }
 }
 
+const CGS_REQUEST_TIMEOUT_MS = 10_000;
+const MAX_CGS_ROSTER_PAGES = 100;
+
 type RawMember = {
   did?: unknown;
   memberDid?: unknown;
@@ -96,6 +99,17 @@ function errorMessage(payload: RawMembersResponse | RawGroupsResponse | null, fa
   return formatCgsErrorMessage(raw, fallback);
 }
 
+async function fetchCgsRosterPage(url: URL, init: RequestInit, fallback: string): Promise<Response> {
+  try {
+    return await fetch(url, {
+      ...init,
+      signal: AbortSignal.timeout(CGS_REQUEST_TIMEOUT_MS),
+    });
+  } catch {
+    throw new CgsRequestError(fallback, 502);
+  }
+}
+
 async function resolveCgsRepoIdentifier(repo: string): Promise<string> {
   const trimmed = repo.trim();
   if (trimmed.startsWith("did:")) return trimmed;
@@ -123,10 +137,10 @@ async function fetchCgsGroupMembershipPage(
   upstreamUrl.searchParams.set("limit", "100");
   if (cursor) upstreamUrl.searchParams.set("cursor", cursor);
 
-  const upstream = await fetch(upstreamUrl, {
+  const upstream = await fetchCgsRosterPage(upstreamUrl, {
     headers: { cookie: authCookie },
     cache: "no-store",
-  });
+  }, "Could not load organizations. Try again later.");
   const payload = (await upstream.json().catch(() => null)) as RawGroupsResponse | null;
   if (!upstream.ok || payload?.error) {
     throw new CgsRequestError(errorMessage(payload, "Could not load organizations."), upstream.status || 502);
@@ -189,7 +203,14 @@ export async function fetchAllCgsGroupMembershipsWithCookie(cookie: string | nul
   const seenCursors = new Set<string>();
   let cursor: string | null = null;
 
-  do {
+  for (let pageCount = 0; ; pageCount += 1) {
+    if (pageCount >= MAX_CGS_ROSTER_PAGES) {
+      throw new CgsRequestError(
+        "Could not completely load organizations because the group service exceeded the 100-page limit. Nothing was stored; try again later.",
+        502,
+      );
+    }
+
     const page = await fetchCgsGroupMembershipPage(authCookie, cursor);
     appendUniqueGroupMemberships({
       groups,
@@ -197,10 +218,9 @@ export async function fetchAllCgsGroupMembershipsWithCookie(cookie: string | nul
       seenGroupDids,
     });
     rememberGroupMembershipCursor(page.cursor, seenCursors);
+    if (!page.cursor) return groups;
     cursor = page.cursor;
-  } while (cursor);
-
-  return groups;
+  }
 }
 
 export async function fetchCgsMembersWithCookie({
@@ -220,7 +240,7 @@ export async function fetchCgsMembersWithCookie({
 
   const resolvedRepo = await resolveCgsRepoIdentifier(repo);
 
-  const upstream = await fetch(new URL("/api/cgs/mutation", getAuthBaseUrl()), {
+  const upstream = await fetchCgsRosterPage(new URL("/api/cgs/mutation", getAuthBaseUrl()), {
     method: "POST",
     headers: {
       "content-type": "application/json",
@@ -233,7 +253,7 @@ export async function fetchCgsMembersWithCookie({
       ...(cursor ? { cursor } : {}),
     }),
     cache: "no-store",
-  });
+  }, "Could not load organization members. Try again later.");
 
   const payload = (await upstream.json().catch(() => null)) as RawMembersResponse | null;
   if (!upstream.ok || payload?.error) {
@@ -263,7 +283,7 @@ export async function fetchCgsMembersWithCookie({
   };
 }
 
-/** Resolve one member's current role across every group-service page. */
+/** Load the complete roster for one organization across every group-service page. */
 export async function fetchAllCgsMembersWithCookie({
   repo,
   cookie,
@@ -276,7 +296,14 @@ export async function fetchAllCgsMembersWithCookie({
   const seenCursors = new Set<string>();
   let cursor: string | null = null;
 
-  do {
+  for (let pageCount = 0; ; pageCount += 1) {
+    if (pageCount >= MAX_CGS_ROSTER_PAGES) {
+      throw new CgsRequestError(
+        "Could not completely load organization members because the group service exceeded the 100-page limit. Nothing was stored; try again later.",
+        502,
+      );
+    }
+
     const page = await fetchCgsMembersWithCookie({ repo, cookie, cursor, limit: 100 });
     for (const member of page.members) {
       if (seenMemberDids.has(member.did)) {
@@ -297,8 +324,9 @@ export async function fetchAllCgsMembersWithCookie({
       );
     }
     if (next) seenCursors.add(next);
+    if (!next) break;
     cursor = next;
-  } while (cursor);
+  }
 
   if (members.length === 0) {
     throw new CgsRequestError(

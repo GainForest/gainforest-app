@@ -2477,6 +2477,48 @@ export async function fetchAccountCards(
   return cards;
 }
 
+/**
+ * Reverse-resolve verified EVM wallet addresses back to the account DIDs that
+ * linked them (`app.gainforest.link.evm`). Best-effort: many recipient wallets
+ * are splits-vaults, ENS names, or ad-hoc payout addresses that were never
+ * linked to an account, so those simply won't appear in the result. Keyed by
+ * lowercased address so callers can match regardless of checksum casing.
+ */
+export async function fetchDidsByEvmAddresses(
+  addresses: string[],
+  signal?: AbortSignal,
+): Promise<Map<string, string>> {
+  const resolved = new Map<string, string>();
+  const wanted = Array.from(
+    new Set(addresses.filter((a): a is string => typeof a === "string" && a.length > 0)),
+  );
+  if (wanted.length === 0) return resolved;
+
+  // The indexer stores addresses with their original checksum casing, so query
+  // both the exact values and their lowercased forms to be safe.
+  const queryValues = Array.from(new Set([...wanted, ...wanted.map((a) => a.toLowerCase())]));
+  const data = await indexerQuery<{
+    appGainforestLinkEvm?: Connection<{ did?: string | null; address?: string | null }>;
+  }>(
+    `query LinkEvmByAddresses($addresses: [String!], $first: Int!) {
+      appGainforestLinkEvm(first: $first, where: { address: { in: $addresses } }) {
+        edges { node { did address } }
+      }
+    }`,
+    { addresses: queryValues, first: Math.min(queryValues.length * 2, 200) },
+    signal,
+  ).catch(() => null);
+
+  for (const edge of data?.appGainforestLinkEvm?.edges ?? []) {
+    const did = sv(edge?.node?.did);
+    const address = sv(edge?.node?.address);
+    if (!did || !address) continue;
+    const key = address.toLowerCase();
+    if (!resolved.has(key)) resolved.set(key, did);
+  }
+  return resolved;
+}
+
 function mapActivity(n: RawActivity): BumicertRecord {
   let imageUrl: string | null = null;
   let imageRef: string | null = null;

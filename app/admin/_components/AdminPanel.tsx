@@ -14,7 +14,8 @@ export function AdminPanel({
   Icon: typeof SproutIcon;
   title: string;
   description: string;
-  count: number;
+  /** Optional so panels that load their own data lazily can omit the badge. */
+  count?: number;
   footer?: string;
   children: ReactNode;
 }) {
@@ -26,9 +27,11 @@ export function AdminPanel({
             <Icon className="size-4" />
           </span>
           <h2 className="text-base font-semibold text-foreground">{title}</h2>
-          <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium tabular-nums text-muted-foreground">
-            {count}
-          </span>
+          {count !== undefined ? (
+            <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium tabular-nums text-muted-foreground">
+              {count}
+            </span>
+          ) : null}
         </div>
         <p className="mt-1.5 max-w-prose text-sm leading-6 text-muted-foreground">{description}</p>
       </header>

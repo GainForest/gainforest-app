@@ -1094,6 +1094,7 @@
       "goToOrganization": "Abrir organização",
       "errorTitle": "Não foi possível aceitar o convite",
       "acceptError": "Não foi possível aceitar o convite.",
+      "membershipOutcomeUnknown": "Não foi possível confirmar que você entrou na organização. Tente novamente.",
       "tryAgain": "Tentar novamente",
       "notFoundTitle": "Convite não encontrado",
       "notFoundDescription": "Este link de convite não é válido ou foi removido.",
@@ -1358,7 +1359,8 @@
       "awardEndorsements": "Conceder endossos",
       "facilitator": "Carteira facilitadora",
       "dataJobs": "Lotes de dados",
-      "blockedDomains": "Endereços bloqueados"
+      "blockedDomains": "Endereços bloqueados",
+      "walletConnections": "Carteiras conectadas"
     },
     "unnamed": "Conta sem nome",
     "awardHint": "Abra um perfil para conceder um selo.",
@@ -1440,7 +1442,7 @@
       },
       "people": {
         "title": "Pessoas",
-        "subtitle": "Quem usa um assistente de campo Tainá, as organizações que podem endossar contas e os selos concedidos pela GainForest."
+        "subtitle": "Quem usa um assistente de campo Tainá, as contas com carteiras conectadas, as organizações que podem endossar contas e os selos concedidos pela GainForest."
       },
       "trust": {
         "title": "Confiança e segurança",
@@ -1511,6 +1513,10 @@
     },
     "ignore": "Ignorar",
     "countAgain": "Voltar a contar",
+    "noWallet": "Sem carteira",
+    "alreadyPaid": "Pago",
+    "paidAt": "Pago em {date}",
+    "payPrize": "Pagar ${amount}",
     "loading": "A carregar inscritos do BioBlitz",
     "empty": "Sem inscritos",
     "loadError": "Não foi possível carregar esta rodada.",
@@ -2137,7 +2143,7 @@
     },
     "mainTabs": {
       "setup": "Configuração",
-      "library": "Gravações",
+      "library": "Implantações",
       "upload": "Enviar",
       "label": "Rotular",
       "identifications": "Identificações",
@@ -2274,6 +2280,7 @@
       "metadataTitle": "{name} — Implantação",
       "detailBack": "Voltar às gravações",
       "mapTitle": "Local da implantação",
+      "mapExpand": "Ver este local em um mapa maior",
       "equipmentUsedLabel": "AudioMoth utilizado",
       "protocolLabel": "Protocolo",
       "recordedByLabel": "Registrado por",
@@ -3952,5 +3959,24 @@
         "description": "Dados rotulados e pelo menos uma atualização pública publicada no Bumicerts."
       }
     }
+  },
+  "adminWalletConnections": {
+    "title": "Carteiras conectadas",
+    "description": "Pesquise uma conta por nome, identificador ou DID para ver quais carteiras ela conectou — uma carteira de doações e/ou carteiras EVM vinculadas.",
+    "prompt": "Pesquise uma conta por nome, identificador ou DID para ver suas carteiras.",
+    "minChars": "Digite pelo menos {count} caracteres para pesquisar.",
+    "searching": "Pesquisando…",
+    "unavailable": "A pesquisa não pôde ser concluída agora. Tente novamente em instantes.",
+    "searchPlaceholder": "Pesquisar por nome, identificador ou DID…",
+    "noMatches": "Nenhuma conta correspondeu à sua pesquisa.",
+    "person": "Pessoa",
+    "organization": "Organização",
+    "vaultWallet": "Carteira de doações",
+    "linkedWallet": "Carteira vinculada",
+    "unnamed": "Conta sem nome",
+    "noWallet": "Nenhuma carteira conectada.",
+    "legacy": "herdada",
+    "signers": "{count} signatários",
+    "unverified": "não verificada"
   }
 }

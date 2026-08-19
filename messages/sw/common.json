@@ -1094,6 +1094,7 @@
       "goToOrganization": "Fungua shirika",
       "errorTitle": "Haikuwezekana kukubali mwaliko",
       "acceptError": "Haikuwezekana kukubali mwaliko.",
+      "membershipOutcomeUnknown": "Hatukuweza kuthibitisha kuwa umejiunga na shirika. Jaribu tena.",
       "tryAgain": "Jaribu tena",
       "notFoundTitle": "Mwaliko haukupatikana",
       "notFoundDescription": "Kiungo hiki cha mwaliko si halali au kimeondolewa.",
@@ -1358,7 +1359,8 @@
       "awardEndorsements": "Toa idhini",
       "facilitator": "Pochi ya uwezeshaji",
       "dataJobs": "Makundi ya data",
-      "blockedDomains": "Anwani zilizozuiwa"
+      "blockedDomains": "Anwani zilizozuiwa",
+      "walletConnections": "Pochi zilizounganishwa"
     },
     "unnamed": "Akaunti isiyo na jina",
     "awardHint": "Fungua wasifu ili kutoa beji.",
@@ -1440,7 +1442,7 @@
       },
       "people": {
         "title": "Watu",
-        "subtitle": "Kila mtu anayetumia msaidizi wa uwandani Tainá, mashirika yanayoweza kudhamini akaunti, na beji zinazotolewa na GainForest."
+        "subtitle": "Kila mtu anayetumia msaidizi wa uwandani Tainá, akaunti zilizo na pochi zilizounganishwa, mashirika yanayoweza kudhamini akaunti, na beji zinazotolewa na GainForest."
       },
       "trust": {
         "title": "Uaminifu na usalama",
@@ -1511,6 +1513,10 @@
     },
     "ignore": "Puuza",
     "countAgain": "Hesabu tena",
+    "noWallet": "Hakuna pochi",
+    "alreadyPaid": "Imelipwa",
+    "paidAt": "Imelipwa {date}",
+    "payPrize": "Lipa ${amount}",
     "loading": "Inapakia waliojisajili BioBlitz",
     "empty": "Hakuna waliojisajili",
     "loadError": "Haikuweza kupakia raundi hii.",
@@ -2137,7 +2143,7 @@
     },
     "mainTabs": {
       "setup": "Usanidi",
-      "library": "Rekodi",
+      "library": "Usambazaji",
       "upload": "Pakia",
       "label": "Weka lebo",
       "identifications": "Vitambulisho",
@@ -2274,6 +2280,7 @@
       "metadataTitle": "{name} — Usambazaji",
       "detailBack": "Rudi kwenye rekodi",
       "mapTitle": "Mahali pa usambazaji",
+      "mapExpand": "Ona mahali hapa kwenye ramani kubwa zaidi",
       "equipmentUsedLabel": "AudioMoth iliyotumika",
       "protocolLabel": "Itifaki",
       "recordedByLabel": "Kimerekodiwa na",
@@ -3952,5 +3959,24 @@
         "description": "Data imewekwa lebo na angalau sasisho moja la umma limechapishwa kwenye Bumicerts."
       }
     }
+  },
+  "adminWalletConnections": {
+    "title": "Pochi zilizounganishwa",
+    "description": "Tafuta akaunti kwa jina, kitambulishi, au DID ili kuona ni pochi zipi zilizounganishwa — pochi ya mchango na/au pochi za EVM zilizounganishwa.",
+    "prompt": "Tafuta akaunti kwa jina, kitambulishi, au DID ili kuona pochi zake.",
+    "minChars": "Andika angalau herufi {count} kutafuta.",
+    "searching": "Inatafuta…",
+    "unavailable": "Utafutaji haukuweza kukamilika kwa sasa. Jaribu tena baada ya muda.",
+    "searchPlaceholder": "Tafuta kwa jina, kitambulishi, au DID…",
+    "noMatches": "Hakuna akaunti inayolingana na utafutaji wako.",
+    "person": "Mtu",
+    "organization": "Shirika",
+    "vaultWallet": "Pochi ya mchango",
+    "linkedWallet": "Pochi iliyounganishwa",
+    "unnamed": "Akaunti isiyo na jina",
+    "noWallet": "Hakuna pochi iliyounganishwa.",
+    "legacy": "ya zamani",
+    "signers": "watia saini {count}",
+    "unverified": "hajathibitishwa"
   }
 }

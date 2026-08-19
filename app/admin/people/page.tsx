@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { AwardIcon, BotIcon, Building2Icon, UsersIcon } from "lucide-react";
+import { AwardIcon, BotIcon, Building2Icon, UsersIcon, WalletIcon } from "lucide-react";
 import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
 import { BUILTIN_ENDORSERS, fetchEndorserRecords } from "@/app/_lib/endorsers";
 import { loadAwardEndorsements, loadTainaRows } from "../_lib/admin-loaders";
@@ -9,6 +9,7 @@ import { AdminPageHeader } from "../_components/AdminPageHeader";
 import { AdminPanel } from "../_components/AdminPanel";
 import { AdminSectionTabs } from "../_components/AdminSectionTabs";
 import { AdminTainaPanel } from "../_components/AdminTainaPanel";
+import { AdminWalletConnectionsPanel } from "../_components/AdminWalletConnectionsPanel";
 import { EndorsersManager } from "../_components/EndorsersManager";
 import { AwardEndorsementsPanel } from "../_components/AwardEndorsementsPanel";
 
@@ -18,8 +19,9 @@ export const metadata: Metadata = {
 };
 
 /**
- * People: everyone running a Tainá field assistant, the organizations allowed
- * to endorse accounts, and the badges GainForest itself awards.
+ * People: everyone running a Tainá field assistant, the accounts that have
+ * connected wallets, the organizations allowed to endorse accounts, and the
+ * badges GainForest itself awards.
  */
 export default async function AdminPeoplePage({
   searchParams,
@@ -33,6 +35,7 @@ export default async function AdminPeoplePage({
   const tTaina = await getTranslations("common.adminTaina");
   const tEndorsers = await getTranslations("common.adminEndorsers");
   const tAward = await getTranslations("common.adminAwardEndorsements");
+  const tWallet = await getTranslations("common.adminWalletConnections");
 
   const [{ tab }, taina, endorsers, awardEndorsements] = await Promise.all([
     searchParams,
@@ -78,6 +81,22 @@ export default async function AdminPeoplePage({
                 footer={tEndorsers("propagationHint")}
               >
                 <EndorsersManager builtins={BUILTIN_ENDORSERS} initial={endorsers} />
+              </AdminPanel>
+            ),
+          },
+          {
+            // Fetched lazily by the panel (a full wallet scan is expensive), so
+            // the badge can't show a live count here without running it.
+            id: "walletConnections",
+            label: t("tabs.walletConnections"),
+            icon: <WalletIcon className="size-4" />,
+            content: (
+              <AdminPanel
+                Icon={WalletIcon}
+                title={tWallet("title")}
+                description={tWallet("description")}
+              >
+                <AdminWalletConnectionsPanel />
               </AdminPanel>
             ),
           },

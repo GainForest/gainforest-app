@@ -87,6 +87,7 @@ import {
 import { AddDeploymentToProjectModal } from "@/app/_components/AddDeploymentToProjectModal";
 import { formatDate } from "@/app/_lib/format";
 import { RecordingsExplorer } from "@/app/_components/RecordingsExplorer";
+import { DeploymentLocationMap } from "@/app/_components/DeploymentLocationMap";
 
 type DeploymentGroup = {
   key: string;
@@ -813,9 +814,37 @@ export function AccountAudioViewer({
                 </div>
                 <div className="mt-4">
                   {group.items.length === 0 ? (
-                    <p className="rounded-xl border border-dashed border-border bg-muted/20 px-4 py-6 text-center text-xs text-muted-foreground">
-                      {tFolders("emptyFolder")}
-                    </p>
+                    /* No recordings yet — but a deployment can already know
+                       where its recorder stood (the chime flow asks up front,
+                       and the owner can set it by hand). Show that place as a
+                       small pinned map thumbnail beside the note, so an empty
+                       folder still reads as a real spot without the full-height
+                       map a populated deployment carries. */
+                    group.coords ? (
+                      <div className="flex items-center gap-4 rounded-xl border border-border p-3">
+                        <DeploymentLocationMap
+                          compact
+                          lat={group.coords.lat}
+                          lon={group.coords.lon}
+                          label={group.name}
+                          className="w-28 shrink-0 border-border/70"
+                          heightClass="h-[72px]"
+                        />
+                        <div className="min-w-0">
+                          <p className="text-[13px] font-medium text-foreground">{tFolders("emptyFolder")}</p>
+                          <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <MapPinIcon className="size-3.5 shrink-0 text-primary" aria-hidden />
+                            <span className="tabular-nums">
+                              {group.coords.lat.toFixed(5)}, {group.coords.lon.toFixed(5)}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="rounded-xl border border-dashed border-border bg-muted/20 px-4 py-6 text-center text-xs text-muted-foreground">
+                        {tFolders("emptyFolder")}
+                      </p>
+                    )
                   ) : (
                     <RecordingsExplorer
                       did={did}

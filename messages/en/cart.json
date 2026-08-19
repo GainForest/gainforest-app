@@ -96,7 +96,8 @@
     "messageTitle": "Add a message (optional)",
     "messageHint": "A word of encouragement, or why you gave. The recipient will see it.",
     "messagePlaceholder": "Add a message (optional)…",
-    "messageAnonymousNote": "Your message won’t be shown under your name.",
+    "messageAnonymousNote": "Your message won't be shown under your name.",
+    "bioblitzAwardNote": "This message identifies the payment as a BioBlitz prize and cannot be changed.",
     "tipNone": "No tip",
     "cardsPreviewTitle": "Bumicerts you’ll receive",
     "cardsUnavailableNote": "Bumicerts are only available for eligible project donations. This checkout does not include one.",
@@ -256,6 +257,13 @@
     },
     "myCardsTitle": "My Bumicerts gallery",
     "myCardsDescription": "Preview the collected Bumicerts gallery, populated with sample collectibles.",
+    "shop": {
+      "title": "Shop page (Bumimic)",
+      "description": "The product page for Bumimic, a low-cost open acoustic recorder.",
+      "mockBadge": "Static page",
+      "cardTitle": "Bumimic shop page",
+      "cardDescription": "Preview the product page for the Bumimic acoustic recorder prototype."
+    },
     "rewildingDashboard": {
       "title": "Rewilding grant dashboard",
       "description": "The My grant overview and its audio pace chart, in each state the recording target can be in.",
@@ -302,7 +310,7 @@
   "myCards": {
     "eyebrow": "Collectibles",
     "title": "My Bumicerts",
-    "description": "Every Bumicert comes from a verified project donation receipt linked to your account.",
+    "description": "Every Bumicert comes from a verified donation receipt linked to your account.",
     "count": "{count, plural, one {# Bumicert} other {# Bumicerts}}",
     "emptyTitle": "No Bumicerts yet",
     "emptyBody": "Donate to a project while signed in and showing your name to earn your first Bumicert.",
@@ -317,6 +325,7 @@
     "fallbackOrganization": "Project team",
     "fallbackRecipient": "A community member",
     "fallbackPersonContext": "Direct support",
+    "fallbackAccount": "An account you supported",
     "verifiedDonation": "Verified donation",
     "viewProject": "View project",
     "viewProfile": "View profile",

@@ -125,7 +125,7 @@ test("signed-out card galleries ignore browser-injected collectibles", async ({ 
     window.localStorage.setItem("gainforest.reward-cards.v1:guest", JSON.stringify([{ title: "Fake card" }]));
   });
 
-  await page.goto("/cards");
+  await page.goto("/bumicerts");
   await expect(page.getByRole("heading", { name: "My Cards", exact: true })).toBeVisible();
   await expect(page.getByText("Sign in to see your cards", { exact: true })).toBeVisible();
   await expect(page.getByText("Fake card", { exact: true })).toHaveCount(0);

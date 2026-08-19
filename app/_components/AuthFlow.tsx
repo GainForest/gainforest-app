@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRightIcon,
   CheckIcon,
@@ -672,6 +672,10 @@ function AuthenticatedMenu({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
+  // Re-mounts the My Bumicerts glare each time the menu opens and on hover so
+  // the one-shot sheen replays instead of only running on first mount.
+  const [glareKey, setGlareKey] = useState(0);
+  const reduceMotion = useReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
   const { personal: personalCard, groups, status: groupsStatus, reload } = useAccountList(session.did);
   const [activeContext, setActiveContext] = useActiveAccountContext(session.did);
@@ -1035,28 +1039,27 @@ function AuthenticatedMenu({
 
               <div className="my-2 h-px bg-border/60" />
 
-              {/* My Cards — the collectibles earned from donations. Given a
-                  holographic treatment so it reads as something special. */}
+              {/* My Bumicerts — the collectibles earned from donations. Kept
+                  visually in line with the other menu rows; the "special" read
+                  comes from a one-shot glare that sweeps across it when the
+                  menu opens and again on hover. */}
               <Link
-                href="/cards"
+                href="/bumicerts"
                 onClick={() => setOpen(false)}
-                className="group relative mb-1 flex items-center gap-2.5 overflow-hidden rounded-xl border border-primary/30 px-2.5 py-2.5 text-sm font-medium text-foreground shadow-[0_6px_20px_-10px_rgba(79,70,229,0.6)] transition-colors"
+                onMouseEnter={() => setGlareKey((key) => key + 1)}
+                className="relative flex items-center gap-2.5 overflow-hidden rounded-lg px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
               >
-                <span
-                  aria-hidden
-                  className="absolute inset-0 opacity-70"
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(115deg, rgba(255,0,128,0.12), rgba(255,214,0,0.09), rgba(0,229,255,0.12), rgba(123,47,247,0.12))",
-                  }}
-                />
-                <span
-                  aria-hidden
-                  className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full"
-                />
-                <span className="relative grid size-6 shrink-0 place-items-center rounded-lg bg-primary/15 text-primary">
-                  <SparklesIcon className="h-3.5 w-3.5" />
-                </span>
+                {reduceMotion ? null : (
+                  <motion.span
+                    key={glareKey}
+                    aria-hidden
+                    initial={{ x: "-100%" }}
+                    animate={{ x: "100%" }}
+                    transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
+                    className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-primary/30 to-transparent"
+                  />
+                )}
+                <SparklesIcon className="relative h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 <span className="relative flex-1">{sidebarT("profileRow.myCards")}</span>
               </Link>
 

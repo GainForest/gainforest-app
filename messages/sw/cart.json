@@ -97,6 +97,7 @@
     "messageHint": "Neno la kutia moyo, au sababu ya kutoa. Mpokeaji ataliona.",
     "messagePlaceholder": "Ongeza ujumbe (hiari)…",
     "messageAnonymousNote": "Ujumbe wako hautaonyeshwa kwa jina lako.",
+    "bioblitzAwardNote": "Ujumbe huu unatambua malipo kama tuzo ya BioBlitz na hauwezi kubadilishwa.",
     "tipNone": "Hakuna bahashishi",
     "cardsPreviewTitle": "Bumicerts utakazopokea",
     "cardsUnavailableNote": "Bumicerts hupatikana tu kwa michango ya miradi inayostahiki. Malipo haya hayana mchango kama huo.",
@@ -256,6 +257,13 @@
     },
     "myCardsTitle": "Matunzio ya Bumicerts Zangu",
     "myCardsDescription": "Hakiki matunzio ya Bumicerts zilizokusanywa yenye mifano ya Bumicerts.",
+    "shop": {
+      "title": "Ukurasa wa duka (Bumimic)",
+      "description": "Ukurasa wa bidhaa ya Bumimic, kirekodi cha sauti huria na cha gharama nafuu.",
+      "mockBadge": "Ukurasa tuli",
+      "cardTitle": "Ukurasa wa duka la Bumimic",
+      "cardDescription": "Onyesho la ukurasa wa bidhaa kwa mfano wa kirekodi cha sauti cha Bumimic."
+    },
     "rewildingDashboard": {
       "title": "Dashibodi ya ruzuku ya Rewilding",
       "description": "Muhtasari wa Ruzuku yangu na chati yake ya mwendo wa sauti, katika kila hali ambayo lengo la kurekodi linaweza kuwa.",
@@ -302,7 +310,7 @@
   "myCards": {
     "eyebrow": "Bumicerts za kukusanya",
     "title": "Bumicerts Zangu",
-    "description": "Kila Bumicert hutokana na risiti ya mchango wa mradi iliyothibitishwa na kuunganishwa na akaunti yako.",
+    "description": "Kila Bumicert hutoka kwa risiti ya mchango iliyothibitishwa iliyounganishwa na akaunti yako.",
     "count": "{count, plural, one {Bumicert #} other {Bumicerts #}}",
     "emptyTitle": "Bado hakuna Bumicerts",
     "emptyBody": "Changia mradi ukiwa umeingia na ukionyesha jina lako ili kupata Bumicert yako ya kwanza.",
@@ -317,6 +325,7 @@
     "fallbackOrganization": "Timu ya mradi",
     "fallbackRecipient": "Mwanajamii",
     "fallbackPersonContext": "Msaada wa moja kwa moja",
+    "fallbackAccount": "Akaunti uliyoisaidia",
     "verifiedDonation": "Mchango uliothibitishwa",
     "viewProject": "Tazama mradi",
     "viewProfile": "Tazama wasifu",
