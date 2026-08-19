@@ -43,6 +43,7 @@ export default function TrapsPage() {
   const [error, setError] = useState<string | null>(null);
   const [kills, setKills] = useState<TrapKill[]>([]);
   const [observations, setObservations] = useState<TrapObservation[]>([]);
+  const [sources, setSources] = useState(0);
 
   // Tab state
   const [activeTab, setActiveTab] = useState<TabId>("records");
@@ -71,6 +72,7 @@ export default function TrapsPage() {
       const data = await response.json();
       setKills(data.kills ?? []);
       setObservations(data.observations ?? []);
+      setSources(data.sources ?? 0);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load records");
     } finally {
@@ -283,7 +285,9 @@ export default function TrapsPage() {
                   <TargetIcon className="size-12 text-muted-foreground/50" />
                   <h3 className="mt-4 text-lg font-semibold">No records yet</h3>
                   <p className="mt-1 max-w-md text-sm text-muted-foreground">
-                    Start by adding a kill or observation record. Your field data will appear here.
+                    {sources === 0
+                      ? "No trap sources are loaded yet. Sign in to see your own records."
+                      : `No trap records were found across ${sources} loaded source${sources === 1 ? "" : "s"}. Start by adding a kill or observation record.`}
                   </p>
                   <div className="mt-4 flex gap-2">
                     <Button variant="outline" size="sm" onClick={() => handleAddRecord("observation")}>

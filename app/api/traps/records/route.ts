@@ -1,211 +1,195 @@
 import { NextResponse } from "next/server";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
+import { resolvePdsHost } from "@/app/_lib/pds";
 import {
-  fetchAllTrapRecords,
   TRAP_KILL_COLLECTION,
   TRAP_OBSERVATION_COLLECTION,
   type TrapKill,
+  type TrapKillRecord,
   type TrapObservation,
+  type TrapObservationRecord,
 } from "@/app/traps/_lib/trap-records";
-import { resolvePdsHost } from "@/app/_lib/pds";
 
 /**
- * Known DIDs that have Trap.NZ field records.
- * Since these collections aren't indexed, we maintain a list of known sources.
- * Add DIDs here as users start using the system.
+ * AT-Protocol repos that hold Trap.NZ field records (`nz.trap.field.*`).
+ *
+ * There is no public XRPC endpoint that answers "which DIDs hold this
+ * collection" — `com.atproto.repo.listRecords` is strictly per-repo, and repo
+ * discovery only happens by listening to the firehose or querying a relay's
+ * backing index (the app's indexer doesn't know `nz.trap.*`). So the roster
+ * of trusted sources is maintained here.
+ *
+ * Add a DID or handle (both are resolved) whenever someone records via Trap.NZ.
+ * The signed-in user's own repo is always included on top of this roster.
  */
-const KNOWN_TRAP_SOURCES: string[] = [
-  // Add known DIDs with trap records here
-  // "did:plc:example1",
-  // "did:plc:example2",
+const TRAP_SOURCES: string[] = [
+  "satyam-mishra.bsky.social",
 ];
+
+/** Resolve a handle to a DID via its PDS. */
+async function resolveHandleToDid(handle: string): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `https://bsky.social/xrpc/com.atproto.identity.resolveHandle?handle=${encodeURIComponent(handle)}`,
+      { cache: "no-store" },
+    );
+    if (!res.ok) return null;
+    const data = (await res.json()) as { did?: unknown };
+    return typeof data.did === "string" ? data.did : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Fetch all records of one collection from a DID's PDS, paged. */
+async function fetchCollection<T>(
+  did: string,
+  collection: string,
+): Promise<TripRecordList<T>> {
+  const host = await resolvePdsHost(did).catch(() => null);
+  if (!host) return { records: [] };
+
+  const records: TripRecordList<T>["records"] = [];
+  let cursor: string | undefined;
+
+  for (let page = 0; page < 20; page += 1) {
+    const params = new URLSearchParams({
+      repo: did,
+      collection,
+      limit: "100",
+    });
+    if (cursor) params.set("cursor", cursor);
+
+    const res = await fetch(
+      `https://${host}/xrpc/com.atproto.repo.listRecords?${params.toString()}`,
+      { cache: "no-store" },
+    ).catch(() => null);
+    if (!res?.ok) break;
+
+    const payload = (await res.json().catch(() => null)) as ListRecordsResponse | null;
+    for (const entry of payload?.records ?? []) {
+      if (typeof entry !== "object" || entry === null) continue;
+      const uri = typeof entry.uri === "string" ? entry.uri : "";
+      const value = entry.value;
+      if (!uri || typeof value !== "object" || value === null) continue;
+      records.push({ uri, rkey: uri.split("/").pop() ?? "", did, record: value as T });
+    }
+
+    cursor = typeof payload?.cursor === "string" ? payload.cursor : undefined;
+    if (!cursor) break;
+  }
+
+  return { records };
+}
+
+type TripRecordList<T> = { records: { uri: string; rkey: string; did: string; record: T }[] };
+type ListRecordsResponse = { records?: Array<{ uri?: string; value?: unknown } | null>; cursor?: string };
 
 /**
  * GET /api/traps/records
- * Fetches all trap records from known sources and the current user (if signed in).
+ * Fetches all trap kill + observation records from:
+ *   1. The known TRAP_SOURCES roster (handles/DIDs resolved)
+ *   2. The signed-in user's own repo (if authenticated)
+ *
+ * Returns them merged & newest-first. If nothing is loaded, `sources` tells
+ * the client how many repos were queried so the empty state can explain itself.
  */
 export async function GET() {
   try {
     const session = await fetchAuthSession().catch(() => ({ isLoggedIn: false as const }));
-    
-    // Collect all DIDs to query
-    const didsToQuery = new Set<string>(KNOWN_TRAP_SOURCES);
-    
-    // Add the current user's DID if signed in
-    if (session.isLoggedIn) {
-      didsToQuery.add(session.did);
+
+    // Build the set of DIDs to query: roster (resolve handles→DIDs) + current user.
+    const didSet = new Set<string>();
+    for (const source of TRAP_SOURCES) {
+      const did = source.startsWith("did:") ? source : await resolveHandleToDid(source);
+      if (did) didSet.add(did);
+    }
+    if (session.isLoggedIn) didSet.add(session.did);
+
+    if (didSet.size === 0) {
+      return NextResponse.json({ kills: [], observations: [], sources: 0 });
     }
 
-    // Fetch records from all sources in parallel
-    const results = await Promise.all(
-      Array.from(didsToQuery).map(async (did) => {
-        try {
-          return await fetchAllTrapRecords(did);
-        } catch {
-          // Silently skip DIDs that fail (e.g., PDS unreachable)
-          return { kills: [], observations: [] };
-        }
-      })
-    );
+    const dids = Array.from(didSet);
+    const [killsFromAll, obsFromAll] = await Promise.all([
+      Promise.all(dids.map((d) => fetchCollection<TrapKillRecord>(d, TRAP_KILL_COLLECTION))),
+      Promise.all(dids.map((d) => fetchCollection<TrapObservationRecord>(d, TRAP_OBSERVATION_COLLECTION))),
+    ]);
 
-    // Merge all results
-    const allKills: TrapKill[] = [];
-    const allObservations: TrapObservation[] = [];
+    const kills: TrapKill[] = killsFromAll.flatMap((r) => r.records);
+    const observations: TrapObservation[] = obsFromAll.flatMap((r) => r.records);
 
-    for (const result of results) {
-      allKills.push(...result.kills);
-      allObservations.push(...result.observations);
-    }
+    kills.sort((a, b) => b.record.occurredAt.localeCompare(a.record.occurredAt));
+    observations.sort((a, b) => b.record.occurredAt.localeCompare(a.record.occurredAt));
 
-    // Sort by occurredAt descending
-    allKills.sort((a, b) => b.record.occurredAt.localeCompare(a.record.occurredAt));
-    allObservations.sort((a, b) => b.record.occurredAt.localeCompare(a.record.occurredAt));
-
-    return NextResponse.json({
-      kills: allKills,
-      observations: allObservations,
-    });
+    return NextResponse.json({ kills, observations, sources: dids.length });
   } catch (error) {
     console.error("Failed to fetch trap records:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch records" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch records" }, { status: 500 });
   }
 }
 
 /**
  * POST /api/traps/records
- * Creates a new trap record for the signed-in user.
+ * Creates a kill/observation record on the signed-in user's repo.
+ * Write goes through the auth-service's mutation endpoint (the same path the
+ * manage proxy uses) so it carries the caller's session as the record owner.
  */
 export async function POST(request: Request) {
   try {
     const session = await fetchAuthSession();
     if (!session.isLoggedIn) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+      return NextResponse.json({ error: "Sign in to add a record" }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { collection, record } = body;
+    const body = (await request.json().catch(() => null)) as {
+      collection?: unknown;
+      record?: unknown;
+    } | null;
+    const collection = body?.collection as string | undefined;
+    const record = body?.record as Record<string, unknown> | undefined;
 
     if (!collection || !record) {
       return NextResponse.json({ error: "Missing collection or record" }, { status: 400 });
     }
-
     if (collection !== TRAP_KILL_COLLECTION && collection !== TRAP_OBSERVATION_COLLECTION) {
       return NextResponse.json({ error: "Invalid collection" }, { status: 400 });
     }
 
-    // Create the record via the user's PDS
-    const host = await resolvePdsHost(session.did);
-    if (!host) {
-      return NextResponse.json({ error: "Could not resolve PDS" }, { status: 500 });
-    }
-
-    // Generate a TID for the record key
-    const rkey = generateTid();
-
-    const response = await fetch(`https://${host}/xrpc/com.atproto.repo.createRecord`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        // Note: This requires proper authentication - the client should handle this
-        // For now, return guidance that CRUD needs to go through the manage proxy
-      },
-      body: JSON.stringify({
-        repo: session.did,
-        collection,
-        rkey,
-        record,
-      }),
-    });
-
-    if (!response.ok) {
-      // Creating records requires authentication that we don't have here
-      // Guide users to use the proper mutation flow
+    // Delegate the write to the centralized group/record mutation path so the
+    // app-level rules (ownership, permissions) apply uniformly. The manage
+    // proxy forwards to the auth-service's record-create endpoint using the
+    // caller's session cookie.
+    const cgsUrl = process.env.NEXT_PUBLIC_CGS_URL || process.env.CGS_URL;
+    if (!cgsUrl) {
       return NextResponse.json(
-        { 
-          error: "Record creation requires authentication. Use the GainForest manage flow.",
-          hint: "POST to /api/manage/proxy with the record data"
-        },
-        { status: 501 }
+        { error: "Record service is not configured on this deployment." },
+        { status: 501 },
       );
     }
 
-    const result = await response.json();
-    return NextResponse.json(result);
+    const response = await fetch(`${cgsUrl}/xrpc/com.atproto.repo.createRecord`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        cookie: request.headers.get("cookie") ?? "",
+      },
+      body: JSON.stringify({ repo: session.did, collection, record }),
+    });
+
+    const payload = (await response.json().catch(() => ({}))) as { error?: unknown };
+    if (!response.ok) {
+      return NextResponse.json(
+        { error: typeof payload.error === "string" ? payload.error : "Could not create record" },
+        { status: response.status },
+      );
+    }
+
+    return NextResponse.json({ ok: true, ...payload }, { status: 200 });
   } catch (error) {
     console.error("Failed to create trap record:", error);
-    return NextResponse.json(
-      { error: "Failed to create record" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to create record" }, { status: 500 });
   }
 }
 
-/**
- * PUT /api/traps/records
- * Updates an existing trap record.
- */
-export async function PUT(request: Request) {
-  try {
-    const session = await fetchAuthSession();
-    if (!session.isLoggedIn) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-    }
-
-    // Similar to POST - requires proper auth flow
-    return NextResponse.json(
-      { 
-        error: "Record updates require authentication. Use the GainForest manage flow.",
-        hint: "PUT to /api/manage/proxy with the record data"
-      },
-      { status: 501 }
-    );
-  } catch (error) {
-    console.error("Failed to update trap record:", error);
-    return NextResponse.json(
-      { error: "Failed to update record" },
-      { status: 500 }
-    );
-  }
-}
-
-/**
- * DELETE /api/traps/records
- * Deletes a trap record.
- */
-export async function DELETE(request: Request) {
-  try {
-    const session = await fetchAuthSession();
-    if (!session.isLoggedIn) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-    }
-
-    // Similar to POST - requires proper auth flow
-    return NextResponse.json(
-      { 
-        error: "Record deletion requires authentication. Use the GainForest manage flow.",
-        hint: "DELETE to /api/manage/proxy with the record URI"
-      },
-      { status: 501 }
-    );
-  } catch (error) {
-    console.error("Failed to delete trap record:", error);
-    return NextResponse.json(
-      { error: "Failed to delete record" },
-      { status: 500 }
-    );
-  }
-}
-
-/**
- * Generate a TID (Timestamp ID) for record keys.
- * TIDs are base32-sortable timestamps used in AT Protocol.
- */
-function generateTid(): string {
-  const timestamp = Date.now() * 1000; // microseconds
-  const clockId = Math.floor(Math.random() * 1024);
-  const tid = (BigInt(timestamp) << 10n) | BigInt(clockId);
-  return tid.toString(32).padStart(13, "0");
-}
+export const dynamic = "force-dynamic";
