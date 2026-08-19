@@ -95,7 +95,8 @@
       "explore": "GUNDUA",
       "funding": "UFADHILI",
       "manage": "SIMAMIA",
-      "ai": "AI"
+      "ai": "AI",
+      "admin": "ADMIN"
     },
     "items": {
       "bumicerts": "vyeti",
@@ -130,7 +131,8 @@
       "audiomoth": "AudioMoth",
       "identifications": "Vitambulisho",
       "myGrant": "Ruzuku yangu",
-      "myRecorders": "Vinasa sauti vyangu"
+      "myRecorders": "Vinasa sauti vyangu",
+      "traps": "Mitego"
     },
     "prompts": {
       "signInDescription": "Ingia ili kusimamia akaunti na maudhui yako.",

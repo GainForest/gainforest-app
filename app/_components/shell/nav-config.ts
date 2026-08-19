@@ -4,6 +4,7 @@ import {
   BotIcon,
   Building2Icon,
   CalendarDaysIcon,
+  CrosshairIcon,
   EarthIcon,
   FolderKanbanIcon,
   HeartHandshakeIcon,
@@ -195,6 +196,21 @@ export const NAV_ITEMS: NavSection[] = [
   },
   // Admin has no sidebar section on purpose: it is a staff area, reached from
   // the account menu's Admin link, and /admin groups its pages into cards.
+  {
+    kind: "section",
+    id: "admin",
+    text: "ADMIN",
+    items: [
+      {
+        kind: "leaf",
+        id: "traps",
+        text: "Traps",
+        Icon: CrosshairIcon,
+        href: "/traps",
+        pathCheck: { startsWith: "/traps" },
+      },
+    ],
+  },
 ];
 
 export function isLeafActive(pathCheck: { equals?: string; startsWith?: string }, pathname: string): boolean {
