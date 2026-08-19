@@ -319,7 +319,6 @@ export function ProjectShowcaseCard({
               {isRewilding ? (
                 <span
                   aria-label={rewildingT("indicator")}
-                  title={rewildingT("indicator")}
                   className="grid h-7 w-7 place-items-center rounded-full border border-white/25 bg-black/30 text-white/90 backdrop-blur-md"
                 >
                   <RibbonIcon className="h-3.5 w-3.5" aria-hidden />

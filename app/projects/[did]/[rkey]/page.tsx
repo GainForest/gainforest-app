@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ArrowLeftIcon, ArrowUpRightIcon, FolderKanbanIcon, RibbonIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowUpRightIcon, FolderKanbanIcon } from "lucide-react";
 import { fetchRecordByUri, fetchRecordDetail, isAccountPubliclyListed, type RecordDetail } from "../../../_lib/indexer";
 import { NOINDEX_ROBOTS } from "../../../_lib/seo-metadata";
 import { dropDeletedRecordUris, getPdsRecord, isPdsBlobUrl } from "../../../_lib/pds";
@@ -17,7 +17,7 @@ import { localizedAlternates } from "../../../_lib/seo-metadata";
 import { FollowButton } from "../../../_components/FollowButton";
 import { ProjectFeaturedToggle } from "../../_components/ProjectFeaturedToggle";
 import { getRequestOrigin } from "../../../_lib/request-origin";
-import { fetchRewildingProjectUris } from "../../../_lib/rewilding-projects";
+import { ProjectRecognitions } from "../../_components/ProjectRecognitions";
 import {
   ProjectDetailView,
   loadBumicertRouteData,
@@ -279,9 +279,6 @@ async function ProjectFallback({
     getRequestOrigin(),
     loadProjectStory(did, rkey, record.atUri),
   ]);
-  const isRewildingProject = await fetchRewildingProjectUris()
-    .then((uris) => uris.includes(record.atUri))
-    .catch(() => false);
 
   if (owner && owner.urlIdentifier !== urlIdentifier) {
     redirect(localProjectHref(owner.urlIdentifier, rkey));
@@ -311,16 +308,7 @@ async function ProjectFallback({
             <FolderKanbanIcon className="h-3.5 w-3.5" aria-hidden />
             {t("kind")}
           </span>
-          {isRewildingProject ? (
-            <span
-              title={t("rewilding.indicator")}
-              aria-label={t("rewilding.indicator")}
-              className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-[12px] font-medium text-primary-dark"
-            >
-              <RibbonIcon className="h-3.5 w-3.5" aria-hidden />
-              {t("rewilding.label")}
-            </span>
-          ) : null}
+          <ProjectRecognitions projectUri={record.atUri} ownerDid={did} />
           <ProjectFeaturedToggle projectUri={record.atUri} />
         </div>
 

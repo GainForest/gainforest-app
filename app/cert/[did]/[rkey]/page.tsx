@@ -76,6 +76,7 @@ import { resolveTimelineReferences } from "./_components/timeline/timelineRefere
 import { collectTimelineReferenceLookupInput, type TimelineReference } from "./_components/timeline/timelineReferences";
 import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "@/app/(manage)/manage/_lib/cgs-permissions";
 import { ProjectFeaturedToggle } from "@/app/projects/_components/ProjectFeaturedToggle";
+import { ProjectRecognitions } from "@/app/projects/_components/ProjectRecognitions";
 
 export const revalidate = 60;
 
@@ -813,6 +814,12 @@ export async function ProjectDetailView({
             {detail?.badges?.map((badge, index) => (
               <Badge key={`${badge.label}-${index}`} badge={badge} workScopeLabels={workScopeLabels} />
             ))}
+            {/* Project recognitions (Rewilding the Web, Ma Earth rounds,
+                Trusted-by). Only on the project view — a standalone Cert page
+                has no project collection URI. */}
+            {engagementSubjectUri ? (
+              <ProjectRecognitions projectUri={engagementSubjectUri} ownerDid={record.did} />
+            ) : null}
           </div>
           <h1
             className="mt-3 max-w-3xl text-4xl font-light italic leading-tight tracking-[-0.035em] text-foreground md:text-5xl"
