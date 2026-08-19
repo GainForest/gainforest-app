@@ -2,6 +2,7 @@ import { publicExploreCache, PUBLIC_EXPLORE_CACHE_TTL_MS } from "./public-explor
 import { countryFlag } from "./format";
 import { fetchCertifiedLocationCountriesByUri } from "./indexer";
 import { INDEXER_URL, FACILITATOR_DID, blockExplorerUrl } from "./urls";
+import { cachedAsync } from "./async-cache";
 import { donorMessageFromNotes } from "./donor-message";
 
 // ── Raw receipt fetch ──────────────────────────────────────────────────────
@@ -169,6 +170,16 @@ async function fetchReceiptsUncached(): Promise<FundingReceipt[]> {
 
 export async function fetchReceipts(signal?: AbortSignal): Promise<FundingReceipt[]> {
   return publicExploreCache("funding-receipts", { ttl: TOTAL_STATS_CACHE_MS }, fetchReceiptsUncached, signal);
+}
+
+// The heavy 24h Explore cache is wrong for surfaces where a just-made donation
+// should appear promptly — e.g. an account's "Donations received" tab. This
+// keeps a tiny 30s window (enough to dedupe a burst of loads) so a new receipt
+// shows within seconds of being indexed instead of up to a day later.
+const RECEIPTS_FRESH_TTL_MS = 30_000;
+
+export async function fetchReceiptsFresh(signal?: AbortSignal): Promise<FundingReceipt[]> {
+  return cachedAsync("funding-receipts-fresh:v1", RECEIPTS_FRESH_TTL_MS, fetchReceiptsUncached, signal);
 }
 
 const DONOR_RECEIPTS_QUERY = `

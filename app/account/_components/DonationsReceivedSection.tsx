@@ -2,7 +2,7 @@ import { ExternalLinkIcon, HeartIcon, WalletIcon } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { AuthorInline } from "../../_components/AuthorChip";
 import { PreferredBumicertLink } from "../../_components/PreferredLinks";
-import { fetchReceipts, type FundingReceipt } from "../../_lib/dashboard";
+import { fetchReceiptsFresh, type FundingReceipt } from "../../_lib/dashboard";
 import { formatCompactUsd } from "../../_lib/format";
 import { fetchBumicertsByDid } from "../../_lib/indexer";
 import { blockExplorerUrl } from "../../_lib/urls";
@@ -36,7 +36,7 @@ export async function DonationsReceivedSection({ did, className = "" }: { did: s
     getTranslations("common.accountDonationsReceived"),
     getTranslations("common.accountDonations"),
     getLocale(),
-    fetchReceipts().catch(() => [] as FundingReceipt[]),
+    fetchReceiptsFresh().catch(() => [] as FundingReceipt[]),
     fetchVerifiedRecipientAddress(did).catch(() => null),
   ]);
 
