@@ -10,6 +10,7 @@ import { createWelcomeRuntime } from "@/lib/email-notifications/welcome-runtime"
 import {
   LANGUAGE_COOKIE_NAME,
   isSupportedLanguageCode,
+  readCookieValue,
   resolvePreferredLanguageFromHeader,
   type SupportedLanguageCode,
 } from "@/lib/i18n/languages";
@@ -19,20 +20,6 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const USABLE_INVOCATION_MS = 55_000;
-
-function readCookieValue(cookieHeader: string | null, name: string): string | null {
-  if (!cookieHeader) return null;
-  for (const part of cookieHeader.split(";")) {
-    const [rawName, ...rawValueParts] = part.trim().split("=");
-    if (rawName !== name || rawValueParts.length === 0) continue;
-    try {
-      return decodeURIComponent(rawValueParts.join("="));
-    } catch {
-      return rawValueParts.join("=");
-    }
-  }
-  return null;
-}
 
 function requestLocale(request: Request, cookie: string | null): SupportedLanguageCode {
   const headerLocale = request.headers.get(LOCALE_REQUEST_HEADER_NAME)?.trim();

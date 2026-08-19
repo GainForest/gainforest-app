@@ -355,7 +355,8 @@ describe("acceptGroupInvitation", () => {
     expect(supabaseRpc).not.toHaveBeenCalled();
   });
 
-  it("keeps the invitation pending when membership reconciliation is unavailable", async () => {
+  it("logs redacted context when membership reconciliation is unavailable", async () => {
+    const log = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("timed out")));
     supabaseSelect.mockResolvedValueOnce([rawInvitation]);
     fetchAllCgsGroupMembershipsWithCookie.mockRejectedValueOnce(new Error("membership endpoint unavailable"));
@@ -368,6 +369,12 @@ describe("acceptGroupInvitation", () => {
       name: "GroupInvitationError",
       status: 503,
       code: "membership_outcome_unknown",
+    });
+
+    expect(log).toHaveBeenCalledWith("[cgs-invitations] Membership reconciliation failed", {
+      invitationId,
+      repo: rawInvitation.repo,
+      reason: "Error",
     });
     expect(supabaseRpc).not.toHaveBeenCalled();
   });

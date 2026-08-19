@@ -66,14 +66,25 @@ const acceptedInvitation = {
   notification: null,
 };
 
-function acceptanceRequest(): Request {
+function acceptanceRequest({
+  languageCookie = "pt",
+  requestLocale = "es",
+  acceptLanguage = "sw;q=0.9,en;q=0.8",
+}: {
+  languageCookie?: string | null;
+  requestLocale?: string | null;
+  acceptLanguage?: string | null;
+} = {}): Request {
+  const cookie = ["session=cookie", languageCookie ? `bumicerts-language=${languageCookie}` : null]
+    .filter((value): value is string => Boolean(value))
+    .join("; ");
+  const headers = new Headers({ cookie });
+  if (requestLocale) headers.set("x-bumicerts-locale", requestLocale);
+  if (acceptLanguage) headers.set("accept-language", acceptLanguage);
+
   return new Request(`https://gainforest.app/api/cgs/invitations/${invitationId}/accept`, {
     method: "POST",
-    headers: {
-      cookie: "session=cookie; bumicerts-language=pt",
-      "x-bumicerts-locale": "es",
-      "accept-language": "sw;q=0.9,en;q=0.8",
-    },
+    headers,
   });
 }
 
@@ -142,6 +153,20 @@ describe("POST /api/cgs/invitations/[invitationId]/accept", () => {
     const deadline = deliver.mock.calls[0]?.[1] as Date;
     expect(deadline.getTime()).toBeGreaterThanOrEqual(before + 55_000);
     expect(deadline.getTime()).toBeLessThanOrEqual(after + 55_000);
+  });
+
+  it.each([
+    ["the language cookie when the request locale is absent", { requestLocale: null }, "pt"],
+    ["accept-language when the request locale and language cookie are absent", { requestLocale: null, languageCookie: null }, "sw"],
+  ])("uses %s for the joined email", async (_source, requestOptions, locale) => {
+    const { POST } = await import("./route");
+    const response = await POST(acceptanceRequest(requestOptions), {
+      params: Promise.resolve({ invitationId }),
+    });
+
+    expect(response.status).toBe(200);
+    await afterCallbacks[0]!();
+    expect(deliver).toHaveBeenCalledWith(expect.objectContaining({ locale }), expect.any(Date));
   });
 
   it.each([

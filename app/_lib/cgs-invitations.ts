@@ -378,7 +378,12 @@ async function confirmInvitedMembership(
     return membership.role === invitation.role
       ? { kind: "already_present" }
       : { kind: "role_conflict" };
-  } catch {
+  } catch (error) {
+    console.warn("[cgs-invitations] Membership reconciliation failed", {
+      invitationId: invitation.id,
+      repo: invitation.repo,
+      reason: error instanceof Error ? error.name : "unknown",
+    });
     return { kind: "unknown" };
   }
 }
