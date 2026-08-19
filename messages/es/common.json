@@ -1094,6 +1094,7 @@
       "goToOrganization": "Abrir organización",
       "errorTitle": "No se pudo aceptar la invitación",
       "acceptError": "No se pudo aceptar la invitación.",
+      "membershipOutcomeUnknown": "No pudimos confirmar que te uniste a la organización. Inténtalo de nuevo.",
       "tryAgain": "Intentar de nuevo",
       "notFoundTitle": "Invitación no encontrada",
       "notFoundDescription": "Este enlace de invitación no es válido o fue eliminado.",

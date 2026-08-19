@@ -1094,6 +1094,7 @@
       "goToOrganization": "Open organization",
       "errorTitle": "Could not accept invitation",
       "acceptError": "Could not accept invitation.",
+      "membershipOutcomeUnknown": "We couldn’t confirm that you joined the organization. Try again.",
       "tryAgain": "Try again",
       "notFoundTitle": "Invitation not found",
       "notFoundDescription": "This invitation link is not valid or has been removed.",
