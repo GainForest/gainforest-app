@@ -19,6 +19,7 @@ import { OverviewFolders, type OverviewFolderTile } from "./OverviewFolders";
 import { AccountContentColumns, AccountSidebar } from "./AccountSidebar";
 import { ShareProfileButton } from "./ShareProfileButton";
 import { DonationHistory } from "./DonationHistory";
+import { DonationsReceivedSection } from "./DonationsReceivedSection";
 import { fetchReceipts } from "../../_lib/dashboard";
 import { fetchOwnAnonymousReceipts } from "../../_lib/anonymous-donations";
 import { fetchPublicDataCouncilMembers, type PublicDataCouncilMember } from "../../_lib/data-council";
@@ -269,6 +270,7 @@ export async function AccountHomeTabContent({ account }: { account: AccountRoute
       ) : null}
       {account.kind === "organization" ? <AccountOverviewGallerySection account={account} did={account.did} /> : null}
       {account.kind === "organization" ? <AccountMaEarthRoundsSection did={account.did} className="mt-8" /> : null}
+      {account.kind === "organization" ? <DonationsReceivedSection did={account.did} className="mt-8" /> : null}
       {account.kind === "organization" ? <AccountProjectUpdatesSection did={account.did} /> : null}
       {account.kind === "organization" ? <AccountDataCouncilSection did={account.did} /> : null}
     </>
@@ -324,6 +326,8 @@ export async function AccountOverviewTabContent({ account, did }: { account: Acc
       </section>
 
       <AccountMaEarthRoundsSection did={did} />
+
+      <DonationsReceivedSection did={did} />
 
       <section className="rounded-2xl border border-border bg-card/80 p-4 sm:flex sm:items-center sm:justify-between sm:gap-4">
         <div className="min-w-0">

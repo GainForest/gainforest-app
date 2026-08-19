@@ -759,6 +759,15 @@
     "anonymousBadge": "Solo visible para ti",
     "messageQuote": "Mensaje del donante: «{message}»"
   },
+  "accountDonationsReceived": {
+    "title": "Donaciones recibidas",
+    "description": "Recibos públicos de donación que cualquiera puede auditar. Cada uno enlaza al Cert que financió.",
+    "summary": "{amount} en {count, plural, one {# donación} other {# donaciones}}",
+    "empty": "Aún no se han recibido donaciones públicas.",
+    "anonymousDonor": "Donante anónimo",
+    "certFallback": "Ver Cert",
+    "paymentDetails": "Detalles del pago"
+  },
   "accountProjects": {
     "emptyEyebrow": "Sin proyectos",
     "empty": "Esta cuenta aún no ha compartido proyectos."

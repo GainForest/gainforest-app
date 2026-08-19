@@ -759,6 +759,15 @@
     "anonymousBadge": "Hanya terlihat oleh Anda",
     "messageQuote": "Pesan donor: “{message}”"
   },
+  "accountDonationsReceived": {
+    "title": "Donasi yang diterima",
+    "description": "Tanda terima donasi publik yang dapat diaudit siapa saja. Masing-masing tertaut ke Cert yang didanainya.",
+    "summary": "{amount} dari {count, plural, other {# donasi}}",
+    "empty": "Belum ada donasi publik yang diterima.",
+    "anonymousDonor": "Pendukung anonim",
+    "certFallback": "Lihat Cert",
+    "paymentDetails": "Detail pembayaran"
+  },
   "accountProjects": {
     "emptyEyebrow": "Belum ada proyek",
     "empty": "Akun ini belum membagikan proyek apa pun."

@@ -759,6 +759,15 @@
     "anonymousBadge": "Only visible to you",
     "messageQuote": "Donor message: “{message}”"
   },
+  "accountDonationsReceived": {
+    "title": "Donations received",
+    "description": "Public donation receipts anyone can audit. Each one links to the Cert it funded.",
+    "summary": "{amount} across {count, plural, one {# donation} other {# donations}}",
+    "empty": "No public donations received yet.",
+    "anonymousDonor": "Anonymous supporter",
+    "certFallback": "View Cert",
+    "paymentDetails": "Payment details"
+  },
   "accountProjects": {
     "emptyEyebrow": "No projects",
     "empty": "This account has not shared any projects yet."

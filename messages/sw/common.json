@@ -759,6 +759,15 @@
     "anonymousBadge": "Inaonekana kwako pekee",
     "messageQuote": "Ujumbe wa mfadhili: “{message}”"
   },
+  "accountDonationsReceived": {
+    "title": "Michango iliyopokelewa",
+    "description": "Risiti za umma za michango ambazo mtu yeyote anaweza kukagua. Kila moja ina kiungo kwa Cert iliyofadhiliwa.",
+    "summary": "{amount} katika {count, plural, one {mchango #} other {michango #}}",
+    "empty": "Bado hakuna michango ya umma iliyopokelewa.",
+    "anonymousDonor": "Mfadhili asiyejulikana",
+    "certFallback": "Ona Cert",
+    "paymentDetails": "Maelezo ya malipo"
+  },
   "accountProjects": {
     "emptyEyebrow": "Hakuna miradi",
     "empty": "Akaunti hii bado haijashiriki miradi yoyote."
