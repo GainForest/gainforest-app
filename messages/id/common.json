@@ -1375,7 +1375,7 @@
       "footer": "Perubahan tonggak dan dokumen langsung terlihat di halaman hibah penerima.",
       "unnamedGrantee": "Akun tanpa nama",
       "granteeBadge": "Lencana hibah",
-      "summary": "{done} dari {total} tonggak dikonfirmasi · {documents, plural, =0 {tanpa dokumen} other {# dokumen}}",
+      "summary": "{done} dari {total} tonggak dikonfirmasi · {documents, plural, =0 {tanpa dokumen} other {# dokumen}} · {projects, plural, =0 {tanpa proyek hibah} other {# proyek hibah}}",
       "milestonesTitle": "Tonggak",
       "payout": "Mencairkan ${amount} · pembayaran {tranche}",
       "payoutDefaultLabel": "Gunakan pembayaran standar buku panduan",
@@ -1435,7 +1435,12 @@
       "editCancel": "Batal",
       "milestoneDescriptionLabel": "Deskripsi tonggak",
       "milestoneDescriptionPlaceholder": "Jelaskan apa yang dicakup langkah ini (opsional)",
-      "programCopyHint": "Biarkan nama atau deskripsi kosong untuk memakai teks standar program."
+      "programCopyHint": "Biarkan nama atau deskripsi kosong untuk memakai teks standar program.",
+      "projectsTitle": "Proyek untuk hibah",
+      "projectsHint": "Centang proyek penerima ini yang dicakup hibah. Proyek tersebut mendapat penanda Rewilding the Web dan muncul di bagian Rewilding the Web pada halaman proyek. Menghapus penerima ini akan menghapus semua proyek hibahnya.",
+      "projectsEmpty": "Penerima ini belum memiliki proyek.",
+      "projectAdd": "Tambahkan ke hibah",
+      "projectRemove": "Hapus dari hibah"
     },
     "pages": {
       "hub": {

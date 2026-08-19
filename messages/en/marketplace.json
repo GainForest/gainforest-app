@@ -1413,6 +1413,12 @@
       "sightings": "{count, plural, =0 {No nature sightings yet} one {# nature sighting} other {# nature sightings}}",
       "timeline": "{count, plural, =0 {No project updates yet} one {# project update} other {# project updates}}",
       "reviews": "{count, plural, =0 {No reviews yet} one {# review} other {# reviews}}"
+    },
+    "rewilding": {
+      "eyebrow": "Rewilding the Web",
+      "title": "Rewilding the Web grant",
+      "description": "Projects supported by the Rewilding the Web grant.",
+      "indicator": "Part of the Rewilding the Web grant"
     }
   },
   "ownerFilter": {
@@ -1752,7 +1758,11 @@
     "timelineTitle": "Timeline",
     "publishingBadge": "Publishing",
     "publishingTitle": "Your project is on its way",
-    "publishingBody": "We're publishing your project. This usually takes a minute — the page will refresh by itself."
+    "publishingBody": "We're publishing your project. This usually takes a minute — the page will refresh by itself.",
+    "rewilding": {
+      "label": "Rewilding the Web",
+      "indicator": "Part of the Rewilding the Web grant"
+    }
   },
   "observationPage": {
     "back": "All sightings",

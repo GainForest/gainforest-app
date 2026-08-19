@@ -1413,6 +1413,12 @@
       "sightings": "{count, plural, =0 {Belum ada pengamatan alam} other {# pengamatan alam}}",
       "timeline": "{count, plural, =0 {Belum ada pembaruan proyek} other {# pembaruan proyek}}",
       "reviews": "{count, plural, =0 {Belum ada ulasan} other {# ulasan}}"
+    },
+    "rewilding": {
+      "eyebrow": "Rewilding the Web",
+      "title": "Hibah Rewilding the Web",
+      "description": "Proyek yang didukung oleh hibah Rewilding the Web.",
+      "indicator": "Bagian dari hibah Rewilding the Web"
     }
   },
   "ownerFilter": {
@@ -1752,7 +1758,11 @@
     "timelineTitle": "Lini Masa",
     "publishingBadge": "Memublikasikan",
     "publishingTitle": "Proyek Anda sedang diproses",
-    "publishingBody": "Kami sedang memublikasikan proyek Anda. Ini biasanya memakan waktu sekitar satu menit — halaman akan diperbarui secara otomatis."
+    "publishingBody": "Kami sedang memublikasikan proyek Anda. Ini biasanya memakan waktu sekitar satu menit — halaman akan diperbarui secara otomatis.",
+    "rewilding": {
+      "label": "Rewilding the Web",
+      "indicator": "Bagian dari hibah Rewilding the Web"
+    }
   },
   "observationPage": {
     "back": "Semua pengamatan",

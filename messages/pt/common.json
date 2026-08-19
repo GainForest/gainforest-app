@@ -1375,7 +1375,7 @@
       "footer": "Alterações de marcos e documentos aparecem imediatamente na página do subsídio do beneficiário.",
       "unnamedGrantee": "Conta sem nome",
       "granteeBadge": "Selo do subsídio",
-      "summary": "{done} de {total} marcos confirmados · {documents, plural, =0 {sem documentos} one {# documento} other {# documentos}}",
+      "summary": "{done} de {total} marcos confirmados · {documents, plural, =0 {sem documentos} one {# documento} other {# documentos}} · {projects, plural, =0 {sem projetos da bolsa} one {# projeto da bolsa} other {# projetos da bolsa}}",
       "milestonesTitle": "Marcos",
       "payout": "Libera ${amount} · pagamento {tranche}",
       "payoutDefaultLabel": "Usar os pagamentos padrão do manual",
@@ -1435,7 +1435,12 @@
       "editCancel": "Cancelar",
       "milestoneDescriptionLabel": "Descrição do marco",
       "milestoneDescriptionPlaceholder": "Descreva o que esta etapa envolve (opcional)",
-      "programCopyHint": "Deixe o nome ou a descrição em branco para usar o texto padrão do programa."
+      "programCopyHint": "Deixe o nome ou a descrição em branco para usar o texto padrão do programa.",
+      "projectsTitle": "Projetos da bolsa",
+      "projectsHint": "Marque quais projetos deste beneficiário a bolsa cobre. Eles recebem um indicador Rewilding the Web e aparecem na seção Rewilding the Web na página de projetos. Remover este beneficiário retira todos os seus projetos da bolsa.",
+      "projectsEmpty": "Este beneficiário ainda não tem projetos.",
+      "projectAdd": "Adicionar à bolsa",
+      "projectRemove": "Remover da bolsa"
     },
     "pages": {
       "hub": {

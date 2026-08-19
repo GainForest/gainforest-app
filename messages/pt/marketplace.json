@@ -1413,6 +1413,12 @@
       "sightings": "{count, plural, =0 {Sem avistamentos da natureza ainda} one {# avistamento da natureza} other {# avistamentos da natureza}}",
       "timeline": "{count, plural, =0 {Sem atualizações do projeto ainda} one {# atualização do projeto} other {# atualizações do projeto}}",
       "reviews": "{count, plural, =0 {Sem avaliações ainda} one {# avaliação} other {# avaliações}}"
+    },
+    "rewilding": {
+      "eyebrow": "Rewilding the Web",
+      "title": "Bolsa Rewilding the Web",
+      "description": "Projetos apoiados pela bolsa Rewilding the Web.",
+      "indicator": "Parte da bolsa Rewilding the Web"
     }
   },
   "ownerFilter": {
@@ -1752,7 +1758,11 @@
     "timelineTitle": "Linha do tempo",
     "publishingBadge": "Publicando",
     "publishingTitle": "Seu projeto está a caminho",
-    "publishingBody": "Estamos publicando seu projeto. Isso costuma levar um minuto — a página será atualizada sozinha."
+    "publishingBody": "Estamos publicando seu projeto. Isso costuma levar um minuto — a página será atualizada sozinha.",
+    "rewilding": {
+      "label": "Rewilding the Web",
+      "indicator": "Parte da bolsa Rewilding the Web"
+    }
   },
   "observationPage": {
     "back": "Todos os avistamentos",

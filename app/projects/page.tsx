@@ -5,6 +5,7 @@ import { localizedAlternates, socialPreviewMetadata } from "@/app/_lib/seo-metad
 import { ExploreGridPageSkeleton } from "../_components/PageLoadingSkeletons";
 import { fetchProjects, fetchRecordByUri, GAINFOREST_MODERATION_REPO_DID, type ProjectRecord } from "../_lib/indexer";
 import { fetchFeaturedProjectUris } from "../internal/badges/_lib/featured-projects";
+import { fetchRewildingProjectUris } from "../_lib/rewilding-projects";
 import { getRequestOrigin } from "../_lib/request-origin";
 import { localProjectHref } from "../_lib/urls";
 import { ProjectsExploreClient } from "./ProjectsExploreClient";
@@ -70,7 +71,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ProjectsPage() {
-  const [t, origin, initialPage, initialFeaturedUris] = await Promise.all([
+  const [t, origin, initialPage, initialFeaturedUris, initialRewildingUris] = await Promise.all([
     getTranslations("marketplace.projects.metadata"),
     getRequestOrigin(),
     fetchProjects(INITIAL_PROJECTS_TARGET, null, undefined, undefined, {
@@ -78,11 +79,21 @@ export default async function ProjectsPage() {
       featuredBadgesOnly: true,
     }).catch(() => undefined),
     fetchFeaturedProjectUris(GAINFOREST_MODERATION_REPO_DID).catch(() => []),
+    fetchRewildingProjectUris().catch(() => []),
   ]);
+  // The rewilding shelf shows the actual project records, and those URIs may
+  // not be in the featured page, so fetch any that are missing (same approach
+  // as the featured merge above).
   const initialFeaturedRecords = (await Promise.all(
     initialFeaturedUris.map((uri) => fetchRecordByUri(uri).catch(() => null)),
   )).filter((record): record is ProjectRecord => record?.kind === "project");
-  const mergedInitialRecords = mergeFeaturedProjects(initialFeaturedRecords, initialPage?.records ?? []);
+  const rewildingRecords = (await Promise.all(
+    initialRewildingUris.map((uri) => fetchRecordByUri(uri).catch(() => null)),
+  )).filter((record): record is ProjectRecord => record?.kind === "project");
+  const mergedInitialRecords = mergeFeaturedProjects(
+    [...initialFeaturedRecords, ...rewildingRecords],
+    initialPage?.records ?? [],
+  );
   const title = t("title");
   const jsonLd = {
     "@context": "https://schema.org",
@@ -113,6 +124,7 @@ export default async function ProjectsPage() {
         <ProjectsExploreClient
           initialPage={initialPage ? { ...initialPage, records: mergedInitialRecords } : undefined}
           initialFeaturedUris={initialFeaturedUris}
+          initialRewildingUris={initialRewildingUris}
         />
       </Suspense>
     </>

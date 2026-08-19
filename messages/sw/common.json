@@ -1375,7 +1375,7 @@
       "footer": "Mabadiliko ya hatua muhimu na nyaraka huonekana mara moja kwenye ukurasa wa ruzuku wa mpokeaji.",
       "unnamedGrantee": "Akaunti isiyo na jina",
       "granteeBadge": "Beji ya ruzuku",
-      "summary": "Hatua {done} kati ya {total} zimethibitishwa · {documents, plural, =0 {hakuna nyaraka} one {waraka #} other {nyaraka #}}",
+      "summary": "Hatua {done} kati ya {total} zimethibitishwa · {documents, plural, =0 {hakuna nyaraka} one {waraka #} other {nyaraka #}} · {projects, plural, =0 {hakuna miradi ya ruzuku} one {mradi # wa ruzuku} other {miradi # ya ruzuku}}",
       "milestonesTitle": "Hatua muhimu",
       "payout": "Hufungua ${amount} · malipo {tranche}",
       "payoutDefaultLabel": "Tumia malipo ya kawaida ya mwongozo",
@@ -1435,7 +1435,12 @@
       "editCancel": "Ghairi",
       "milestoneDescriptionLabel": "Maelezo ya hatua",
       "milestoneDescriptionPlaceholder": "Eleza hatua hii inahusu nini (hiari)",
-      "programCopyHint": "Acha jina au maelezo wazi ili kutumia maneno ya kawaida ya programu."
+      "programCopyHint": "Acha jina au maelezo wazi ili kutumia maneno ya kawaida ya programu.",
+      "projectsTitle": "Miradi ya ruzuku",
+      "projectsHint": "Weka alama miradi ya mnufaika huyu inayohusika na ruzuku. Itapata kiashiria cha Rewilding the Web na kuonekana katika sehemu ya Rewilding the Web kwenye ukurasa wa miradi. Kumwondoa mnufaika huyu kutaondoa miradi yake yote ya ruzuku.",
+      "projectsEmpty": "Mnufaika huyu bado hana miradi.",
+      "projectAdd": "Ongeza kwenye ruzuku",
+      "projectRemove": "Ondoa kwenye ruzuku"
     },
     "pages": {
       "hub": {

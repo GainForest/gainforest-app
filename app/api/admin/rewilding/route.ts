@@ -13,6 +13,11 @@ import {
   removeRewildingDocument,
   RewildingDocumentError,
 } from "@/app/admin/_lib/rewilding-documents";
+import {
+  addRewildingProject,
+  removeRewildingProject,
+  RewildingProjectMutationError,
+} from "@/app/_lib/rewilding-projects";
 
 export const runtime = "nodejs";
 
@@ -38,6 +43,8 @@ export const runtime = "nodejs";
  *       — switch a grantee between the handbook split and a custom one
  *   { action: "addDocument", subjectDid, title, fileName, mimeType, dataBase64 }
  *   { action: "deleteDocument", id }
+ *   { action: "setProject", projectUri }    — tie a grantee's project to the grant
+ *   { action: "unsetProject", projectUri }  — drop it from the grant
  */
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -154,9 +161,24 @@ export async function POST(request: Request) {
       return Response.json({ ok: true }, { headers: { "cache-control": "no-store" } });
     }
 
+    if (body.action === "setProject" || body.action === "unsetProject") {
+      const headerList = await headers();
+      const cookie = getAuthForwardCookie(headerList.get("cookie"));
+      const projectUri = str(body.projectUri);
+      if (body.action === "setProject") {
+        await addRewildingProject(access.repoDid, cookie, projectUri);
+      } else {
+        await removeRewildingProject(access.repoDid, cookie, projectUri);
+      }
+      return Response.json({ ok: true }, { headers: { "cache-control": "no-store" } });
+    }
+
     return Response.json({ error: "invalid_request" }, { status: 400 });
   } catch (error) {
-    const known = error instanceof RewildingMutationError || error instanceof RewildingDocumentError;
+    const known =
+      error instanceof RewildingMutationError ||
+      error instanceof RewildingDocumentError ||
+      error instanceof RewildingProjectMutationError;
     if (!known) console.error("[rewilding] admin mutation failed", error);
     return Response.json(
       { error: known ? error.code : "save_failed" },

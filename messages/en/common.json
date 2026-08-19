@@ -1375,7 +1375,7 @@
       "footer": "Milestone changes and documents show up on the grantee's grant page right away.",
       "unnamedGrantee": "Unnamed account",
       "granteeBadge": "Grant badge",
-      "summary": "{done} of {total} milestones confirmed · {documents, plural, =0 {no documents} one {# document} other {# documents}}",
+      "summary": "{done} of {total} milestones confirmed · {documents, plural, =0 {no documents} one {# document} other {# documents}} · {projects, plural, =0 {no grant projects} one {# grant project} other {# grant projects}}",
       "milestonesTitle": "Milestones",
       "payout": "Releases ${amount} · payment {tranche}",
       "payoutDefaultLabel": "Use the standard handbook payments",
@@ -1435,7 +1435,12 @@
       "editCancel": "Cancel",
       "milestoneDescriptionLabel": "Milestone description",
       "milestoneDescriptionPlaceholder": "Describe what this step involves (optional)",
-      "programCopyHint": "Leave the name or description blank to use the program's standard wording."
+      "programCopyHint": "Leave the name or description blank to use the program's standard wording.",
+      "projectsTitle": "Projects for the grant",
+      "projectsHint": "Tick which of this grantee’s projects the grant covers. They gain a Rewilding the Web indicator and appear in the Rewilding the Web section on the projects page. Removing this grantee drops all of their grant projects.",
+      "projectsEmpty": "This grantee has no projects yet.",
+      "projectAdd": "Add to grant",
+      "projectRemove": "Remove from grant"
     },
     "pages": {
       "hub": {

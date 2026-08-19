@@ -20,7 +20,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { motion, useMotionTemplate, useMotionValue, useReducedMotion, useSpring } from "framer-motion";
-import { FolderKanbanIcon, Loader2Icon, MapPinIcon, StarIcon } from "lucide-react";
+import { FolderKanbanIcon, Loader2Icon, MapPinIcon, RibbonIcon, StarIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { BumicertOwnerAvatar } from "@/components/bumicert/BumicertOwnerAvatar";
@@ -100,6 +100,7 @@ export function ProjectShowcaseCard({
   featured = false,
   featureBusy = false,
   onToggleFeatured,
+  isRewilding = false,
   className,
   isActive = true,
   frozen = false,
@@ -113,6 +114,9 @@ export function ProjectShowcaseCard({
   featured?: boolean;
   featureBusy?: boolean;
   onToggleFeatured?: (record: ProjectRecord) => void;
+  /** Part of the Rewilding the Web grant — shows an icon-only indicator pill
+   *  whose label appears on hover. */
+  isRewilding?: boolean;
   /** Extra classes on the outer wrapper — lets carousels size/snap the card. */
   className?: string;
   /** Side-preview cards in the coverflow are inert + untilted. */
@@ -124,6 +128,7 @@ export function ProjectShowcaseCard({
   const t = useTranslations("marketplace.projects.card");
   const ownerFilterT = useTranslations("marketplace.ownerFilter");
   const featuredT = useTranslations("marketplace.projects.featured.manage");
+  const rewildingT = useTranslations("marketplace.projects.rewilding");
   const workScopeT = useTranslations("common.workScopes");
   const workScopeLabels = useMemo(() => buildWorkScopeLabels(workScopeT), [workScopeT]);
 
@@ -311,6 +316,15 @@ export function ProjectShowcaseCard({
             </span>
 
             <span className="flex shrink-0 flex-col items-end gap-1.5">
+              {isRewilding ? (
+                <span
+                  aria-label={rewildingT("indicator")}
+                  title={rewildingT("indicator")}
+                  className="grid h-7 w-7 place-items-center rounded-full border border-white/25 bg-black/30 text-white/90 backdrop-blur-md"
+                >
+                  <RibbonIcon className="h-3.5 w-3.5" aria-hidden />
+                </span>
+              ) : null}
               {acceptsGainForestDonations ? (
                 <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-white/20 bg-black/30 py-0.5 pl-1 pr-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/90 backdrop-blur-md">
                   <Image src="/assets/media/images/gainforest-logo.svg" width={12} height={12} alt="" className="h-3 w-3 shrink-0 object-contain" />

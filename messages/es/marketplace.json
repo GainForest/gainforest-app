@@ -1413,6 +1413,12 @@
       "sightings": "{count, plural, =0 {Sin avistamientos de naturaleza aún} one {# avistamiento de naturaleza} other {# avistamientos de naturaleza}}",
       "timeline": "{count, plural, =0 {Sin actualizaciones del proyecto aún} one {# actualización del proyecto} other {# actualizaciones del proyecto}}",
       "reviews": "{count, plural, =0 {Sin evaluaciones aún} one {# evaluación} other {# evaluaciones}}"
+    },
+    "rewilding": {
+      "eyebrow": "Rewilding the Web",
+      "title": "Beca Rewilding the Web",
+      "description": "Proyectos apoyados por la beca Rewilding the Web.",
+      "indicator": "Parte de la beca Rewilding the Web"
     }
   },
   "ownerFilter": {
@@ -1752,7 +1758,11 @@
     "timelineTitle": "Cronología",
     "publishingBadge": "Publicando",
     "publishingTitle": "Tu proyecto está en camino",
-    "publishingBody": "Estamos publicando tu proyecto. Esto suele tardar un minuto; la página se actualizará sola."
+    "publishingBody": "Estamos publicando tu proyecto. Esto suele tardar un minuto; la página se actualizará sola.",
+    "rewilding": {
+      "label": "Rewilding the Web",
+      "indicator": "Parte de la beca Rewilding the Web"
+    }
   },
   "observationPage": {
     "back": "Todos los avistamientos",

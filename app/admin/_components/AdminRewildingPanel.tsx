@@ -11,6 +11,7 @@ import {
   ListPlusIcon,
   LockIcon,
   PencilIcon,
+  RibbonIcon,
   SearchIcon,
   Trash2Icon,
   UploadIcon,
@@ -29,6 +30,7 @@ import type {
   RewildingAdminDocument,
   RewildingAdminGrantee,
   RewildingAdminMilestone,
+  RewildingAdminProject,
 } from "../_lib/rewilding-admin";
 import { AdminAvatar } from "./AdminPanel";
 
@@ -284,7 +286,9 @@ function GranteeCard({
   const [milestones, setMilestones] = useState(grantee.milestones);
   const [documents, setDocuments] = useState(grantee.documents);
   const [customPayouts, setCustomPayouts] = useState(grantee.customPayouts);
+  const [projects, setProjects] = useState(grantee.projects);
   const doneCount = milestones.filter((milestone) => milestone.done).length;
+  const grantProjectCount = projects.filter((project) => project.selected).length;
 
   /** Custom milestones are numbered on from the program's, in plan order —
    *  adding or removing one renumbers the ones after it. */
@@ -325,7 +329,12 @@ function GranteeCard({
             ) : null}
           </span>
           <span className="text-xs text-muted-foreground">
-            {t("summary", { done: doneCount, total: milestones.length, documents: documents.length })}
+            {t("summary", {
+              done: doneCount,
+              total: milestones.length,
+              documents: documents.length,
+              projects: grantProjectCount,
+            })}
           </span>
         </span>
         <ChevronDownIcon
@@ -379,6 +388,22 @@ function GranteeCard({
 
           <section className="flex flex-col gap-2">
             <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+              <RibbonIcon className="size-3" aria-hidden />
+              {t("projectsTitle")}
+            </h4>
+            <p className="text-[11px] leading-5 text-muted-foreground">{t("projectsHint")}</p>
+            <ProjectPicker
+              projects={projects}
+              onToggled={(atUri, selected) =>
+                setProjects((current) =>
+                  current.map((entry) => (entry.atUri === atUri ? { ...entry, selected } : entry)),
+                )
+              }
+            />
+          </section>
+
+          <section className="flex flex-col gap-2">
+            <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
               <LockIcon className="size-3" aria-hidden />
               {t("documentsTitle")}
             </h4>
@@ -411,6 +436,98 @@ function GranteeCard({
         </div>
       ) : null}
     </li>
+  );
+}
+
+/**
+ * Picks which of a grantee's own projects count toward the grant. Ticking one
+ * ties it to the grant (a Rewilding the Web indicator appears on it and it
+ * joins the shelf on the projects page); unticking removes it. Removing the
+ * grantee later drops all of their projects from the grant automatically, so
+ * these ticks only take effect while the account holds a slot.
+ */
+function ProjectPicker({
+  projects,
+  onToggled,
+}: {
+  projects: RewildingAdminProject[];
+  onToggled: (atUri: string, selected: boolean) => void;
+}) {
+  const t = useTranslations("common.adminModeration.rewilding");
+  const [pendingUri, setPendingUri] = useState<string | null>(null);
+  const [failedUri, setFailedUri] = useState<string | null>(null);
+
+  if (projects.length === 0) {
+    return <p className="text-xs text-muted-foreground">{t("projectsEmpty")}</p>;
+  }
+
+  const toggle = async (project: RewildingAdminProject) => {
+    if (pendingUri) return;
+    const next = !project.selected;
+    setPendingUri(project.atUri);
+    setFailedUri(null);
+    try {
+      await postAction({
+        action: next ? "setProject" : "unsetProject",
+        projectUri: project.atUri,
+      });
+      onToggled(project.atUri, next);
+    } catch {
+      setFailedUri(project.atUri);
+    } finally {
+      setPendingUri(null);
+    }
+  };
+
+  return (
+    <ul className="flex flex-col gap-1.5">
+      {projects.map((project) => (
+        <li
+          key={project.atUri}
+          className={cn(
+            "flex items-center gap-2.5 rounded-xl border border-border px-3 py-2",
+            project.selected && "border-primary/30 bg-primary/[0.04]",
+          )}
+        >
+          {project.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={project.imageUrl}
+              alt=""
+              className="size-8 shrink-0 rounded-md object-cover"
+            />
+          ) : (
+            <span className="grid size-8 shrink-0 place-items-center rounded-md bg-muted text-muted-foreground">
+              <RibbonIcon className="size-3.5" aria-hidden />
+            </span>
+          )}
+          <span className="flex min-w-0 flex-1 flex-col">
+            <span className="truncate text-sm font-medium text-foreground">{project.title}</span>
+            {failedUri === project.atUri ? (
+              <span className="text-[11px] text-destructive">{t("error")}</span>
+            ) : null}
+          </span>
+          <button
+            type="button"
+            onClick={() => void toggle(project)}
+            disabled={pendingUri === project.atUri}
+            aria-pressed={project.selected}
+            className={cn(
+              "shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-sm transition-colors disabled:pointer-events-none disabled:opacity-50",
+              project.selected
+                ? "border-border bg-background text-muted-foreground hover:bg-muted"
+                : "border-primary/40 bg-primary text-primary-foreground hover:bg-primary/90",
+            )}
+          >
+            {pendingUri === project.atUri
+              ? t("saving")
+              : project.selected
+                ? t("projectRemove")
+                : t("projectAdd")}
+          </button>
+        </li>
+      ))}
+    </ul>
   );
 }
 

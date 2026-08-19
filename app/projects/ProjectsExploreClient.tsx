@@ -13,6 +13,7 @@ import {
   ListIcon,
   MapIcon,
   MapPinIcon,
+  RibbonIcon,
   SearchIcon,
   SlidersHorizontalIcon,
   SproutIcon,
@@ -111,10 +112,12 @@ export function ProjectsExploreClient({
   initialPage,
   records: initialRecordsProp,
   initialFeaturedUris = [],
+  initialRewildingUris = [],
 }: {
   initialPage?: InitialProjectsPage;
   records?: ProjectRecord[];
   initialFeaturedUris?: string[];
+  initialRewildingUris?: string[];
 }) {
   const t = useTranslations("marketplace.projects");
   const exploreT = useTranslations("marketplace.explore");
@@ -155,6 +158,7 @@ export function ProjectsExploreClient({
   const [drawer, setDrawer] = useState<ProjectRecord | null>(null);
   const [donationSummaries, setDonationSummaries] = useState<Record<string, ProjectDonationSummary>>({});
   const [featuredUris, setFeaturedUris] = useState<string[]>(initialFeaturedUris);
+  const [rewildingUris, setRewildingUris] = useState<string[]>(initialRewildingUris);
   const [canManageFeatured, setCanManageFeatured] = useState(false);
   const [featureBusyUri, setFeatureBusyUri] = useState<string | null>(null);
   const [featureError, setFeatureError] = useState<string | null>(null);
@@ -205,6 +209,21 @@ export function ProjectsExploreClient({
     && badgeFilters.length === 0
     && sort === "newest"
     && !ownerDid;
+
+  // Read-only refresh of the rewilding-grant project set. Public, so no viewer
+  // gate — keeps the shelf and per-project indicator current on client
+  // navigation. Selecting projects lives entirely in the admin panel.
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/rewilding-projects", { cache: "no-store", signal: controller.signal })
+      .then(async (response) => (response.ok ? (response.json() as Promise<{ uris?: string[] }>) : null))
+      .then((data) => {
+        if (!data || controller.signal.aborted) return;
+        if (Array.isArray(data.uris)) setRewildingUris(data.uris);
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     if (viewer.status !== "ready" || !viewer.sessionDid) return;
@@ -328,6 +347,14 @@ export function ProjectsExploreClient({
       return record ? [record] : [];
     });
   }, [featuredUris, records]);
+  const rewildingUriSet = useMemo(() => new Set(rewildingUris), [rewildingUris]);
+  const rewildingRecords = useMemo(() => {
+    const byUri = new Map(records.map((record) => [record.atUri, record]));
+    return rewildingUris.flatMap((uri) => {
+      const record = byUri.get(uri);
+      return record ? [record] : [];
+    });
+  }, [rewildingUris, records]);
   const supportRecords = useMemo(() => {
     const featuredIds = new Set(featuredRecords.map((record) => record.id));
     return records.filter((record) => {
@@ -570,6 +597,15 @@ export function ProjectsExploreClient({
               canManageFeatured={canManageFeatured}
               featureBusyUri={featureBusyUri}
               onToggleFeatured={toggleFeatured}
+              rewildingUris={rewildingUriSet}
+            />
+          ) : null}
+
+          {showExploreHome && rewildingRecords.length > 0 ? (
+            <RewildingProjects
+              records={rewildingRecords}
+              donationSummaries={donationSummaries}
+              onFilterOwner={setOwnerDid}
             />
           ) : null}
 
@@ -600,6 +636,7 @@ export function ProjectsExploreClient({
                   featuredUris={featuredUris}
                   featureBusyUri={featureBusyUri}
                   onToggleFeatured={toggleFeatured}
+                  rewildingUris={rewildingUriSet}
                 />
               )}
             </div>
@@ -661,6 +698,7 @@ function FeaturedProjects({
   canManageFeatured,
   featureBusyUri,
   onToggleFeatured,
+  rewildingUris,
 }: {
   records: ProjectRecord[];
   donationSummaries: Record<string, ProjectDonationSummary>;
@@ -668,6 +706,7 @@ function FeaturedProjects({
   canManageFeatured: boolean;
   featureBusyUri: string | null;
   onToggleFeatured: (record: ProjectRecord) => void;
+  rewildingUris: Set<string>;
 }) {
   const t = useTranslations("marketplace.projects.featured");
 
@@ -696,6 +735,56 @@ function FeaturedProjects({
             featured
             featureBusy={featureBusyUri === record.atUri}
             onToggleFeatured={onToggleFeatured}
+            isRewilding={rewildingUris.has(record.atUri)}
+            isActive={isActive}
+            frozen={frozen}
+          />
+        )}
+      />
+    </section>
+  );
+}
+
+/**
+ * The "Rewilding the Web" shelf: the projects an admin has tied to the grant,
+ * shown above the catalog like the featured shelf. Only projects owned by an
+ * account currently holding a grant slot appear here — removing the grantee
+ * empties this shelf automatically (`rewilding-projects.ts`). Read-only: the
+ * grant selection is managed in the admin panel, not here.
+ */
+function RewildingProjects({
+  records,
+  donationSummaries,
+  onFilterOwner,
+}: {
+  records: ProjectRecord[];
+  donationSummaries: Record<string, ProjectDonationSummary>;
+  onFilterOwner: (did: string) => void;
+}) {
+  const t = useTranslations("marketplace.projects.rewilding");
+
+  return (
+    <section aria-labelledby="rewilding-projects-heading" className="mt-14 sm:mt-16">
+      <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+        <div>
+          <p className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+            <RibbonIcon className="h-4 w-4" aria-hidden />
+            {t("eyebrow")}
+          </p>
+          <h2 id="rewilding-projects-heading" className="mt-1 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{t("title")}</h2>
+        </div>
+        <p className="max-w-md text-sm leading-6 text-muted-foreground">{t("description")}</p>
+      </div>
+      <ProjectCoverflow
+        records={records}
+        renderCard={(record, index, isActive, frozen) => (
+          <ProjectShowcaseCard
+            record={record}
+            priority={index < 3}
+            index={index}
+            onFilterOwner={onFilterOwner}
+            donationSummary={donationSummaries[record.atUri]}
+            isRewilding
             isActive={isActive}
             frozen={frozen}
           />
@@ -799,6 +888,7 @@ const ProjectGrid = memo(function ProjectGrid({
   featuredUris = [],
   featureBusyUri = null,
   onToggleFeatured,
+  rewildingUris,
 }: {
   records: ProjectRecord[];
   loading: boolean;
@@ -809,6 +899,7 @@ const ProjectGrid = memo(function ProjectGrid({
   featuredUris?: string[];
   featureBusyUri?: string | null;
   onToggleFeatured?: (record: ProjectRecord) => void;
+  rewildingUris?: Set<string>;
 }) {
   const t = useTranslations("marketplace.projects");
   if (loading && records.length === 0) return <ProjectGridSkeleton />;
@@ -847,6 +938,7 @@ const ProjectGrid = memo(function ProjectGrid({
           featured={featuredUris.includes(record.atUri)}
           featureBusy={featureBusyUri === record.atUri}
           onToggleFeatured={onToggleFeatured}
+          isRewilding={rewildingUris?.has(record.atUri) ?? false}
         />
       ))}
     </div>

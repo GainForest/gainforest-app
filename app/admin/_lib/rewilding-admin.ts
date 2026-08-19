@@ -2,8 +2,10 @@ import "server-only";
 import { fetchGrantApplicants } from "@/app/_lib/grants";
 import {
   fetchIndexedCertifiedProfileCards,
+  fetchProjects,
   fetchRecognitionBadgesForDids,
 } from "@/app/_lib/indexer";
+import { fetchSelectedRewildingProjectUris } from "@/app/_lib/rewilding-projects";
 import { resolveDidHandle } from "@/app/_lib/pds";
 import {
   customPayoutGranteeDids,
@@ -65,6 +67,15 @@ export type RewildingAdminDocument = {
   uploadedAt: string;
 };
 
+/** One of a grantee's own projects, with whether it is currently tied to the
+ *  grant. The admin ticks these to build the projects shelf + indicator. */
+export type RewildingAdminProject = {
+  atUri: string;
+  title: string;
+  imageUrl: string | null;
+  selected: boolean;
+};
+
 export type RewildingAdminGrantee = {
   did: string;
   displayName: string | null;
@@ -83,6 +94,8 @@ export type RewildingAdminGrantee = {
   customPayouts: boolean;
   milestones: RewildingAdminMilestone[];
   documents: RewildingAdminDocument[];
+  /** This grantee's own projects, with those tied to the grant marked. */
+  projects: RewildingAdminProject[];
 };
 
 /** One row per enrolled organization, in slot order. */
@@ -91,14 +104,23 @@ export async function fetchRewildingAdminGrantees(): Promise<RewildingAdminGrant
   const enrolled = effectiveRewildingGrantees(enrollmentRecords);
   if (enrolled.length === 0) return [];
 
-  const [applicants, milestoneRecords, milestonePlanRecords, payoutModeRecords, documentRecords] =
+  const [
+    applicants,
+    milestoneRecords,
+    milestonePlanRecords,
+    payoutModeRecords,
+    documentRecords,
+    selectedProjectUris,
+  ] =
     await Promise.all([
       fetchGrantApplicants().catch(() => []),
       fetchRewildingMilestones().catch(() => []),
       fetchRewildingMilestonePlans().catch(() => []),
       fetchRewildingPayoutModes().catch(() => []),
       listRewildingDocuments().catch(() => []),
+      fetchSelectedRewildingProjectUris().catch(() => []),
     ]);
+  const selectedProjectUriSet = new Set(selectedProjectUris);
 
   const currentMilestones = effectiveRewildingMilestones(milestoneRecords);
   const customPayoutDids = customPayoutGranteeDids(payoutModeRecords);
@@ -135,7 +157,24 @@ export async function fetchRewildingAdminGrantees(): Promise<RewildingAdminGrant
           sizeBytes: record.sizeBytes,
           uploadedAt: record.uploadedAt,
         }));
-      const handle = await resolveDidHandle(did).catch(() => null);
+      const [handle, ownedProjects] = await Promise.all([
+        resolveDidHandle(did).catch(() => null),
+        // The grantee's own catalog — full list, not just featured, so the
+        // admin can tie any of their projects to the grant.
+        fetchProjects(100, null, undefined, undefined, {
+          creatorDid: did,
+          featuredBadgesOnly: false,
+          sort: "newest",
+        })
+          .then((page) => page.records)
+          .catch(() => []),
+      ]);
+      const projects: RewildingAdminProject[] = ownedProjects.map((project) => ({
+        atUri: project.atUri,
+        title: project.title,
+        imageUrl: project.imageUrl,
+        selected: selectedProjectUriSet.has(project.atUri),
+      }));
       return {
         did,
         displayName: applicant?.displayName ?? profile?.displayName ?? null,
@@ -160,6 +199,7 @@ export async function fetchRewildingAdminGrantees(): Promise<RewildingAdminGrant
           updatedAt: doneStates.get(resolved.id)?.createdAt ?? null,
         })),
         documents,
+        projects,
       };
     }),
   );

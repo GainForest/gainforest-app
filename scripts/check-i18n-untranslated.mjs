@@ -26,6 +26,7 @@ const allowedExactValues = new Set([
   "Ma Earth",
   "ESA WorldCover 2021",
   "BioBlitz",
+  "Rewilding the Web",
   "GitHub",
   "X (Twitter)",
   "Telegram",

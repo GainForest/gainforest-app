@@ -1375,7 +1375,7 @@
       "footer": "Los cambios de hitos y los documentos aparecen de inmediato en la página de subvención del beneficiario.",
       "unnamedGrantee": "Cuenta sin nombre",
       "granteeBadge": "Insignia de subvención",
-      "summary": "{done} de {total} hitos confirmados · {documents, plural, =0 {sin documentos} one {# documento} other {# documentos}}",
+      "summary": "{done} de {total} hitos confirmados · {documents, plural, =0 {sin documentos} one {# documento} other {# documentos}} · {projects, plural, =0 {sin proyectos de la beca} one {# proyecto de la beca} other {# proyectos de la beca}}",
       "milestonesTitle": "Hitos",
       "payout": "Libera ${amount} · pago {tranche}",
       "payoutDefaultLabel": "Usar los pagos estándar del manual",
@@ -1435,7 +1435,12 @@
       "editCancel": "Cancelar",
       "milestoneDescriptionLabel": "Descripción del hito",
       "milestoneDescriptionPlaceholder": "Describe en qué consiste este paso (opcional)",
-      "programCopyHint": "Deja el nombre o la descripción en blanco para usar el texto estándar del programa."
+      "programCopyHint": "Deja el nombre o la descripción en blanco para usar el texto estándar del programa.",
+      "projectsTitle": "Proyectos de la beca",
+      "projectsHint": "Marca cuáles de los proyectos de este beneficiario cubre la beca. Reciben un indicador de Rewilding the Web y aparecen en la sección Rewilding the Web de la página de proyectos. Al quitar a este beneficiario se retiran todos sus proyectos de la beca.",
+      "projectsEmpty": "Este beneficiario aún no tiene proyectos.",
+      "projectAdd": "Añadir a la beca",
+      "projectRemove": "Quitar de la beca"
     },
     "pages": {
       "hub": {
