@@ -486,6 +486,7 @@
     "projects": "Projects",
     "organizations": "Organizations",
     "donationHistory": "Donation History",
+    "donationsReceived": "Donations received",
     "observations": "Observations",
     "gallery": "Gallery",
     "settings": "Settings",
@@ -761,7 +762,6 @@
   },
   "accountDonationsReceived": {
     "title": "Donations received",
-    "description": "Public donation receipts anyone can audit. Each one links to the Cert it funded.",
     "summary": "{amount} across {count, plural, one {# donation} other {# donations}}",
     "empty": "No public donations received yet.",
     "anonymousDonor": "Anonymous supporter",

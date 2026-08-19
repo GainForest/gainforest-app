@@ -74,7 +74,6 @@ export async function DonationsReceivedSection({ did, className = "" }: { did: s
           </p>
         ) : null}
       </div>
-      <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("description")}</p>
 
       {received.length === 0 ? (
         <p className="mt-4 rounded-2xl bg-muted/50 px-3.5 py-2.5 text-sm text-muted-foreground">{t("empty")}</p>

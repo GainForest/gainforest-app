@@ -270,7 +270,6 @@ export async function AccountHomeTabContent({ account }: { account: AccountRoute
       ) : null}
       {account.kind === "organization" ? <AccountOverviewGallerySection account={account} did={account.did} /> : null}
       {account.kind === "organization" ? <AccountMaEarthRoundsSection did={account.did} className="mt-8" /> : null}
-      {account.kind === "organization" ? <DonationsReceivedSection did={account.did} className="mt-8" /> : null}
       {account.kind === "organization" ? <AccountProjectUpdatesSection did={account.did} /> : null}
       {account.kind === "organization" ? <AccountDataCouncilSection did={account.did} /> : null}
     </>
@@ -326,8 +325,6 @@ export async function AccountOverviewTabContent({ account, did }: { account: Acc
       </section>
 
       <AccountMaEarthRoundsSection did={did} />
-
-      <DonationsReceivedSection did={did} />
 
       <section className="rounded-2xl border border-border bg-card/80 p-4 sm:flex sm:items-center sm:justify-between sm:gap-4">
         <div className="min-w-0">
@@ -385,6 +382,16 @@ export async function AccountBumicertsTabContent({
     >
       {grid}
     </AccountContentColumns>
+  );
+}
+
+// Public funding this account has received across all its Certs — its own tab
+// under More, for people and organizations alike.
+export function AccountDonationsReceivedTabContent({ did }: { did: string }) {
+  return (
+    <section className="py-6">
+      <DonationsReceivedSection did={did} />
+    </section>
   );
 }
 

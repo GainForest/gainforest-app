@@ -486,6 +486,7 @@
     "projects": "Proyectos",
     "organizations": "Organizaciones",
     "donationHistory": "Historial de donaciones",
+    "donationsReceived": "Donaciones recibidas",
     "observations": "Observaciones",
     "gallery": "Galería",
     "settings": "Configuración",
@@ -761,7 +762,6 @@
   },
   "accountDonationsReceived": {
     "title": "Donaciones recibidas",
-    "description": "Recibos públicos de donación que cualquiera puede auditar. Cada uno enlaza al Cert que financió.",
     "summary": "{amount} en {count, plural, one {# donación} other {# donaciones}}",
     "empty": "Aún no se han recibido donaciones públicas.",
     "anonymousDonor": "Donante anónimo",

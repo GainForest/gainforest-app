@@ -486,6 +486,7 @@
     "projects": "Miradi",
     "organizations": "Mashirika",
     "donationHistory": "Historia ya michango",
+    "donationsReceived": "Michango iliyopokelewa",
     "observations": "Uchunguzi",
     "gallery": "Matunzio",
     "settings": "Mipangilio",
@@ -761,7 +762,6 @@
   },
   "accountDonationsReceived": {
     "title": "Michango iliyopokelewa",
-    "description": "Risiti za umma za michango ambazo mtu yeyote anaweza kukagua. Kila moja ina kiungo kwa Cert iliyofadhiliwa.",
     "summary": "{amount} katika {count, plural, one {mchango #} other {michango #}}",
     "empty": "Bado hakuna michango ya umma iliyopokelewa.",
     "anonymousDonor": "Mfadhili asiyejulikana",

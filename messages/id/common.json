@@ -486,6 +486,7 @@
     "projects": "Proyek",
     "organizations": "Organisasi",
     "donationHistory": "Riwayat donasi",
+    "donationsReceived": "Donasi yang diterima",
     "observations": "Observasi",
     "gallery": "Galeri",
     "settings": "Pengaturan",
@@ -761,7 +762,6 @@
   },
   "accountDonationsReceived": {
     "title": "Donasi yang diterima",
-    "description": "Tanda terima donasi publik yang dapat diaudit siapa saja. Masing-masing tertaut ke Cert yang didanainya.",
     "summary": "{amount} dari {count, plural, other {# donasi}}",
     "empty": "Belum ada donasi publik yang diterima.",
     "anonymousDonor": "Pendukung anonim",

@@ -15,6 +15,7 @@ import {
   accountAudioPath,
   accountBumicertsPath,
   accountDonationsPath,
+  accountDonationsReceivedPath,
   accountDronePath,
   accountGalleryPath,
   accountLikesPath,
@@ -29,7 +30,7 @@ import {
   accountWalletPath,
 } from "../_lib/account-route";
 
-type TabLabelKey = "home" | "overview" | "bumicerts" | "projects" | "donationHistory" | "observations" | "posts" | "timeline" | "gallery" | "filesAndPhotos" | "settings" | "sites" | "audio" | "drone" | "trees" | "taina" | "endorsementsGiven" | "equipment" | "wallet";
+type TabLabelKey = "home" | "overview" | "bumicerts" | "projects" | "donationHistory" | "donationsReceived" | "observations" | "posts" | "timeline" | "gallery" | "filesAndPhotos" | "settings" | "sites" | "audio" | "drone" | "trees" | "taina" | "endorsementsGiven" | "equipment" | "wallet";
 
 interface Tab {
   labelKey: TabLabelKey;
@@ -143,7 +144,17 @@ function buildTabs(
     icon: WrenchIcon,
     exact: false,
   };
+  // Public funding an account has received across its Certs. Lives in More for
+  // both people and organizations, and only on the public profile (not the
+  // manage dashboard).
+  const donationsReceivedTab: Tab = {
+    labelKey: "donationsReceived",
+    href: accountDonationsReceivedPath(did),
+    icon: HeartHandshakeIcon,
+    exact: false,
+  };
   const appendExtras = (tabs: Tab[]): Tab[] => {
+    if (scope === "account") tabs.push(donationsReceivedTab);
     if (includeWallet && scope === "account") tabs.push(walletTab);
     if (includeTaina && scope === "account") tabs.push(tainaTab);
     if (includeSettings) tabs.push(settingsTab);
