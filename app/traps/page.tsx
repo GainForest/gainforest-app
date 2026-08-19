@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   AlertCircleIcon,
   BarChart3Icon,
@@ -9,11 +9,9 @@ import {
   FilterIcon,
   ListIcon,
   Loader2Icon,
-  PlusIcon,
   RefreshCwIcon,
   SearchIcon,
   TargetIcon,
-  XIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +27,6 @@ import { TrapRecordCard } from "./_components/TrapRecordCard";
 import { TrapRecordForm } from "./_components/TrapRecordForm";
 import { TrapsAnalytics } from "./_components/TrapsAnalytics";
 import {
-  fetchAllTrapRecords,
   mergeAndSortTrapRecords,
   type TrapKill,
   type TrapKillRecord,
@@ -42,12 +39,10 @@ type ViewMode = "all" | "kills" | "observations";
 type TabId = "records" | "analytics";
 
 export default function TrapsPage() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [kills, setKills] = useState<TrapKill[]>([]);
   const [observations, setObservations] = useState<TrapObservation[]>([]);
-  const [didInput, setDidInput] = useState("");
-  const [loadedDids, setLoadedDids] = useState<string[]>([]);
 
   // Tab state
   const [activeTab, setActiveTab] = useState<TabId>("records");
@@ -64,61 +59,28 @@ export default function TrapsPage() {
   // Delete confirmation state
   const [deleteRecord, setDeleteRecord] = useState<TrapRecord | null>(null);
 
-  const loadRecordsForDid = useCallback(
-    async (did: string) => {
-      if (!did.startsWith("did:")) {
-        setError("Please enter a valid DID (starts with did:)");
-        return;
-      }
-
-      if (loadedDids.includes(did)) {
-        setError("Records from this DID are already loaded");
-        return;
-      }
-
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const { kills: newKills, observations: newObs } = await fetchAllTrapRecords(did);
-
-        if (newKills.length === 0 && newObs.length === 0) {
-          setError(`No trap records found for ${did}`);
-        } else {
-          setKills((prev) => [...prev, ...newKills]);
-          setObservations((prev) => [...prev, ...newObs]);
-          setLoadedDids((prev) => [...prev, did]);
-          setDidInput("");
-        }
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Failed to load records");
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [loadedDids]
-  );
-
-  const handleRefresh = useCallback(async () => {
-    if (loadedDids.length === 0) return;
-
+  const loadRecords = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    setKills([]);
-    setObservations([]);
 
     try {
-      for (const did of loadedDids) {
-        const { kills: newKills, observations: newObs } = await fetchAllTrapRecords(did);
-        setKills((prev) => [...prev, ...newKills]);
-        setObservations((prev) => [...prev, ...newObs]);
+      const response = await fetch("/api/traps/records");
+      if (!response.ok) {
+        throw new Error("Failed to load records");
       }
+      const data = await response.json();
+      setKills(data.kills ?? []);
+      setObservations(data.observations ?? []);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to refresh records");
+      setError(e instanceof Error ? e.message : "Failed to load records");
     } finally {
       setIsLoading(false);
     }
-  }, [loadedDids]);
+  }, []);
+
+  useEffect(() => {
+    loadRecords();
+  }, [loadRecords]);
 
   const handleAddRecord = (type: "kill" | "observation") => {
     setFormType(type);
@@ -139,25 +101,53 @@ export default function TrapsPage() {
   const confirmDelete = async () => {
     if (!deleteRecord) return;
 
-    // In a real implementation, this would call an API to delete the record
-    // For now, just remove it from local state
-    if (deleteRecord.type === "kill") {
-      setKills((prev) => prev.filter((k) => k.uri !== deleteRecord.data.uri));
-    } else {
-      setObservations((prev) => prev.filter((o) => o.uri !== deleteRecord.data.uri));
+    try {
+      const response = await fetch("/api/traps/records", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uri: deleteRecord.data.uri,
+          collection: deleteRecord.type === "kill" ? "nz.trap.field.kill" : "nz.trap.field.observation",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete record");
+      }
+
+      // Remove from local state
+      if (deleteRecord.type === "kill") {
+        setKills((prev) => prev.filter((k) => k.uri !== deleteRecord.data.uri));
+      } else {
+        setObservations((prev) => prev.filter((o) => o.uri !== deleteRecord.data.uri));
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to delete record");
+    } finally {
+      setDeleteRecord(null);
     }
-    setDeleteRecord(null);
   };
 
   const handleFormSubmit = async (data: TrapKillRecord | TrapObservationRecord) => {
-    // In a real implementation, this would call the PDS to create/update the record
-    // For now, we'll just show a success message
-    console.log("Form submitted:", { type: formType, data, editing: !!editingRecord });
+    const collection = formType === "kill" ? "nz.trap.field.kill" : "nz.trap.field.observation";
+    
+    const response = await fetch("/api/traps/records", {
+      method: editingRecord ? "PUT" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        collection,
+        record: data,
+        ...(editingRecord ? { rkey: editingRecord.data.rkey } : {}),
+      }),
+    });
 
-    // After successful submission, refresh records
-    if (loadedDids.length > 0) {
-      await handleRefresh();
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message ?? "Failed to save record");
     }
+
+    // Refresh records after save
+    await loadRecords();
   };
 
   // Filter and merge records for display
@@ -186,11 +176,15 @@ export default function TrapsPage() {
             Trap.NZ Field Records
           </h1>
           <p className="mt-1 text-muted-foreground">
-            View and analyze kill and observation records from Trap.NZ users.
+            View and manage pest control kills and field observations.
           </p>
         </div>
 
         <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => loadRecords()} disabled={isLoading}>
+            <RefreshCwIcon className={cn("mr-1.5 size-4", isLoading && "animate-spin")} />
+            Refresh
+          </Button>
           <Button variant="outline" size="sm" onClick={() => handleAddRecord("observation")}>
             <EyeIcon className="mr-1.5 size-4" />
             Add Observation
@@ -202,54 +196,14 @@ export default function TrapsPage() {
         </div>
       </div>
 
-      {/* Load DID input */}
-      <div className="rounded-2xl border border-border bg-card p-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-          <div className="flex-1 space-y-1.5">
-            <label htmlFor="did-input" className="text-sm font-medium">
-              Load records from a DID
-            </label>
-            <div className="flex gap-2">
-              <Input
-                id="did-input"
-                placeholder="did:plc:..."
-                value={didInput}
-                onChange={(e) => setDidInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && loadRecordsForDid(didInput)}
-              />
-              <Button onClick={() => loadRecordsForDid(didInput)} disabled={isLoading || !didInput}>
-                {isLoading ? <Loader2Icon className="size-4 animate-spin" /> : <SearchIcon className="size-4" />}
-                <span className="ml-1.5 hidden sm:inline">Load</span>
-              </Button>
-            </div>
-          </div>
-
-          {loadedDids.length > 0 && (
-            <Button variant="ghost" size="sm" onClick={handleRefresh} disabled={isLoading}>
-              <RefreshCwIcon className={`mr-1.5 size-4 ${isLoading ? "animate-spin" : ""}`} />
-              Refresh
-            </Button>
-          )}
-        </div>
-
-        {loadedDids.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            <span className="text-sm text-muted-foreground">Loaded:</span>
-            {loadedDids.map((did) => (
-              <code key={did} className="rounded bg-muted px-2 py-0.5 font-mono text-xs">
-                {did.slice(0, 20)}...
-              </code>
-            ))}
-          </div>
-        )}
-
-        {error && (
-          <p className="mt-3 flex items-center gap-2 text-sm text-destructive">
+      {error && (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
+          <p className="flex items-center gap-2 text-sm text-destructive">
             <AlertCircleIcon className="size-4" />
             {error}
           </p>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Tab bar */}
       <div className="flex gap-1.5 rounded-full border border-border bg-muted/40 p-1.5">
@@ -309,33 +263,53 @@ export default function TrapsPage() {
             </Select>
           </div>
 
-          {/* Records count */}
-          <p className="text-sm text-muted-foreground">
-            Showing {filteredRecords.length} of {kills.length + observations.length} records
-            {searchQuery && ` matching "${searchQuery}"`}
-          </p>
-
-          {/* Records list */}
-          {filteredRecords.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed py-12 text-center">
-              <TargetIcon className="size-12 text-muted-foreground/50" />
-              <h3 className="mt-4 text-lg font-semibold">No records yet</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Enter a DID above to load trap records from a user&apos;s PDS.
-              </p>
+          {/* Loading state */}
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <Loader2Icon className="size-8 animate-spin text-primary" />
+              <p className="mt-4 text-sm text-muted-foreground">Loading records...</p>
             </div>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredRecords.map((record) => (
-                <TrapRecordCard
-                  key={record.type === "kill" ? record.data.uri : record.data.uri}
-                  record={record}
-                  onEdit={handleEditRecord}
-                  onDelete={handleDeleteRecord}
-                  canManage={true}
-                />
-              ))}
-            </div>
+            <>
+              {/* Records count */}
+              <p className="text-sm text-muted-foreground">
+                Showing {filteredRecords.length} of {kills.length + observations.length} records
+                {searchQuery && ` matching "${searchQuery}"`}
+              </p>
+
+              {/* Records list */}
+              {filteredRecords.length === 0 ? (
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed py-12 text-center">
+                  <TargetIcon className="size-12 text-muted-foreground/50" />
+                  <h3 className="mt-4 text-lg font-semibold">No records yet</h3>
+                  <p className="mt-1 max-w-md text-sm text-muted-foreground">
+                    Start by adding a kill or observation record. Your field data will appear here.
+                  </p>
+                  <div className="mt-4 flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => handleAddRecord("observation")}>
+                      <EyeIcon className="mr-1.5 size-4" />
+                      Add Observation
+                    </Button>
+                    <Button size="sm" onClick={() => handleAddRecord("kill")}>
+                      <CrosshairIcon className="mr-1.5 size-4" />
+                      Add Kill
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {filteredRecords.map((record) => (
+                    <TrapRecordCard
+                      key={record.data.uri}
+                      record={record}
+                      onEdit={handleEditRecord}
+                      onDelete={handleDeleteRecord}
+                      canManage={true}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
       ) : (
