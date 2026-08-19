@@ -95,7 +95,8 @@
       "explore": "EXPLORAR",
       "funding": "FINANCIACIÓN",
       "manage": "GESTIONAR",
-      "ai": "AI"
+      "ai": "AI",
+      "admin": "ADMIN"
     },
     "items": {
       "bumicerts": "certificados",
@@ -130,7 +131,8 @@
       "audiomoth": "AudioMoth",
       "identifications": "Identificaciones",
       "myGrant": "Mi subvención",
-      "myRecorders": "Mis grabadoras"
+      "myRecorders": "Mis grabadoras",
+      "traps": "Trampas"
     },
     "prompts": {
       "signInDescription": "Inicia sesión para gestionar tu cuenta y contenido.",

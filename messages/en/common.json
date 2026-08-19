@@ -95,7 +95,8 @@
       "explore": "EXPLORE",
       "funding": "FUNDING",
       "manage": "MANAGE",
-      "ai": "AI"
+      "ai": "AI",
+      "admin": "ADMIN"
     },
     "items": {
       "bumicerts": "Certs",
@@ -130,7 +131,8 @@
       "audiomoth": "AudioMoth",
       "identifications": "Identifications",
       "myGrant": "My grant",
-      "myRecorders": "My recorders"
+      "myRecorders": "My recorders",
+      "traps": "Traps"
     },
     "prompts": {
       "signInDescription": "Sign in to manage your account and content.",

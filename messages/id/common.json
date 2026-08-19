@@ -95,7 +95,8 @@
       "explore": "JELAJAHI",
       "funding": "PENDANAAN",
       "manage": "KELOLA",
-      "ai": "AI"
+      "ai": "AI",
+      "admin": "ADMIN"
     },
     "items": {
       "bumicerts": "sertifikat",
@@ -130,7 +131,8 @@
       "audiomoth": "AudioMoth",
       "identifications": "Identifikasi",
       "myGrant": "Hibah saya",
-      "myRecorders": "Perekam saya"
+      "myRecorders": "Perekam saya",
+      "traps": "Perangkap"
     },
     "prompts": {
       "signInDescription": "Masuk untuk mengelola akun dan konten Anda.",
