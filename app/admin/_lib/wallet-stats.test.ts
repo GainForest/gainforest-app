@@ -1,10 +1,11 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 vi.mock("@/app/_lib/indexer", () => ({ fetchAccountCards: vi.fn(), indexerQuery: vi.fn() }));
 vi.mock("@/app/_lib/pds", () => ({ resolveBlobUrl: vi.fn() }));
 
-import { buildWalletStatRows, type RawWalletRecord } from "./wallet-stats";
+import { fetchAccountCards, indexerQuery } from "@/app/_lib/indexer";
+import { buildWalletStatRows, loadWalletStats, type RawWalletRecord } from "./wallet-stats";
 
 const ADDRESS = "0x024B9ac1176000000000000000000000000000aa";
 
@@ -65,5 +66,44 @@ describe("buildWalletStatRows", () => {
       signerCount: 2,
       legacy: false,
     });
+  });
+});
+
+describe("loadWalletStats resilience", () => {
+  afterEach(() => {
+    vi.mocked(indexerQuery).mockReset();
+    vi.mocked(fetchAccountCards).mockReset();
+  });
+
+  function edgesFor(collection: string) {
+    // Only the primary collection carries a record in these tests.
+    const edges =
+      collection === "app.gainforest.wallet.primary"
+        ? [{ node: { author: { did: "did:plc:alice" }, value: { createdAt: "2026-08-14T00:00:00.000Z" } } }]
+        : [];
+    return { records: { edges, pageInfo: { hasNextPage: false, endCursor: null } } };
+  }
+
+  it("recovers from a transient indexer failure by retrying the record read", async () => {
+    const attempts = new Map<string, number>();
+    vi.mocked(indexerQuery).mockImplementation(async (_query, variables) => {
+      const collection = (variables as { collection: string }).collection;
+      const n = (attempts.get(collection) ?? 0) + 1;
+      attempts.set(collection, n);
+      if (n === 1) throw new Error("transient indexer blip");
+      return edgesFor(collection) as never;
+    });
+    vi.mocked(fetchAccountCards).mockResolvedValue(new Map());
+
+    const { rows } = await loadWalletStats();
+    expect(rows.map((row) => row.did)).toEqual(["did:plc:alice"]);
+    // One failure + one success per collection.
+    expect(attempts.get("app.gainforest.wallet.primary")).toBe(2);
+  });
+
+  it("surfaces the failure (so the page shows 'unavailable') when the indexer keeps failing", async () => {
+    vi.mocked(indexerQuery).mockRejectedValue(new Error("indexer down"));
+    vi.mocked(fetchAccountCards).mockResolvedValue(new Map());
+    await expect(loadWalletStats()).rejects.toThrow(/indexer down/);
   });
 });

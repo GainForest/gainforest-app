@@ -33,7 +33,12 @@ export default async function AdminStatisticsPage({
 
   const [{ tab }, wallets] = await Promise.all([
     searchParams,
-    loadWalletStats().catch(() => null),
+    // A null result renders the "unavailable" card. Log the real cause first so
+    // a recurring failure is diagnosable instead of silently swallowed.
+    loadWalletStats().catch((error) => {
+      console.error("[admin-wallet-stats] loadWalletStats failed", error);
+      return null;
+    }),
   ]);
 
   return (
