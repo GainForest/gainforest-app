@@ -588,6 +588,9 @@ function PayoutSplitControl({
   const format = useFormatter();
   const [pending, setPending] = useState(false);
   const [failed, setFailed] = useState(false);
+  // Keep the confirmation visible until the next change, so an admin has time
+  // to see that the optimistically flipped checkbox was persisted.
+  const [saved, setSaved] = useState(false);
 
   const total = REWILDING_GRANT_AMOUNT_USD;
   const allocated = milestones.reduce(
@@ -600,9 +603,11 @@ function PayoutSplitControl({
     if (pending) return;
     setPending(true);
     setFailed(false);
+    setSaved(false);
     onChange(nextCustom);
     try {
       await postAction({ action: "setPayoutMode", subjectDid, custom: nextCustom });
+      setSaved(true);
     } catch {
       onChange(!nextCustom);
       setFailed(true);
@@ -648,7 +653,16 @@ function PayoutSplitControl({
           ) : null}
         </div>
       ) : null}
-      {failed ? <p className="pl-6 text-[11px] text-destructive">{t("error")}</p> : null}
+      {failed ? (
+        <p className="pl-6 text-[11px] text-destructive">{t("error")}</p>
+      ) : pending ? (
+        <p className="pl-6 text-[11px] text-muted-foreground">{t("saving")}</p>
+      ) : saved ? (
+        <p className="flex items-center gap-1 pl-6 text-[11px] font-medium text-primary">
+          <CheckIcon className="size-3" aria-hidden />
+          {t("saved")}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -696,6 +710,10 @@ function MilestoneRow({
     setAmountDraft(String(effectivePayoutUsd));
   }, [effectivePayoutUsd]);
 
+  // Keep the confirmation visible until the next change, so an admin has time
+  // to see that the optimistically updated row was persisted.
+  const [saved, setSaved] = useState(false);
+
   const programTitle = milestone.isCustom ? "" : program(`${milestone.id}.title`);
   const programDescription = milestone.isCustom ? "" : program(`${milestone.id}.description`);
   const name = milestone.title ?? programTitle;
@@ -706,6 +724,7 @@ function MilestoneRow({
     if (pending) return;
     setPending(true);
     setFailed(false);
+    setSaved(false);
     try {
       await postAction({
         action: "setMilestone",
@@ -714,6 +733,7 @@ function MilestoneRow({
         done: !milestone.done,
       });
       onChanged({ ...milestone, done: !milestone.done, updatedAt: new Date().toISOString() });
+      setSaved(true);
     } catch {
       setFailed(true);
     } finally {
@@ -728,6 +748,7 @@ function MilestoneRow({
     if (planPending) return;
     setPlanPending(true);
     setFailed(false);
+    setSaved(false);
     try {
       const title = next.title !== undefined ? next.title : (milestone.title ?? "");
       const nextDescription =
@@ -749,6 +770,7 @@ function MilestoneRow({
         dueDate: next.dueDate,
       });
       setEditing(false);
+      setSaved(true);
     } catch {
       setFailed(true);
     } finally {
@@ -770,6 +792,7 @@ function MilestoneRow({
     const previous = milestone;
     setDueDatePending(true);
     setFailed(false);
+    setSaved(false);
     onChanged({ ...milestone, dueDate: value });
     try {
       await postAction({
@@ -782,6 +805,7 @@ function MilestoneRow({
         // Carry the current payment so setting a date never clears it.
         payoutUsd: milestone.payoutUsd,
       });
+      setSaved(true);
     } catch {
       onChanged(previous);
       setFailed(true);
@@ -806,6 +830,7 @@ function MilestoneRow({
     const previous = milestone;
     setAmountPending(true);
     setFailed(false);
+    setSaved(false);
     onChanged({ ...milestone, payoutUsd: value });
     try {
       await postAction({
@@ -817,6 +842,7 @@ function MilestoneRow({
         dueDate: milestone.dueDate ?? "",
         payoutUsd: value,
       });
+      setSaved(true);
     } catch {
       onChanged(previous);
       setAmountDraft(String(effectivePayoutUsd));
@@ -952,7 +978,16 @@ function MilestoneRow({
             {t("confirmedAt", { date: formatRelative(milestone.updatedAt) })}
           </span>
         ) : null}
-        {failed ? <span className="text-[11px] text-destructive">{t("error")}</span> : null}
+        {failed ? (
+          <span className="text-[11px] text-destructive">{t("error")}</span>
+        ) : pending || planPending || dueDatePending || amountPending ? (
+          <span className="text-[11px] text-muted-foreground">{t("saving")}</span>
+        ) : saved ? (
+          <span className="flex items-center gap-1 text-[11px] font-medium text-primary">
+            <CheckIcon className="size-3" aria-hidden />
+            {t("saved")}
+          </span>
+        ) : null}
       </span>
       <span className="flex shrink-0 items-center gap-1.5">
         {customPayouts ? (

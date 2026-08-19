@@ -1387,6 +1387,7 @@
       "markDone": "Marcar como hecho",
       "reopen": "Reabrir",
       "saving": "Guardando…",
+      "saved": "Guardado",
       "confirmedAt": "Confirmado {date}",
       "error": "No se pudo guardar. Inténtalo de nuevo.",
       "documentsTitle": "Documentos",

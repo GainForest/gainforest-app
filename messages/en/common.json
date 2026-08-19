@@ -1387,6 +1387,7 @@
       "markDone": "Mark as done",
       "reopen": "Reopen",
       "saving": "Saving…",
+      "saved": "Saved",
       "confirmedAt": "Confirmed {date}",
       "error": "That didn't save. Try again.",
       "documentsTitle": "Documents",
