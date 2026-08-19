@@ -50,7 +50,7 @@ const GENERIC_RECORDS_QUERY = `
       edges {
         node {
           uri
-          author { did }
+          did
           value
         }
       }
@@ -117,11 +117,18 @@ export type RawWalletRecord = {
 type GenericRecordsPayload = {
   records?: {
     edges?: Array<{
-      node?: { uri?: string | null; author?: { did?: string | null } | null; value?: unknown } | null;
+      node?: { uri?: string | null; did?: string | null; value?: unknown } | null;
     } | null> | null;
     pageInfo?: { hasNextPage?: boolean | null; endCursor?: string | null } | null;
   } | null;
 };
+
+/** Pull the DID out of an `at://did/collection/rkey` record URI. */
+function didFromUri(uri: string | null | undefined): string | null {
+  if (typeof uri !== "string") return null;
+  const did = uri.replace(/^at:\/\//, "").split("/")[0];
+  return did.startsWith("did:") ? did : null;
+}
 
 async function fetchAllWalletRecords(collection: string, signal?: AbortSignal): Promise<RawWalletRecord[]> {
   const out: RawWalletRecord[] = [];
@@ -132,7 +139,9 @@ async function fetchAllWalletRecords(collection: string, signal?: AbortSignal): 
     if (!connection) break;
     for (const edge of connection.edges ?? []) {
       const node = edge?.node;
-      const did = node?.author?.did;
+      // The prod indexer's GenericRecord exposes `did` at the top level (there is
+      // no `author` subfield); fall back to parsing it out of the record URI.
+      const did = node?.did ?? didFromUri(node?.uri);
       if (typeof did !== "string" || !did.startsWith("did:")) continue;
       out.push({ did, value: node?.value });
     }

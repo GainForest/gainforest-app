@@ -79,7 +79,15 @@ describe("loadWalletStats resilience", () => {
     // Only the primary collection carries a record in these tests.
     const edges =
       collection === "app.gainforest.wallet.primary"
-        ? [{ node: { author: { did: "did:plc:alice" }, value: { createdAt: "2026-08-14T00:00:00.000Z" } } }]
+        ? [
+            {
+              node: {
+                uri: "at://did:plc:alice/app.gainforest.wallet.primary/self",
+                did: "did:plc:alice",
+                value: { createdAt: "2026-08-14T00:00:00.000Z" },
+              },
+            },
+          ]
         : [];
     return { records: { edges, pageInfo: { hasNextPage: false, endCursor: null } } };
   }
@@ -99,6 +107,21 @@ describe("loadWalletStats resilience", () => {
     expect(rows.map((row) => row.did)).toEqual(["did:plc:alice"]);
     // One failure + one success per collection.
     expect(attempts.get("app.gainforest.wallet.primary")).toBe(2);
+  });
+
+  it("derives the DID from the record URI when the node has no top-level did", async () => {
+    vi.mocked(indexerQuery).mockImplementation(async (_query, variables) => {
+      const collection = (variables as { collection: string }).collection;
+      const edges =
+        collection === "app.gainforest.wallet.primary"
+          ? [{ node: { uri: "at://did:plc:carol/app.gainforest.wallet.primary/self", value: {} } }]
+          : [];
+      return { records: { edges, pageInfo: { hasNextPage: false, endCursor: null } } } as never;
+    });
+    vi.mocked(fetchAccountCards).mockResolvedValue(new Map());
+
+    const { rows } = await loadWalletStats();
+    expect(rows.map((row) => row.did)).toEqual(["did:plc:carol"]);
   });
 
   it("surfaces the failure (so the page shows 'unavailable') when the indexer keeps failing", async () => {
