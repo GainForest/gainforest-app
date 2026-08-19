@@ -88,6 +88,13 @@ export function RecordingsPlayerList({
   /* A scrub can start a stopped track: remember where to jump so the seek can
      be applied once the freshly-loaded clip reports its duration. */
   const pendingSeekRef = useRef<number | null>(null);
+  /* The PDS blob endpoint doesn't answer Range requests, so a streamed
+     <audio> is unseekable (currentTime writes snap back to 0). We download the
+     compact preview once into an in-memory object URL — a whole-file source is
+     instantly seekable, which is what makes scrubbing actually stick. */
+  const objectUrlRef = useRef<string | null>(null);
+  /* Guards against rapid clicks: only the newest load may take over playback. */
+  const loadTokenRef = useRef(0);
 
   /* Cap the list to MAX_VISIBLE_ROWS rows and scroll the rest. The row height
      is measured so the cap stays exact if the card layout ever changes. */
@@ -142,6 +149,8 @@ export function RecordingsPlayerList({
       audio.removeEventListener("waiting", onWaiting);
       audio.removeEventListener("playing", onPlaying);
       unregister();
+      if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
       audioRef.current = null;
     };
   }, []);
@@ -161,12 +170,33 @@ export function RecordingsPlayerList({
       setTrackDuration(0);
       setBuffering(true);
       pendingSeekRef.current = atFraction > 0 ? atFraction : null;
-      audio.src = pdsBlobUrl(host, did, item.previewCid);
+      setPlayingUri(item.uri);
+      onPlay?.();
       // Stop anything else playing on the page (a soundscape dial, a feed clip).
       pauseOtherAudio(audio);
-      onPlay?.();
-      void audio.play().catch(() => setBuffering(false));
-      setPlayingUri(item.uri);
+      const token = ++loadTokenRef.current;
+      const url = pdsBlobUrl(host, did, item.previewCid);
+      // Download the whole preview, then play it from an object URL so the
+      // recording is seekable (see objectUrlRef). onLoadedMetadata applies any
+      // pending scrub target once the duration is known.
+      void (async () => {
+        try {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error("preview_unavailable");
+          const bytes = await response.arrayBuffer();
+          if (token !== loadTokenRef.current) return; // a newer click won
+          const type = response.headers.get("content-type")?.split(";")[0]?.trim() || "audio/wav";
+          const objectUrl = URL.createObjectURL(new Blob([bytes], { type }));
+          if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+          objectUrlRef.current = objectUrl;
+          audio.src = objectUrl;
+          await audio.play();
+        } catch {
+          if (token !== loadTokenRef.current) return;
+          setBuffering(false);
+          setPlayingUri((current) => (current === item.uri ? null : current));
+        }
+      })();
     },
     [did, host, onPlay],
   );
