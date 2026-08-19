@@ -2,6 +2,7 @@ import { publicExploreCache, PUBLIC_EXPLORE_CACHE_TTL_MS } from "./public-explor
 import { countryFlag } from "./format";
 import { fetchCertifiedLocationCountriesByUri } from "./indexer";
 import { INDEXER_URL, FACILITATOR_DID, blockExplorerUrl } from "./urls";
+import { donorMessageFromNotes } from "./donor-message";
 
 // ── Raw receipt fetch ──────────────────────────────────────────────────────
 
@@ -125,7 +126,7 @@ function mapReceipt(node: RawReceipt): FundingReceipt {
     bumicertUri,
     txHash: node.transactionId ?? null,
     paymentNetwork: node.paymentNetwork ?? null,
-    message: node.notes?.trim() || null,
+    message: donorMessageFromNotes(node.notes),
   };
 }
 

@@ -2,6 +2,7 @@ import "server-only";
 import { createHmac } from "node:crypto";
 import { cachedAsync } from "./async-cache";
 import type { FundingReceipt } from "./dashboard";
+import { donorMessageFromNotes } from "./donor-message";
 import { FACILITATOR_DID } from "./urls";
 
 /**
@@ -98,7 +99,7 @@ function mapRawReceipt(record: RawReceiptRecord): FundingReceipt {
     bumicertUri,
     txHash: value.transactionId ?? null,
     paymentNetwork: value.paymentNetwork ?? null,
-    message: value.notes?.trim() || null,
+    message: donorMessageFromNotes(value.notes),
     isAnonymous: true,
   };
 }
