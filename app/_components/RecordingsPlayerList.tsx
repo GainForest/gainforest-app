@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { pdsBlobUrl, type AcAudioListItem } from "@/app/_lib/ac-audio";
 import { pauseOtherAudio, registerAudioElement } from "@/app/_lib/audio-coordinator";
+import { Spectrogram } from "@/app/_components/Spectrogram";
 
 const PAGE_SIZE = 20;
 
@@ -84,6 +85,9 @@ export function RecordingsPlayerList({
   /* True while a pause we caused ourselves (stopping, or switching tracks) is
      in flight, so it isn't mistaken for another player taking over. */
   const selfPauseRef = useRef(false);
+  /* A scrub can start a stopped track: remember where to jump so the seek can
+     be applied once the freshly-loaded clip reports its duration. */
+  const pendingSeekRef = useRef<number | null>(null);
 
   /* Cap the list to MAX_VISIBLE_ROWS rows and scroll the rest. The row height
      is measured so the cap stays exact if the card layout ever changes. */
@@ -97,7 +101,18 @@ export function RecordingsPlayerList({
     const audio = new Audio();
     audioRef.current = audio;
     const onTime = () => setPosition(audio.currentTime);
-    const onMeta = () => setTrackDuration(Number.isFinite(audio.duration) ? audio.duration : 0);
+    const onMeta = () => {
+      const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+      setTrackDuration(duration);
+      // A scrub that started this clip jumps to the pointed-at time as soon as
+      // the duration is known.
+      if (pendingSeekRef.current !== null && duration > 0) {
+        const target = Math.max(0, Math.min(duration, pendingSeekRef.current * duration));
+        audio.currentTime = target;
+        setPosition(target);
+      }
+      pendingSeekRef.current = null;
+    };
     const onEnded = () => setPlayingUri(null);
     const onWaiting = () => setBuffering(true);
     const onPlaying = () => {
@@ -131,6 +146,31 @@ export function RecordingsPlayerList({
     };
   }, []);
 
+  /* Load and play a recording, optionally jumping straight to a fraction of
+     its length (a scrub landing on a stopped row). */
+  const startPlaying = useCallback(
+    (item: AcAudioListItem, atFraction: number) => {
+      const audio = audioRef.current;
+      if (!audio || !host || !item.previewCid) return;
+      // Interrupting a track already playing here: flag that pause as ours.
+      if (!audio.paused) {
+        selfPauseRef.current = true;
+        audio.pause();
+      }
+      setPosition(0);
+      setTrackDuration(0);
+      setBuffering(true);
+      pendingSeekRef.current = atFraction > 0 ? atFraction : null;
+      audio.src = pdsBlobUrl(host, did, item.previewCid);
+      // Stop anything else playing on the page (a soundscape dial, a feed clip).
+      pauseOtherAudio(audio);
+      onPlay?.();
+      void audio.play().catch(() => setBuffering(false));
+      setPlayingUri(item.uri);
+    },
+    [did, host, onPlay],
+  );
+
   const togglePlay = useCallback(
     (item: AcAudioListItem) => {
       const audio = audioRef.current;
@@ -141,31 +181,26 @@ export function RecordingsPlayerList({
         setPlayingUri(null);
         return;
       }
-      // Interrupting a track already playing here: flag that pause as ours.
-      if (!audio.paused) {
-        selfPauseRef.current = true;
-        audio.pause();
-      }
-      setPosition(0);
-      setTrackDuration(0);
-      setBuffering(true);
-      audio.src = pdsBlobUrl(host, did, item.previewCid);
-      // Stop anything else playing on the page (a soundscape dial, a feed clip).
-      pauseOtherAudio(audio);
-      onPlay?.();
-      void audio.play().catch(() => setBuffering(false));
-      setPlayingUri(item.uri);
+      startPlaying(item, 0);
     },
-    [did, host, playingUri, onPlay],
+    [host, playingUri, startPlaying],
   );
 
-  const seek = useCallback(
+  /* Scrub the spectrogram: seek in place when this row is already playing,
+     otherwise start it playing from the pointed-at moment. */
+  const scrub = useCallback(
     (item: AcAudioListItem, fraction: number) => {
       const audio = audioRef.current;
-      if (!audio || playingUri !== item.uri || trackDuration <= 0) return;
-      audio.currentTime = Math.max(0, Math.min(trackDuration, fraction * trackDuration));
+      const clamped = Math.max(0, Math.min(1, fraction));
+      if (audio && playingUri === item.uri && trackDuration > 0) {
+        const target = clamped * trackDuration;
+        audio.currentTime = target;
+        setPosition(target);
+        return;
+      }
+      startPlaying(item, clamped);
     },
-    [playingUri, trackDuration],
+    [playingUri, trackDuration, startPlaying],
   );
 
   const shown = useMemo(() => items.slice(0, visible), [items, visible]);
@@ -280,41 +315,23 @@ export function RecordingsPlayerList({
                 </Button>
 
                 <div className="min-w-0 flex-1">
-                  {/* Spectrogram strip doubles as the seek bar while playing */}
+                  {/* Spectrogram strip doubles as the seek bar: clicking any
+                      point jumps the recording there — starting it if stopped. */}
                   {item.spectrogramCid && host ? (
-                    <div
-                      className="relative h-12 cursor-pointer overflow-hidden rounded-md bg-[#000004]"
-                      onClick={(e) => {
-                        // Seek only while this row is playing; otherwise let the
-                        // click bubble up and toggle the row's selection.
-                        if (playing) {
-                          e.stopPropagation();
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          seek(item, (e.clientX - rect.left) / rect.width);
-                        }
-                      }}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element -- arbitrary PDS hosts */}
-                      <img
-                        src={pdsBlobUrl(host, did, item.spectrogramCid)}
-                        alt=""
-                        loading="lazy"
-                        className="h-full w-full object-cover object-left"
-                      />
-                      {playing ? (
-                        <span
-                          className="absolute inset-y-0 w-px bg-white shadow-[0_0_4px_rgba(255,255,255,0.9)]"
-                          style={{ left: `${progress * 100}%` }}
-                        />
-                      ) : null}
-                    </div>
+                    <Spectrogram
+                      source={{ kind: "image", url: pdsBlobUrl(host, did, item.spectrogramCid) }}
+                      imageClassName="object-cover object-left"
+                      className="h-12 rounded-md bg-[#000004]"
+                      playheadFraction={playing ? progress : null}
+                      onSeek={(fraction) => scrub(item, fraction)}
+                    />
                   ) : playing ? (
                     <div
                       className="h-1.5 cursor-pointer overflow-hidden rounded-full bg-muted"
                       onClick={(e) => {
                         e.stopPropagation();
                         const rect = e.currentTarget.getBoundingClientRect();
-                        seek(item, (e.clientX - rect.left) / rect.width);
+                        scrub(item, (e.clientX - rect.left) / rect.width);
                       }}
                     >
                       <div className="h-full rounded-full bg-primary" style={{ width: `${progress * 100}%` }} />

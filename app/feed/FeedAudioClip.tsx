@@ -25,15 +25,15 @@
  * decode — makes the whole recording instantly seekable.
  */
 
-import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2Icon, PauseIcon, PlayIcon, WavesIcon } from "lucide-react";
 import type { FeedBioacousticsClip } from "../_lib/feed";
 import type { AudioLabelCategory } from "../_lib/audiomoth/labels";
 import { pauseOtherAudio } from "../_lib/audio-coordinator";
-import { colorForSpectrogram, computeSpectrogram } from "../_lib/audiomoth/spectrogram";
+import { computeSpectrogram, type SpectrogramData } from "../_lib/audiomoth/spectrogram";
 import { blobUrl, getPdsRecord, parseAtUri, resolvePdsHost } from "../_lib/pds";
+import { Spectrogram, type SpectrogramSource } from "@/app/_components/Spectrogram";
 import { cn } from "@/lib/utils";
 
 /** FFT settings for the client-side fallback spectrogram — a lighter pass
@@ -120,8 +120,10 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
   const tCategories = useTranslations("common.audiomoth.label.categories");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [source, setSource] = useState<SourceAudio | null | undefined>(undefined);
+  // Client-computed magnitudes for recordings that stored no spectrogram PNG;
+  // painted by the shared <Spectrogram> exactly like a loaded one.
+  const [computedData, setComputedData] = useState<SpectrogramData | null>(null);
   // Lazy trigger for the computed fallback: only decode audio once the card
   // has actually scrolled into (or near) the viewport.
   const [inView, setInView] = useState(false);
@@ -144,6 +146,7 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
     setAudioFailed(false);
     setFallback(null);
     setComputedNyquist(null);
+    setComputedData(null);
     const controller = new AbortController();
     loadSourceAudio(clip.audioUri, controller.signal)
       .then((next) => setSource(next))
@@ -237,27 +240,9 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
           Math.ceil(Math.max(1, samples.length - FALLBACK_FFT_SIZE) / FALLBACK_MAX_COLUMNS),
         );
         const data = computeSpectrogram(samples, { fftSize: FALLBACK_FFT_SIZE, hopSize });
-        const canvas = canvasRef.current;
-        if (!canvas || data.columns < 2) throw new Error("empty");
+        if (data.columns < 2) throw new Error("empty");
         if (cancelled) return;
-        canvas.width = data.columns;
-        canvas.height = data.bins;
-        const paint = canvas.getContext("2d");
-        if (!paint) throw new Error("canvas");
-        const image = paint.createImageData(data.columns, data.bins);
-        for (let column = 0; column < data.columns; column += 1) {
-          for (let bin = 0; bin < data.bins; bin += 1) {
-            const [red, green, blue] = colorForSpectrogram(
-              (data.magnitudesDb[column * data.bins + bin]! + 100) / 80,
-            );
-            const offset = ((data.bins - 1 - bin) * data.columns + column) * 4;
-            image.data[offset] = Math.round(red);
-            image.data[offset + 1] = Math.round(green);
-            image.data[offset + 2] = Math.round(blue);
-            image.data[offset + 3] = 255;
-          }
-        }
-        paint.putImageData(image, 0, 0);
+        setComputedData(data);
         setComputedNyquist(buffer.sampleRate / 2);
         setMeasuredDuration(buffer.duration);
         setFallback("done");
@@ -356,50 +341,28 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
     source && !source.spectrogramUrl && source.audioUrls.length > 0 && fallback !== "done" && fallback !== "failed",
   );
 
+  // The picture the shared surface draws: a stored PNG, our computed
+  // magnitudes, or a spinner while the fallback is still being computed.
+  const spectrogramSource: SpectrogramSource = source?.spectrogramUrl
+    ? { kind: "image", url: source.spectrogramUrl }
+    : computedData
+      ? { kind: "data", data: computedData }
+      : source === undefined || computingFallback
+        ? { kind: "pending" }
+        : { kind: "failed" };
+
   return (
     <div ref={containerRef} className="mt-2 overflow-hidden rounded-xl border border-border/60">
-      {/* Spectrogram of the whole recording with the labelled box on top. */}
-      <div className="relative h-32 w-full bg-[#06040b] sm:h-36">
-        {/* Backdrop for loading / failed states. */}
-        <div className="absolute inset-0 bg-linear-to-b from-[#1a1430] via-[#0d0a18] to-[#06040b]" aria-hidden />
-        {source?.spectrogramUrl ? (
-          <Image
-            src={source.spectrogramUrl}
-            alt={t("spectrogramAlt")}
-            fill
-            unoptimized
-            sizes="(max-width: 672px) 100vw, 608px"
-            className="object-fill"
-          />
-        ) : (
-          /* Client-computed fallback spectrogram, painted once decoded. */
-          <canvas
-            ref={canvasRef}
-            role="img"
-            aria-label={t("spectrogramAlt")}
-            className={cn("relative h-full w-full", fallback !== "done" && "opacity-0")}
-          />
-        )}
-        {source === undefined || computingFallback ? (
-          <div className="absolute inset-0 grid place-items-center text-white/60">
-            <Loader2Icon className="size-4 animate-spin" aria-hidden />
-          </div>
-        ) : null}
-        {/* Click anywhere on the spectrogram to play from that moment. */}
-        {canPlay && duration ? (
-          <button
-            type="button"
-            aria-label={t("seek")}
-            className="absolute inset-0 z-10 cursor-pointer"
-            onClick={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              const rect = event.currentTarget.getBoundingClientRect();
-              const fraction = clampFraction((event.clientX - rect.left) / rect.width);
-              seekAndPlay(fraction * duration);
-            }}
-          />
-        ) : null}
+      {/* Spectrogram of the whole recording with the labelled box on top;
+          clicking anywhere plays from that moment. */}
+      <Spectrogram
+        source={spectrogramSource}
+        className="h-32 w-full bg-linear-to-b from-[#1a1430] via-[#0d0a18] to-[#06040b] sm:h-36"
+        imageAlt={t("spectrogramAlt")}
+        ariaLabel={t("spectrogramAlt")}
+        onSeek={canPlay && duration ? (fraction) => seekAndPlay(fraction * duration) : undefined}
+        playheadFraction={showPlayhead ? clampFraction((playhead ?? 0) / (duration ?? 1)) : null}
+      >
         {box ? (
           /* The labelled sound itself — tap the box to replay that section. */
           <button
@@ -420,14 +383,7 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
             style={{ left: `${box.left}%`, top: `${box.top}%`, width: `${box.width}%`, height: `${box.height}%` }}
           />
         ) : null}
-        {showPlayhead ? (
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-y-0 z-30 w-px bg-white/80 shadow-[0_0_7px_rgba(255,255,255,.7)]"
-            style={{ left: `${clampFraction((playhead ?? 0) / (duration ?? 1)) * 100}%` }}
-          />
-        ) : null}
-      </div>
+      </Spectrogram>
 
       {/* Play control + what the box says. */}
       <div className="flex items-center gap-2.5 border-t border-border/60 bg-muted/30 px-3 py-2">

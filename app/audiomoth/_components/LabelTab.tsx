@@ -15,7 +15,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type PointerEvent as ReactPointerEvent,
 } from "react";
 import { useTranslations } from "next-intl";
 import {
@@ -57,7 +56,8 @@ import {
   type AudioOccurrenceDraft,
   type AudioOccurrenceItem,
 } from "@/app/_lib/audiomoth/occurrences";
-import { colorForSpectrogram, computeSpectrogram } from "@/app/_lib/audiomoth/spectrogram";
+import { computeSpectrogram, type SpectrogramData } from "@/app/_lib/audiomoth/spectrogram";
+import { Spectrogram, type SpectrogramSource } from "@/app/_components/Spectrogram";
 import { listAllRecordings, pdsBlobUrl, type AcAudioListItem } from "@/app/_lib/ac-audio";
 import { listAcDeployments, type AcDeploymentItem } from "@/app/_lib/ac-deployment";
 import { useActingRepo } from "@/app/_lib/account-switcher";
@@ -70,11 +70,6 @@ const MIN_BOX_SIZE = 0.006;
 type SpectrogramReady = {
   durationSeconds: number;
   maxFrequencyHz: number;
-};
-
-type DrawState = {
-  anchorX: number;
-  anchorY: number;
 };
 
 const CATEGORY_STYLES: Record<AudioLabelCategory, { box: string; chip: string }> = {
@@ -540,11 +535,10 @@ function SpectrogramEditor({
   onSelectLabel: (item: AudioOccurrenceItem) => void;
 }) {
   const t = useTranslations("common.audiomoth.label");
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const drawRef = useRef<DrawState | null>(null);
   const [loading, setLoading] = useState(sourceUrls.length > 0);
   const [failed, setFailed] = useState(sourceUrls.length === 0);
+  const [spectrogramData, setSpectrogramData] = useState<SpectrogramData | null>(null);
   const [playbackUrl, setPlaybackUrl] = useState<string | null>(null);
   const [duration, setDuration] = useState(0);
   const [maxFrequency, setMaxFrequency] = useState(0);
@@ -554,6 +548,7 @@ function SpectrogramEditor({
     let cancelled = false;
     setLoading(sourceUrls.length > 0);
     setFailed(sourceUrls.length === 0);
+    setSpectrogramData(null);
     setPlaybackUrl(null);
     setCurrentTime(0);
     if (sourceUrls.length === 0) return;
@@ -583,22 +578,10 @@ function SpectrogramEditor({
         const samples = new Int16Array(channel.length);
         for (let index = 0; index < channel.length; index += 1) samples[index] = Math.round(Math.max(-1, Math.min(1, channel[index]!)) * 32_767);
         const hopSize = Math.max(256, Math.ceil(Math.max(1, samples.length - FFT_SIZE) / MAX_SPECTROGRAM_COLUMNS));
-        const data = computeSpectrogram(samples, { fftSize: FFT_SIZE, hopSize });
-        const canvas = canvasRef.current;
-        if (!canvas || data.columns < 2) throw new Error("empty");
-        canvas.width = data.columns;
-        canvas.height = data.bins;
-        const paint = canvas.getContext("2d");
-        if (!paint) throw new Error("canvas");
-        const image = paint.createImageData(data.columns, data.bins);
-        for (let column = 0; column < data.columns; column += 1) {
-          for (let bin = 0; bin < data.bins; bin += 1) {
-            const [red, green, blue] = colorForSpectrogram((data.magnitudesDb[column * data.bins + bin]! + 100) / 80);
-            const offset = ((data.bins - 1 - bin) * data.columns + column) * 4;
-            image.data[offset] = Math.round(red); image.data[offset + 1] = Math.round(green); image.data[offset + 2] = Math.round(blue); image.data[offset + 3] = 255;
-          }
-        }
-        paint.putImageData(image, 0, 0);
+        const computed = computeSpectrogram(samples, { fftSize: FFT_SIZE, hopSize });
+        if (computed.columns < 2) throw new Error("empty");
+        if (cancelled) return;
+        setSpectrogramData(computed);
         const next = { durationSeconds: buffer.duration, maxFrequencyHz: buffer.sampleRate / 2 };
         setDuration(next.durationSeconds); setMaxFrequency(next.maxFrequencyHz); onReady(next);
       } finally {
@@ -612,25 +595,23 @@ function SpectrogramEditor({
     return () => { cancelled = true; window.clearTimeout(timer); };
   }, [onReady, sourceUrls]);
 
-  const pointFromEvent = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    return { x: Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)), y: Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height)) };
-  };
-  const beginDraw = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (loading || failed) return;
-    event.currentTarget.setPointerCapture(event.pointerId);
-    const point = pointFromEvent(event); drawRef.current = { anchorX: point.x, anchorY: point.y }; onDraftBox(normalizeSpectrogramBox(point.x, point.y, point.x, point.y));
-  };
-  const continueDraw = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!drawRef.current) return;
-    const point = pointFromEvent(event); onDraftBox(normalizeSpectrogramBox(drawRef.current.anchorX, drawRef.current.anchorY, point.x, point.y));
-  };
-  const finishDraw = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!drawRef.current) return;
-    const point = pointFromEvent(event); const box = normalizeSpectrogramBox(drawRef.current.anchorX, drawRef.current.anchorY, point.x, point.y); drawRef.current = null;
-    onDraftBox(box.endX - box.startX < MIN_BOX_SIZE || box.bottomY - box.topY < MIN_BOX_SIZE ? null : box);
-  };
   const seekTo = (seconds: number) => { if (audioRef.current) { audioRef.current.currentTime = seconds; setCurrentTime(seconds); } };
+  // A plain click (no drag) on the spectrogram scrubs the recording there and
+  // starts playing from that point; a drag draws a label box instead.
+  const scrubTo = (fraction: number) => {
+    const audio = audioRef.current;
+    if (!audio || duration <= 0) return;
+    const seconds = fraction * duration;
+    audio.currentTime = seconds;
+    setCurrentTime(seconds);
+    void audio.play().catch(() => {});
+  };
+
+  const editorSource: SpectrogramSource = failed
+    ? { kind: "failed" }
+    : loading || !spectrogramData
+      ? { kind: "pending" }
+      : { kind: "data", data: spectrogramData };
 
   return (
     <div className="mt-4">
@@ -638,10 +619,17 @@ function SpectrogramEditor({
       <div className="flex min-h-[330px] overflow-hidden rounded-b-2xl border border-border bg-[#06040b]">
         <div className="flex w-12 shrink-0 flex-col justify-between border-r border-white/10 py-2 pr-2 text-right font-mono text-[9px] text-white/50">{[1, .75, .5, .25, 0].map((fraction) => <span key={fraction}>{maxFrequency ? formatFrequency(maxFrequency * fraction) : "—"}</span>)}</div>
         <div className="min-w-0 flex-1">
-          <div className={cn("relative h-[300px] touch-none select-none overflow-hidden", loading ? "cursor-wait" : "cursor-crosshair")} onPointerDown={beginDraw} onPointerMove={continueDraw} onPointerUp={finishDraw} onPointerCancel={() => { drawRef.current = null; }} aria-label={t("spectrogramAria")}>
-            <canvas ref={canvasRef} className="h-full w-full" />
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,transparent_24.8%,rgba(255,255,255,.08)_25%,transparent_25.2%,transparent_49.8%,rgba(255,255,255,.08)_50%,transparent_50.2%,transparent_74.8%,rgba(255,255,255,.08)_75%,transparent_75.2%),linear-gradient(to_bottom,transparent_24.8%,rgba(255,255,255,.08)_25%,transparent_25.2%,transparent_49.8%,rgba(255,255,255,.08)_50%,transparent_50.2%,transparent_74.8%,rgba(255,255,255,.08)_75%,transparent_75.2%)]" />
-            {duration > 0 ? <div className="pointer-events-none absolute inset-y-0 w-px bg-white/80 shadow-[0_0_7px_rgba(255,255,255,.7)]" style={{ left: `${(currentTime / duration) * 100}%` }} /> : null}
+          <Spectrogram
+            source={editorSource}
+            grid
+            className={cn("h-[300px]", loading ? "cursor-wait" : "cursor-crosshair")}
+            ariaLabel={t("spectrogramAria")}
+            loadingLabel={t("buildingSpectrogram")}
+            failedLabel={t("spectrogramFailed")}
+            draw={{ onDraftChange: onDraftBox, onCommit: onDraftBox, minBoxSize: MIN_BOX_SIZE }}
+            onSeek={scrubTo}
+            playheadFraction={duration > 0 ? currentTime / duration : null}
+          >
             {labels.map((item) => {
               const box = boundsToBox(item, duration || 1, maxFrequency || 1);
               const name = occurrenceDisplayName(item) || t(`categories.${item.category}`);
@@ -652,9 +640,7 @@ function SpectrogramEditor({
               );
             })}
             {draftBox ? <div className="pointer-events-none absolute z-20 border-2 border-white bg-white/15 shadow-[0_0_0_1px_rgba(0,0,0,.35),0_0_16px_rgba(255,255,255,.25)]" style={{ left: `${draftBox.startX * 100}%`, top: `${draftBox.topY * 100}%`, width: `${(draftBox.endX - draftBox.startX) * 100}%`, height: `${(draftBox.bottomY - draftBox.topY) * 100}%` }} /> : null}
-            {loading ? <div className="absolute inset-0 grid place-items-center bg-[#080611]/85 text-center text-sm text-white/70 backdrop-blur-sm"><span><Loader2Icon className="mx-auto mb-2 size-5 animate-spin text-primary" />{t("buildingSpectrogram")}</span></div> : null}
-            {failed ? <div className="absolute inset-0 grid place-items-center bg-[#080611] px-6 text-center text-sm text-white/60">{t("spectrogramFailed")}</div> : null}
-          </div>
+          </Spectrogram>
           <div className="flex justify-between border-t border-white/10 px-1.5 py-1.5 font-mono text-[9px] text-white/50">{[0, .25, .5, .75, 1].map((fraction) => <span key={fraction}>{duration ? formatTime(duration * fraction) : "—"}</span>)}</div>
         </div>
       </div>
