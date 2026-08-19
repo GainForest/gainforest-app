@@ -108,14 +108,15 @@ async function fetchLinkedEvmWallet(did: string): Promise<BioblitzWinnerWallet |
 
 // ── Payment status checking ──────────────────────────────────────────────────
 
+// The indexer has no where-filter for a receipt's recipient wallet (`to` is a
+// union type), so we fetch the facilitator's receipts and match the recipient
+// in code. The facilitator repo holds every donation/prize receipt, a small
+// set, so one query covers all winners on a dashboard load.
 const PRIZE_RECEIPTS_QUERY = `
-  query BioblitzPrizeReceipts($repoDid: String!, $recipientWallet: String!, $first: Int!) {
+  query BioblitzPrizeReceipts($repoDid: String!, $first: Int!) {
     orgHypercertsFundingReceipt(
       first: $first
-      where: {
-        did: { eq: $repoDid }
-        to_value: { eq: $recipientWallet }
-      }
+      where: { did: { eq: $repoDid } }
       sortBy: createdAt
       sortDirection: DESC
     ) {
@@ -125,6 +126,10 @@ const PRIZE_RECEIPTS_QUERY = `
           notes
           transactionId
           createdAt
+          to {
+            __typename
+            ... on OrgHypercertsFundingReceiptText { value }
+          }
         }
       }
     }
@@ -136,42 +141,70 @@ type RawReceiptNode = {
   notes?: string | null;
   transactionId?: string | null;
   createdAt?: string | null;
+  to?: { __typename?: string | null; value?: string | null } | null;
+};
+
+export type PrizeReceipt = {
+  toWallet: string | null;
+  notes: string | null;
+  txHash: string | null;
+  createdAt: string | null;
 };
 
 /**
- * Check if bioblitz prizes have been paid to a winner's wallet.
- * Queries funding receipts and matches against the deterministic message format.
+ * Every funding receipt written by the facilitator, newest first. Bioblitz
+ * prize payments live here alongside ordinary donations; callers filter by
+ * recipient wallet and the deterministic prize-note format.
  */
-export async function fetchBioblitzPrizePaymentStatus(
+export async function fetchFacilitatorPrizeReceipts(): Promise<PrizeReceipt[]> {
+  const data = await indexerQuery<{
+    orgHypercertsFundingReceipt?: { edges?: Array<{ node?: RawReceiptNode | null } | null> | null } | null;
+  }>(PRIZE_RECEIPTS_QUERY, { repoDid: FACILITATOR_DID, first: 1000 }).catch(() => null);
+
+  const edges = data?.orgHypercertsFundingReceipt?.edges ?? [];
+  const receipts: PrizeReceipt[] = [];
+  for (const edge of edges) {
+    const node = edge?.node;
+    if (!node) continue;
+    receipts.push({
+      toWallet: node.to?.value ?? null,
+      notes: node.notes ?? null,
+      txHash: node.transactionId ?? null,
+      createdAt: node.createdAt ?? null,
+    });
+  }
+  return receipts;
+}
+
+/**
+ * Which of a winner's prizes have already been paid to their wallet, matched
+ * from a pre-fetched receipt set. Wallet comparison is case-insensitive — a
+ * receipt's recipient is stored checksummed, while a vault/link record may use
+ * different casing, and an exact match silently misses real payments.
+ */
+export function computeBioblitzPrizePaymentStatus(
   roundId: number,
   prizes: BioblitzPrize[],
   walletAddress: string,
-): Promise<BioblitzPrizePaymentStatus[]> {
+  receipts: PrizeReceipt[],
+): BioblitzPrizePaymentStatus[] {
   if (prizes.length === 0) return [];
 
-  const data = await indexerQuery<{
-    orgHypercertsFundingReceipt?: { edges?: Array<{ node?: RawReceiptNode | null } | null> | null } | null;
-  }>(PRIZE_RECEIPTS_QUERY, {
-    repoDid: FACILITATOR_DID,
-    recipientWallet: walletAddress,
-    first: 50,
-  }).catch(() => null);
-
-  const edges = data?.orgHypercertsFundingReceipt?.edges ?? [];
+  const wallet = walletAddress.toLowerCase();
   const paidPrizes = new Map<BioblitzPrize, { txHash?: string; paidAt?: string }>();
 
-  for (const edge of edges) {
-    const node = edge?.node;
-    if (!node?.notes) continue;
+  for (const receipt of receipts) {
+    if (!receipt.notes) continue;
+    if ((receipt.toWallet ?? "").toLowerCase() !== wallet) continue;
 
-    const parsed = parseBioblitzPrizeReceipt(node.notes);
+    const parsed = parseBioblitzPrizeReceipt(receipt.notes);
     if (!parsed || parsed.roundId !== roundId) continue;
 
     // Only mark as paid if we're tracking this prize
     if (prizes.includes(parsed.prize) && !paidPrizes.has(parsed.prize)) {
       paidPrizes.set(parsed.prize, {
-        txHash: node.transactionId || undefined,
-        paidAt: node.createdAt || undefined,
+        txHash: receipt.txHash || undefined,
+        paidAt: receipt.createdAt || undefined,
       });
     }
   }
@@ -188,6 +221,20 @@ export async function fetchBioblitzPrizePaymentStatus(
 }
 
 /**
+ * Check if bioblitz prizes have been paid to a winner's wallet. Fetches the
+ * facilitator receipt set, then matches by recipient wallet and prize note.
+ */
+export async function fetchBioblitzPrizePaymentStatus(
+  roundId: number,
+  prizes: BioblitzPrize[],
+  walletAddress: string,
+): Promise<BioblitzPrizePaymentStatus[]> {
+  if (prizes.length === 0) return [];
+  const receipts = await fetchFacilitatorPrizeReceipts();
+  return computeBioblitzPrizePaymentStatus(roundId, prizes, walletAddress, receipts);
+}
+
+/**
  * Batch fetch wallet and payment status for multiple winners.
  * This is more efficient than fetching one at a time.
  */
@@ -196,12 +243,13 @@ export async function fetchWinnersWalletAndPaymentStatus(
 ): Promise<Map<string, { wallet: BioblitzWinnerWallet | null; payments: BioblitzPrizePaymentStatus[] }>> {
   const results = new Map<string, { wallet: BioblitzWinnerWallet | null; payments: BioblitzPrizePaymentStatus[] }>();
 
-  // Fetch in parallel for better performance
+  // One receipt fetch covers every winner; wallet lookups run in parallel.
+  const receipts = await fetchFacilitatorPrizeReceipts();
   await Promise.all(
     winners.map(async ({ did, roundId, prizes }) => {
       const wallet = await fetchWinnerWallet(did);
       const payments = wallet
-        ? await fetchBioblitzPrizePaymentStatus(roundId, prizes, wallet.address)
+        ? computeBioblitzPrizePaymentStatus(roundId, prizes, wallet.address, receipts)
         : prizes.map((prize) => ({ prize, paid: false }));
 
       results.set(did, { wallet, payments });
