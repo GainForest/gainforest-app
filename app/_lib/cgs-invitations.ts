@@ -2,7 +2,11 @@ import "server-only";
 
 import { accountPath, getCertifiedProfileCard } from "@/app/account/_lib/account-route";
 import { getAuthBaseUrl, getAuthInternalServiceToken } from "@/app/_lib/auth";
-import { fetchCgsMemberRoleWithCookie, type CgsServerRole } from "@/app/_lib/cgs-server";
+import {
+  fetchAllCgsGroupMembershipsWithCookie,
+  fetchCgsMemberRoleWithCookie,
+  type CgsServerRole,
+} from "@/app/_lib/cgs-server";
 import { resolveGroupInvitationEmailLocale } from "@/lib/email/group-invitation-template";
 import { supabaseFilterValue, supabaseRpc, supabaseSelect } from "@/lib/supabase/rest";
 import type { ProcessOneOutcome } from "@/lib/email-notifications/orchestrator";
@@ -14,7 +18,8 @@ export type GroupInvitationErrorCode =
   | "invitation_retry_cooldown"
   | "invitation_notification_not_safely_retryable"
   | "invitation_not_found"
-  | "invitation_not_pending";
+  | "invitation_not_pending"
+  | "membership_outcome_unknown";
 type GroupInvitationStatus = "pending" | "accepted" | "canceled" | "expired";
 export type InvitationNotificationStatus = "waiting_recipient" | "queued" | "processing" | "sent" | "suppressed" | "dead";
 
@@ -78,6 +83,7 @@ export type GroupInvitation = {
 
 const TABLE = "cgs_group_invitations";
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const MEMBER_ADD_TIMEOUT_MS = 10_000;
 
 const INVITATION_SELECT = [
   "id",
@@ -350,35 +356,76 @@ function canCancelInvitation(role: CgsServerRole | null, invitationRole: GroupIn
   return false;
 }
 
-async function addMemberViaAuthService(invitation: GroupInvitation, memberDid: string): Promise<void> {
-  const internalKey = getAuthInternalServiceToken();
-  if (!internalKey) throw new GroupInvitationError("We couldn’t add you to the organization right now. Please try again later.", 500);
+type ConfirmMembershipResult =
+  | { kind: "added" }
+  | { kind: "already_present" }
+  | { kind: "rejected" }
+  | { kind: "role_conflict" }
+  | { kind: "unknown" };
 
-  const response = await fetch(new URL("/api/internal/cgs/member-add", getAuthBaseUrl()), {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${internalKey}`,
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      actorDid: invitation.inviterDid,
-      repo: invitation.repo,
-      memberDid,
-      role: invitation.role,
-    }),
-    cache: "no-store",
-  });
-  const data = await response.json().catch(() => null) as { message?: string; error?: string } | null;
-  if (!response.ok || data?.error) {
-    const upstreamMessage = data?.message ?? data?.error ?? `Auth service returned ${response.status || "an error"}`;
-    console.warn("[cgs-invitations] Auth service member-add failed", {
-      status: response.status || null,
-      invitationId: invitation.id,
-      repo: invitation.repo,
-      upstreamMessage,
-    });
-    throw new GroupInvitationError("We couldn’t add you to the organization right now. Please try again later.", 502);
+function isDefiniteMemberAddRejection(status: number): boolean {
+  return status === 400 || status === 401 || status === 403 || status === 404 || status === 422;
+}
+
+async function confirmInvitedMembership(
+  invitation: GroupInvitation,
+  cookie: string | null,
+): Promise<ConfirmMembershipResult> {
+  try {
+    const groups = await fetchAllCgsGroupMembershipsWithCookie(cookie);
+    const membership = groups.find(group => group.groupDid === invitation.repo);
+    if (!membership) return { kind: "unknown" };
+    return membership.role === invitation.role
+      ? { kind: "already_present" }
+      : { kind: "role_conflict" };
+  } catch {
+    return { kind: "unknown" };
   }
+}
+
+async function addOrConfirmInvitedMember({
+  invitation,
+  memberDid,
+  cookie,
+}: {
+  invitation: GroupInvitation;
+  memberDid: string;
+  cookie: string | null;
+}): Promise<ConfirmMembershipResult> {
+  const internalKey = getAuthInternalServiceToken();
+  if (!internalKey) return { kind: "rejected" };
+
+  let response: Response;
+  try {
+    response = await fetch(new URL("/api/internal/cgs/member-add", getAuthBaseUrl()), {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${internalKey}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        actorDid: invitation.inviterDid,
+        repo: invitation.repo,
+        memberDid,
+        role: invitation.role,
+      }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(MEMBER_ADD_TIMEOUT_MS),
+    });
+  } catch {
+    return confirmInvitedMembership(invitation, cookie);
+  }
+
+  const data = await response.json().catch(() => null) as { error?: string } | null;
+  if (response.ok && !data?.error) return { kind: "added" };
+
+  console.warn("[cgs-invitations] Auth service member-add did not confirm success", {
+    status: response.status || null,
+    invitationId: invitation.id,
+    repo: invitation.repo,
+  });
+  if (isDefiniteMemberAddRejection(response.status)) return { kind: "rejected" };
+  return confirmInvitedMembership(invitation, cookie);
 }
 
 function mutationResult(value: unknown): { invitation: GroupInvitation; notification: InvitationNotificationSummary | null } | null {
@@ -534,27 +581,61 @@ export async function retryGroupInvitation({
   }
 }
 
+function wasAcceptedBy(invitation: GroupInvitation, did: string, email: string): boolean {
+  const acceptedEmail = invitation.acceptedByEmail
+    ? normalizeInvitationEmail(invitation.acceptedByEmail)
+    : "";
+  return invitation.acceptedByDid === did && acceptedEmail === email;
+}
+
 export async function acceptGroupInvitation({
   invitationId,
   session,
+  cookie,
 }: {
   invitationId: string;
   session: Extract<AuthSession, { isLoggedIn: true }>;
+  cookie: string | null;
 }): Promise<GroupInvitation> {
   const invitation = await getGroupInvitation(invitationId);
   if (!invitation) throw new GroupInvitationError("Invitation not found.", 404, "invitation_not_found");
+
+  const sessionEmail = session.email ? normalizeInvitationEmail(session.email) : "";
+  if (!sessionEmail) throw new GroupInvitationError("Your signed-in account does not have an email address available.", 403);
+  if (invitation.status === "accepted") {
+    if (wasAcceptedBy(invitation, session.did, sessionEmail)) return invitation;
+    throw new GroupInvitationError("This invitation is no longer pending.", 409, "invitation_not_pending");
+  }
   if (invitation.status !== "pending") throw new GroupInvitationError("This invitation is no longer pending.", 409, "invitation_not_pending");
   if (new Date(invitation.expiresAt).getTime() < Date.now()) {
     await closeInvitation(invitation.id, "expired").catch(() => undefined);
     throw new GroupInvitationError("This invitation has expired.", 410);
   }
-
-  const sessionEmail = session.email ? normalizeInvitationEmail(session.email) : "";
-  if (!sessionEmail) throw new GroupInvitationError("Your signed-in account does not have an email address available.", 403);
   if (sessionEmail !== invitation.email) {
     throw new GroupInvitationError("Sign in with the email address that received this invitation.", 403);
   }
 
-  await addMemberViaAuthService(invitation, session.did);
-  return closeInvitation(invitation.id, "accepted", session.did, sessionEmail);
+  const membership = await addOrConfirmInvitedMember({ invitation, memberDid: session.did, cookie });
+  if (membership.kind === "rejected") {
+    throw new GroupInvitationError("We couldn’t add you to the organization right now. Please try again later.", 502);
+  }
+  if (membership.kind === "role_conflict") {
+    throw new GroupInvitationError(
+      "Your organization role does not match this invitation. Ask an organization owner to update your role.",
+      409,
+      "invitation_role_conflict",
+    );
+  }
+  if (membership.kind === "unknown") {
+    throw new GroupInvitationError(
+      "We couldn’t confirm whether you joined the organization. Try accepting the invitation again.",
+      503,
+      "membership_outcome_unknown",
+    );
+  }
+  const accepted = await closeInvitation(invitation.id, "accepted", session.did, sessionEmail);
+  if (!wasAcceptedBy(accepted, session.did, sessionEmail)) {
+    throw new GroupInvitationError("This invitation is no longer pending.", 409, "invitation_not_pending");
+  }
+  return accepted;
 }

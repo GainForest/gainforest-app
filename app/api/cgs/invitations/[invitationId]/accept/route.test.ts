@@ -13,9 +13,6 @@ class GroupInvitationError extends Error {
   }
 }
 
-vi.mock("next/headers", () => ({
-  headers: async () => new Headers({ cookie: "session=cookie" }),
-}));
 vi.mock("@/app/_lib/auth-server", () => ({ fetchAuthSession }));
 vi.mock("@/app/_lib/cgs-invitations", () => ({ acceptGroupInvitation, GroupInvitationError }));
 vi.mock("@/app/_lib/organization-memberships", () => ({ scheduleOrganizationRosterSync }));
@@ -40,14 +37,21 @@ beforeEach(() => {
 afterEach(() => vi.restoreAllMocks());
 
 describe("POST /api/cgs/invitations/[invitationId]/accept", () => {
-  it("schedules a forced roster refresh after the invitation member is added", async () => {
+  it("forwards the request cookie and schedules a forced roster refresh", async () => {
     const { POST } = await import("./route");
-
-    const response = await POST(new Request("https://gainforest.app/api/cgs/invitations/invite-1/accept", {
+    const request = new Request("https://gainforest.app/api/cgs/invitations/invite-1/accept", {
       method: "POST",
-    }), { params: Promise.resolve({ invitationId: "invite-1" }) });
+      headers: { cookie: "session=cookie" },
+    });
+
+    const response = await POST(request, { params: Promise.resolve({ invitationId: "invite-1" }) });
 
     expect(response.status).toBe(200);
+    expect(acceptGroupInvitation).toHaveBeenCalledWith({
+      invitationId: "invite-1",
+      session: expect.objectContaining({ did: "did:plc:invitee" }),
+      cookie: "session=cookie",
+    });
     expect(scheduleOrganizationRosterSync).toHaveBeenCalledWith("did:plc:forest", "session=cookie");
   });
 });
