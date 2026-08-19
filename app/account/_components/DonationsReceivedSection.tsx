@@ -6,6 +6,7 @@ import { fetchReceipts, type FundingReceipt } from "../../_lib/dashboard";
 import { formatCompactUsd } from "../../_lib/format";
 import { fetchBumicertsByDid } from "../../_lib/indexer";
 import { blockExplorerUrl } from "../../_lib/urls";
+import { fetchVerifiedRecipientAddress } from "@/lib/facilitator/recipient";
 
 /** at://did/collection/rkey → { did, rkey } */
 function bumicertParts(uri: string | null): { did: string; rkey: string } | null {
@@ -24,20 +25,30 @@ function dateValue(value: string | null): number {
   return Number.isNaN(parsed) ? 0 : parsed;
 }
 
-// Public funding history for a profile: every donation receipt recorded for
-// this account's Certs, aggregated across all of them, newest first. Personal
-// and organization accounts render the exact same section — receipts are keyed
-// by the Cert owner's DID, so both ownership models inherit it identically.
+// Public funding history for a profile: every donation receipt this account
+// received, aggregated and newest first. A donation counts as received when it
+// either funded one of the account's Certs (the receipt's funded Cert is owned
+// by this DID) OR was paid to the account's verified receiving wallet — the
+// latter catches donations and prize payouts that carry no Cert reference at
+// all. Personal and organization accounts render the exact same section.
 export async function DonationsReceivedSection({ did, className = "" }: { did: string; className?: string }) {
-  const [t, quoteT, locale, receipts] = await Promise.all([
+  const [t, quoteT, locale, receipts, recipientAddress] = await Promise.all([
     getTranslations("common.accountDonationsReceived"),
     getTranslations("common.accountDonations"),
     getLocale(),
     fetchReceipts().catch(() => [] as FundingReceipt[]),
+    fetchVerifiedRecipientAddress(did).catch(() => null),
   ]);
 
+  const recipientWallet = recipientAddress?.toLowerCase() ?? null;
   const received = receipts
-    .filter((receipt) => receipt.orgDid === did)
+    .filter(
+      (receipt) =>
+        receipt.orgDid === did ||
+        (recipientWallet !== null &&
+          receipt.to?.type === "wallet" &&
+          receipt.to.id.toLowerCase() === recipientWallet),
+    )
     .sort((a, b) => dateValue(receiptDate(b)) - dateValue(receiptDate(a)));
 
   // Cert titles so each entry can say *what* the donation funded. Receipts only
