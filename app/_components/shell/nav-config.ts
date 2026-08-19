@@ -208,7 +208,6 @@ export const NAV_ITEMS: NavSection[] = [
         Icon: CrosshairIcon,
         href: "/traps",
         pathCheck: { startsWith: "/traps" },
-        adminOnly: true,
       },
     ],
   },
