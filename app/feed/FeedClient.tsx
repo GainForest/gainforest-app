@@ -70,6 +70,12 @@ const MAX_BATCH_GAP_MS = 12 * 60 * 60 * 1000; // 12h
 // How many sample thumbnails the summary card shows.
 const MAX_THUMBS = 4;
 
+// Donations are intentionally paused in the activity feed. Keep this guard at
+// the rendering boundary too, so stale cached responses cannot reintroduce them.
+function withoutDonations(items: ActivityFeedItem[]): ActivityFeedItem[] {
+  return items.filter((item) => item.kind !== "donation");
+}
+
 function batchTime(iso: string): number {
   const t = Date.parse(iso);
   return Number.isNaN(t) ? 0 : t;
@@ -166,7 +172,7 @@ export function FeedClient({
 }) {
   const t = useTranslations("common.feed");
   const interactions = useFeedInteractions(viewerDid);
-  const [items, setItems] = useState<ActivityFeedItem[]>(initialItems);
+  const [items, setItems] = useState<ActivityFeedItem[]>(withoutDonations(initialItems));
   const [filter, setFilter] = useState<Filter>("all");
   const [cursor, setCursor] = useState<string | null>(initialCursor);
   const [hasMore, setHasMore] = useState(initialHasMore);
@@ -238,7 +244,7 @@ export function FeedClient({
       if (!res.ok) throw new Error("feed fetch failed");
       const data = (await res.json()) as ActivityFeedPage;
       if (seq !== reqRef.current) return; // a newer request superseded this one
-      setItems(data.items ?? []);
+      setItems(withoutDonations(data.items ?? []));
       setCursor(data.nextCursor ?? null);
       setHasMore(Boolean(data.hasMore));
     } catch {
@@ -263,7 +269,7 @@ export function FeedClient({
       if (seq !== reqRef.current) return; // filter changed mid-flight — drop it
       setItems((prev) => {
         const seen = new Set(prev.map((row) => row.id));
-        return [...prev, ...(data.items ?? []).filter((row) => !seen.has(row.id))];
+        return [...prev, ...withoutDonations(data.items ?? []).filter((row) => !seen.has(row.id))];
       });
       setCursor(data.nextCursor ?? null);
       setHasMore(Boolean(data.hasMore));
