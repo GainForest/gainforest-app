@@ -9,6 +9,7 @@ import {
   BinocularsIcon,
   Building2Icon,
   FolderKanbanIcon,
+  HeartHandshakeIcon,
   HeartIcon,
   Loader2Icon,
   MegaphoneIcon,
