@@ -19,8 +19,7 @@ function orgFromInvitation(invitation: GroupInvitation): InviteOrg {
 
 export default async function InvitePage({ params }: InvitePageProps) {
   const { invitationId } = await params;
-  const [session, invitation, t] = await Promise.all([
-    fetchAuthSession(),
+  const [invitation, t] = await Promise.all([
     getGroupInvitation(invitationId).catch(() => null),
     getTranslations("common.groupInvitations.invitePage"),
   ]);
@@ -43,5 +42,6 @@ export default async function InvitePage({ params }: InvitePageProps) {
     return <InviteScene tone="danger" icon={<XIcon className="size-7" />} title={t("canceledTitle")} description={t("canceledDescription")} org={org} />;
   }
 
+  const session = await fetchAuthSession();
   return <InvitationAcceptClient invitation={invitation} session={session} />;
 }

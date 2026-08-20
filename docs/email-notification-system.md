@@ -15,7 +15,7 @@ flowchart TB
     direction LR
 
     FirstUse["Signed-in app load finds<br/>a DID absent from user_emails"]
-    Membership["Account system reports<br/>an organization join"]
+    JoinedInvitation["Invitee accepts<br/>an email invitation"]
     Invitation["Owner or admin<br/>sends an invitation"]
     BioBlitz["Moderator confirms<br/>a BioBlitz winner"]
   end
@@ -35,7 +35,7 @@ flowchart TB
   end
 
   FirstUse --> SaveJob
-  Membership --> SaveJob
+  JoinedInvitation --> SaveJob
   BioBlitz --> SaveJob
   Invitation --> SaveTogether
 
@@ -119,7 +119,7 @@ flowchart TB
   Cleanup -.-> Retention["Stop active jobs after 7 days<br/>Clear sent details after 7 days<br/>Clear failed details after 14 days<br/>Remove records after 90 days"]
 ```
 
-The cron never discovers historical events or creates missing notification jobs. The general welcome producer runs after an authenticated app load only when the session DID is absent from `user_emails`; account age and PDS do not affect eligibility. Membership, invitation, and moderator award producers create jobs only when their corresponding actions happen.
+The cron never discovers historical events or creates missing notification jobs. The general welcome producer runs after an authenticated app load only when the session DID is absent from `user_emails`; account age and PDS do not affect eligibility. Joined-email jobs are created only after a person accepts an email invitation. Direct DID or handle additions, organization creation, organization reads, role changes, and removals do not create them. Invitation and moderator award producers create their other jobs only when their corresponding actions happen.
 
 ### 4. How manual actions work
 
@@ -255,7 +255,9 @@ Authorization: Bearer <NOTIFICATION_CRON_SECRET>
 
 To stop all notification email, set `EMAIL_DISABLED=true`. This prevents new enqueue operations and provider calls without deleting durable rows. Do not drop or reverse the migration while retained rows exist.
 
-Invitation creation and notification enqueue share one transaction. Email failure never removes the invitation. Eligible owners and admins can expedite a safely retryable invitation with a database-enforced cooldown. Acceptance, cancellation, and expiry suppress unsent work.
+Invitation creation and invitation-email enqueue share one transaction. Email failure never removes the invitation. Eligible owners and admins can expedite a safely retryable invitation with a database-enforced cooldown. Acceptance, cancellation, and expiry suppress unsent invitation-email work.
+
+After CGS membership is confirmed, invitation acceptance is stored before GainForest schedules the “You joined this organization” email. That enqueue is best effort: a failure never changes the accepted invitation or CGS membership. The acceptance route supplies `invitation.accepted.v1:<invitation-id>` as its `authEventId`; `enqueueMembershipJoined` stores `organization-membership-joined:invitation.accepted.v1:<invitation-id>` as both the event key and provider idempotency key, so concurrent scheduling cannot create duplicate jobs. A process failure between storing acceptance and enqueueing the email can cause a missed non-critical email; this failure window is deliberately accepted instead of adding a database transaction or RPC. Signed legacy auth membership events remain authenticated and schema-validated but return `200 ignored` and create no email work.
 
 BioBlitz awards succeed independently of email. When an address is unavailable, moderators are told that manual contact may be needed. Marking an award handled records the first moderator and preserves a suppression tombstone so it cannot be sent later.
 

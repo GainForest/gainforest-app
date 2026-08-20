@@ -2,14 +2,24 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-const { fetchCgsMemberRoleWithCookie, getCertifiedProfileCard, supabaseRpc, supabaseSelect } = vi.hoisted(() => ({
+const {
+  fetchAllCgsGroupMembershipsWithCookie,
+  fetchCgsMemberRoleWithCookie,
+  getCertifiedProfileCard,
+  supabaseRpc,
+  supabaseSelect,
+} = vi.hoisted(() => ({
+  fetchAllCgsGroupMembershipsWithCookie: vi.fn(),
   fetchCgsMemberRoleWithCookie: vi.fn(),
   getCertifiedProfileCard: vi.fn(),
   supabaseRpc: vi.fn(),
   supabaseSelect: vi.fn(),
 }));
 
-vi.mock("@/app/_lib/cgs-server", () => ({ fetchCgsMemberRoleWithCookie }));
+vi.mock("@/app/_lib/cgs-server", () => ({
+  fetchAllCgsGroupMembershipsWithCookie,
+  fetchCgsMemberRoleWithCookie,
+}));
 vi.mock("@/app/account/_lib/account-route", () => ({
   accountPath: (identifier: string) => `/account/${identifier}`,
   getCertifiedProfileCard,
@@ -20,7 +30,12 @@ vi.mock("@/lib/supabase/rest", () => ({
   supabaseSelect,
 }));
 
-import { createGroupInvitation, GroupInvitationError, retryGroupInvitation } from "./cgs-invitations";
+import {
+  acceptGroupInvitation,
+  createGroupInvitation,
+  GroupInvitationError,
+  retryGroupInvitation,
+} from "./cgs-invitations";
 
 // Pin the clock inside the fixture's validity window: invitation status is
 // derived by comparing expires_at against the real clock, so without this the
@@ -53,10 +68,26 @@ const session = {
   handle: "owner.example.com",
   email: "owner@example.com",
 };
+const inviteeSession = {
+  isLoggedIn: true as const,
+  did: "did:plc:invitee",
+  handle: "invitee.example.com",
+  email: "invitee@example.com",
+};
+const acceptedRawInvitation = {
+  ...rawInvitation,
+  status: "accepted",
+  accepted_at: "2026-08-06T01:01:00.000Z",
+  accepted_by_did: inviteeSession.did,
+  accepted_by_email: inviteeSession.email,
+};
 
 beforeEach(() => {
   vi.useFakeTimers({ now: NOW, toFake: ["Date"] });
   vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.test");
+  vi.stubEnv("NEXT_PUBLIC_AUTH_BASE_URL", "https://auth.example.test");
+  vi.stubEnv("AUTH_INTERNAL_SERVICE_TOKEN", "test-internal-service-token");
+  fetchAllCgsGroupMembershipsWithCookie.mockReset();
   fetchCgsMemberRoleWithCookie.mockReset();
   getCertifiedProfileCard.mockReset();
   supabaseRpc.mockReset();
@@ -198,6 +229,209 @@ describe("createGroupInvitation", () => {
       p_inviter_url: "https://www.gainforest.app/account/owner.example.com",
       p_public_origin: "https://www.gainforest.app",
     }));
+  });
+});
+
+describe("acceptGroupInvitation", () => {
+  it("accepts a clear member-add success without an extra membership read", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(Response.json({ ok: true }));
+    vi.stubGlobal("fetch", fetchMock);
+    supabaseSelect.mockResolvedValueOnce([rawInvitation]);
+    supabaseRpc.mockResolvedValueOnce({ invitation: acceptedRawInvitation, notification: null });
+
+    await expect(acceptGroupInvitation({
+      invitationId,
+      session: inviteeSession,
+      cookie: "session=cookie",
+    })).resolves.toMatchObject({ status: "accepted", acceptedByDid: inviteeSession.did });
+
+    expect(fetchAllCgsGroupMembershipsWithCookie).not.toHaveBeenCalled();
+    expect(supabaseRpc).toHaveBeenCalledWith("notification_invitation_close", expect.objectContaining({
+      p_invitation_id: invitationId,
+      p_status: "accepted",
+      p_accepted_by_did: inviteeSession.did,
+      p_accepted_by_email: inviteeSession.email,
+    }));
+  });
+
+  it("bounds member-add and reconciles when the request aborts", async () => {
+    const controller = new AbortController();
+    const timeout = vi.spyOn(AbortSignal, "timeout").mockReturnValue(controller.signal);
+    const fetchMock = vi.fn((_url: URL, init?: RequestInit) => {
+      if (!init?.signal) return Promise.reject(new Error("missing abort signal"));
+      return new Promise<Response>((_resolve, reject) => {
+        init.signal!.addEventListener("abort", () => reject(new Error("timed out")), { once: true });
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    supabaseSelect.mockResolvedValueOnce([rawInvitation]);
+    fetchAllCgsGroupMembershipsWithCookie.mockResolvedValueOnce([
+      { groupDid: rawInvitation.repo, role: rawInvitation.role },
+    ]);
+    supabaseRpc.mockResolvedValueOnce({ invitation: acceptedRawInvitation, notification: null });
+
+    const acceptance = acceptGroupInvitation({
+      invitationId,
+      session: inviteeSession,
+      cookie: "session=cookie",
+    });
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    controller.abort();
+
+    await expect(acceptance).resolves.toMatchObject({ status: "accepted" });
+    expect(timeout).toHaveBeenCalledWith(10_000);
+    expect(fetchAllCgsGroupMembershipsWithCookie).toHaveBeenCalledWith("session=cookie");
+  });
+
+  it.each([
+    ["an upstream server response", () => Response.json({ error: "temporary" }, { status: 503 })],
+    ["a thrown member-add request", () => Promise.reject(new Error("timed out"))],
+  ])("reconciles %s when the expected membership and role are present", async (_case, addResult) => {
+    vi.stubGlobal("fetch", vi.fn().mockImplementation(addResult));
+    supabaseSelect.mockResolvedValueOnce([rawInvitation]);
+    fetchAllCgsGroupMembershipsWithCookie.mockResolvedValueOnce([
+      { groupDid: rawInvitation.repo, role: rawInvitation.role },
+    ]);
+    supabaseRpc.mockResolvedValueOnce({ invitation: acceptedRawInvitation, notification: null });
+
+    await expect(acceptGroupInvitation({
+      invitationId,
+      session: inviteeSession,
+      cookie: "session=cookie",
+    })).resolves.toMatchObject({ status: "accepted" });
+
+    expect(fetchAllCgsGroupMembershipsWithCookie).toHaveBeenCalledWith("session=cookie");
+  });
+
+  it("does not reconcile a definite member-add rejection", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ error: "forbidden" }, { status: 403 })));
+    supabaseSelect.mockResolvedValueOnce([rawInvitation]);
+
+    await expect(acceptGroupInvitation({
+      invitationId,
+      session: inviteeSession,
+      cookie: "session=cookie",
+    })).rejects.toMatchObject({
+      name: "GroupInvitationError",
+      status: 502,
+    });
+    expect(fetchAllCgsGroupMembershipsWithCookie).not.toHaveBeenCalled();
+    expect(supabaseRpc).not.toHaveBeenCalled();
+  });
+
+  it("keeps the invitation pending when an ambiguous add cannot be found", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ error: "temporary" }, { status: 503 })));
+    supabaseSelect.mockResolvedValueOnce([rawInvitation]);
+    fetchAllCgsGroupMembershipsWithCookie.mockResolvedValueOnce([]);
+
+    await expect(acceptGroupInvitation({
+      invitationId,
+      session: inviteeSession,
+      cookie: "session=cookie",
+    })).rejects.toMatchObject({
+      name: "GroupInvitationError",
+      status: 503,
+      code: "membership_outcome_unknown",
+    });
+    expect(supabaseRpc).not.toHaveBeenCalled();
+  });
+
+  it("rejects a confirmed membership with a conflicting role", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ error: "temporary" }, { status: 503 })));
+    supabaseSelect.mockResolvedValueOnce([rawInvitation]);
+    fetchAllCgsGroupMembershipsWithCookie.mockResolvedValueOnce([
+      { groupDid: rawInvitation.repo, role: "admin" },
+    ]);
+
+    await expect(acceptGroupInvitation({
+      invitationId,
+      session: inviteeSession,
+      cookie: "session=cookie",
+    })).rejects.toMatchObject({
+      name: "GroupInvitationError",
+      status: 409,
+      code: "invitation_role_conflict",
+    });
+    expect(supabaseRpc).not.toHaveBeenCalled();
+  });
+
+  it("logs redacted context when membership reconciliation is unavailable", async () => {
+    const log = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("timed out")));
+    supabaseSelect.mockResolvedValueOnce([rawInvitation]);
+    fetchAllCgsGroupMembershipsWithCookie.mockRejectedValueOnce(new Error("membership endpoint unavailable"));
+
+    await expect(acceptGroupInvitation({
+      invitationId,
+      session: inviteeSession,
+      cookie: "session=cookie",
+    })).rejects.toMatchObject({
+      name: "GroupInvitationError",
+      status: 503,
+      code: "membership_outcome_unknown",
+    });
+
+    expect(log).toHaveBeenCalledWith("[cgs-invitations] Membership reconciliation failed", {
+      invitationId,
+      repo: rawInvitation.repo,
+      reason: "Error",
+    });
+    expect(supabaseRpc).not.toHaveBeenCalled();
+  });
+
+  it("rejects when a concurrent close returns another acceptor's identity", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ ok: true })));
+    supabaseSelect.mockResolvedValueOnce([rawInvitation]);
+    supabaseRpc.mockResolvedValueOnce({
+      invitation: {
+        ...acceptedRawInvitation,
+        accepted_by_did: "did:plc:other-invitee",
+      },
+      notification: null,
+    });
+
+    await expect(acceptGroupInvitation({
+      invitationId,
+      session: inviteeSession,
+      cookie: "session=cookie",
+    })).rejects.toMatchObject({
+      name: "GroupInvitationError",
+      status: 409,
+      code: "invitation_not_pending",
+    });
+  });
+
+  it("returns an already accepted invitation for the same DID and normalized email without new work", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    supabaseSelect.mockResolvedValueOnce([{ ...acceptedRawInvitation, accepted_by_email: "INVITEE@EXAMPLE.COM" }]);
+
+    await expect(acceptGroupInvitation({
+      invitationId,
+      session: inviteeSession,
+      cookie: "session=cookie",
+    })).resolves.toMatchObject({ status: "accepted", acceptedByDid: inviteeSession.did });
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(fetchAllCgsGroupMembershipsWithCookie).not.toHaveBeenCalled();
+    expect(supabaseRpc).not.toHaveBeenCalled();
+  });
+
+  it("rejects an accepted invitation when the current person does not match", async () => {
+    vi.stubGlobal("fetch", vi.fn());
+    supabaseSelect.mockResolvedValueOnce([acceptedRawInvitation]);
+
+    await expect(acceptGroupInvitation({
+      invitationId,
+      session: { ...inviteeSession, did: "did:plc:someone-else" },
+      cookie: "session=cookie",
+    })).rejects.toMatchObject({
+      name: "GroupInvitationError",
+      status: 409,
+      code: "invitation_not_pending",
+    });
+    expect(fetchAllCgsGroupMembershipsWithCookie).not.toHaveBeenCalled();
+    expect(supabaseRpc).not.toHaveBeenCalled();
   });
 });
 
