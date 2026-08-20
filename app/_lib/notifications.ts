@@ -12,7 +12,10 @@
  *      DID (see app/_lib/mentions.ts).
  *   4. Donations — `org.hypercerts.funding.receipt` records in the facilitator
  *      repo (see app/_lib/dashboard.ts) whose recipient is the viewer: either
- *      the receipt's `to` DID, or the repo DID of the Cert it funded.
+ *      the receipt's `to` DID, or the repo DID of the Cert it funded. Unlike
+ *      likes/comments this is NOT a recent window — the full all-time receipt
+ *      sweep is used (donations are rarer and the sweep is already cached), so
+ *      a recipient's very first donation shows up no matter how old it is.
  *
  * The owner DID is embedded in every subject AT-URI, so we scan the most-recent
  * engagement records and keep the ones whose subject belongs to the viewer,
@@ -33,10 +36,10 @@
  * querying `subject.uri.in` instead.
  */
 
-import { donorMessageFromNotes } from "./donor-message";
+import { fetchReceiptsFresh, type FundingReceipt } from "./dashboard";
 import { indexerQuery } from "./indexer";
 import { mentionDidsOfFacets, type RawIndexedFacet } from "./mentions";
-import { FACILITATOR_DID, localBumicertHref, localObservationHref } from "./urls";
+import { localBumicertHref, localObservationHref } from "./urls";
 import { normaliseRef, parseAtUri, resolvePdsHost } from "./pds";
 import { parseSpeciesSuggestion } from "./species-suggestions";
 import { identificationRkeyFromTags } from "./species-identifications";
@@ -173,45 +176,9 @@ type MentionNode = {
   certifiedProfileData?: CertifiedProfileData;
 };
 
-// Donation receipts all live in the facilitator repo, so `certifiedProfileData`
-// would join to the facilitator — the donor's identity is resolved separately
-// from their PDS profile (see resolveDonorIdentities).
-const DONATIONS_QUERY = `
-  query NotificationDonations($facilitator: String!, $first: Int!) {
-    orgHypercertsFundingReceipt(
-      where: { did: { eq: $facilitator } }
-      first: $first
-      sortBy: createdAt
-      sortDirection: DESC
-    ) {
-      edges {
-        node {
-          uri createdAt occurredAt amount currency notes
-          from { __typename ... on AppCertifiedDefsDid { did } }
-          to { __typename ... on AppCertifiedDefsDid { did } }
-          for { uri }
-        }
-      }
-    }
-  }
-`;
-
-type ReceiptParty = { __typename?: string; did?: string | null } | null;
-
-type ReceiptNode = {
-  uri?: string | null;
-  createdAt?: string | null;
-  occurredAt?: string | null;
-  amount?: string | null;
-  currency?: string | null;
-  notes?: string | null;
-  from?: ReceiptParty;
-  to?: ReceiptParty;
-  for?: { uri?: string | null } | null;
-};
-
-function receiptPartyDid(party: ReceiptParty | undefined): string | null {
-  return party?.__typename === "AppCertifiedDefsDid" && party.did ? party.did : null;
+/** DID half of a receipt party ref (donors/recipients can also be bare wallets). */
+function receiptPartyDid(party: FundingReceipt["from"]): string | null {
+  return party?.type === "did" ? party.id : null;
 }
 
 // ── Subject helpers ─────────────────────────────────────────────────────────
@@ -274,7 +241,7 @@ export async function fetchNotificationsForDid(
   const limit = opts.limit ?? 30;
   const seenAt = opts.seenAt ?? null;
 
-  const [likeData, commentData, mentionData, donationData] = await Promise.all([
+  const [likeData, commentData, mentionData, receipts] = await Promise.all([
     indexerQuery<{ appGainforestFeedLike?: { edges?: Array<{ node?: LikeNode | null } | null> | null } | null }>(
       LIKES_QUERY,
       { first: SCAN_LIMIT },
@@ -287,9 +254,10 @@ export async function fetchNotificationsForDid(
       MENTIONS_QUERY,
       { first: SCAN_LIMIT },
     ).catch(() => null),
-    indexerQuery<{
-      orgHypercertsFundingReceipt?: { edges?: Array<{ node?: ReceiptNode | null } | null> | null } | null;
-    }>(DONATIONS_QUERY, { facilitator: FACILITATOR_DID, first: SCAN_LIMIT }).catch(() => null),
+    // All-time sweep, not a recent window — see the module doc. Shares the
+    // 30s-fresh cache with the account "Donations received" tab, so this adds
+    // no indexer load in steady state.
+    fetchReceiptsFresh().catch(() => []),
   ]);
 
   const items: NotificationItem[] = [];
@@ -371,32 +339,28 @@ export async function fetchNotificationsForDid(
     });
   }
 
-  for (const edge of donationData?.orgHypercertsFundingReceipt?.edges ?? []) {
-    const node = edge?.node;
-    if (!node?.uri) continue;
-    const donorDid = receiptPartyDid(node.from);
-    const recipientDid = receiptPartyDid(node.to);
-    const bumicertUri = node.for?.uri ?? null;
-    const bumicertParts = bumicertUri ? parseAtUri(bumicertUri) : null;
+  for (const receipt of receipts) {
+    const donorDid = receiptPartyDid(receipt.from);
+    const recipientDid = receiptPartyDid(receipt.to ?? null);
+    const bumicertParts = receipt.bumicertUri ? parseAtUri(receipt.bumicertUri) : null;
     // Yours when the receipt names you, or when it funded one of your Certs.
-    if (recipientDid !== did && bumicertParts?.did !== did) continue;
+    if (recipientDid !== did && receipt.orgDid !== did) continue;
     if (donorDid === did) continue; // your own donation
-    const amount = Number.parseFloat(node.amount ?? "");
-    if (!Number.isFinite(amount) || amount <= 0) continue;
+    if (!Number.isFinite(receipt.amount) || receipt.amount <= 0) continue;
     items.push({
-      id: node.uri,
+      id: receipt.uri,
       kind: "donation",
-      createdAt: node.createdAt || node.occurredAt || new Date(0).toISOString(),
+      createdAt: receipt.createdAt || receipt.occurredAt || new Date(0).toISOString(),
       // Anonymous / wallet-only donors have no DID; the row falls back to
       // "Someone" with the generic avatar rather than being dropped.
       actorDid: donorDid ?? "",
       actorName: null,
       actorAvatarRef: null,
-      subjectUri: bumicertUri ?? node.uri,
+      subjectUri: receipt.bumicertUri ?? receipt.uri,
       subjectKind: bumicertParts ? "project" : "record",
       subjectHref: bumicertParts ? localBumicertHref(bumicertParts.did, bumicertParts.rkey) : null,
-      text: donorMessageFromNotes(node.notes),
-      donation: { amount, currency: (node.currency || "USD").toUpperCase() },
+      text: receipt.message,
+      donation: { amount: receipt.amount, currency: receipt.currency },
     });
   }
 
