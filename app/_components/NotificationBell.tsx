@@ -104,7 +104,7 @@ export function NotificationBell({ session }: { session: AuthSession | null }) {
               <NotificationRow
                 key={item.id}
                 item={item}
-                isUnread={!seenSnapshot || item.createdAt > seenSnapshot}
+                isUnread={!seenSnapshot || item.notifiedAt > seenSnapshot}
                 onNavigate={() => setOpen(false)}
               />
             ))}

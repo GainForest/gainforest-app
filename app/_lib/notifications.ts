@@ -50,6 +50,12 @@ export const NOTIFICATION_SEEN_COLLECTION = "app.gainforest.notification.seen";
 /** Recent likes/comments scanned per source before client-side filtering. */
 const SCAN_LIMIT = 500;
 
+/** When donation notifications shipped. Donations recorded before this moment
+ *  could never have been seen in the bell, so they count as arriving "now":
+ *  anyone who hasn't opened the panel since gets the unread badge for their
+ *  backfilled donation history, however old the receipts are. */
+const DONATION_NOTIFICATIONS_SINCE = "2026-08-20T11:00:00.000Z";
+
 type NotificationKind = "like" | "comment" | "mention" | "identification" | "donation";
 
 /** Plain-language category of the liked/commented record, for display + links. */
@@ -60,6 +66,11 @@ export type NotificationItem = {
   id: string;
   kind: NotificationKind;
   createdAt: string;
+  /** When this item first became visible in the bell. Usually `createdAt`, but
+   *  a donation older than the donation-notifications launch "arrived" at
+   *  launch — the viewer had no way to see it before then, so ordering and
+   *  unread state use this instead of the (possibly years-old) `createdAt`. */
+  notifiedAt: string;
   /** The account that liked/commented. */
   actorDid: string;
   actorName: string | null;
@@ -277,6 +288,7 @@ export async function fetchNotificationsForDid(
       id: node.uri,
       kind: "like",
       createdAt: node.createdAt || new Date(0).toISOString(),
+      notifiedAt: node.createdAt || new Date(0).toISOString(),
       actorDid: node.did,
       actorName: actorName(node.certifiedProfileData),
       actorAvatarRef: actorAvatarRef(node.certifiedProfileData),
@@ -302,6 +314,7 @@ export async function fetchNotificationsForDid(
       id: node.uri,
       kind: isStructuredIdentification || identification ? "identification" : "comment",
       createdAt: node.createdAt || new Date(0).toISOString(),
+      notifiedAt: node.createdAt || new Date(0).toISOString(),
       actorDid: node.did,
       actorName: actorName(node.certifiedProfileData),
       actorAvatarRef: actorAvatarRef(node.certifiedProfileData),
@@ -327,6 +340,7 @@ export async function fetchNotificationsForDid(
       id: `${node.uri}#mention`,
       kind: "mention",
       createdAt: node.createdAt || new Date(0).toISOString(),
+      notifiedAt: node.createdAt || new Date(0).toISOString(),
       actorDid: node.did,
       actorName: actorName(node.certifiedProfileData),
       actorAvatarRef: actorAvatarRef(node.certifiedProfileData),
@@ -347,10 +361,12 @@ export async function fetchNotificationsForDid(
     if (recipientDid !== did && receipt.orgDid !== did) continue;
     if (donorDid === did) continue; // your own donation
     if (!Number.isFinite(receipt.amount) || receipt.amount <= 0) continue;
+    const receiptCreatedAt = receipt.createdAt || receipt.occurredAt || new Date(0).toISOString();
     items.push({
       id: receipt.uri,
       kind: "donation",
-      createdAt: receipt.createdAt || receipt.occurredAt || new Date(0).toISOString(),
+      createdAt: receiptCreatedAt,
+      notifiedAt: receiptCreatedAt > DONATION_NOTIFICATIONS_SINCE ? receiptCreatedAt : DONATION_NOTIFICATIONS_SINCE,
       // Anonymous / wallet-only donors have no DID; the row falls back to
       // "Someone" with the generic avatar rather than being dropped.
       actorDid: donorDid ?? "",
@@ -364,10 +380,10 @@ export async function fetchNotificationsForDid(
     });
   }
 
-  items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  items.sort((a, b) => b.notifiedAt.localeCompare(a.notifiedAt));
 
   const unreadCount = seenAt
-    ? items.filter((item) => item.createdAt > seenAt).length
+    ? items.filter((item) => item.notifiedAt > seenAt).length
     : items.length;
 
   const visible = items.slice(0, limit);
