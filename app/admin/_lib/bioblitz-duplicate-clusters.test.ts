@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   clusterDuplicateCandidates,
+  planExactDuplicateMerges,
   speciesKey,
   type DuplicateCandidateRecord,
 } from "./bioblitz-duplicate-clusters";
@@ -169,5 +170,61 @@ describe("clusterDuplicateCandidates", () => {
     );
     const clusters = clusterDuplicateCandidates([...small, ...big]);
     expect(clusters.map((cluster) => cluster.records.length)).toEqual([3, 2]);
+  });
+});
+
+describe("planExactDuplicateMerges", () => {
+  it("plans one merge per identical-blob group and picks the best canonical", () => {
+    const weak = candidate({ imageCid: "cid-same", points: 2, createdAt: at(0) });
+    const strong = candidate({ imageCid: "cid-same", points: 2.5, createdAt: at(5) });
+    const later = candidate({ imageCid: "cid-same", points: 2.5, createdAt: at(9) });
+    const unrelated = candidate({ imageCid: "cid-other", createdAt: at(1) });
+    const plans = planExactDuplicateMerges([weak, strong, later, unrelated]);
+    expect(plans).toEqual([
+      {
+        did: DID,
+        canonicalUri: strong.uri,
+        duplicateUris: [weak.uri, later.uri].sort(),
+      },
+    ]);
+  });
+
+  it("never groups identical blobs across collectors", () => {
+    const mine = candidate({ imageCid: "cid-same", createdAt: at(0) });
+    const theirs = candidate({ did: OTHER_DID, imageCid: "cid-same", createdAt: at(1) });
+    expect(planExactDuplicateMerges([mine, theirs])).toEqual([]);
+  });
+
+  it("skips records without an image blob", () => {
+    const a = candidate({ imageCid: null, createdAt: at(0) });
+    const b = candidate({ imageCid: null, createdAt: at(1) });
+    expect(planExactDuplicateMerges([a, b])).toEqual([]);
+  });
+
+  it("is idempotent: fully handled groups produce no plan entry", () => {
+    const keep = candidate({ imageCid: "cid-same", createdAt: at(0) });
+    const gone = candidate({ imageCid: "cid-same", createdAt: at(1) });
+    expect(planExactDuplicateMerges([keep, gone], new Set([gone.uri]))).toEqual([]);
+  });
+
+  it("re-plans when new identical uploads arrive after a merge", () => {
+    const keep = candidate({ imageCid: "cid-same", points: 2.5, createdAt: at(0) });
+    const merged = candidate({ imageCid: "cid-same", points: 2, createdAt: at(1) });
+    const fresh = candidate({ imageCid: "cid-same", points: 2, createdAt: at(2) });
+    const plans = planExactDuplicateMerges([keep, merged, fresh], new Set([merged.uri]));
+    expect(plans).toEqual([
+      { did: DID, canonicalUri: keep.uri, duplicateUris: [fresh.uri] },
+    ]);
+  });
+
+  it("orders plans deterministically", () => {
+    const a1 = candidate({ imageCid: "cid-a", createdAt: at(0) });
+    const a2 = candidate({ imageCid: "cid-a", createdAt: at(1) });
+    const b1 = candidate({ imageCid: "cid-b", createdAt: at(2) });
+    const b2 = candidate({ imageCid: "cid-b", createdAt: at(3) });
+    const plans = planExactDuplicateMerges([b1, b2, a1, a2]);
+    expect(plans.map((plan) => plan.canonicalUri)).toEqual(
+      [a1.uri, b1.uri].sort((x, y) => x.localeCompare(y)),
+    );
   });
 });

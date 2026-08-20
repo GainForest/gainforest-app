@@ -1591,8 +1591,19 @@
         "finalized": "Esta ronda está cerrada, así que las fusiones no pueden cambiar.",
         "merge": "No se pudo guardar la fusión. Inténtalo de nuevo.",
         "undo": "No se pudo deshacer la fusión. Inténtalo de nuevo.",
-        "load": "No se pudo analizar esta ronda en busca de duplicados. Inténtalo de nuevo."
-      }
+        "load": "No se pudo analizar esta ronda en busca de duplicados. Inténtalo de nuevo.",
+        "autoMergePartial": "Algunos grupos idénticos no se pudieron fusionar. Inténtalo de nuevo."
+      },
+      "autoMerge": "Fusionar automáticamente {count, plural, one {# grupo idéntico} other {# grupos idénticos}}",
+      "filter": {
+        "aria": "Filtrar grupos de duplicados",
+        "all": "Todos",
+        "unmerged": "Sin fusionar",
+        "merged": "Fusionados"
+      },
+      "emptyFiltered": "Ningún grupo de duplicados coincide con este filtro.",
+      "keepAria": "Mantener esta observación contando",
+      "includeAria": "Incluir en la fusión"
     }
   },
   "adminBlockedDomains": {

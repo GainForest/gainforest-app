@@ -264,3 +264,67 @@ export function clusterDuplicateCandidates(
 function roundHalf(value: number): number {
   return Math.round(value * 2) / 2;
 }
+
+// ── One-click auto-merge of exact duplicates ───────────────────────────────
+//
+// Identical image blobs are certain duplicates — no human judgement needed —
+// so the dashboard offers a bulk action that merges every such group at once.
+// The plan deliberately covers *only* the identical-image signal: bursts and
+// scanner matches stay behind the per-cluster review buttons.
+
+export type ExactDuplicateMergePlan = {
+  /** The collector every observation in this merge belongs to. */
+  did: string;
+  /** The observation that keeps counting. */
+  canonicalUri: string;
+  /** The exact-duplicate observations that stop counting. */
+  duplicateUris: string[];
+};
+
+/**
+ * Plan one merge per group of observations that share the exact same image
+ * blob (per collector). Observations already merged away are left alone; a
+ * group whose duplicates are all handled produces no plan entry, which makes
+ * the bulk action idempotent.
+ */
+export function planExactDuplicateMerges(
+  records: readonly DuplicateCandidateRecord[],
+  alreadyMergedAway: ReadonlySet<string> = new Set<string>(),
+): ExactDuplicateMergePlan[] {
+  const byUri = new Map<string, DuplicateCandidateRecord>();
+  for (const record of records) {
+    if (!byUri.has(record.uri)) byUri.set(record.uri, record);
+  }
+  const groups = new Map<string, DuplicateCandidateRecord[]>();
+  for (const record of byUri.values()) {
+    if (!record.imageCid) continue;
+    const key = `${record.did}|${record.imageCid}`;
+    const group = groups.get(key) ?? [];
+    group.push(record);
+    groups.set(key, group);
+  }
+
+  const plans: ExactDuplicateMergePlan[] = [];
+  for (const group of groups.values()) {
+    if (group.length < 2) continue;
+    const countable = group.filter((record) => !alreadyMergedAway.has(record.uri));
+    // Zero or one member still counting means the group is already resolved.
+    if (countable.length < 2) continue;
+    const canonical = [...countable].sort(
+      (a, b) =>
+        b.points - a.points || createdAtMs(a) - createdAtMs(b) || a.uri.localeCompare(b.uri),
+    )[0]!;
+    plans.push({
+      did: canonical.did,
+      canonicalUri: canonical.uri,
+      duplicateUris: countable
+        .filter((record) => record.uri !== canonical.uri)
+        .map((record) => record.uri)
+        .sort(),
+    });
+  }
+
+  return plans.sort(
+    (a, b) => a.did.localeCompare(b.did) || a.canonicalUri.localeCompare(b.canonicalUri),
+  );
+}

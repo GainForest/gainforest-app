@@ -1591,8 +1591,19 @@
         "finalized": "Esta rodada está encerrada, então as mesclagens não podem mudar.",
         "merge": "A mesclagem não pôde ser salva. Tente novamente.",
         "undo": "A mesclagem não pôde ser desfeita. Tente novamente.",
-        "load": "Não foi possível analisar esta rodada em busca de duplicados. Tente novamente."
-      }
+        "load": "Não foi possível analisar esta rodada em busca de duplicados. Tente novamente.",
+        "autoMergePartial": "Alguns grupos idênticos não puderam ser mesclados. Tente novamente."
+      },
+      "autoMerge": "Mesclar automaticamente {count, plural, one {# grupo idêntico} other {# grupos idênticos}}",
+      "filter": {
+        "aria": "Filtrar grupos de duplicados",
+        "all": "Todos",
+        "unmerged": "Não mesclados",
+        "merged": "Mesclados"
+      },
+      "emptyFiltered": "Nenhum grupo de duplicados corresponde a este filtro.",
+      "keepAria": "Manter esta observação contando",
+      "includeAria": "Incluir na mesclagem"
     }
   },
   "adminBlockedDomains": {

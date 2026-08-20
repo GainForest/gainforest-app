@@ -612,7 +612,8 @@
         "labeled": "{count, plural, one {# especie nombrada} other {# especies nombradas}} × 0,5",
         "ineligible": "{count, plural, one {# foto no calificó} other {# fotos no calificaron}}",
         "total": "Puntos totales",
-        "profile": "Abrir perfil"
+        "profile": "Abrir perfil",
+        "merged": "{count, plural, one {# foto duplicada fusionada} other {# fotos duplicadas fusionadas}} en {groups, plural, one {# observación} other {# observaciones}}"
       }
     },
     "winners": {

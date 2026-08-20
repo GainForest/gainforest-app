@@ -1591,8 +1591,19 @@
         "finalized": "This round is closed, so merges can't change.",
         "merge": "The merge couldn't be saved. Please try again.",
         "undo": "The merge couldn't be undone. Please try again.",
-        "load": "Couldn't scan this round for duplicates. Please try again."
-      }
+        "load": "Couldn't scan this round for duplicates. Please try again.",
+        "autoMergePartial": "Some identical groups couldn't be merged. Please try again."
+      },
+      "autoMerge": "{count, plural, one {Auto-merge # identical group} other {Auto-merge # identical groups}}",
+      "filter": {
+        "aria": "Filter duplicate groups",
+        "all": "All",
+        "unmerged": "Not merged",
+        "merged": "Merged"
+      },
+      "emptyFiltered": "No duplicate groups match this filter.",
+      "keepAria": "Keep this observation counting",
+      "includeAria": "Include in the merge"
     }
   },
   "adminBlockedDomains": {

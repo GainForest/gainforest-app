@@ -612,7 +612,8 @@
         "labeled": "{count, plural, one {spishi # iliyotajwa} other {spishi # zilizotajwa}} × 0.5",
         "ineligible": "{count, plural, one {picha # haikufuzu} other {picha # hazikufuzu}}",
         "total": "Jumla ya pointi",
-        "profile": "Fungua wasifu"
+        "profile": "Fungua wasifu",
+        "merged": "Picha nakala {count, number} zimeunganishwa kuwa uchunguzi {groups, number}"
       }
     },
     "winners": {

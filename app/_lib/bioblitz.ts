@@ -46,6 +46,7 @@ import {
   isAccountExcludedFromBioblitzRound,
 } from "./bioblitz-exclusions";
 import {
+  effectiveBioblitzMergeRecords,
   fetchBioblitzMerges,
   fetchBioblitzMergesStrict,
   indexBioblitzMerges,
@@ -332,6 +333,11 @@ export type RoundCollectorBreakdown = {
   labeled: number;
   /** This collector's image observations that did not qualify. */
   ineligible: number;
+  /** Eligible photos a steward merged as duplicates — still public, but no
+   *  longer counted or scored. Shown so a collector understands their tally. */
+  merged: number;
+  /** How many merged observations those duplicate photos collapsed into. */
+  mergedGroups: number;
 };
 
 export type RoundCollector = {
@@ -485,6 +491,13 @@ export async function fetchRoundCollectors(
   ]);
   const exclusions = indexBioblitzExclusions(exclusionRecords);
   const merges = indexBioblitzMerges(mergeRecords);
+  // Per-collector merge summary for the board's transparency breakdown.
+  const mergedGroupsByDid = new Map<string, number>();
+  for (const merge of effectiveBioblitzMergeRecords(mergeRecords)) {
+    if (scope === "round" && merge.roundId !== round.id) continue;
+    mergedGroupsByDid.set(merge.subjectDid, (mergedGroupsByDid.get(merge.subjectDid) ?? 0) + 1);
+  }
+  const mergedAwayByDid = new Map<string, number>();
 
   // Ended and early rounds keep their original "most observations" ranking;
   // the all-time view also stays count-based because it spans both eras.
@@ -576,8 +589,12 @@ export async function fetchRoundCollectors(
 
       // A merged duplicate stops counting everywhere — including the admin
       // roster's raw tally — so a steward's merge is one authoritative points
-      // adjustment rather than a view-dependent one.
-      if (mergedAway) continue;
+      // adjustment rather than a view-dependent one. The tally is kept so the
+      // public breakdown can explain the adjustment to the collector.
+      if (mergedAway) {
+        mergedAwayByDid.set(did, (mergedAwayByDid.get(did) ?? 0) + 1);
+        continue;
+      }
 
       const labeled = hasBioblitzSpeciesLabel(description);
       const points = bioblitzObservationPoints(description);
@@ -599,6 +616,14 @@ export async function fetchRoundCollectors(
     if (entry) entry.breakdown.ineligible = ineligible;
     const unfilteredEntry = unfilteredTally?.get(did);
     if (unfilteredEntry) unfilteredEntry.breakdown.ineligible = ineligible;
+  }
+  for (const [did, merged] of mergedAwayByDid) {
+    const mergedGroups = mergedGroupsByDid.get(did) ?? 0;
+    for (const entry of [tally.get(did), unfilteredTally?.get(did)]) {
+      if (!entry) continue;
+      entry.breakdown.merged = merged;
+      entry.breakdown.mergedGroups = mergedGroups;
+    }
   }
 
   const collectors = sortRoundCollectors(tally, ranking);
@@ -642,6 +667,8 @@ function incrementRoundCollector(
       plant: category === "plant" ? 1 : 0,
       labeled: labeled ? 1 : 0,
       ineligible: 0,
+      merged: 0,
+      mergedGroups: 0,
     },
     displayName: profileName(node),
     avatarRef: profileAvatarRef(node),

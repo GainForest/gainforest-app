@@ -612,7 +612,8 @@
         "labeled": "{count, plural, one {# named species} other {# named species}} × 0.5",
         "ineligible": "{count, plural, one {# photo didn't qualify} other {# photos didn't qualify}}",
         "total": "Total points",
-        "profile": "Open profile"
+        "profile": "Open profile",
+        "merged": "{count, plural, one {# duplicate photo} other {# duplicate photos}} merged into {groups, plural, one {# observation} other {# observations}}"
       }
     },
     "winners": {

@@ -612,7 +612,8 @@
         "labeled": "{count, plural, other {# spesies dinamai}} × 0,5",
         "ineligible": "{count, plural, other {# foto tidak memenuhi syarat}}",
         "total": "Total poin",
-        "profile": "Buka profil"
+        "profile": "Buka profil",
+        "merged": "{count, number} foto duplikat digabung menjadi {groups, number} pengamatan"
       }
     },
     "winners": {

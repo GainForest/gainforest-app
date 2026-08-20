@@ -1439,6 +1439,17 @@ function CollectorRow({
                 <dd className="tabular-nums text-muted-foreground">+0</dd>
               </div>
             ) : null}
+            {breakdown.merged > 0 ? (
+              <div className="flex items-center justify-between gap-2">
+                <dt className="text-muted-foreground">
+                  {t("breakdown.merged", {
+                    count: breakdown.merged,
+                    groups: breakdown.mergedGroups,
+                  })}
+                </dt>
+                <dd className="tabular-nums text-muted-foreground">+0</dd>
+              </div>
+            ) : null}
             <div className="flex items-center justify-between gap-2 border-t border-border/60 pt-1">
               <dt className="font-semibold text-foreground">
                 {t("breakdown.total")}

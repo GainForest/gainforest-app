@@ -1591,8 +1591,19 @@
         "finalized": "Ronde ini sudah ditutup, jadi penggabungan tidak dapat diubah.",
         "merge": "Penggabungan tidak dapat disimpan. Silakan coba lagi.",
         "undo": "Penggabungan tidak dapat dibatalkan. Silakan coba lagi.",
-        "load": "Tidak dapat memindai ronde ini untuk duplikat. Silakan coba lagi."
-      }
+        "load": "Tidak dapat memindai ronde ini untuk duplikat. Silakan coba lagi.",
+        "autoMergePartial": "Beberapa kelompok identik tidak dapat digabungkan. Silakan coba lagi."
+      },
+      "autoMerge": "Gabung otomatis {count, number} kelompok identik",
+      "filter": {
+        "aria": "Saring kelompok duplikat",
+        "all": "Semua",
+        "unmerged": "Belum digabung",
+        "merged": "Digabung"
+      },
+      "emptyFiltered": "Tidak ada kelompok duplikat yang cocok dengan filter ini.",
+      "keepAria": "Biarkan pengamatan ini tetap dihitung",
+      "includeAria": "Sertakan dalam penggabungan"
     }
   },
   "adminBlockedDomains": {

@@ -1591,8 +1591,19 @@
         "finalized": "Raundi hii imefungwa, kwa hivyo miunganisho haiwezi kubadilika.",
         "merge": "Muunganisho haukuweza kuhifadhiwa. Tafadhali jaribu tena.",
         "undo": "Muunganisho haukuweza kutenguliwa. Tafadhali jaribu tena.",
-        "load": "Haikuweza kuchanganua raundi hii kwa nakala. Tafadhali jaribu tena."
-      }
+        "load": "Haikuweza kuchanganua raundi hii kwa nakala. Tafadhali jaribu tena.",
+        "autoMergePartial": "Baadhi ya vikundi vinavyofanana havikuweza kuunganishwa. Tafadhali jaribu tena."
+      },
+      "autoMerge": "Unganisha kiotomatiki vikundi {count, number} vinavyofanana",
+      "filter": {
+        "aria": "Chuja vikundi vya nakala",
+        "all": "Vyote",
+        "unmerged": "Havijaunganishwa",
+        "merged": "Vimeunganishwa"
+      },
+      "emptyFiltered": "Hakuna vikundi vya nakala vinavyolingana na kichujio hiki.",
+      "keepAria": "Acha uchunguzi huu ukihesabiwa",
+      "includeAria": "Jumuisha kwenye muunganisho"
     }
   },
   "adminBlockedDomains": {

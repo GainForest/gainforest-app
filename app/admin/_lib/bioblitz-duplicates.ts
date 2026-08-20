@@ -23,8 +23,10 @@ import {
 import { normaliseRef, resolveBlobUrl } from "@/app/_lib/pds";
 import {
   clusterDuplicateCandidates,
+  planExactDuplicateMerges,
   type BioblitzDuplicateSignal,
   type DuplicateCandidateRecord,
+  type ExactDuplicateMergePlan,
 } from "./bioblitz-duplicate-clusters";
 import { resolveBioblitzAdminRound } from "./bioblitz-dashboard";
 
@@ -48,6 +50,8 @@ export type BioblitzDuplicateObservationView = {
   points: number;
   /** True for the observation that keeps counting after a merge. */
   canonical: boolean;
+  /** True when an active merge already stops this observation from counting. */
+  mergedAway: boolean;
 };
 
 export type BioblitzDuplicateClusterView = {
@@ -75,6 +79,8 @@ export type BioblitzDuplicateReport = {
   clusters: BioblitzDuplicateClusterView[];
   /** Points the round board currently over-counts across unmerged clusters. */
   suspectedExtraPoints: number;
+  /** Identical-image groups the one-click auto-merge would merge right now. */
+  autoMergeableGroups: number;
 };
 
 // ── Round occurrence walk ───────────────────────────────────────────────────
@@ -271,15 +277,22 @@ function activeMergeForCluster(
   );
 }
 
-/**
- * Build the automatic duplicate report for one round: every registered
- * collector's observations, clustered by the metadata heuristics and the
- * visual scanner's published warnings, joined with the current merge state.
- */
-export async function loadBioblitzDuplicateReport(
+/** Everything both the report and the auto-merge plan need for one round. */
+type RoundDuplicateContext = {
+  roundId: number;
+  registrantByDid: Map<string, { displayName: string | null; avatarUrl: string | null }>;
+  eligibleCandidates: CandidateWithDescription[];
+  scannerPairs: [string, string][];
+  /** Current active merges (all rounds). */
+  activeMerges: ReturnType<typeof effectiveBioblitzMergeRecords>;
+  /** URIs an active merge already stops from counting, for this round. */
+  roundMergedAway: Set<string>;
+};
+
+async function loadRoundDuplicateContext(
   roundId: number,
   signal?: AbortSignal,
-): Promise<BioblitzDuplicateReport> {
+): Promise<RoundDuplicateContext> {
   const round = resolveBioblitzAdminRound(roundId);
   const registrants = await fetchBioblitzRoundRegistrants(round, signal);
   const registrantByDid = new Map(registrants.map((registrant) => [registrant.did, registrant]));
@@ -290,21 +303,45 @@ export async function loadBioblitzDuplicateReport(
     fetchBioblitzMergeRecords(GAINFOREST_MODERATION_REPO_DID, signal),
   ]);
   const activeMerges = effectiveBioblitzMergeRecords(mergeRecords);
+  const roundMergedAway = new Set(
+    activeMerges
+      .filter((merge) => merge.roundId === round.id)
+      .flatMap((merge) => merge.duplicateUris),
+  );
 
-  // Only observations that can earn points are worth clustering; ineligible
-  // photos never contribute to the board in the first place.
-  const eligibleCandidates = candidates.filter((candidate) => candidate.eligible);
+  return {
+    roundId: round.id,
+    registrantByDid,
+    // Only observations that can earn points are worth clustering; ineligible
+    // photos never contribute to the board in the first place.
+    eligibleCandidates: candidates.filter((candidate) => candidate.eligible),
+    scannerPairs,
+    activeMerges,
+    roundMergedAway,
+  };
+}
+
+/**
+ * Build the automatic duplicate report for one round: every registered
+ * collector's observations, clustered by the metadata heuristics and the
+ * visual scanner's published warnings, joined with the current merge state.
+ */
+export async function loadBioblitzDuplicateReport(
+  roundId: number,
+  signal?: AbortSignal,
+): Promise<BioblitzDuplicateReport> {
+  const { roundId: resolvedRoundId, registrantByDid, eligibleCandidates, scannerPairs, activeMerges, roundMergedAway } =
+    await loadRoundDuplicateContext(roundId, signal);
   const clusters = clusterDuplicateCandidates(eligibleCandidates, scannerPairs);
 
   const views: BioblitzDuplicateClusterView[] = [];
   let suspectedExtraPoints = 0;
   for (const cluster of clusters) {
     const memberUris = new Set(cluster.records.map((record) => record.uri));
-    const merge = activeMergeForCluster(activeMerges, round.id, memberUris);
-    const mergedAway = new Set(merge?.duplicateUris ?? []);
+    const merge = activeMergeForCluster(activeMerges, resolvedRoundId, memberUris);
     const canonicalUri = merge?.canonicalUri ?? cluster.canonicalUri;
     const hasUnmergedMembers = cluster.records.some(
-      (record) => record.uri !== canonicalUri && !mergedAway.has(record.uri),
+      (record) => record.uri !== canonicalUri && !roundMergedAway.has(record.uri),
     );
     if (!merge) suspectedExtraPoints += cluster.pointsBefore - cluster.pointsAfter;
 
@@ -325,6 +362,7 @@ export async function loadBioblitzDuplicateReport(
         vernacularName: record.vernacularName,
         points: record.points,
         canonical: record.uri === canonicalUri,
+        mergedAway: roundMergedAway.has(record.uri),
       })),
       canonicalUri,
       pointsBefore: cluster.pointsBefore,
@@ -339,10 +377,32 @@ export async function loadBioblitzDuplicateReport(
   await resolveClusterImages(views, eligibleCandidates, signal);
 
   return {
-    roundId: round.id,
+    roundId: resolvedRoundId,
     scannedObservations: eligibleCandidates.length,
     clusters: views,
     suspectedExtraPoints: Math.round(suspectedExtraPoints * 2) / 2,
+    autoMergeableGroups: planExactDuplicateMerges(eligibleCandidates, roundMergedAway).length,
+  };
+}
+
+export type BioblitzAutoMergePlan = {
+  roundId: number;
+  entries: ExactDuplicateMergePlan[];
+};
+
+/**
+ * The merges the one-click "auto-merge identical files" action would perform
+ * right now: one merge per group of same-collector observations that share
+ * the exact same image blob and are not already handled by an active merge.
+ */
+export async function loadBioblitzAutoMergePlan(
+  roundId: number,
+  signal?: AbortSignal,
+): Promise<BioblitzAutoMergePlan> {
+  const context = await loadRoundDuplicateContext(roundId, signal);
+  return {
+    roundId: context.roundId,
+    entries: planExactDuplicateMerges(context.eligibleCandidates, context.roundMergedAway),
   };
 }
 
