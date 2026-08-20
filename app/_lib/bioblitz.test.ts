@@ -1,9 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   BIOBLITZ_LATE_UPLOAD_GRACE_MS,
   BIOBLITZ_POINTS_FROM_ROUND,
   bioblitzPublishTimeMs,
   bioblitzRoundUsesPoints,
+  fetchBioblitzRoundRegistrants,
   frozenWinnersFor,
   isWithinRoundUploadWindow,
   type BioblitzRound,
@@ -121,5 +122,74 @@ describe("frozenWinnersFor", () => {
     expect(frozen.mostObservations).toBeUndefined();
     expect(frozen.bestPicture).toBeUndefined();
     expect(frozenWinnersFor(ROUND, null).mostObservations).toBeUndefined();
+  });
+});
+
+describe("fetchBioblitzRoundRegistrants", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  function stubIndexerResponse(body: unknown, status = 200) {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response(JSON.stringify(body), { status })),
+    );
+  }
+
+  const node = (did: string, displayName: string | null = null) => ({
+    node: {
+      did,
+      createdAt: "2026-07-09T21:18:10.607Z",
+      certifiedProfileData: { displayName, avatar: null },
+    },
+  });
+
+  it("keeps the full roster when the indexer only failed to decorate one row", async () => {
+    // Mirrors the live round-2 payload: one registrant's avatar blob ref is
+    // malformed, so the indexer nulls the avatar and reports a partial error
+    // while every registrant row is still present.
+    stubIndexerResponse(
+      {
+        errors: [{ message: 'blob.ref expected ref to be a CID string or {"$link": string} object' }],
+        data: {
+          appGainforestFeedPost: {
+            pageInfo: { hasNextPage: false, endCursor: null },
+            edges: [node("did:plc:aaa", "mena"), node("did:plc:bbb", "Luah"), node("did:plc:ccc", "Satyam2")],
+          },
+        },
+      },
+      // Hyperindex reports the partial serialization failure as HTTP 400.
+      400,
+    );
+
+    const registrants = await fetchBioblitzRoundRegistrants(ROUND);
+    expect(registrants.map((registrant) => registrant.did)).toEqual([
+      "did:plc:aaa",
+      "did:plc:bbb",
+      "did:plc:ccc",
+    ]);
+  });
+
+  it("still fails when a whole registrant row was dropped", async () => {
+    stubIndexerResponse({
+      errors: [{ message: "some row-level failure" }],
+      data: {
+        appGainforestFeedPost: {
+          pageInfo: { hasNextPage: false, endCursor: null },
+          edges: [node("did:plc:aaa"), { node: null }],
+        },
+      },
+    });
+
+    await expect(fetchBioblitzRoundRegistrants(ROUND)).rejects.toThrow(
+      "Could not load BioBlitz registrations.",
+    );
+  });
+
+  it("still fails when the indexer returns errors with no data at all", async () => {
+    stubIndexerResponse({ errors: [{ message: "indexer down" }], data: null });
+
+    await expect(fetchBioblitzRoundRegistrants(ROUND)).rejects.toThrow("indexer down");
   });
 });

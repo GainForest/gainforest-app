@@ -26,7 +26,6 @@ import {
   fetchHiddenRecordUris,
   fetchPublicHiddenAccountDids,
   indexerQuery,
-  indexerQueryStrict,
   walkOccurrences,
   type OccurrenceRecord,
 } from "./indexer";
@@ -1086,7 +1085,12 @@ async function fetchBioblitzRegistrantsForTag(
   let after: string | null = null;
 
   for (let page = 0; page < MAX_BIOBLITZ_REGISTRANT_PAGES; page += 1) {
-    const data: BioblitzRegistrantsResponse | null = await indexerQueryStrict<BioblitzRegistrantsResponse>(
+    // A lenient read: the indexer occasionally fails to serialize one optional
+    // decoration (e.g. a malformed avatar blob ref on one profile) and reports
+    // it as a partial GraphQL error while every row is still present. Rejecting
+    // the whole page for that made an entire round unviewable. Structural
+    // integrity is enforced below instead: a nulled-out row still fails hard.
+    const data: BioblitzRegistrantsResponse | null = await indexerQuery<BioblitzRegistrantsResponse>(
       REGISTRANTS_QUERY,
       { first: 100, after, tag },
       signal,
@@ -1094,7 +1098,12 @@ async function fetchBioblitzRegistrantsForTag(
     const connection: BioblitzRegistrantsResponse["appGainforestFeedPost"] = data?.appGainforestFeedPost;
     if (!connection) throw new Error("Could not load BioBlitz registrations.");
 
-    nodes.push(...((connection.edges ?? []).flatMap((edge: { node?: RawRegistrantNode | null } | null) => (edge?.node ? [edge.node] : []))));
+    for (const edge of connection.edges ?? []) {
+      // A missing node (or one without its account) means the indexer dropped a
+      // whole row — an incomplete roster, so fail rather than under-report.
+      if (!edge?.node?.did?.trim()) throw new Error("Could not load BioBlitz registrations.");
+      nodes.push(edge.node);
+    }
     if (!connection.pageInfo?.hasNextPage) break;
     const nextCursor: string | null = connection.pageInfo.endCursor ?? null;
     if (!nextCursor || seenCursors.has(nextCursor)) {
