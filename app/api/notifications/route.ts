@@ -12,8 +12,9 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/notifications?limit=<n>
  *
- * Returns the signed-in viewer's notifications (likes + comments other accounts
- * made on the viewer's records), newest first, plus the unread count and the
+ * Returns the signed-in viewer's notifications (likes, comments, and mentions
+ * from other accounts, plus donations the viewer received), newest first, with
+ * the unread count and the
  * viewer's last-seen timestamp. `unreadCount` is derived from the same fetch —
  * no extra round-trip — and capped for display ("99+").
  */

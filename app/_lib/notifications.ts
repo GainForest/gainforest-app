@@ -10,6 +10,9 @@
  *   3. Mentions — `app.gainforest.feed.post` records (top-level or reply)
  *      whose `facets` carry an app.bsky.richtext.facet#mention of the viewer's
  *      DID (see app/_lib/mentions.ts).
+ *   4. Donations — `org.hypercerts.funding.receipt` records in the facilitator
+ *      repo (see app/_lib/dashboard.ts) whose recipient is the viewer: either
+ *      the receipt's `to` DID, or the repo DID of the Cert it funded.
  *
  * The owner DID is embedded in every subject AT-URI, so we scan the most-recent
  * engagement records and keep the ones whose subject belongs to the viewer,
@@ -30,9 +33,10 @@
  * querying `subject.uri.in` instead.
  */
 
+import { donorMessageFromNotes } from "./donor-message";
 import { indexerQuery } from "./indexer";
 import { mentionDidsOfFacets, type RawIndexedFacet } from "./mentions";
-import { localBumicertHref, localObservationHref } from "./urls";
+import { FACILITATOR_DID, localBumicertHref, localObservationHref } from "./urls";
 import { normaliseRef, parseAtUri, resolvePdsHost } from "./pds";
 import { parseSpeciesSuggestion } from "./species-suggestions";
 import { identificationRkeyFromTags } from "./species-identifications";
@@ -43,7 +47,7 @@ export const NOTIFICATION_SEEN_COLLECTION = "app.gainforest.notification.seen";
 /** Recent likes/comments scanned per source before client-side filtering. */
 const SCAN_LIMIT = 500;
 
-type NotificationKind = "like" | "comment" | "mention" | "identification";
+type NotificationKind = "like" | "comment" | "mention" | "identification" | "donation";
 
 /** Plain-language category of the liked/commented record, for display + links. */
 type NotificationSubjectKind = "observation" | "project" | "post" | "recording" | "record";
@@ -62,8 +66,11 @@ export type NotificationItem = {
   subjectKind: NotificationSubjectKind;
   /** In-app link to the subject record, when one exists. */
   subjectHref: string | null;
-  /** Comment/post body (kind === "comment" or "mention" only). */
+  /** Comment/post body (kind === "comment" or "mention" only), or the donor's
+   *  message (kind === "donation"). */
   text: string | null;
+  /** What was given (kind === "donation" only). */
+  donation?: { amount: number; currency: string };
 };
 
 // ── Indexer queries ─────────────────────────────────────────────────────────
@@ -166,6 +173,47 @@ type MentionNode = {
   certifiedProfileData?: CertifiedProfileData;
 };
 
+// Donation receipts all live in the facilitator repo, so `certifiedProfileData`
+// would join to the facilitator — the donor's identity is resolved separately
+// from their PDS profile (see resolveDonorIdentities).
+const DONATIONS_QUERY = `
+  query NotificationDonations($facilitator: String!, $first: Int!) {
+    orgHypercertsFundingReceipt(
+      where: { did: { eq: $facilitator } }
+      first: $first
+      sortBy: createdAt
+      sortDirection: DESC
+    ) {
+      edges {
+        node {
+          uri createdAt occurredAt amount currency notes
+          from { __typename ... on AppCertifiedDefsDid { did } }
+          to { __typename ... on AppCertifiedDefsDid { did } }
+          for { uri }
+        }
+      }
+    }
+  }
+`;
+
+type ReceiptParty = { __typename?: string; did?: string | null } | null;
+
+type ReceiptNode = {
+  uri?: string | null;
+  createdAt?: string | null;
+  occurredAt?: string | null;
+  amount?: string | null;
+  currency?: string | null;
+  notes?: string | null;
+  from?: ReceiptParty;
+  to?: ReceiptParty;
+  for?: { uri?: string | null } | null;
+};
+
+function receiptPartyDid(party: ReceiptParty | undefined): string | null {
+  return party?.__typename === "AppCertifiedDefsDid" && party.did ? party.did : null;
+}
+
 // ── Subject helpers ─────────────────────────────────────────────────────────
 
 /** Map a subject's collection NSID to a plain-language category. */
@@ -226,7 +274,7 @@ export async function fetchNotificationsForDid(
   const limit = opts.limit ?? 30;
   const seenAt = opts.seenAt ?? null;
 
-  const [likeData, commentData, mentionData] = await Promise.all([
+  const [likeData, commentData, mentionData, donationData] = await Promise.all([
     indexerQuery<{ appGainforestFeedLike?: { edges?: Array<{ node?: LikeNode | null } | null> | null } | null }>(
       LIKES_QUERY,
       { first: SCAN_LIMIT },
@@ -239,6 +287,9 @@ export async function fetchNotificationsForDid(
       MENTIONS_QUERY,
       { first: SCAN_LIMIT },
     ).catch(() => null),
+    indexerQuery<{
+      orgHypercertsFundingReceipt?: { edges?: Array<{ node?: ReceiptNode | null } | null> | null } | null;
+    }>(DONATIONS_QUERY, { facilitator: FACILITATOR_DID, first: SCAN_LIMIT }).catch(() => null),
   ]);
 
   const items: NotificationItem[] = [];
@@ -320,13 +371,99 @@ export async function fetchNotificationsForDid(
     });
   }
 
+  for (const edge of donationData?.orgHypercertsFundingReceipt?.edges ?? []) {
+    const node = edge?.node;
+    if (!node?.uri) continue;
+    const donorDid = receiptPartyDid(node.from);
+    const recipientDid = receiptPartyDid(node.to);
+    const bumicertUri = node.for?.uri ?? null;
+    const bumicertParts = bumicertUri ? parseAtUri(bumicertUri) : null;
+    // Yours when the receipt names you, or when it funded one of your Certs.
+    if (recipientDid !== did && bumicertParts?.did !== did) continue;
+    if (donorDid === did) continue; // your own donation
+    const amount = Number.parseFloat(node.amount ?? "");
+    if (!Number.isFinite(amount) || amount <= 0) continue;
+    items.push({
+      id: node.uri,
+      kind: "donation",
+      createdAt: node.createdAt || node.occurredAt || new Date(0).toISOString(),
+      // Anonymous / wallet-only donors have no DID; the row falls back to
+      // "Someone" with the generic avatar rather than being dropped.
+      actorDid: donorDid ?? "",
+      actorName: null,
+      actorAvatarRef: null,
+      subjectUri: bumicertUri ?? node.uri,
+      subjectKind: bumicertParts ? "project" : "record",
+      subjectHref: bumicertParts ? localBumicertHref(bumicertParts.did, bumicertParts.rkey) : null,
+      text: donorMessageFromNotes(node.notes),
+      donation: { amount, currency: (node.currency || "USD").toUpperCase() },
+    });
+  }
+
   items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
   const unreadCount = seenAt
     ? items.filter((item) => item.createdAt > seenAt).length
     : items.length;
 
-  return { items: items.slice(0, limit), unreadCount };
+  const visible = items.slice(0, limit);
+  await resolveDonorIdentities(visible);
+  return { items: visible, unreadCount };
+}
+
+/** How many distinct donor profiles we'll resolve per fetch, to bound latency. */
+const DONOR_LOOKUP_LIMIT = 10;
+
+/**
+ * Fill in donor names/avatars for donation notifications. Receipts carry no
+ * profile join (they live in the facilitator repo), so the donor's
+ * `app.certified.actor.profile` is read from their own PDS. Best-effort: a
+ * missing profile leaves the "Someone" fallback.
+ */
+async function resolveDonorIdentities(items: NotificationItem[]): Promise<void> {
+  const donorDids = [
+    ...new Set(items.filter((item) => item.kind === "donation" && item.actorDid).map((item) => item.actorDid)),
+  ].slice(0, DONOR_LOOKUP_LIMIT);
+  if (donorDids.length === 0) return;
+
+  const identities = await Promise.all(
+    donorDids.map(async (donorDid) => [donorDid, await fetchDonorIdentity(donorDid)] as const),
+  );
+  const byDid = new Map(identities);
+  for (const item of items) {
+    if (item.kind !== "donation") continue;
+    const identity = byDid.get(item.actorDid);
+    if (!identity) continue;
+    item.actorName = identity.name;
+    item.actorAvatarRef = identity.avatarRef;
+  }
+}
+
+async function fetchDonorIdentity(did: string): Promise<{ name: string | null; avatarRef: string | null }> {
+  const none = { name: null, avatarRef: null };
+  try {
+    const host = await resolvePdsHost(did);
+    if (!host) return none;
+    const params = new URLSearchParams({ repo: did, collection: "app.certified.actor.profile", rkey: "self" });
+    const res = await fetch(`https://${host}/xrpc/com.atproto.repo.getRecord?${params.toString()}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return none;
+    const json = (await res.json().catch(() => null)) as {
+      value?: { displayName?: unknown; avatar?: { image?: { ref?: unknown } | null } | null };
+    } | null;
+    const displayName = typeof json?.value?.displayName === "string" ? json.value.displayName.trim() || null : null;
+    const rawRef = json?.value?.avatar?.image?.ref;
+    const avatarRef =
+      typeof rawRef === "string"
+        ? normaliseRef(rawRef)
+        : rawRef && typeof rawRef === "object" && typeof (rawRef as { $link?: unknown }).$link === "string"
+          ? (rawRef as { $link: string }).$link
+          : null;
+    return { name: displayName, avatarRef };
+  } catch {
+    return none;
+  }
 }
 
 /**

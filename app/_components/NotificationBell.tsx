@@ -3,7 +3,8 @@
 /**
  * Notification bell — a small button in the header, next to the account avatar,
  * that shows likes and comments other people left on the signed-in viewer's
- * records, plus posts and comments that @-mention the viewer. The unread badge
+ * records, posts and comments that @-mention the viewer, and donations the
+ * viewer received. The unread badge
  * polls in the background; opening the panel marks
  * everything seen (writing app.gainforest.notification.seen / rkey "self" to the
  * viewer's repo) so the badge clears.
@@ -14,7 +15,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { AtSignIcon, BellIcon, HeartIcon, MessageCircleIcon, MicroscopeIcon, UserIcon } from "lucide-react";
+import { AtSignIcon, BellIcon, HandCoinsIcon, HeartIcon, MessageCircleIcon, MicroscopeIcon, UserIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import type { AuthSession } from "../_lib/auth";
@@ -114,6 +115,14 @@ export function NotificationBell({ session }: { session: AuthSession | null }) {
   );
 }
 
+/** "$50" for USD/USDC, "0.5 ETH" style otherwise. */
+function donationAmountLabel(donation: { amount: number; currency: string }): string {
+  if (donation.currency === "USD" || donation.currency === "USDC") {
+    return `$${donation.amount.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+  }
+  return `${donation.amount.toLocaleString(undefined, { maximumFractionDigits: 6 })} ${donation.currency}`;
+}
+
 function NotificationRow({
   item,
   isUnread,
@@ -133,7 +142,11 @@ function NotificationRow({
         ? t("mentionedYou")
         : item.kind === "identification"
           ? t("identifiedYour", { subject: subjectLabel })
-          : t("commentedYour", { subject: subjectLabel });
+          : item.kind === "donation"
+            ? item.donation && item.subjectHref
+              ? t("donatedYour", { amount: donationAmountLabel(item.donation), subject: subjectLabel })
+              : t("donatedToYou", { amount: item.donation ? donationAmountLabel(item.donation) : "" })
+            : t("commentedYour", { subject: subjectLabel });
 
   const body = (
     <div
@@ -159,6 +172,8 @@ function NotificationRow({
             <AtSignIcon className="size-2.5" aria-hidden />
           ) : item.kind === "identification" ? (
             <MicroscopeIcon className="size-2.5" aria-hidden />
+          ) : item.kind === "donation" ? (
+            <HandCoinsIcon className="size-2.5" aria-hidden />
           ) : (
             <MessageCircleIcon className="size-2.5" aria-hidden />
           )}
