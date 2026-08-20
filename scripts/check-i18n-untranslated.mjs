@@ -101,6 +101,8 @@ const allowedExactValues = new Set([
   "Etherscan",
   "Starlink",
   "Raspberry Pi",
+  // Multiplier notation used on compact award badges.
+  "x{count}",
   // Same word in the flagged locales (loanwords).
   "Sensor",
   "Laptop",

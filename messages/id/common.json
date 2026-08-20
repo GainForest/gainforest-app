@@ -1347,6 +1347,8 @@
       }
     },
     "awardsLabel": "Penghargaan",
+    "bioblitzCount": "x{count}",
+    "bioblitzWinsTooltip": "{count, plural, one {kemenangan BioBlitz} other {kemenangan BioBlitz}}",
     "aria": "Penghargaan: {names}",
     "roundName": {
       "pilot": "Ronde Perintis",

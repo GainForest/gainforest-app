@@ -1347,6 +1347,8 @@
       }
     },
     "awardsLabel": "Tuzo",
+    "bioblitzCount": "x{count}",
+    "bioblitzWinsTooltip": "{count, plural, one {ushindi wa BioBlitz} other {ushindi wa BioBlitz}}",
     "aria": "Tuzo: {names}",
     "roundName": {
       "pilot": "Raundi ya Majaribio",

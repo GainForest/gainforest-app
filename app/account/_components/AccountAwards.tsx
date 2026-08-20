@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { TrophyIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import QuickTooltip from "@/components/ui/quick-tooltip";
 import {
@@ -49,10 +50,56 @@ const EMBLEM_SIZES = {
   },
 } as const;
 
+type AwardEmblemGroup = {
+  key: string;
+  badges: string[];
+  isBioblitz: boolean;
+};
+
 /**
- * Overlapping circular award emblems for a list of recognition badge keys —
- * one emblem per award, each with a tooltip naming the round and prize, and a
- * small round-number dot for BioBlitz wins. Renders nothing when empty.
+ * Group the individual recognition records into the emblems shown in compact
+ * account and leaderboard rows. BioBlitz wins share one emblem; the count is
+ * the number of winning badges, not the number of unique rounds.
+ */
+export function groupAwardKeys(keys: Iterable<string>): AwardEmblemGroup[] {
+  const groups: AwardEmblemGroup[] = [];
+  const bioblitzBadges: string[] = [];
+
+  for (const key of displayAwardKeys(keys)) {
+    const parsed = parseRecognitionBadgeKey(key);
+    if (parsed?.family === "bioblitz") {
+      bioblitzBadges.push(key);
+    } else {
+      groups.push({ key, badges: [key], isBioblitz: false });
+    }
+  }
+
+  if (bioblitzBadges.length > 0) {
+    groups.push({ key: "bioblitz-wins", badges: bioblitzBadges, isBioblitz: true });
+  }
+
+  return groups;
+}
+
+function awardTooltipFor(group: AwardEmblemGroup, t: Translator) {
+  const labels = group.badges.map((key) => awardLabelFor(key, t));
+  if (!group.isBioblitz || labels.length <= 1) return labels[0] ?? "";
+
+  return (
+    <span className="flex max-w-64 flex-col gap-1 text-left">
+      <span className="font-semibold">{t("bioblitzWinsTooltip", { count: labels.length })}</span>
+      {labels.map((label, index) => (
+        <span key={`${group.badges[index]}-${index}`}>{label}</span>
+      ))}
+    </span>
+  );
+}
+
+/**
+ * Overlapping circular recognition emblems. Manual recognition badges keep
+ * one emblem each; all BioBlitz winning badges share one trophy emblem with an
+ * xN count when there is more than one. Every emblem has a tooltip with its
+ * award details. Renders nothing when empty.
  */
 export function AwardEmblems({
   badges,
@@ -64,28 +111,28 @@ export function AwardEmblems({
   className?: string;
 }) {
   const t = useTranslations("common.recognition");
-  if (badges.length === 0) return null;
+  const groups = groupAwardKeys(badges);
+  if (groups.length === 0) return null;
   const dims = EMBLEM_SIZES[size];
 
   return (
-    // Slight padding so the overhanging round-number dot never gets clipped
-    // by a parent with overflow-hidden.
+    // Slight padding so the overhanging count dot never gets clipped by a
+    // parent with overflow-hidden.
     <span className={`inline-flex shrink-0 items-center -space-x-1 pb-0.5 pr-0.5 ${className}`}>
-      {badges.map((key) => {
-        const Icon = recognitionBadgeIcon(key);
-        const parsed = parseRecognitionBadgeKey(key);
-        const roundId = parsed?.family === "bioblitz" ? parsed.roundId : null;
+      {groups.map((group) => {
+        const Icon = group.isBioblitz ? TrophyIcon : recognitionBadgeIcon(group.badges[0]);
+        const count = group.badges.length;
         return (
-          <QuickTooltip key={key} content={awardLabelFor(key, t)} asChild>
+          <QuickTooltip key={group.key} content={awardTooltipFor(group, t)} asChild>
             <span
               className={`relative grid ${dims.emblem} place-items-center rounded-full bg-background shadow-sm ring-1 ring-border/70 transition hover:z-10 hover:ring-2 hover:ring-primary`}
             >
               <Icon className={`${dims.icon} text-primary`} aria-hidden />
-              {roundId !== null ? (
+              {group.isBioblitz && count > 1 ? (
                 <span
                   className={`absolute rounded-full bg-primary font-semibold tabular-nums text-primary-foreground ${dims.dot}`}
                 >
-                  {roundId}
+                  {t("bioblitzCount", { count })}
                 </span>
               ) : null}
             </span>
@@ -103,11 +150,11 @@ export function displayAwardKeys(keys: Iterable<string>): string[] {
 
 /**
  * Read-only "Awards" line for a public profile, styled to sit beside the
- * plain "Trusted by" line in the hero: a quiet label followed by overlapping
- * round emblems, one per award. Fetches its own data by DID (the same
+ * plain "Trusted by" line in the hero: a quiet label followed by compact
+ * recognition emblems. Fetches its own data by DID (the same
  * self-contained pattern as TrustedByBadges) so both hero variants can drop
- * it in without plumbing. A profile can hold several BioBlitz wins at once.
- * Renders nothing while loading or when there are no awards.
+ * it in without plumbing. BioBlitz wins are grouped into one emblem by
+ * AwardEmblems. Renders nothing while loading or when there are no awards.
  */
 export function AccountAwards({ did, className = "" }: { did: string; className?: string }) {
   const t = useTranslations("common.recognition");

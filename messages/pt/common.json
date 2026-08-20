@@ -1347,6 +1347,8 @@
       }
     },
     "awardsLabel": "Prêmios",
+    "bioblitzCount": "x{count}",
+    "bioblitzWinsTooltip": "{count, plural, one {vitória no BioBlitz} other {vitórias no BioBlitz}}",
     "aria": "Prêmios: {names}",
     "roundName": {
       "pilot": "Rodada piloto",
