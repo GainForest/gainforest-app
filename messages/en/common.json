@@ -1562,6 +1562,37 @@
       "restore": "The observation count couldn't be restored. Please try again.",
       "download": "The winner package couldn't be prepared. Please try again.",
       "load": "Couldn't load this round. Please try again."
+    },
+    "duplicates": {
+      "title": "Likely duplicates",
+      "description": "Auto-detected groups of near-identical submissions: identical files, same-species bursts, consecutive filenames, and image-scanner warnings. Merging keeps one observation counting and adjusts the points.",
+      "scanned": "{count, plural, one {# observation scanned} other {# observations scanned}}",
+      "extraPoints": "+{points} pts from unmerged duplicates",
+      "empty": "No likely duplicates detected in this round.",
+      "cluster": "{count, plural, one {# observation} other {# observations}}",
+      "observationsAria": "Observations in this group",
+      "signal": {
+        "identical-image": "Identical file",
+        "species-burst": "Same-species burst",
+        "filename-burst": "Consecutive filenames",
+        "scanner": "Image scanner"
+      },
+      "keeps": "Keeps",
+      "pts": "{points} pts",
+      "pointsImpact": "{before} → {after} pts",
+      "mergedPoints": "{points} pts counted",
+      "merge": "{count, plural, one {Merge # duplicate} other {Merge # duplicates}}",
+      "merged": "Merged",
+      "undo": "Undo merge",
+      "unnamed": "Unnamed account",
+      "errors": {
+        "notSignedIn": "Sign in again to continue.",
+        "forbidden": "You don't have access to this BioBlitz dashboard.",
+        "finalized": "This round is closed, so merges can't change.",
+        "merge": "The merge couldn't be saved. Please try again.",
+        "undo": "The merge couldn't be undone. Please try again.",
+        "load": "Couldn't scan this round for duplicates. Please try again."
+      }
     }
   },
   "adminBlockedDomains": {

@@ -1562,6 +1562,37 @@
       "restore": "Hitungan pengamatan tidak dapat dipulihkan. Coba lagi.",
       "download": "Paket pemenang tidak dapat disiapkan. Coba lagi.",
       "load": "Ronde ini tidak dapat dimuat. Coba lagi."
+    },
+    "duplicates": {
+      "title": "Kemungkinan duplikat",
+      "description": "Kelompok kiriman nyaris identik yang terdeteksi otomatis: berkas identik, rentetan spesies yang sama, nama berkas berurutan, dan peringatan pemindai gambar. Penggabungan membuat satu pengamatan tetap dihitung dan poin disesuaikan.",
+      "scanned": "{count, number} pengamatan dipindai",
+      "extraPoints": "+{points} poin dari duplikat yang belum digabung",
+      "empty": "Tidak ada kemungkinan duplikat yang terdeteksi pada ronde ini.",
+      "cluster": "{count, number} pengamatan",
+      "observationsAria": "Pengamatan dalam kelompok ini",
+      "signal": {
+        "identical-image": "Berkas identik",
+        "species-burst": "Rentetan spesies sama",
+        "filename-burst": "Nama berkas berurutan",
+        "scanner": "Pemindai gambar"
+      },
+      "keeps": "Dihitung",
+      "pts": "{points} poin",
+      "pointsImpact": "{before} → {after} poin",
+      "mergedPoints": "{points} poin dihitung",
+      "merge": "{count, plural, other {Gabungkan # duplikat}}",
+      "merged": "Digabung",
+      "undo": "Batalkan penggabungan",
+      "unnamed": "Akun tanpa nama",
+      "errors": {
+        "notSignedIn": "Masuk lagi untuk melanjutkan.",
+        "forbidden": "Anda tidak punya akses ke dasbor BioBlitz ini.",
+        "finalized": "Ronde ini sudah ditutup, jadi penggabungan tidak dapat diubah.",
+        "merge": "Penggabungan tidak dapat disimpan. Silakan coba lagi.",
+        "undo": "Penggabungan tidak dapat dibatalkan. Silakan coba lagi.",
+        "load": "Tidak dapat memindai ronde ini untuk duplikat. Silakan coba lagi."
+      }
     }
   },
   "adminBlockedDomains": {

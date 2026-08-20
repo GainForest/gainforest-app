@@ -1562,6 +1562,37 @@
       "restore": "Hesabu ya uchunguzi haikuweza kurejeshwa. Jaribu tena.",
       "download": "Kifurushi cha mshindi hakikuweza kutayarishwa. Jaribu tena.",
       "load": "Haikuweza kupakia raundi hii. Jaribu tena."
+    },
+    "duplicates": {
+      "title": "Nakala zinazowezekana",
+      "description": "Vikundi vilivyotambuliwa kiotomatiki vya mawasilisho yanayofanana sana: faili zinazofanana, mfululizo wa spishi ileile, majina ya faili yanayofuatana, na tahadhari za skana ya picha. Kuunganisha huacha uchunguzi mmoja ukihesabiwa na pointi hurekebishwa.",
+      "scanned": "Uchunguzi {count, number} umechanganuliwa",
+      "extraPoints": "pointi +{points} kutoka nakala ambazo hazijaunganishwa",
+      "empty": "Hakuna nakala zinazowezekana zilizogunduliwa katika raundi hii.",
+      "cluster": "Uchunguzi {count, number}",
+      "observationsAria": "Uchunguzi katika kikundi hiki",
+      "signal": {
+        "identical-image": "Faili inayofanana",
+        "species-burst": "Mfululizo wa spishi ileile",
+        "filename-burst": "Majina ya faili yanayofuatana",
+        "scanner": "Skana ya picha"
+      },
+      "keeps": "Inahesabiwa",
+      "pts": "pointi {points}",
+      "pointsImpact": "pointi {before} → {after}",
+      "mergedPoints": "pointi {points} zinahesabiwa",
+      "merge": "Unganisha nakala {count, number}",
+      "merged": "Imeunganishwa",
+      "undo": "Tengua muunganisho",
+      "unnamed": "Akaunti isiyo na jina",
+      "errors": {
+        "notSignedIn": "Ingia tena ili kuendelea.",
+        "forbidden": "Huna ufikiaji wa dashibodi hii ya BioBlitz.",
+        "finalized": "Raundi hii imefungwa, kwa hivyo miunganisho haiwezi kubadilika.",
+        "merge": "Muunganisho haukuweza kuhifadhiwa. Tafadhali jaribu tena.",
+        "undo": "Muunganisho haukuweza kutenguliwa. Tafadhali jaribu tena.",
+        "load": "Haikuweza kuchanganua raundi hii kwa nakala. Tafadhali jaribu tena."
+      }
     }
   },
   "adminBlockedDomains": {

@@ -31,6 +31,7 @@ import { useModal } from "@/components/ui/modal/context";
 import { ACCOUNT_SUPPORT_RKEY } from "@/app/_components/cart/CartProvider";
 import { AmountModal } from "@/app/cert/[did]/[rkey]/_components/donate/DonationModals";
 import { bioblitzPrizeAmountUsd, type BioblitzPrize } from "@/lib/bioblitz-prizes";
+import { AdminBioblitzDuplicatesPanel } from "./AdminBioblitzDuplicatesPanel";
 import { cn } from "@/lib/utils";
 
 async function loadRound(roundId: number, signal: AbortSignal): Promise<BioblitzAdminRoundData> {
@@ -322,6 +323,7 @@ export function AdminBioblitzDashboard({
         </div>
       </nav>
 
+      <div className="min-w-0 space-y-4">
       <section className="min-w-0 overflow-hidden rounded-3xl border-[0.35rem] border-muted/80 bg-card shadow-none">
         {error ? (
           <p role="alert" className="border-b border-destructive/15 bg-destructive/[0.06] px-4 py-3 text-sm text-destructive sm:px-5">
@@ -493,6 +495,14 @@ export function AdminBioblitzDashboard({
           </Accordion>
         )}
       </section>
+
+      <AdminBioblitzDuplicatesPanel
+        roundId={selectedRoundId}
+        canManage={canManage}
+        roundEnded={selectedStatus === "ended"}
+        onMutated={() => setRefreshCount((current) => current + 1)}
+      />
+      </div>
     </div>
   );
 }

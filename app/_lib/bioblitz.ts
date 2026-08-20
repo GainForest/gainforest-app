@@ -45,6 +45,12 @@ import {
   indexBioblitzExclusions,
   isAccountExcludedFromBioblitzRound,
 } from "./bioblitz-exclusions";
+import {
+  fetchBioblitzMerges,
+  fetchBioblitzMergesStrict,
+  indexBioblitzMerges,
+  isObservationMergedAway,
+} from "./bioblitz-merges";
 
 export {
   BIOBLITZ_PRIZES,
@@ -464,12 +470,21 @@ export async function fetchRoundCollectors(
     exclusionRead === "required"
       ? fetchBioblitzExclusionsStrict(signal)
       : fetchBioblitzExclusions(signal).catch(() => []);
-  const [hidden, hiddenRecords, exclusionRecords] = await Promise.all([
+  // Steward-confirmed duplicate merges: the canonical observation keeps
+  // counting for its round; the merged-away ones stop contributing to every
+  // tally (public board and admin roster alike), which adjusts points too.
+  const mergePromise =
+    exclusionRead === "required"
+      ? fetchBioblitzMergesStrict(signal)
+      : fetchBioblitzMerges(signal).catch(() => []);
+  const [hidden, hiddenRecords, exclusionRecords, mergeRecords] = await Promise.all([
     fetchPublicHiddenAccountDids(signal).catch(() => new Set<string>()),
     fetchHiddenRecordUris(signal).catch(() => new Set<string>()),
     exclusionPromise,
+    mergePromise,
   ]);
   const exclusions = indexBioblitzExclusions(exclusionRecords);
+  const merges = indexBioblitzMerges(mergeRecords);
 
   // Ended and early rounds keep their original "most observations" ranking;
   // the all-time view also stays count-based because it spans both eras.
@@ -531,6 +546,7 @@ export async function fetchRoundCollectors(
       if (!Number.isFinite(t) || t < startMs || t > endMs) continue;
       const observationRoundId = scope === "round" ? round.id : bioblitzRoundIdAt(t);
       const excluded = isAccountExcludedFromBioblitzRound(exclusions, did, observationRoundId);
+      const mergedAway = isObservationMergedAway(merges, uri, observationRoundId);
       // Backdating guard: skip records actually published well after the round.
       if (scope === "round" && !isWithinRoundUploadWindow(n.rkey, endMs)) continue;
 
@@ -539,7 +555,7 @@ export async function fetchRoundCollectors(
         // Keep the public board exactly as it was: ignored accounts do not
         // influence any leaderboard metric. The optional admin tally only
         // needs eligible, image-backed observations.
-        if (!excluded) {
+        if (!excluded && !mergedAway) {
           imageCounts.missingPhoto += 1;
           ineligibleByDid.set(did, (ineligibleByDid.get(did) ?? 0) + 1);
         }
@@ -552,11 +568,16 @@ export async function fetchRoundCollectors(
         kingdom: n.kingdom,
       };
       const category = classifyBioblitzImage(description);
-      if (!excluded) imageCounts[category] += 1;
+      if (!excluded && !mergedAway) imageCounts[category] += 1;
       if (!isEligibleBioblitzCategory(category)) {
-        if (!excluded) ineligibleByDid.set(did, (ineligibleByDid.get(did) ?? 0) + 1);
+        if (!excluded && !mergedAway) ineligibleByDid.set(did, (ineligibleByDid.get(did) ?? 0) + 1);
         continue;
       }
+
+      // A merged duplicate stops counting everywhere — including the admin
+      // roster's raw tally — so a steward's merge is one authoritative points
+      // adjustment rather than a view-dependent one.
+      if (mergedAway) continue;
 
       const labeled = hasBioblitzSpeciesLabel(description);
       const points = bioblitzObservationPoints(description);

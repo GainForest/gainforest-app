@@ -1562,6 +1562,37 @@
       "restore": "Não foi possível repor a contagem. Tente novamente.",
       "download": "Não foi possível preparar o kit do vencedor. Tente novamente.",
       "load": "Não foi possível carregar esta rodada. Tente novamente."
+    },
+    "duplicates": {
+      "title": "Prováveis duplicados",
+      "description": "Grupos detectados automaticamente de envios quase idênticos: arquivos idênticos, sequências da mesma espécie, nomes de arquivo consecutivos e avisos do escâner de imagens. Ao mesclar, apenas uma observação continua contando e os pontos são ajustados.",
+      "scanned": "{count, plural, one {# observação analisada} other {# observações analisadas}}",
+      "extraPoints": "+{points} pts de duplicados não mesclados",
+      "empty": "Nenhum provável duplicado detectado nesta rodada.",
+      "cluster": "{count, plural, one {# observação} other {# observações}}",
+      "observationsAria": "Observações deste grupo",
+      "signal": {
+        "identical-image": "Arquivo idêntico",
+        "species-burst": "Sequência da mesma espécie",
+        "filename-burst": "Nomes de arquivo consecutivos",
+        "scanner": "Escâner de imagens"
+      },
+      "keeps": "Fica",
+      "pts": "{points} pontos",
+      "pointsImpact": "{before} → {after} pontos",
+      "mergedPoints": "{points} pts contados",
+      "merge": "{count, plural, one {Mesclar # duplicado} other {Mesclar # duplicados}}",
+      "merged": "Mesclado",
+      "undo": "Desfazer mesclagem",
+      "unnamed": "Conta sem nome",
+      "errors": {
+        "notSignedIn": "Entre novamente para continuar.",
+        "forbidden": "Você não tem acesso a este painel do BioBlitz.",
+        "finalized": "Esta rodada está encerrada, então as mesclagens não podem mudar.",
+        "merge": "A mesclagem não pôde ser salva. Tente novamente.",
+        "undo": "A mesclagem não pôde ser desfeita. Tente novamente.",
+        "load": "Não foi possível analisar esta rodada em busca de duplicados. Tente novamente."
+      }
     }
   },
   "adminBlockedDomains": {
