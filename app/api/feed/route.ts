@@ -25,8 +25,9 @@ function parseFilter(value: string | null): ActivityFeedFilter {
  * GET /api/feed?cursor=<opaque>&scope=following
  *
  * Returns one page of the global, newest-first activity feed (projects, nature
- * sightings, organizations, posts, uploaded recorder folders, and donations —
- * Certs are folded into projects). Rows are ordered purely by recency across
+ * sightings, organizations, posts, and uploaded recorder folders. Donations are
+ * intentionally excluded from the activity feed; Certs are folded into projects.
+ * Rows are ordered purely by recency across
  * all kinds; `cursor` walks strictly older rows for "load more".
  *
  * With `scope=following` the feed is scoped to records authored by accounts the

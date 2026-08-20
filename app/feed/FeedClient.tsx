@@ -9,7 +9,6 @@ import {
   BinocularsIcon,
   Building2Icon,
   FolderKanbanIcon,
-  HeartHandshakeIcon,
   HeartIcon,
   Loader2Icon,
   MegaphoneIcon,
@@ -117,8 +116,7 @@ function groupFeedEntries(items: ActivityFeedItem[]): FeedEntry[] {
 }
 
 // `authOnly` tabs are shown only to signed-in viewers (a following feed has no
-// meaning when signed out). `adminOnly` tabs are shown only to admin-group
-// members — donations are being wound down for the general public.
+// meaning when signed out).
 const FILTERS: { key: Filter; Icon: typeof NewspaperIcon; authOnly?: boolean; adminOnly?: boolean }[] = [
   { key: "all", Icon: NewspaperIcon },
   { key: "following", Icon: UsersRoundIcon, authOnly: true },
@@ -127,7 +125,6 @@ const FILTERS: { key: Filter; Icon: typeof NewspaperIcon; authOnly?: boolean; ad
   { key: "observation", Icon: BinocularsIcon },
   { key: "audio", Icon: RadioIcon },
   { key: "organization", Icon: Building2Icon },
-  { key: "donation", Icon: HeartHandshakeIcon, adminOnly: true },
 ];
 
 // Whether a filter tab is visible to the current viewer.

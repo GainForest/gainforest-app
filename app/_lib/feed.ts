@@ -1457,7 +1457,8 @@ async function buildFeedPageUncached(
   const didChunks: (readonly string[] | null)[] = isFollowing
     ? chunkDids(following.dids, FOLLOW_IN_LIMIT)
     : [null];
-  const wantDonation = wants("donation") && !isFollowing;
+  // Donations remain available in the dedicated donations views, but are not
+  // part of the activity feed while the donation stream is paused.
   // Reshares only join the unified merge (and the following feed, scoped to
   // the RESHARER); single-kind tabs stay records-only.
   const wantsReshare = filter === "all";
@@ -1476,7 +1477,7 @@ async function buildFeedPageUncached(
         projectFirst: wants("project") ? STREAM_BATCH : 1,
         occurrenceFirst: wants("observation") ? STREAM_BATCH : 1,
         orgFirst: wants("organization") ? STREAM_BATCH : 1,
-        receiptFirst: wantDonation ? STREAM_BATCH : 1,
+        receiptFirst: 1,
         postFirst: wants("post") ? STREAM_BATCH : 1,
         repostFirst: wantsReshare ? STREAM_BATCH : 1,
         projectWhere: { type: { in: ["project", "Project"] }, ...didIn, ...ltBound },
@@ -1525,7 +1526,8 @@ async function buildFeedPageUncached(
     repostNodes.push(...q);
   }
 
-  const { items: donationItems, certUriById, recipientById, donorById } = mapDonations(receiptNodes);
+  // Donation receipts are intentionally excluded from the activity feed. Keep
+  // the floor fetch above so the query shape stays stable for older filters.
 
   // Upload days are derived, not streamed: one cached sweep serves every page,
   // and only the days this feed can show are kept. A following feed keeps the
@@ -1561,7 +1563,6 @@ async function buildFeedPageUncached(
     ...mapOrganizations(orgNodes),
     ...mapPosts(postNodes),
     ...mapAudioUploadDays(audioDays, audioProfiles, hiddenRecords),
-    ...donationItems,
     ...(wantsReshare ? mapReposts(repostNodes) : []),
   ].filter(
     (item) =>
@@ -1592,7 +1593,6 @@ async function buildFeedPageUncached(
       const skipPage = await buildBurstSkipPage(ordered, firstObsIdx, burstActor, cursor);
       if (skipPage) {
         skipPage.items = await resolveReshares(skipPage.items, hidden, hiddenRecords);
-        await enrichDonations(skipPage.items, certUriById, recipientById, donorById);
         return skipPage;
       }
     }
@@ -1603,7 +1603,6 @@ async function buildFeedPageUncached(
   // gone/hidden is consumed (dropped from the page) without stalling paging.
   const last = sliced[sliced.length - 1];
   const pageItems = await resolveReshares(sliced, hidden, hiddenRecords);
-  await enrichDonations(pageItems, certUriById, recipientById, donorById);
   // A stream that returned a full batch may still have older rows we haven't
   // reached (tracked as `fetchedFull` during the per-chunk union above);
   // combined with leftover eligible overflow, that's "more to load".
