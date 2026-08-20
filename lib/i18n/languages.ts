@@ -6,6 +6,22 @@ export type SupportedLanguageCode = (typeof SUPPORTED_LOCALES)[number];
 
 export const DEFAULT_LANGUAGE: SupportedLanguageCode = "en";
 
+/** Returns a decoded cookie value while preserving malformed percent-encoding. */
+export function readCookieValue(cookieHeader: string | null, name: string): string | null {
+  if (!cookieHeader) return null;
+  for (const part of cookieHeader.split(";")) {
+    const [rawName, ...rawValueParts] = part.trim().split("=");
+    if (rawName !== name || rawValueParts.length === 0) continue;
+    const value = rawValueParts.join("=");
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      return value;
+    }
+  }
+  return null;
+}
+
 export const SUPPORTED_LANGUAGES = [
   { code: "en", label: "English", nativeLabel: "English" },
   { code: "es", label: "Spanish", nativeLabel: "Español" },

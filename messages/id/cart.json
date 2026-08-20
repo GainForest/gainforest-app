@@ -177,6 +177,8 @@
       "cart": "Keranjang",
       "checkout": "Pembayaran"
     },
+    "myCardsTitle": "Galeri Kartu Saya",
+    "myCardsDescription": "Pratinjau galeri kartu yang telah dikumpulkan dengan contoh koleksi.",
     "projectUpdates": {
       "title": "Penyusun pembaruan proyek",
       "description": "Editor WYSIWYG untuk menulis pembaruan proyek, dan linimasa yang menampilkannya — persis seperti di halaman Cert.",

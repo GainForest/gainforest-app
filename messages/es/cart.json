@@ -177,6 +177,8 @@
       "cart": "Carrito",
       "checkout": "Pago"
     },
+    "myCardsTitle": "Galería Mis cartas",
+    "myCardsDescription": "Previsualiza la galería de cartas coleccionadas con coleccionables de muestra.",
     "projectUpdates": {
       "title": "Compositor de actualizaciones del proyecto",
       "description": "El editor WYSIWYG para escribir actualizaciones del proyecto, y la línea de tiempo que las muestra, exactamente como aparecen en la página de un Cert.",

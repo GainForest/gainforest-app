@@ -177,6 +177,8 @@
       "cart": "Cart",
       "checkout": "Checkout"
     },
+    "myCardsTitle": "My Cards gallery",
+    "myCardsDescription": "Preview the collected-cards gallery, populated with sample collectibles.",
     "projectUpdates": {
       "title": "Project update composer",
       "description": "The WYSIWYG editor used to write project updates, and the timeline that renders them — exactly as they appear on a Cert page.",

@@ -586,7 +586,7 @@ create temp table bioblitz_handled_replay as select * from public.notification_o
   'bioblitz:4:most-observations:did:plc:winner','bioblitz_winner','{"roundId":4}','bioblitz:4:most-observations','did:plc:winner',
   null,'bioblitz-winner',null,null,clock_timestamp()
 );
-select pg_temp.assert_true((select status='suppressed' and duplicate from bioblitz_handled_replay), 'manual handling tombstone blocks reconciliation replay');
+select pg_temp.assert_true((select status='suppressed' and duplicate from bioblitz_handled_replay), 'manual handling tombstone blocks enqueue replay');
 
 select * from public.notification_outbox_enqueue(
   'bioblitz:4:best-picture:did:plc:winner','bioblitz_winner','{"roundId":4}','bioblitz:4:best-picture','did:plc:winner',

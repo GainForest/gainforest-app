@@ -203,7 +203,7 @@ export function renderGroupInvitationEmailTemplate({
   acceptUrl,
   appName = "GainForest",
   logoUri,
-  siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://certs-rewrite.gainforest.app",
+  siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.gainforest.app",
 }: {
   locale?: SupportedLanguageCode;
   invitedEmail: string;

@@ -3,7 +3,7 @@ import { getCertifiedProfileCard } from "@/app/account/_lib/account-route";
 import { fetchIndexedCertifiedProfileCards, type IndexedCertifiedProfileCard } from "@/app/_lib/indexer";
 import { getAuthBaseUrl, getAuthForwardCookie } from "@/app/_lib/auth";
 import { relayUpstreamCookies } from "@/app/_lib/upstream-cookies";
-import { LANGUAGE_COOKIE_NAME, isSupportedLanguageCode } from "@/lib/i18n/languages";
+import { LANGUAGE_COOKIE_NAME, isSupportedLanguageCode, readCookieValue } from "@/lib/i18n/languages";
 import { LOCALE_REQUEST_HEADER_NAME } from "@/lib/i18n/routing";
 
 export const runtime = "nodejs";
@@ -14,20 +14,6 @@ type RawCgsGroupsPayload = Record<string, unknown> & { groups?: unknown };
 
 function nonEmptyString(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
-}
-
-function readCookieValue(cookieHeader: string | null, name: string): string | null {
-  if (!cookieHeader) return null;
-  for (const part of cookieHeader.split(";")) {
-    const [rawName, ...rawValueParts] = part.trim().split("=");
-    if (rawName !== name || rawValueParts.length === 0) continue;
-    try {
-      return decodeURIComponent(rawValueParts.join("="));
-    } catch {
-      return rawValueParts.join("=");
-    }
-  }
-  return null;
 }
 
 async function hydrateGroup(group: RawCgsGroup, indexed?: IndexedCertifiedProfileCard): Promise<RawCgsGroup> {

@@ -7,10 +7,46 @@ import { ArrowRightIcon, CheckIcon, Loader2Icon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { buildLoginUrl } from "@/app/_lib/auth-client";
 import type { AuthSession } from "@/app/_lib/auth";
-import type { GroupInvitation } from "@/app/_lib/cgs-invitations";
+import type { GroupInvitation, GroupInvitationErrorCode } from "@/app/_lib/cgs-invitations";
 import { InviteScene, type InviteOrg } from "./InviteScene";
 
 type AcceptStatus = "idle" | "accepting" | "accepted" | "error";
+
+export function InvitationAcceptErrorScene({
+  invitation,
+  error,
+  errorCode,
+  onRetry,
+}: {
+  invitation: GroupInvitation;
+  error: string | null;
+  errorCode: GroupInvitationErrorCode | null;
+  onRetry: () => void;
+}) {
+  const t = useTranslations("common.groupInvitations.invitePage");
+  const org: InviteOrg = {
+    name: invitation.groupName || invitation.groupHandle || invitation.repo,
+    handle: invitation.groupHandle,
+    did: invitation.repo,
+  };
+  const description = errorCode === "membership_outcome_unknown"
+    ? t("membershipOutcomeUnknown")
+    : error || t("acceptError");
+
+  return (
+    <InviteScene
+      tone="danger"
+      icon={<XIcon className="size-7" />}
+      title={t("errorTitle")}
+      description={description}
+      org={org}
+    >
+      <Button type="button" onClick={onRetry} className="w-full shadow-none sm:w-auto">
+        {t("tryAgain")}
+      </Button>
+    </InviteScene>
+  );
+}
 
 export function InvitationAcceptClient({
   invitation,
@@ -22,6 +58,7 @@ export function InvitationAcceptClient({
   const t = useTranslations("common.groupInvitations.invitePage");
   const [status, setStatus] = useState<AcceptStatus>(session.isLoggedIn ? "accepting" : "idle");
   const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<GroupInvitationErrorCode | null>(null);
   const manageHref = useMemo(() => `/manage/groups/${encodeURIComponent(invitation.groupHandle || invitation.repo)}`, [invitation.groupHandle, invitation.repo]);
   const org: InviteOrg = {
     name: invitation.groupName || invitation.groupHandle || invitation.repo,
@@ -40,12 +77,22 @@ export function InvitationAcceptClient({
           headers: { "content-type": "application/json" },
           cache: "no-store",
         });
-        const data = await response.json().catch(() => null) as { error?: string } | null;
-        if (!response.ok || data?.error) throw new Error(data?.error ?? t("acceptError"));
+        const data = await response.json().catch(() => null) as {
+          error?: string;
+          code?: GroupInvitationErrorCode;
+        } | null;
+        if (!response.ok || data?.error) {
+          if (!active) return;
+          setError(data?.error ?? t("acceptError"));
+          setErrorCode(data?.code ?? null);
+          setStatus("error");
+          return;
+        }
         if (active) setStatus("accepted");
       } catch (err) {
         if (!active) return;
         setError(err instanceof Error ? err.message : t("acceptError"));
+        setErrorCode(null);
         setStatus("error");
       }
     }
@@ -94,17 +141,16 @@ export function InvitationAcceptClient({
 
   if (status === "error") {
     return (
-      <InviteScene
-        tone="danger"
-        icon={<XIcon className="size-7" />}
-        title={t("errorTitle")}
-        description={error || t("acceptError")}
-        org={org}
-      >
-        <Button type="button" onClick={() => { setError(null); setStatus("accepting"); }} className="w-full shadow-none sm:w-auto">
-          {t("tryAgain")}
-        </Button>
-      </InviteScene>
+      <InvitationAcceptErrorScene
+        invitation={invitation}
+        error={error}
+        errorCode={errorCode}
+        onRetry={() => {
+          setError(null);
+          setErrorCode(null);
+          setStatus("accepting");
+        }}
+      />
     );
   }
 
