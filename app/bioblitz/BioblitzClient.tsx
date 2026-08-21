@@ -577,7 +577,7 @@ function RoundNavigator({
   return (
     <FadeIn delay={0.03} className="-mt-2">
       <div className="flex items-center gap-3 overflow-hidden rounded-2xl border border-border/60 bg-background/70 p-2 backdrop-blur">
-        <div className="hidden shrink-0 pl-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:block">
+        <div className="hidden shrink-0 ps-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:block">
           {t("title")}
         </div>
         <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-0.5">
@@ -591,7 +591,7 @@ function RoundNavigator({
                 type="button"
                 onClick={() => onSelect(item.id)}
                 aria-pressed={selected}
-                className={`flex min-w-[9rem] shrink-0 flex-col rounded-xl border px-3 py-2 text-left transition-colors ${
+                className={`flex min-w-[9rem] shrink-0 flex-col rounded-xl border px-3 py-2 text-start transition-colors ${
                   selected
                     ? "border-primary/50 bg-primary/10 text-foreground"
                     : "border-transparent bg-foreground/5 text-muted-foreground hover:bg-foreground/10 hover:text-foreground"
@@ -1347,7 +1347,7 @@ function CollectorRow({
         <OrgLabel org={org} />
       </div>
 
-      <span className="shrink-0 text-right">
+      <span className="shrink-0 text-end">
         {mode === "points" ? (
           <>
             <span className="font-instrument block text-sm italic leading-none tabular-nums text-primary">
@@ -1405,7 +1405,7 @@ function CollectorRow({
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         title={t("breakdown.toggle")}
-        className="group flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-left text-foreground transition-colors duration-200 hover:bg-foreground/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&_.truncate]:text-foreground/85"
+        className="group flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-start text-foreground transition-colors duration-200 hover:bg-foreground/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&_.truncate]:text-foreground/85"
       >
         {rowBody}
         <ChevronRightIcon

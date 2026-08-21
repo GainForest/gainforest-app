@@ -435,8 +435,8 @@ export function SignInPrompt({ collapsed = false }: { collapsed?: boolean }) {
     >
       {/* Aurora stage: a soft glow that breathes brighter on hover */}
       <div className="relative h-20 overflow-hidden rounded-xl bg-gradient-to-b from-primary/[0.07] to-transparent">
-        <div className="pointer-events-none absolute -left-3 -top-5 size-20 rounded-full bg-primary/20 blur-2xl transition-all duration-700 group-hover:scale-110 group-hover:bg-primary/35" />
-        <div className="pointer-events-none absolute -right-4 top-1 size-16 rounded-full bg-primary/10 blur-2xl transition-all duration-700 group-hover:scale-110 group-hover:bg-primary/25" />
+        <div className="pointer-events-none absolute -start-3 -top-5 size-20 rounded-full bg-primary/20 blur-2xl transition-all duration-700 group-hover:scale-110 group-hover:bg-primary/35" />
+        <div className="pointer-events-none absolute -end-4 top-1 size-16 rounded-full bg-primary/10 blur-2xl transition-all duration-700 group-hover:scale-110 group-hover:bg-primary/25" />
 
         {/* A spark that rises out of the lock as it opens */}
         <div className="absolute left-1/2 top-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary opacity-0 blur-[1px] transition-all duration-500 ease-out group-hover:-translate-y-[150%] group-hover:opacity-80" />
@@ -597,7 +597,7 @@ function AccountBlock({
     <div>
       <div
         className={cn(
-          "group flex items-center gap-1 rounded-xl pr-1 transition-colors",
+          "group flex items-center gap-1 rounded-xl pe-1 transition-colors",
           active ? "bg-primary/10" : "hover:bg-muted/50",
         )}
       >
@@ -638,7 +638,7 @@ function AccountBlock({
             transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
             className="overflow-hidden"
           >
-            <div className="ml-5 mt-0.5 flex flex-col gap-0.5 border-l border-border/60 py-1 pl-3">
+            <div className="ml-5 mt-0.5 flex flex-col gap-0.5 border-s border-border/60 py-1 pl-3">
               {account.subItems.map((item) => (
                 <Link
                   key={item.key}
@@ -940,7 +940,7 @@ function AuthenticatedMenu({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 6 }}
             transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
-            className="absolute top-full right-0 z-[1000] mt-2 w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-border/60 bg-background/75 shadow-xl shadow-black/10 backdrop-blur-xl supports-[backdrop-filter]:bg-background/65"
+            className="absolute top-full end-0 z-[1000] mt-2 w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-border/60 bg-background/75 shadow-xl shadow-black/10 backdrop-blur-xl supports-[backdrop-filter]:bg-background/65"
           >
             <div className="border-b border-border/60 px-3 py-3">
               <p className="text-sm font-medium text-foreground truncate">{displayLabel}</p>
@@ -1016,7 +1016,7 @@ function AuthenticatedMenu({
                 const label = invitation.groupName || invitation.groupHandle || invitation.repo;
                 const accepting = acceptingInvitationId === invitation.id;
                 return (
-                  <div key={invitation.id} className="flex items-center gap-3 rounded-xl px-2.5 py-2 text-left">
+                  <div key={invitation.id} className="flex items-center gap-3 rounded-xl px-2.5 py-2 text-start">
                     <AccountDot label={label} icon={<MailIcon className="h-4 w-4" />} />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-medium text-foreground">{label}</span>
@@ -1088,7 +1088,7 @@ function AuthenticatedMenu({
               {/* Sign out */}
               <button
                 onClick={redirectToLogout}
-                className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"
+                className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-start text-sm text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"
               >
                 <LogOutIcon className="h-3.5 w-3.5 shrink-0" />
                 {authT("signOut")}

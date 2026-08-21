@@ -13,7 +13,7 @@ import {
 
 function alignmentClassName(align?: string | null): string | undefined {
   if (align === "center") return "text-center";
-  if (align === "right") return "text-right";
+  if (align === "right") return "text-end";
   return undefined;
 }
 
@@ -90,7 +90,7 @@ function Block({ block }: { block: TimelineOptionalNoteBlock }) {
       );
     case "blockquote":
       return (
-        <blockquote className={cn("whitespace-pre-wrap border-l-2 border-primary/40 pl-3 italic text-foreground/70", alignmentClassName(block.align))}>
+        <blockquote className={cn("whitespace-pre-wrap border-s-2 border-primary/40 ps-3 italic text-foreground/70", alignmentClassName(block.align))}>
           <Spans spans={block.spans} />
         </blockquote>
       );
@@ -102,13 +102,13 @@ function Block({ block }: { block: TimelineOptionalNoteBlock }) {
       );
     case "list":
       return block.ordered ? (
-        <ol className="list-decimal space-y-1 pl-5 marker:text-muted-foreground">
+        <ol className="list-decimal space-y-1 ps-5 marker:text-muted-foreground">
           {block.items.map((item, index) => (
             <li key={index}><Spans spans={item} /></li>
           ))}
         </ol>
       ) : (
-        <ul className="list-disc space-y-1 pl-5 marker:text-muted-foreground">
+        <ul className="list-disc space-y-1 ps-5 marker:text-muted-foreground">
           {block.items.map((item, index) => (
             <li key={index}><Spans spans={item} /></li>
           ))}

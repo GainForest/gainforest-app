@@ -24,7 +24,7 @@ export function AccountHeroSkeleton() {
       <div className="relative h-32 sm:h-40 md:h-44">
         <Skeleton className="absolute inset-0 rounded-none" />
         {/* Share pill, with the "Account details" toggle tucked under it. */}
-        <div className="absolute right-3 top-3 z-10 flex flex-col items-end gap-1.5">
+        <div className="absolute end-3 top-3 z-10 flex flex-col items-end gap-1.5">
           <Skeleton className="h-8 w-10 rounded-full sm:w-20" />
           <Skeleton className="h-6 w-24 rounded-md" />
         </div>
@@ -95,17 +95,17 @@ function OverviewFolderSkeleton({ id }: { id: string }) {
   return (
     <div className="relative">
       {art ? (
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-0 flex justify-end pr-3.5">
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-0 flex justify-end pe-3.5">
           <div className="rotate-6">{art}</div>
         </div>
       ) : null}
 
       <div className="relative pt-7">
         {/* tab */}
-        <div className="absolute left-0 top-[12px] z-20 h-[19px] w-[42%] rounded-t-lg border border-b-0 border-border/60 bg-card" />
+        <div className="absolute start-0 top-[12px] z-20 h-[19px] w-[42%] rounded-t-lg border border-b-0 border-border/60 bg-card" />
         {/* body — the figure is a live count and the title a short label, so
             both are left unpainted; the card's min height holds the tile. */}
-        <div className="relative z-10 flex min-h-[86px] flex-col justify-end rounded-[18px] rounded-tl-none border border-border/60 bg-card p-3.5">
+        <div className="relative z-10 flex min-h-[86px] flex-col justify-end rounded-[18px] rounded-ss-none border border-border/60 bg-card p-3.5">
           <div className="h-6" />
           <div className="mt-1 h-[19px]" />
         </div>

@@ -295,7 +295,7 @@ export function DatasetLandingSection({
         <article
           key={card.id}
           className={cn(
-            "group flex h-full flex-col rounded-2xl border border-border bg-background p-5 text-left transition-all",
+            "group flex h-full flex-col rounded-2xl border border-border bg-background p-5 text-start transition-all",
             "hover:-translate-y-0.5 hover:border-foreground/15 hover:shadow-sm",
           )}
         >
@@ -333,7 +333,7 @@ export function DatasetLandingSection({
           </div>
 
           <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-border/70 pt-4 text-sm font-medium text-foreground">
-            <Button type="button" variant="ghost" size="sm" className="-ml-2" onClick={() => onOpen(card.id)}>
+            <Button type="button" variant="ghost" size="sm" className="-ms-2" onClick={() => onOpen(card.id)}>
               <DatabaseIcon className="size-4 text-muted-foreground" />
               {t("openTreeGroup")}
               <ChevronRightIcon className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />

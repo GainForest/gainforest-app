@@ -257,7 +257,7 @@ export function TimelineEntry({
           aria-expanded={expanded}
           aria-controls={panelId}
           onClick={() => setExpanded((value) => !value)}
-          className="min-w-0 flex-1 text-left"
+          className="min-w-0 flex-1 text-start"
         >
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs text-primary">{kindLabel(entry.kind, labels)}</span>

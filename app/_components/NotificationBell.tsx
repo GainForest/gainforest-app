@@ -81,7 +81,7 @@ export function NotificationBell({ session }: { session: AuthSession | null }) {
           <BellIcon className="size-4" aria-hidden />
           {unreadCount > 0 ? (
             <span
-              className="absolute -right-0.5 -top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-none text-primary-foreground"
+              className="absolute -end-0.5 -top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-none text-primary-foreground"
               aria-hidden
             >
               {badgeLabel}
@@ -165,7 +165,7 @@ function NotificationRow({
           className="size-8"
           sizes="32px"
         />
-        <span className="absolute -bottom-0.5 -right-0.5 grid size-4 place-items-center rounded-full bg-background text-primary ring-1 ring-border">
+        <span className="absolute -bottom-0.5 -end-0.5 grid size-4 place-items-center rounded-full bg-background text-primary ring-1 ring-border">
           {item.kind === "like" ? (
             <HeartIcon className="size-2.5 fill-current" aria-hidden />
           ) : item.kind === "mention" ? (

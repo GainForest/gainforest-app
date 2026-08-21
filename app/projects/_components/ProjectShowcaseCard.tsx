@@ -227,7 +227,7 @@ export function ProjectShowcaseCard({
         aria-label={t("open", { title: record.title })}
         tabIndex={isActive ? undefined : -1}
         aria-hidden={!isActive}
-        className="group relative block aspect-[5/8] h-full w-full cursor-pointer rounded-[20px] text-left shadow-[0_22px_44px_-22px_rgba(0,0,0,0.45),0_10px_18px_-12px_rgba(0,0,0,0.35)] outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className="group relative block aspect-[5/8] h-full w-full cursor-pointer rounded-[20px] text-start shadow-[0_22px_44px_-22px_rgba(0,0,0,0.45),0_10px_18px_-12px_rgba(0,0,0,0.35)] outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         style={{
           rotateX,
           rotateY,
@@ -300,7 +300,7 @@ export function ProjectShowcaseCard({
                   }
                 : {})}
               className={cn(
-                "inline-flex min-w-0 max-w-[65%] items-center gap-1.5 rounded-full border border-white/20 bg-black/30 py-0.5 pl-0.5 pr-2 text-[10px] font-medium text-white/90 backdrop-blur-md @max-[12rem]:pr-0.5",
+                "inline-flex min-w-0 max-w-[65%] items-center gap-1.5 rounded-full border border-white/20 bg-black/30 py-0.5 ps-0.5 pe-2 text-[10px] font-medium text-white/90 backdrop-blur-md @max-[12rem]:pe-0.5",
                 canFilterOwner && "cursor-pointer transition-colors hover:bg-black/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70",
               )}
             >
@@ -325,7 +325,7 @@ export function ProjectShowcaseCard({
                 </span>
               ) : null}
               {acceptsGainForestDonations ? (
-                <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-white/20 bg-black/30 py-0.5 pl-1 pr-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/90 backdrop-blur-md">
+                <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-white/20 bg-black/30 py-0.5 ps-1 pe-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/90 backdrop-blur-md">
                   <Image src="/assets/media/images/gainforest-logo.svg" width={12} height={12} alt="" className="h-3 w-3 shrink-0 object-contain" />
                   {t("donate")}
                 </span>

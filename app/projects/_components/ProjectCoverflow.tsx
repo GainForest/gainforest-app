@@ -218,7 +218,7 @@ export function ProjectCoverflow({
           onClick={() => navigate(safeActive - 1)}
           disabled={safeActive <= 0}
           aria-label={t("previous")}
-          className={`${arrowClass} left-0 ml-1`}
+          className={`${arrowClass} start-0 ms-1`}
         >
           <ChevronLeftIcon className="h-4 w-4" aria-hidden />
         </button>
@@ -227,7 +227,7 @@ export function ProjectCoverflow({
           onClick={() => navigate(safeActive + 1)}
           disabled={safeActive >= records.length - 1}
           aria-label={t("next")}
-          className={`${arrowClass} right-0 mr-1`}
+          className={`${arrowClass} end-0 me-1`}
         >
           <ChevronRightIcon className="h-4 w-4" aria-hidden />
         </button>

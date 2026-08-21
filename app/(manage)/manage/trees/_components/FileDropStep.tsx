@@ -720,7 +720,7 @@ export default function FileDropStep({
                 disabled={disabled}
                 title={disabledReason ?? undefined}
                 className={cn(
-                  "rounded-xl border p-4 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60",
+                  "rounded-xl border p-4 text-start transition-colors disabled:cursor-not-allowed disabled:opacity-60",
                   datasetMode === option.mode ? "border-primary bg-primary/5" : "border-border bg-background hover:bg-muted/30",
                 )}
               >
@@ -797,7 +797,7 @@ export default function FileDropStep({
                 type="button"
                 onClick={() => setEstablishmentMeans(isSelected ? null : option.value)}
                 className={cn(
-                  "flex w-full items-start gap-3 border-b border-border px-4 py-3 text-left transition-colors last:border-b-0",
+                  "flex w-full items-start gap-3 border-b border-border px-4 py-3 text-start transition-colors last:border-b-0",
                   isSelected ? "bg-primary/10" : "bg-background hover:bg-muted/30",
                 )}
               >

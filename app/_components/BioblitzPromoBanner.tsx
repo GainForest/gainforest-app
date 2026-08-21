@@ -48,7 +48,7 @@ export function BioblitzPromoBanner() {
           mirrors the dismiss column so the message stays roughly centered. */}
       <Link
         href="/bioblitz"
-        className="flex min-w-0 flex-1 flex-nowrap items-center justify-start gap-x-2 py-2 pl-3 pr-2 transition-colors hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-foreground/40 sm:flex-wrap sm:justify-center sm:gap-x-3 sm:gap-y-1 sm:py-2.5 sm:pl-12 sm:pr-3 sm:text-center"
+        className="flex min-w-0 flex-1 flex-nowrap items-center justify-start gap-x-2 py-2 ps-3 pe-2 transition-colors hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-foreground/40 sm:flex-wrap sm:justify-center sm:gap-x-3 sm:gap-y-1 sm:py-2.5 sm:ps-12 sm:pe-3 sm:text-center"
       >
         <span className="inline-flex min-w-0 flex-1 items-center gap-2 sm:flex-none">
           <BinocularsIcon className="hidden size-4 shrink-0 sm:block" aria-hidden />

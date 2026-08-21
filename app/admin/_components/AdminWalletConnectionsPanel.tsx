@@ -86,12 +86,12 @@ export function AdminWalletConnectionsPanel() {
   return (
     <div className="space-y-4">
       <div className="relative">
-        <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <SearchIcon className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder={t("searchPlaceholder")}
-          className="pl-9"
+          className="ps-9"
           aria-label={t("searchPlaceholder")}
           autoFocus
         />
@@ -172,7 +172,7 @@ function WalletConnectionRow({ row }: { row: Row }) {
       </div>
 
       {hasAny ? (
-        <div className="mt-2.5 flex flex-col gap-1.5 pl-13 text-xs">
+        <div className="mt-2.5 flex flex-col gap-1.5 ps-13 text-xs">
           {row.vault ? (
             <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground">
               <WalletIcon className="size-3.5 text-primary" />
@@ -201,7 +201,7 @@ function WalletConnectionRow({ row }: { row: Row }) {
           ))}
         </div>
       ) : (
-        <p className="mt-2.5 pl-13 text-xs text-muted-foreground">{t("noWallet")}</p>
+        <p className="mt-2.5 ps-13 text-xs text-muted-foreground">{t("noWallet")}</p>
       )}
     </li>
   );

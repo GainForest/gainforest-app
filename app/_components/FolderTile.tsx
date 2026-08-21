@@ -61,7 +61,7 @@ export function FolderTile({
   const inner = (
     <>
       {art ? (
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-0 flex justify-end pr-3.5">
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-0 flex justify-end pe-3.5">
           <div className="rotate-6 transition-transform duration-300 ease-out group-hover:-translate-y-1 group-hover:rotate-0">
             {art}
           </div>
@@ -72,14 +72,14 @@ export function FolderTile({
         {/* tab */}
         <div
           className={cn(
-            "absolute left-0 top-[12px] z-20 h-[19px] w-[42%] rounded-t-lg border border-b-0 bg-card transition-colors duration-300",
+            "absolute start-0 top-[12px] z-20 h-[19px] w-[42%] rounded-t-lg border border-b-0 bg-card transition-colors duration-300",
             active ? "border-primary/50" : "border-border/60 group-hover:border-primary/40",
           )}
         />
         {/* body */}
         <div
           className={cn(
-            "relative z-10 flex min-h-[86px] flex-col justify-end rounded-[18px] rounded-tl-none border bg-card p-3.5 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-[0_14px_32px_-16px_oklch(0_0_0/0.26)]",
+            "relative z-10 flex min-h-[86px] flex-col justify-end rounded-[18px] rounded-ss-none border bg-card p-3.5 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-[0_14px_32px_-16px_oklch(0_0_0/0.26)]",
             active ? "border-primary/50 shadow-[0_14px_32px_-16px_oklch(0_0_0/0.26)]" : "border-border/60 group-hover:border-primary/40",
           )}
         >
@@ -100,7 +100,7 @@ export function FolderTile({
   );
 
   const surfaceClass = cn(
-    "group relative block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 rounded-[18px]",
+    "group relative block w-full text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 rounded-[18px]",
     disabled && "pointer-events-none opacity-60",
   );
 
@@ -129,7 +129,7 @@ export function FolderTile({
       )}
 
       {action ? (
-        <div className="absolute bottom-2 right-2 z-30 opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover/folder:opacity-100 [@media(hover:none)]:opacity-100">
+        <div className="absolute bottom-2 end-2 z-30 opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover/folder:opacity-100 [@media(hover:none)]:opacity-100">
           {action}
         </div>
       ) : null}
@@ -154,16 +154,16 @@ export function FolderTileSkeleton({ art, index = 0 }: { art?: ReactNode; index?
     >
       <div className="relative block w-full">
         {art ? (
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-0 flex justify-end pr-3.5">
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-0 flex justify-end pe-3.5">
             <div className="rotate-6">{art}</div>
           </div>
         ) : null}
 
         <div className="relative pt-7">
           {/* tab */}
-          <div className="absolute left-0 top-[12px] z-20 h-[19px] w-[42%] rounded-t-lg border border-b-0 border-border/60 bg-card" />
+          <div className="absolute start-0 top-[12px] z-20 h-[19px] w-[42%] rounded-t-lg border border-b-0 border-border/60 bg-card" />
           {/* body */}
-          <div className="relative z-10 flex min-h-[86px] flex-col justify-end rounded-[18px] rounded-tl-none border border-border/60 bg-card p-3.5">
+          <div className="relative z-10 flex min-h-[86px] flex-col justify-end rounded-[18px] rounded-ss-none border border-border/60 bg-card p-3.5">
             <Skeleton className="h-7 w-10" />
             <Skeleton className="mt-1.5 h-3 w-20 rounded-full" />
           </div>

@@ -189,14 +189,14 @@ export function AddToProjectModal({
           <label htmlFor="add-to-project-search" className="sr-only">
             {t("searchLabel")}
           </label>
-          <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <SearchIcon className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             id="add-to-project-search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder={t("searchPlaceholder")}
             disabled={isPending}
-            className="pl-9"
+            className="ps-9"
           />
         </div>
 
@@ -226,7 +226,7 @@ export function AddToProjectModal({
                     }}
                     disabled={isPending}
                     className={cn(
-                      "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/35 disabled:cursor-not-allowed disabled:opacity-60",
+                      "flex w-full items-start gap-3 px-4 py-3 text-start transition-colors hover:bg-muted/35 disabled:cursor-not-allowed disabled:opacity-60",
                       isSelected ? "bg-primary/5" : "bg-background",
                     )}
                   >

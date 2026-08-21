@@ -77,7 +77,7 @@ export function AuthorChip({
           openAccount(did);
         }}
         title="View profile"
-        className={`-mx-1 flex w-full min-w-0 items-center gap-2 rounded-lg px-1 py-0.5 text-left transition-colors hover:bg-surface-sunken ${className}`}
+        className={`-mx-1 flex w-full min-w-0 items-center gap-2 rounded-lg px-1 py-0.5 text-start transition-colors hover:bg-surface-sunken ${className}`}
       >
         <Avatar did={did} handle={handle} avatar={avatar} avatarRef={avatarRefOverride ?? null} className={av} />
         <div className="min-w-0 flex-1 leading-tight">

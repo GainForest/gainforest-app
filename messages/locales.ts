@@ -73,26 +73,37 @@ import swPrivacy from "./sw/privacy.json";
 import swChangelog from "./sw/changelog.json";
 import swTainaGuide from "./sw/tainaGuide.json";
 import swShop from "./sw/shop.json";
+import arCommon from "./ar/common.json";
 import type { SupportedLanguageCode } from "@/lib/i18n/languages";
+import { mergeMessages } from "@/lib/i18n/merge-messages";
+
+const enMessages = {
+  ...enLanding,
+  audiomothGuide: enAudioMothGuide,
+  common: enCommon,
+  marketplace: enMarketplace,
+  bumicert: enBumicert,
+  cart: enCart,
+  upload: enUpload,
+  modals: enModals,
+  legacy: enLegacy,
+  privacy: enPrivacy,
+  deleteAccount: enDeleteAccount,
+  changelog: enChangelog,
+  tainaGuide: enTainaGuide,
+  shop: enShop,
+  events: enEvents,
+};
+
+// Arabic is mid-translation: only the namespaces listed here are real Arabic
+// copy, and everything else falls back to English so no key is ever missing.
+// Move a namespace out of this object only once its ar/*.json file exists.
+const arMessages = mergeMessages(enMessages, {
+  common: arCommon,
+});
 
 export const messagesByLocale = {
-  en: {
-    ...enLanding,
-    audiomothGuide: enAudioMothGuide,
-    common: enCommon,
-    marketplace: enMarketplace,
-    bumicert: enBumicert,
-    cart: enCart,
-    upload: enUpload,
-    modals: enModals,
-    legacy: enLegacy,
-    privacy: enPrivacy,
-    deleteAccount: enDeleteAccount,
-    changelog: enChangelog,
-    tainaGuide: enTainaGuide,
-    shop: enShop,
-    events: enEvents,
-  },
+  en: enMessages,
   es: {
     ...esLanding,
     audiomothGuide: esAudioMothGuide,
@@ -161,4 +172,5 @@ export const messagesByLocale = {
     shop: idShop,
     events: idEvents,
   },
+  ar: arMessages,
 } satisfies Record<SupportedLanguageCode, object>;

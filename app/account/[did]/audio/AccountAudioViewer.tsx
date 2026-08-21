@@ -656,7 +656,7 @@ export function AccountAudioViewer({
             <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
               {t("title")}
               {total > 0 ? (
-                <span className="ml-2.5 align-middle font-sans text-sm font-normal not-italic tracking-normal text-muted-foreground">
+                <span className="ms-2.5 align-middle font-sans text-sm font-normal not-italic tracking-normal text-muted-foreground">
                   {t("groupCount", { count: total })}
                 </span>
               ) : null}
@@ -665,7 +665,7 @@ export function AccountAudioViewer({
         </div>
         {selectedCount > 0 ? (
           /* Drive-style selection toolbar — replaces the header actions. */
-          <div className="flex items-center gap-1.5 rounded-full border border-border bg-card py-1 pl-1.5 pr-1.5 shadow-sm">
+          <div className="flex items-center gap-1.5 rounded-full border border-border bg-card py-1 ps-1.5 pe-1.5 shadow-sm">
             <button
               type="button"
               onClick={clearSelection}

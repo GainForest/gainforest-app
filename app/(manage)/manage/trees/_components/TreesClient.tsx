@@ -318,7 +318,7 @@ function DeleteTreeGroupConfirmModal({
 
       <div className="space-y-2 text-sm text-muted-foreground">
         <p className="font-medium text-foreground">This will delete:</p>
-        <ul className="list-disc space-y-1 pl-5">
+        <ul className="list-disc space-y-1 ps-5">
           <li>the tree group</li>
           <li>{shortCount(target.treeCount, "tree", "trees")} in this tree group</li>
           <li>{shortCount(target.measurementCount, "measurement", "measurements")} linked to those trees</li>
@@ -391,7 +391,7 @@ function Field({
     <label className="flex flex-col gap-1.5 text-sm text-muted-foreground">
       <span>
         {label}
-        {required ? <span className="ml-0.5 text-destructive">*</span> : null}
+        {required ? <span className="ms-0.5 text-destructive">*</span> : null}
       </span>
       {children}
     </label>
@@ -1434,7 +1434,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
       </div>
 
       {!showTreeGroupLanding && treeGroupCards.length > 0 ? (
-        <Button variant="ghost" className="-ml-2 w-fit" onClick={handleReturnToTreeGroups}>
+        <Button variant="ghost" className="-ms-2 w-fit" onClick={handleReturnToTreeGroups}>
           <ChevronLeftIcon />
           Back to tree groups
         </Button>
@@ -1465,7 +1465,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex w-full flex-col gap-2 sm:flex-row lg:max-w-2xl">
             <div className="relative w-full sm:max-w-sm">
-              <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <SearchIcon className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={showTreeGroupLanding ? treeGroupSearchQuery : searchQuery}
                 onChange={(event) => {
@@ -1473,7 +1473,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                   else handleTreeSearchChange(event.target.value);
                 }}
                 placeholder={showTreeGroupLanding ? treeFilterT("searchTreeGroups") : treeFilterT("searchTrees")}
-                className="pl-9"
+                className="ps-9"
               />
             </div>
             {showTreeGroupLanding && treeGroupRecorderOptions.length > 0 ? (
@@ -1486,7 +1486,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                 >
                   <SelectTrigger
                     aria-label={treeFilterT("filterByRecorder")}
-                    className="h-auto min-w-0 flex-1 border-0 bg-transparent p-0 text-left shadow-none ring-offset-0 focus:ring-0 [&>svg]:ml-2 [&>svg]:size-4"
+                    className="h-auto min-w-0 flex-1 border-0 bg-transparent p-0 text-start shadow-none ring-offset-0 focus:ring-0 [&>svg]:ms-2 [&>svg]:size-4"
                   >
                     <SelectValue placeholder={treeFilterT("allRecorders")} />
                   </SelectTrigger>
@@ -1640,7 +1640,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                     <button
                       type="button"
                       onClick={() => setQueryValues({ tree: tree.rkey })}
-                      className="min-w-0 flex-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                      className="min-w-0 flex-1 text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 space-y-1">

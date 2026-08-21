@@ -38,7 +38,7 @@ export function FieldTable({
             <div className="shrink-0 font-mono text-[12.5px] text-primary [overflow-wrap:anywhere] sm:basis-[200px]">
               {prop.name}
               {prop.required && (
-                <span className="ml-1 text-destructive" title={labels.required} aria-label={labels.required}>
+                <span className="ms-1 text-destructive" title={labels.required} aria-label={labels.required}>
                   *
                 </span>
               )}

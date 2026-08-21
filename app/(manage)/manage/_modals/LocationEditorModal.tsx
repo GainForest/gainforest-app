@@ -481,7 +481,7 @@ export function LocationEditorModal({
         {!manualMode ? (
           <div className="relative">
             <div className="relative">
-              <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+              <SearchIcon className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -491,7 +491,7 @@ export function LocationEditorModal({
                 autoFocus
               />
               {searching ? (
-                <Loader2Icon className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground" aria-hidden />
+                <Loader2Icon className="absolute end-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground" aria-hidden />
               ) : null}
             </div>
             {results.length > 0 ? (
@@ -501,7 +501,7 @@ export function LocationEditorModal({
                     <button
                       type="button"
                       onClick={() => pickResult(place)}
-                      className="flex w-full items-start gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-muted"
+                      className="flex w-full items-start gap-2 rounded-lg px-3 py-2 text-start text-sm transition-colors hover:bg-muted"
                     >
                       {place.kind === "country" && getCountry(place.countryCode) ? (
                         <span className="mt-0.5 text-base leading-none" aria-hidden>{getCountry(place.countryCode)!.emoji}</span>
@@ -618,7 +618,7 @@ export function LocationEditorModal({
       {saving ? (
         <div className="mt-4">
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-            <div className="h-full w-full origin-left animate-pulse rounded-full bg-[var(--primary)]" />
+            <div className="h-full w-full origin-start animate-pulse rounded-full bg-[var(--primary)]" />
           </div>
           <p className="mt-1.5 text-xs text-muted-foreground" aria-live="polite">{t("savingLocation")}</p>
         </div>

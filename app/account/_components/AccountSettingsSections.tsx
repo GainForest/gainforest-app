@@ -210,7 +210,7 @@ function HandleSection({ did, handle: initialHandle }: { did: string; handle: st
                     setError(null);
                     setMode("custom");
                   }}
-                  className="ml-auto inline-flex items-center gap-1 text-xs text-muted-foreground underline-offset-2 hover:underline disabled:opacity-50"
+                  className="ms-auto inline-flex items-center gap-1 text-xs text-muted-foreground underline-offset-2 hover:underline disabled:opacity-50"
                 >
                   <GlobeIcon className="h-3 w-3" /> {t("useOwnDomain")}
                 </button>
@@ -248,7 +248,7 @@ function HandleSection({ did, handle: initialHandle }: { did: string; handle: st
                     type="button"
                     disabled={saving}
                     onClick={startEdit}
-                    className="ml-auto inline-flex items-center gap-1 text-xs text-muted-foreground underline-offset-2 hover:underline disabled:opacity-50"
+                    className="ms-auto inline-flex items-center gap-1 text-xs text-muted-foreground underline-offset-2 hover:underline disabled:opacity-50"
                   >
                     <AtSignIcon className="h-3 w-3" /> {t("useSubdomain", { suffix })}
                   </button>
@@ -794,7 +794,7 @@ function BlueskySection({ did }: { did: string }) {
           >
             <span
               className={cn(
-                "absolute left-0.5 top-0.5 size-5 rounded-full bg-background shadow transition-transform",
+                "absolute start-0.5 top-0.5 size-5 rounded-full bg-background shadow transition-transform",
                 enabled && "translate-x-5",
               )}
             />
@@ -1213,7 +1213,7 @@ function SettingsGroup({
 }) {
   return (
     <AccordionItem value={value} className="overflow-hidden rounded-xl border border-border bg-background px-4">
-      <AccordionTrigger className="py-4 text-left hover:no-underline">
+      <AccordionTrigger className="py-4 text-start hover:no-underline">
         <span className="flex min-w-0 flex-col pr-3">
           <span className="text-sm font-medium text-foreground">{title}</span>
           <span className="mt-0.5 text-xs font-normal leading-5 text-muted-foreground">{description}</span>

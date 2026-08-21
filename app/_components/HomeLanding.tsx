@@ -110,7 +110,7 @@ function LandingTopNavbar() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5, delay: 0.1 }}
-      className="fixed top-0 right-0 left-0 z-50"
+      className="fixed top-0 end-0 start-0 z-50"
     >
       <div className="pointer-events-none absolute inset-0 h-24">
         <div className="absolute inset-0 z-1 bg-gradient-to-b from-background/85 to-background/0" />
@@ -198,7 +198,7 @@ function LandingHero() {
   const { videoRef, videoReady, setVideoReady } = useAmbientVideo();
   return (
     <section className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-background">
-      <div className="absolute inset-y-0 right-0 w-full overflow-hidden">
+      <div className="absolute inset-y-0 end-0 w-full overflow-hidden">
         <motion.div
           initial={{ scale: 1.04, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -715,13 +715,13 @@ function OpenNetworkSection() {
             {t("protocol.poweredBy")}
           </div>
 
-          <div aria-hidden="true" className="hidden h-8 border-l border-dashed border-border sm:block" />
-          <div className="my-5 h-6 border-l border-dashed border-border sm:hidden" />
+          <div aria-hidden="true" className="hidden h-8 border-s border-dashed border-border sm:block" />
+          <div className="my-5 h-6 border-s border-dashed border-border sm:hidden" />
 
           <div className="relative w-full">
             <div
               aria-hidden="true"
-              className="absolute top-1/2 left-0 hidden w-full -translate-y-1/2 border-t border-dashed border-border sm:block"
+              className="absolute top-1/2 start-0 hidden w-full -translate-y-1/2 border-t border-dashed border-border sm:block"
             />
             <div className="relative grid grid-cols-1 gap-5 sm:grid-cols-3">
               {NETWORK_APPS.map((app, index) => (
@@ -830,7 +830,7 @@ function AccordionItem({
             transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
             className="overflow-hidden"
           >
-            <p className="max-w-lg pb-4 pl-11 text-[15px] leading-relaxed text-muted-foreground dark:text-foreground/75">{t(`${item}.answer`)}</p>
+            <p className="max-w-lg pb-4 ps-11 text-[15px] leading-relaxed text-muted-foreground dark:text-foreground/75">{t(`${item}.answer`)}</p>
           </motion.div>
         )}
       </AnimatePresence>

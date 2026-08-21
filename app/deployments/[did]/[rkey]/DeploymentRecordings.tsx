@@ -63,7 +63,7 @@ export function DeploymentRecordings({
         <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
           {t("title")}
           {items && items.length > 0 ? (
-            <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 font-mono text-[11px] normal-case tracking-normal text-primary">
+            <span className="ms-2 rounded-full bg-primary/10 px-2 py-0.5 font-mono text-[11px] normal-case tracking-normal text-primary">
               {items.length}
             </span>
           ) : null}

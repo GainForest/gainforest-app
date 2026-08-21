@@ -40,13 +40,13 @@ const EMBLEM_SIZES = {
   sm: {
     emblem: "h-5 w-5",
     icon: "size-3",
-    dot: "-bottom-0.5 -right-0.5 px-[3px] text-[7px] leading-[9px]",
+    dot: "-bottom-0.5 -end-0.5 px-[3px] text-[7px] leading-[9px]",
   },
   /** Profile hero size, matching the Trusted-by emblems. */
   md: {
     emblem: "h-8 w-8",
     icon: "size-4",
-    dot: "-bottom-0.5 -right-0.5 px-1 text-[9px] leading-3",
+    dot: "-bottom-0.5 -end-0.5 px-1 text-[9px] leading-3",
   },
 } as const;
 
@@ -86,7 +86,7 @@ function awardTooltipFor(group: AwardEmblemGroup, t: Translator) {
   if (!group.isBioblitz || labels.length <= 1) return labels[0] ?? "";
 
   return (
-    <span className="flex max-w-64 flex-col gap-1 text-left">
+    <span className="flex max-w-64 flex-col gap-1 text-start">
       <span className="font-semibold">{t("bioblitzWinsTooltip", { count: labels.length })}</span>
       {labels.map((label, index) => (
         <span key={`${group.badges[index]}-${index}`}>{label}</span>
@@ -118,7 +118,7 @@ export function AwardEmblems({
   return (
     // Slight padding so the overhanging count dot never gets clipped by a
     // parent with overflow-hidden.
-    <span className={`inline-flex shrink-0 items-center -space-x-1 pb-0.5 pr-0.5 ${className}`}>
+    <span className={`inline-flex shrink-0 items-center -space-x-1 pb-0.5 pe-0.5 ${className}`}>
       {groups.map((group) => {
         const Icon = group.isBioblitz ? TrophyIcon : recognitionBadgeIcon(group.badges[0]);
         const count = group.badges.length;

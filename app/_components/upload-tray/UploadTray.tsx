@@ -98,7 +98,7 @@ export function UploadTray() {
           className={cn(
             "fixed inset-x-0 bottom-0 z-[75] overflow-hidden border-t border-border bg-background",
             "shadow-[0_-14px_34px_-18px_rgba(20,20,19,0.3)] rounded-t-2xl",
-            "sm:inset-x-auto sm:bottom-4 sm:right-4 sm:w-[372px] sm:rounded-2xl sm:border",
+            "sm:inset-x-auto sm:bottom-4 sm:end-4 sm:w-[372px] sm:rounded-2xl sm:border",
             "sm:shadow-[0_18px_40px_-12px_rgba(20,20,19,0.22),0_2px_6px_rgba(20,20,19,0.06)]",
           )}
         >

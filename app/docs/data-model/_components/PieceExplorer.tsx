@@ -89,7 +89,7 @@ export function PieceExplorer() {
               aria-pressed={active}
               onClick={() => setSelected(piece)}
               className={cn(
-                "flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-[12.5px] font-medium leading-snug transition-colors",
+                "flex items-center gap-2 rounded-xl border px-3 py-2.5 text-start text-[12.5px] font-medium leading-snug transition-colors",
                 active
                   ? "border-primary bg-primary/8 text-foreground"
                   : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",

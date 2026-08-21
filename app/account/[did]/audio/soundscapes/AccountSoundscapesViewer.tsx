@@ -120,7 +120,7 @@ export function AccountSoundscapesViewer({
       <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
         {t("soundscapes")}
         {total > 0 ? (
-          <span className="ml-2.5 align-middle font-sans text-sm font-normal not-italic tracking-normal text-muted-foreground">
+          <span className="ms-2.5 align-middle font-sans text-sm font-normal not-italic tracking-normal text-muted-foreground">
             {t("soundscapesCount", { count: total })}
           </span>
         ) : null}

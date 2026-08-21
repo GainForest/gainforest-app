@@ -115,7 +115,7 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
         className="drawer-scrim absolute inset-0 bg-foreground/25 backdrop-blur-[3px]"
         onClick={onClose}
       />
-      <div className="drawer-sheet thin-scroll relative flex h-full w-full max-w-[540px] flex-col overflow-y-auto overscroll-contain bg-background shadow-[-24px_0_60px_-30px_rgba(20,30,15,0.5)] sm:my-3 sm:h-[calc(100%_-_1.5rem)] sm:rounded-l-[28px] sm:border sm:border-r-0 sm:border-border-soft">
+      <div className="drawer-sheet thin-scroll relative flex h-full w-full max-w-[540px] flex-col overflow-y-auto overscroll-contain bg-background shadow-[-24px_0_60px_-30px_rgba(20,30,15,0.5)] sm:my-3 sm:h-[calc(100%_-_1.5rem)] sm:rounded-s-[28px] sm:border sm:border-e-0 sm:border-border-soft">
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border-soft bg-background/95 px-5 py-4 backdrop-blur-xl">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-foreground/[0.06] px-2.5 py-1 text-[11.5px] font-medium text-foreground/70">

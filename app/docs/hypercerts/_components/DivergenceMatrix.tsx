@@ -292,7 +292,7 @@ export function DivergenceMatrix() {
           <div className="mt-4 flex flex-col gap-5">
             <div className="flex flex-col gap-2.5">
               <p className="m-0 text-[13.5px] leading-relaxed text-muted-foreground">
-                <span className="mr-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground/60">
+                <span className="me-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground/60">
                   {t("gainforestLabel")}
                 </span>
                 <RichText text={active.gainforest} />
@@ -301,7 +301,7 @@ export function DivergenceMatrix() {
             </div>
             <div className="flex flex-col gap-2.5">
               <p className="m-0 text-[13.5px] leading-relaxed text-muted-foreground">
-                <span className="mr-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground/60">
+                <span className="me-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground/60">
                   {t("maearthLabel")}
                 </span>
                 <RichText text={active.maearth} />

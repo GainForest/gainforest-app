@@ -286,7 +286,7 @@ function EquipmentTable({
 
   return (
     <div className="mt-4 overflow-x-auto rounded-2xl border border-border bg-background">
-      <table className="w-full min-w-[720px] border-collapse text-left">
+      <table className="w-full min-w-[720px] border-collapse text-start">
         <thead>
           <tr className="border-b border-border bg-muted/40 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
             <th className="px-3 py-2.5">{t("table.equipment")}</th>
@@ -295,7 +295,7 @@ function EquipmentTable({
             <th className="px-3 py-2.5">{t("table.holder")}</th>
             <th className="px-3 py-2.5">{t("table.site")}</th>
             {showMember ? <th className="px-3 py-2.5">{t("table.member")}</th> : null}
-            <th className="px-3 py-2.5 text-right">{t("table.updated")}</th>
+            <th className="px-3 py-2.5 text-end">{t("table.updated")}</th>
             {anyEditable ? <th className="w-[1%] px-3 py-2.5" aria-label={t("edit")} /> : null}
           </tr>
         </thead>
@@ -344,11 +344,11 @@ function EquipmentTable({
                     <MemberBadge did={it.did} profile={profiles[it.did]} mine={mine} youLabel={t("you")} />
                   </td>
                 ) : null}
-                <td className="whitespace-nowrap px-3 py-3 text-right text-xs text-muted-foreground">
+                <td className="whitespace-nowrap px-3 py-3 text-end text-xs text-muted-foreground">
                   {formatRelative(it.updatedAt)}
                 </td>
                 {anyEditable ? (
-                  <td className="px-3 py-3 text-right">
+                  <td className="px-3 py-3 text-end">
                     {mine ? (
                       <Button variant="outline" size="xs" onClick={() => onEdit(it)}>
                         {t("edit")}

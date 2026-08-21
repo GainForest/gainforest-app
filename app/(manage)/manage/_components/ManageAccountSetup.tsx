@@ -222,7 +222,7 @@ function OnboardingMediaField({
       <button
         type="button"
         onClick={() => openImageEditor("banner")}
-        className="relative block w-full overflow-hidden rounded-t-[24px] mask-b-from-0 bg-muted/80 border-t text-left"
+        className="relative block w-full overflow-hidden rounded-t-[24px] mask-b-from-0 bg-muted/80 border-t text-start"
       >
         <div className="aspect-[16/6] w-full">
           {bannerImageUrl ? (
@@ -239,12 +239,12 @@ function OnboardingMediaField({
           )}
         </div>
 
-        <span className="absolute top-3 right-3 rounded-full bg-background/75 px-2.5 py-1 text-xs text-foreground backdrop-blur-sm">
+        <span className="absolute top-3 end-3 rounded-full bg-background/75 px-2.5 py-1 text-xs text-foreground backdrop-blur-sm">
           {bannerImageUrl ? "Change banner" : "Add banner"}
         </span>
       </button>
 
-      <div className="flex items-start gap-4 pl-4">
+      <div className="flex items-start gap-4 ps-4">
         <button
           type="button"
           onClick={() => openImageEditor("primary")}
@@ -368,7 +368,7 @@ function OrganizationSetupDetailsPanel({
 
           <button
             type="button"
-            className="relative min-h-[72px] rounded-2xl border-2 border-dashed bg-background px-2 py-1 text-left hover:bg-muted"
+            className="relative min-h-[72px] rounded-2xl border-2 border-dashed bg-background px-2 py-1 text-start hover:bg-muted"
             onClick={handleOpenLocationEditor}
           >
             {locationLabel ? (
@@ -378,7 +378,7 @@ function OrganizationSetupDetailsPanel({
                   <span>{locationT("basedIn")}</span>
                 </span>
                 {locationFlag ? (
-                  <span className="absolute top-0 right-2 text-2xl">{locationFlag}</span>
+                  <span className="absolute top-0 end-2 text-2xl">{locationFlag}</span>
                 ) : null}
                 <span className="text-sm font-medium">
                   {locationLabel.length > 22
@@ -401,7 +401,7 @@ function OrganizationSetupDetailsPanel({
             <PopoverTrigger asChild>
               <button
                 type="button"
-                className="relative min-h-[72px] rounded-2xl border-2 border-dashed bg-background px-2 py-1 text-left hover:bg-muted"
+                className="relative min-h-[72px] rounded-2xl border-2 border-dashed bg-background px-2 py-1 text-start hover:bg-muted"
               >
                 {selectedDate ? (
                   <div className="flex h-full flex-col justify-between items-start">
@@ -411,7 +411,7 @@ function OrganizationSetupDetailsPanel({
                     </span>
                     <span className="self-end text-sm font-medium">
                       {format(selectedDate, "d MMMM,")}
-                      <span className="ml-1 text-lg font-bold opacity-40 md:text-2xl">
+                      <span className="ms-1 text-lg font-bold opacity-40 md:text-2xl">
                         {format(selectedDate, "yyyy")}
                       </span>
                     </span>

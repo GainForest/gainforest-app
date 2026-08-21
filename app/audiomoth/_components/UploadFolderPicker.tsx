@@ -128,7 +128,7 @@ export function UploadFolderPicker({
                     aria-pressed={selected}
                     onClick={() => onSelect(selected ? "" : folder.uri)}
                     className={cn(
-                      "flex w-full items-center gap-3 border-b border-border/60 px-4 py-2.5 text-left transition-colors last:border-0",
+                      "flex w-full items-center gap-3 border-b border-border/60 px-4 py-2.5 text-start transition-colors last:border-0",
                       selected
                         ? "bg-primary/10 ring-1 ring-inset ring-primary/40"
                         : "hover:bg-muted/50",

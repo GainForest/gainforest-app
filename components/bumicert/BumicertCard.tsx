@@ -100,7 +100,7 @@ export function BumicertCardVisual({
         )}
       </div>
       <div className="relative px-4 py-3 -mt-6 z-1 flex-1 flex flex-col justify-between">
-        <div className="absolute -top-2 left-0 right-0 h-8 bg-linear-to-b from-transparent via-background/65 to-background z-0"></div>
+        <div className="absolute -top-2 start-0 end-0 h-8 bg-linear-to-b from-transparent via-background/65 to-background z-0"></div>
         <div>
           <h3 className="relative text-2xl font-instrument italic text-foreground leading-snug line-clamp-2 z-1">
             {title}
@@ -114,7 +114,7 @@ export function BumicertCardVisual({
         {normalizedObjectives.length > 0 && <OneLineTextPillRow items={normalizedObjectives} />}
       </div>
 
-      <div className="absolute top-2 left-2 bg-background/70 rounded-full p-1 backdrop-blur-lg shadow-lg flex items-center gap-1 min-w-0">
+      <div className="absolute top-2 start-2 bg-background/70 rounded-full p-1 backdrop-blur-lg shadow-lg flex items-center gap-1 min-w-0">
         <BumicertOwnerAvatar
           did={ownerDid}
           avatarUrl={logoUrl}
@@ -187,7 +187,7 @@ function OneLineTextPillRow({ items }: { items: string[] }) {
         {hiddenCount > 0 && <TextPill text={`+${hiddenCount}`} emphasis ariaLabel={`${hiddenCount} more objective${hiddenCount === 1 ? "" : "s"}`} />}
       </div>
 
-      <div aria-hidden className="invisible pointer-events-none absolute left-0 top-0 flex flex-nowrap items-center gap-2">
+      <div aria-hidden className="invisible pointer-events-none absolute start-0 top-0 flex flex-nowrap items-center gap-2">
         {items.map((item, index) => (
           <TextPill
             key={`measure-${item}-${index}`}

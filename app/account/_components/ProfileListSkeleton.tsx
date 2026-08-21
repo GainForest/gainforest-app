@@ -24,7 +24,7 @@ export function ProfileListSkeleton({
             <li key={index} className="flex items-center gap-3 py-3">
               <span className="skeleton size-9 shrink-0 rounded-full" />
               <span className="skeleton h-4 w-40 max-w-[55%] rounded" />
-              <span className="skeleton ml-auto h-8 w-[92px] shrink-0 rounded-full" />
+              <span className="skeleton ms-auto h-8 w-[92px] shrink-0 rounded-full" />
             </li>
           ) : (
             <li key={index} className="space-y-2 py-3.5">

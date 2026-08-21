@@ -449,7 +449,7 @@ export function VisibilitySelectorModal({
             type="button"
             onClick={() => setSelected(opt.value)}
             className={cn(
-              "flex items-start gap-3 w-full px-4 py-3 rounded-xl border text-left transition-colors cursor-pointer",
+              "flex items-start gap-3 w-full px-4 py-3 rounded-xl border text-start transition-colors cursor-pointer",
               selected === opt.value
                 ? "border-primary/40 bg-primary/5"
                 : "border-border hover:bg-muted/60",

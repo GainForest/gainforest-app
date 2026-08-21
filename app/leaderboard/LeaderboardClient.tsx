@@ -179,7 +179,7 @@ function SortControl({ sortBy, onSortChange }: { sortBy: SortMode; onSortChange:
   const t = useTranslations("marketplace.leaderboard.sort");
   const sortOptions = SORT_VALUES.map((value) => ({ value, label: t(SORT_TRANSLATION_KEYS[value]) }));
   return (
-    <div className="flex h-10 items-center justify-between gap-2 rounded-full bg-muted/55 py-1 pr-1 pl-3.5 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+    <div className="flex h-10 items-center justify-between gap-2 rounded-full bg-muted/55 py-1 pe-1 ps-3.5 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
       <span
         id="leaderboard-sort-label"
         className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-[13px] font-medium text-muted-foreground"

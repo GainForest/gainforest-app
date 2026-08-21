@@ -3,8 +3,15 @@ import path from "node:path";
 import ts from "typescript";
 
 const projectRoot = process.cwd();
-const locales = ["es", "id", "pt", "sw"];
+const locales = ["es", "id", "pt", "sw", "ar"];
 const allLocales = ["en", ...locales];
+
+// Locales still being translated. `messages/locales.ts` layers their partial
+// catalog over English, so an absent key is a deliberate fallback rather than a
+// bug and the completeness rule is relaxed. Every other rule still applies: any
+// key they DO define must be genuinely translated, not copied English.
+// Remove a locale from here once its catalog is complete.
+const partialLocales = new Set(["ar"]);
 const namespaces = ["root", "audiomothGuide", "bumicert", "cart", "changelog", "common", "deleteAccount", "events", "legacy", "marketplace", "modals", "privacy", "shop", "tainaGuide", "upload"];
 
 const allowedExactValues = new Set([
@@ -38,6 +45,7 @@ const allowedExactValues = new Set([
   "PDF",
   "DID",
   "GBIF",
+  "API",
   "PDS",
   "ePDS",
   "Router",
@@ -272,7 +280,9 @@ function collectStaticTranslationKeys() {
 
 const messagesByLocale = Object.fromEntries(
   allLocales.map((locale) => {
-    const rootMessages = readJson(namespacePath(locale, "root"));
+    const rootPath = namespacePath(locale, "root");
+    // A partial locale may not have a root landing file yet.
+    const rootMessages = existsSync(path.join(projectRoot, rootPath)) ? readJson(rootPath) : {};
     const merged = { ...rootMessages };
     for (const namespace of namespaces.filter((entry) => entry !== "root")) {
       const file = namespacePath(locale, namespace);
@@ -311,9 +321,17 @@ for (const namespace of namespaces) {
     const localized = new Map(flattenStrings(readJson(localePath)));
     assertBrandNameCasing(locale, namespace, localized);
 
-    for (const [key] of english) {
-      if (!localized.has(key)) {
-        problems.push(`${localePath}:${key} is missing (present in ${englishPath})`);
+    if (!partialLocales.has(locale)) {
+      for (const [key] of english) {
+        if (!localized.has(key)) {
+          problems.push(`${localePath}:${key} is missing (present in ${englishPath})`);
+        }
+      }
+    }
+
+    for (const [key] of localized) {
+      if (!english.has(key)) {
+        problems.push(`${localePath}:${key} has no English counterpart in ${englishPath}`);
       }
     }
 
@@ -332,6 +350,10 @@ for (const namespace of namespaces) {
 
 for (const { file, key } of collectStaticTranslationKeys()) {
   for (const locale of allLocales) {
+    // Partial locales resolve unknown keys through the English fallback that
+    // `messages/locales.ts` builds, so only the English catalog has to be
+    // exhaustive for them.
+    if (partialLocales.has(locale)) continue;
     if (!hasMessageKey(messagesByLocale[locale], key)) {
       problems.push(`${file} uses missing ${locale} message: ${key}`);
     }

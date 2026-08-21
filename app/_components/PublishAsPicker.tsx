@@ -194,7 +194,7 @@ function PublishAsChip({
   t: ReturnType<typeof useTranslations<"common.publishAs">>;
 } & React.ComponentPropsWithoutRef<"button">) {
   const chipClassName = cn(
-    "flex w-full items-center gap-2.5 rounded-2xl border px-3 py-2 text-left transition-colors",
+    "flex w-full items-center gap-2.5 rounded-2xl border px-3 py-2 text-start transition-colors",
     isGroup ? "border-sky-500/30 bg-sky-500/5" : "border-primary/30 bg-primary/5",
     canSwitch
       ? isGroup

@@ -196,7 +196,7 @@ function MapExpandButton({ onClick, label }: { onClick: () => void; label: strin
       aria-label={label}
       className="absolute inset-0 z-10 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
     >
-      <span className="pointer-events-none absolute bottom-1 right-1 grid size-6 place-items-center rounded-md border border-border/70 bg-background/85 text-foreground/70 shadow-sm transition-colors group-hover:text-foreground">
+      <span className="pointer-events-none absolute bottom-1 end-1 grid size-6 place-items-center rounded-md border border-border/70 bg-background/85 text-foreground/70 shadow-sm transition-colors group-hover:text-foreground">
         <Maximize2Icon className="size-3.5" aria-hidden />
       </span>
     </button>
@@ -215,7 +215,7 @@ function DeploymentLocationMapModal({ lat, lon, label }: { lat: number; lon: num
       <ModalHeader>
         {/* The deployment's name is user-supplied and can be long, so the text
             wraps beside the icon and clears the dialog's close button. */}
-        <ModalTitle className="flex items-start gap-2 pr-8">
+        <ModalTitle className="flex items-start gap-2 pe-8">
           <MapPinIcon className="mt-1.5 size-5 shrink-0 text-primary" aria-hidden />
           <span className="min-w-0 break-words">{label || t("mapTitle")}</span>
         </ModalTitle>

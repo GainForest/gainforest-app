@@ -1124,7 +1124,7 @@ const OccurrenceCard = memo(function OccurrenceCard({
         }
       }}
       aria-label={`Open nature sighting: ${name}`}
-      className="group relative block aspect-square w-full cursor-pointer overflow-hidden rounded-lg bg-surface-sunken text-left outline-none transition-all duration-300 hover:z-10 hover:shadow-[0_18px_40px_-22px_rgba(20,30,15,0.55)] focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary/60"
+      className="group relative block aspect-square w-full cursor-pointer overflow-hidden rounded-lg bg-surface-sunken text-start outline-none transition-all duration-300 hover:z-10 hover:shadow-[0_18px_40px_-22px_rgba(20,30,15,0.55)] focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary/60"
     >
       {hasImage ? (
         <Image
@@ -1166,7 +1166,7 @@ const OccurrenceCard = memo(function OccurrenceCard({
           aria-label={audioState === "playing" ? "Pause sound" : "Play sound"}
           className={
             hasImage
-              ? "absolute right-2 top-2 z-20 grid h-9 w-9 place-items-center rounded-full bg-black/55 text-white shadow-md ring-1 ring-white/25 backdrop-blur-md transition hover:bg-black/70"
+              ? "absolute end-2 top-2 z-20 grid h-9 w-9 place-items-center rounded-full bg-black/55 text-white shadow-md ring-1 ring-white/25 backdrop-blur-md transition hover:bg-black/70"
               : "absolute left-1/2 top-[38%] z-20 grid h-14 w-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white text-[#0b2015] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.5)] transition hover:scale-105"
           }
         >
@@ -1229,7 +1229,7 @@ const GenericCard = memo(function GenericCard({ record, onOpen }: { record: Expl
     <button
       type="button"
       onClick={() => onOpen(record)}
-      className="group relative flex h-full w-full flex-col overflow-hidden rounded-xl border border-border-soft bg-surface text-left transition-all duration-300 hover:-translate-y-1 hover:border-primary/25 hover:shadow-[0_18px_40px_-24px_rgba(20,30,15,0.45)]"
+      className="group relative flex h-full w-full flex-col overflow-hidden rounded-xl border border-border-soft bg-surface text-start transition-all duration-300 hover:-translate-y-1 hover:border-primary/25 hover:shadow-[0_18px_40px_-24px_rgba(20,30,15,0.45)]"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-surface-sunken">
         {hasImage ? (
@@ -1247,14 +1247,14 @@ const GenericCard = memo(function GenericCard({ record, onOpen }: { record: Expl
         )}
 
         {record.kind === "site" ? (
-          <TrustedByBadges did={record.did} className="absolute left-1.5 top-1.5 z-10 max-w-[70%]" variant="compact" />
+          <TrustedByBadges did={record.did} className="absolute start-1.5 top-1.5 z-10 max-w-[70%]" variant="compact" />
         ) : (
-          <div className="absolute left-1.5 top-1.5 z-10 inline-flex max-w-[calc(100%-0.75rem)] items-center rounded-full bg-background/75 px-2 py-1 text-[10px] font-medium text-foreground/65 shadow-sm backdrop-blur-md">
+          <div className="absolute start-1.5 top-1.5 z-10 inline-flex max-w-[calc(100%-0.75rem)] items-center rounded-full bg-background/75 px-2 py-1 text-[10px] font-medium text-foreground/65 shadow-sm backdrop-blur-md">
             <span className="truncate">{record.kind === "bumicert" || record.kind === "project" ? record.creatorName ?? "Project steward" : "Shared profile"}</span>
           </div>
         )}
 
-        {v.badge ? <div className="absolute right-1.5 top-1.5 z-10">{v.badge}</div> : null}
+        {v.badge ? <div className="absolute end-1.5 top-1.5 z-10">{v.badge}</div> : null}
       </div>
 
       {/* Content on the solid card surface for legibility. */}
@@ -1407,7 +1407,7 @@ const RecordListItem = memo(function RecordListItem({ record, onOpen }: { record
           open();
         }
       }}
-      className={`group grid w-full cursor-pointer items-center gap-3 px-2 py-2 text-left outline-none transition-colors hover:bg-surface-sunken focus-visible:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 sm:gap-4 sm:px-3 ${RECORD_LIST_GRID}`}
+      className={`group grid w-full cursor-pointer items-center gap-3 px-2 py-2 text-start outline-none transition-colors hover:bg-surface-sunken focus-visible:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 sm:gap-4 sm:px-3 ${RECORD_LIST_GRID}`}
     >
       {/* Thumbnail (with audio toggle for sightings) */}
       <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-md bg-surface-sunken">
@@ -1534,7 +1534,7 @@ function SortControl({
       </button>
 
       {open ? (
-        <div className="absolute right-0 top-full z-[1000] mt-2 w-44 rounded-2xl border border-border bg-popover py-1.5 shadow-xl">
+        <div className="absolute end-0 top-full z-[1000] mt-2 w-44 rounded-2xl border border-border bg-popover py-1.5 shadow-xl">
           {SORT_OPTIONS.map((option) => (
             <button
               key={option.value}
@@ -1543,7 +1543,7 @@ function SortControl({
                 setSort(option.value);
                 setOpen(false);
               }}
-              className={`w-full px-3 py-2 text-left text-sm transition-colors ${
+              className={`w-full px-3 py-2 text-start text-sm transition-colors ${
                 sort === option.value
                   ? "bg-primary/5 text-primary"
                   : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"

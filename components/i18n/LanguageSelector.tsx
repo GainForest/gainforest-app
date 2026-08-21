@@ -15,6 +15,7 @@ import {
   LANGUAGE_COOKIE_NAME,
   SUPPORTED_LANGUAGES,
   getLanguageLabel,
+  getLocaleDirection,
   isSupportedLanguageCode,
   resolveSupportedLanguage,
   type SupportedLanguageCode,
@@ -28,6 +29,9 @@ function persistLocale(locale: SupportedLanguageCode) {
   const secure = window.location.protocol === "https:" ? "; Secure" : "";
   document.cookie = `${LANGUAGE_COOKIE_NAME}=${locale}; Path=/; Max-Age=${maxAge}; SameSite=Lax${secure}`;
   document.documentElement.lang = locale;
+  // Kept in step with `lang` so the switch to or from an RTL locale reflows
+  // immediately, rather than waiting for the server render after reload.
+  document.documentElement.dir = getLocaleDirection(locale);
 }
 
 export function LanguageSelector({ compact = false }: { compact?: boolean } = {}) {

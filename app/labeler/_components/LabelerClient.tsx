@@ -208,12 +208,12 @@ export function LabelerClient({
           <div className="grid gap-3 rounded-2xl border border-border-soft bg-background/80 p-3 shadow-sm backdrop-blur md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[minmax(220px,1fr)_repeat(5,150px)]">
             <label className="relative">
               <span className="sr-only">{t("filters.searchLabel")}</span>
-              <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+              <SearchIcon className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
               <Input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder={t("filters.searchPlaceholder")}
-                className="pl-9"
+                className="ps-9"
               />
             </label>
             <FilterSelect label={t("filters.taxonLabel")} value={taxon} onChange={setTaxon}>
@@ -318,11 +318,11 @@ function FilterSelect({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         aria-label={label}
-        className="h-10 w-full appearance-none rounded-md border border-input bg-background px-3 pr-8 text-sm text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/30"
+        className="h-10 w-full appearance-none rounded-md border border-input bg-background px-3 pe-8 text-sm text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/30"
       >
         {children}
       </select>
-      <FilterIcon className="pointer-events-none absolute right-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" aria-hidden />
+      <FilterIcon className="pointer-events-none absolute end-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" aria-hidden />
     </label>
   );
 }
@@ -387,7 +387,7 @@ function ObservationQueueCard({
       onClick={onSelect}
       aria-pressed={selected}
       className={cn(
-        "group overflow-hidden rounded-2xl border bg-card text-left transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+        "group overflow-hidden rounded-2xl border bg-card text-start transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
         selected ? "border-primary shadow-[0_0_0_2px_color-mix(in_srgb,var(--primary)_18%,transparent)]" : "border-border-soft",
       )}
     >
@@ -407,7 +407,7 @@ function ObservationQueueCard({
           </div>
         )}
         {isUnidentified(record) ? (
-          <span className="absolute left-2 top-2 rounded-full bg-background/90 px-2 py-1 text-[10px] font-medium text-foreground shadow-sm backdrop-blur">
+          <span className="absolute start-2 top-2 rounded-full bg-background/90 px-2 py-1 text-[10px] font-medium text-foreground shadow-sm backdrop-blur">
             {unidentifiedLabel}
           </span>
         ) : null}

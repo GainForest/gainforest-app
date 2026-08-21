@@ -271,7 +271,7 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
             {projects.length > 0 ? (
               <div className="flex flex-row items-center justify-between gap-3">
                 <div className="group/input-group border-input relative flex h-10 min-w-0 flex-1 items-center rounded-full border bg-background/70 shadow-xs backdrop-blur transition-[color,box-shadow] focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 sm:max-w-md">
-                  <SearchIcon className="ml-3 h-4 w-4 text-muted-foreground" />
+                  <SearchIcon className="ms-3 h-4 w-4 text-muted-foreground" />
                   <input
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
@@ -1138,27 +1138,27 @@ function DatesSection({
     <div className="grid gap-4 sm:grid-cols-2">
         <Field label={t("fields.startDate.label")} htmlFor="project-start">
           <div className="relative">
-            <CalendarDaysIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <CalendarDaysIcon className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <input
               id="project-start"
               type="date"
               value={draft.startDate}
               onChange={(event) => setDraft((current) => ({ ...current, startDate: event.target.value }))}
-              className={cn(FIELD, "h-11 pl-9 pr-3")}
+              className={cn(FIELD, "h-11 ps-9 pr-3")}
             />
           </div>
         </Field>
         <Field label={t("fields.endDate.label")} htmlFor="project-end">
           <div className="space-y-3">
             <div className="relative">
-              <CalendarDaysIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <CalendarDaysIcon className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <input
                 id="project-end"
                 type="date"
                 value={draft.endDate}
                 disabled={draft.ongoing}
                 onChange={(event) => setDraft((current) => ({ ...current, endDate: event.target.value }))}
-                className={cn(FIELD, "h-11 pl-9 pr-3 disabled:opacity-40")}
+                className={cn(FIELD, "h-11 ps-9 pe-3 disabled:opacity-40")}
               />
             </div>
             <label className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -1335,7 +1335,7 @@ function ContributorInput({
           />
         )}
 
-        {loading && !actor ? <Loader2Icon className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground/60" /> : null}
+        {loading && !actor ? <Loader2Icon className="absolute end-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground/60" /> : null}
 
         <AnimatePresence>
           {open && !actor ? (
@@ -1361,7 +1361,7 @@ function ContributorInput({
                         onMouseDown={(event) => event.preventDefault()}
                         onClick={() => choose(nextActor)}
                         onMouseEnter={() => setHighlight(index)}
-                        className={cn("flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors", index === highlight ? "bg-muted" : "hover:bg-muted/60")}
+                        className={cn("flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-start transition-colors", index === highlight ? "bg-muted" : "hover:bg-muted/60")}
                       >
                         <ActorAvatar actor={nextActor} fallback={selectedProfileFallback} size="size-7" />
                         <span className="min-w-0">
@@ -1434,7 +1434,7 @@ function ContributorsSection({
           variant="ghost"
           size="sm"
           onClick={() => setDraft((current) => ({ ...current, contributors: [...current.contributors, ""] }))}
-          className="mt-2 -ml-2 text-primary hover:text-primary"
+          className="mt-2 -ms-2 text-primary hover:text-primary"
         >
           <PlusIcon className="size-4" /> {t("fields.people.add")}
         </Button>
@@ -1493,7 +1493,7 @@ function SitesSection({
                     key={site.metadata.uri}
                     onClick={() => toggleLocation(site.metadata.uri)}
                     className={cn(
-                      "flex items-start gap-3 rounded-xl border p-3 text-left transition-all",
+                      "flex items-start gap-3 rounded-xl border p-3 text-start transition-all",
                       active ? "border-primary/40 bg-primary/[0.08]" : "border-border bg-card hover:border-primary/25",
                     )}
                   >
@@ -1550,7 +1550,7 @@ function ProjectSuccessPanel({
       aria-live="polite"
     >
       <div className="relative flex min-h-[26rem] overflow-hidden rounded-[2rem] bg-primary/[0.04] px-6 py-12 sm:px-10">
-        <Button type="button" variant="ghost" size="sm" onClick={onBack} className="absolute left-4 top-4 z-20 text-muted-foreground hover:text-foreground">
+        <Button type="button" variant="ghost" size="sm" onClick={onBack} className="absolute start-4 top-4 z-20 text-muted-foreground hover:text-foreground">
           <ChevronLeftIcon className="size-4" />
           {t("back")}
         </Button>
@@ -1630,7 +1630,7 @@ function BasicsFields({
           placeholder={t("fields.name.placeholder")}
           className={cn(FIELD, "px-4 py-3 font-instrument text-2xl italic tracking-[-0.01em]", issuesByName.title && FIELD_ERROR)}
         />
-        <div className="mt-1.5 text-right text-xs text-muted-foreground">{draft.title.length} / {TITLE_MAX}</div>
+        <div className="mt-1.5 text-end text-xs text-muted-foreground">{draft.title.length} / {TITLE_MAX}</div>
       </Field>
 
       <Field label={t("fields.summary.label")} hint={t("fields.summary.hint")} htmlFor="project-summary" error={issuesByName.shortDescription?.message}>
@@ -1641,7 +1641,7 @@ function BasicsFields({
           placeholder={t("fields.summary.placeholder")}
           className={cn(FIELD, "min-h-24 resize-y px-4 py-3 text-[15px] leading-7", issuesByName.shortDescription && FIELD_ERROR)}
         />
-        <div className="mt-1.5 text-right text-xs text-muted-foreground">{clampSummary(draft.shortDescription).length} / 300</div>
+        <div className="mt-1.5 text-end text-xs text-muted-foreground">{clampSummary(draft.shortDescription).length} / 300</div>
       </Field>
     </div>
   );
@@ -1736,7 +1736,7 @@ function Field({ label, hint, htmlFor, error, children }: { label: string; hint?
     <div className="space-y-2.5">
       <label htmlFor={htmlFor} className="block text-sm font-medium text-foreground">
         {label}
-        {hint ? <span className="ml-2 font-normal text-muted-foreground">{hint}</span> : null}
+        {hint ? <span className="ms-2 font-normal text-muted-foreground">{hint}</span> : null}
       </label>
       {children}
       {error ? <p className={ERROR_MESSAGE}><TriangleAlertIcon className="size-3.5 text-warn" /> {error}</p> : null}
@@ -1977,7 +1977,7 @@ function ProjectCreateHeroCard({
           className="hidden object-cover object-center dark:block"
         />
         <div className="absolute inset-0 bg-linear-to-r from-background/95 via-background/72 to-background/5 dark:from-background/90 dark:via-background/58 dark:to-background/10" />
-        <div className="absolute -top-8 right-[7%] h-28 w-52 rounded-full bg-background/50 blur-2xl dark:bg-primary/10" />
+        <div className="absolute -top-8 end-[7%] h-28 w-52 rounded-full bg-background/50 blur-2xl dark:bg-primary/10" />
         <div className="absolute inset-x-0 bottom-0 h-16 bg-linear-to-t from-foreground/20 via-foreground/5 to-transparent dark:from-black/55" />
 
         <div className="relative z-30 flex min-h-[6rem] flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-8 lg:px-9">
@@ -2003,7 +2003,7 @@ function ProjectCreateHeroCard({
         width={1002}
         height={1146}
         priority
-        className="pointer-events-none absolute bottom-0 right-[4%] z-20 hidden h-[9rem] w-auto max-w-[50%] object-contain dark:hidden md:block"
+        className="pointer-events-none absolute bottom-0 end-[4%] z-20 hidden h-[9rem] w-auto max-w-[50%] object-contain dark:hidden md:block"
       />
       <Image
         src="/assets/media/images/create-bumicert/plant-dark.png"
@@ -2011,7 +2011,7 @@ function ProjectCreateHeroCard({
         width={964}
         height={1129}
         priority
-        className="pointer-events-none absolute bottom-0 right-[4%] z-20 hidden h-[9rem] w-auto max-w-[50%] object-contain dark:md:block"
+        className="pointer-events-none absolute bottom-0 end-[4%] z-20 hidden h-[9rem] w-auto max-w-[50%] object-contain dark:md:block"
       />
     </motion.section>
   );

@@ -78,7 +78,7 @@ async function TainaContent() {
               <li key={step.title} className="flex items-start gap-4">
                 <span className="relative mt-0.5 flex size-11 shrink-0 items-center justify-center rounded-full border border-primary/10 bg-primary/10 text-primary shadow-inner">
                   <step.Icon className="size-5" />
-                  <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-primary font-instrument text-[11px] text-primary-foreground">
+                  <span className="absolute -end-1 -top-1 flex size-5 items-center justify-center rounded-full bg-primary font-instrument text-[11px] text-primary-foreground">
                     {index + 1}
                   </span>
                 </span>

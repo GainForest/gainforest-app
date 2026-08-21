@@ -194,7 +194,7 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-2">
               <div className="group/input-group border-input relative flex h-10 min-w-0 flex-1 items-center rounded-full border bg-background/70 shadow-xs backdrop-blur transition-[color,box-shadow] focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 sm:w-72 sm:flex-none">
-                <SearchIcon className="ml-3 h-4 w-4 text-muted-foreground" />
+                <SearchIcon className="ms-3 h-4 w-4 text-muted-foreground" />
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
@@ -435,7 +435,7 @@ function LinkExistingSection({
         type="button"
         onClick={onToggle}
         aria-expanded={open}
-        className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/40 sm:px-5"
+        className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-start transition-colors hover:bg-muted/40 sm:px-5"
       >
         <span className="flex min-w-0 flex-wrap items-center gap-2">
           <Link2Icon className="size-4 shrink-0 text-muted-foreground" />

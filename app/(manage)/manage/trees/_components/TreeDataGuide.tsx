@@ -69,7 +69,7 @@ export default function TreeDataGuide() {
             <div className="divide-y divide-border">
               {FIELD_DOCS.map((doc) => (
                 <div key={doc.field} className="grid grid-cols-[1fr_1.5fr_0.6fr] items-start gap-0 px-4 py-2.5">
-                  <span className="font-mono text-sm text-foreground">{doc.field}{doc.required && <span className="ml-1 text-destructive">*</span>}</span>
+                  <span className="font-mono text-sm text-foreground">{doc.field}{doc.required && <span className="ms-1 text-destructive">*</span>}</span>
                   <div className="flex flex-col gap-1 text-sm text-muted-foreground">
                     <span>{doc.description}</span>
                     {doc.helperText ? (

@@ -115,10 +115,10 @@ export function ChangelogView({ data, locale }: { data: ChangelogData; locale: s
       </div>
 
       {/* Timeline of months */}
-      <ol className="relative space-y-12 border-l border-border pl-6">
+      <ol className="relative space-y-12 border-s border-border ps-6">
         {visibleMonths.map((month) => (
           <li key={month.month} className="relative">
-            <span className="absolute -left-[31px] top-1.5 size-3 rounded-full border-2 border-background bg-primary" aria-hidden />
+            <span className="absolute -start-[31px] top-1.5 size-3 rounded-full border-2 border-background bg-primary" aria-hidden />
             <div className="mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <h2 className="text-lg font-semibold tracking-tight">{formatMonth(month.month, locale)}</h2>
               <span className="text-sm text-muted-foreground">{t("shipped", { count: month.commits.length })}</span>

@@ -133,7 +133,7 @@ export function RolePlayground() {
             key={action}
             type="button"
             onClick={() => attempt(action)}
-            className="rounded-xl border border-border/60 px-3 py-2.5 text-left text-[12.5px] leading-snug text-foreground transition-colors hover:border-primary/50 hover:bg-muted/40 active:scale-[0.98]"
+            className="rounded-xl border border-border/60 px-3 py-2.5 text-start text-[12.5px] leading-snug text-foreground transition-colors hover:border-primary/50 hover:bg-muted/40 active:scale-[0.98]"
           >
             {actionLabels[action]}
           </button>

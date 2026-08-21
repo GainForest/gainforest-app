@@ -47,7 +47,7 @@ export function TimelineTileRow({
             type="button"
             onClick={() => onTileClick(tile)}
             className={cn(
-              "flex min-w-[150px] items-center gap-2 rounded-xl border p-2 text-left transition-colors",
+              "flex min-w-[150px] items-center gap-2 rounded-xl border p-2 text-start transition-colors",
               active
                 ? "border-primary bg-primary/10"
                 : "border-border/60 bg-background hover:bg-muted/40",

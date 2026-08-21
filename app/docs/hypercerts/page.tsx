@@ -64,7 +64,7 @@ export default async function HypercertsDocsPage() {
       <Section heading={t("why.heading")}>
         <Prose text={t("why.p1")} />
         <Prose text={t("why.p2")} className="mt-4" />
-        <p className="mt-5 border-l-2 border-primary/50 pl-4 text-[14.5px] leading-relaxed text-foreground">
+        <p className="mt-5 border-s-2 border-primary/50 ps-4 text-[14.5px] leading-relaxed text-foreground">
           <RichText text={t("why.callout")} />
         </p>
       </Section>
@@ -89,7 +89,7 @@ export default async function HypercertsDocsPage() {
             </li>
           ))}
         </ol>
-        <p className="mt-5 border-l-2 border-primary/50 pl-4 text-[14.5px] leading-relaxed text-foreground">
+        <p className="mt-5 border-s-2 border-primary/50 ps-4 text-[14.5px] leading-relaxed text-foreground">
           <RichText text={t("pattern.note")} />
         </p>
       </Section>

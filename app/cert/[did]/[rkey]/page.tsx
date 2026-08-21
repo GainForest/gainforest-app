@@ -1120,7 +1120,7 @@ async function ProjectSidebarExtras({
                 {facts.map((fact) => (
                   <div key={fact.label} className="flex items-baseline justify-between gap-3">
                     <dt className="shrink-0 text-xs text-muted-foreground">{fact.label}</dt>
-                    <dd className="min-w-0 truncate text-right text-sm font-medium text-foreground">{fact.value}</dd>
+                    <dd className="min-w-0 truncate text-end text-sm font-medium text-foreground">{fact.value}</dd>
                   </div>
                 ))}
               </dl>
@@ -2219,7 +2219,7 @@ function ReviewsPanel({ record, reviews }: { record: BumicertRecord; reviews: Bu
 
 function ReviewCommentCard({ comment, nested = false }: { comment: ReviewComment; nested?: boolean }) {
   return (
-    <div className={nested ? "border-l-2 border-border-soft pl-4" : "rounded-2xl border border-border-soft bg-surface p-4"}>
+    <div className={nested ? "border-s-2 border-border-soft ps-4" : "rounded-2xl border border-border-soft bg-surface p-4"}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <AuthorInline did={comment.did} />
         {comment.createdAt ? (
@@ -2485,7 +2485,7 @@ function TimelinePanel({
 
   return (
     <article className="py-1">
-      <div className="relative space-y-4 before:absolute before:bottom-3 before:left-[11px] before:top-3 before:w-px before:bg-border-soft">
+      <div className="relative space-y-4 before:absolute before:bottom-3 before:start-[11px] before:top-3 before:w-px before:bg-border-soft">
         {events.map((event) => (
           <div key={event.title} className="relative flex gap-4">
             <span className="mt-1 h-6 w-6 shrink-0 rounded-full border border-primary/30 bg-primary/10 ring-4 ring-card" />

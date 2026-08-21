@@ -284,7 +284,7 @@ export function AdminBioblitzDashboard({
                 aria-pressed={selected}
                 onClick={() => selectRound(round.id)}
                 className={cn(
-                  "group flex min-w-32 shrink-0 flex-col rounded-2xl px-3 py-2.5 text-left transition-[background-color,color,transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-w-36 lg:min-w-0",
+                  "group flex min-w-32 shrink-0 flex-col rounded-2xl px-3 py-2.5 text-start transition-[background-color,color,transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-w-36 lg:min-w-0",
                   selected
                     ? "bg-primary/[0.09] text-primary"
                     : "text-foreground hover:bg-muted/70",
@@ -352,7 +352,7 @@ export function AdminBioblitzDashboard({
               const mutationKey = `${ignored ? "restore" : "exclude"}:${registrant.did}`;
               return (
                 <AccordionItem key={registrant.did} value={registrant.did} className="border-border/80 last:border-b-0">
-                  <AccordionTrigger className="gap-3 px-0 py-3.5 text-left hover:no-underline [&>svg]:size-4 [&>svg]:text-foreground">
+                  <AccordionTrigger className="gap-3 px-0 py-3.5 text-start hover:no-underline [&>svg]:size-4 [&>svg]:text-foreground">
                     <RegistrantAvatar url={registrant.avatarUrl} name={name} />
                     <span className="min-w-0 flex-1">
                       <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
@@ -386,7 +386,7 @@ export function AdminBioblitzDashboard({
                     </span>
                   </AccordionTrigger>
                   <AccordionContent className="px-0">
-                    <div className="ml-[3.25rem] flex flex-wrap items-center gap-2 border-t border-border/80 pt-3">
+                    <div className="ms-[3.25rem] flex flex-wrap items-center gap-2 border-t border-border/80 pt-3">
                       <Link
                         href={accountPath(registrant.did)}
                         className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-background px-3 text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

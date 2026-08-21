@@ -311,7 +311,7 @@ export function PublishedSoundscapeView({
           )}
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="mr-1 text-xs tabular-nums text-muted-foreground">
+          <span className="me-1 text-xs tabular-nums text-muted-foreground">
             {isFullDay(zoom)
               ? t("zoom.rangeAllDay")
               : t("zoom.range", {
@@ -413,7 +413,7 @@ export function PublishedSoundscapeView({
                   }
                   aria-pressed={visibleBands[index]}
                   className={cn(
-                    "flex w-full items-start gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors hover:bg-muted",
+                    "flex w-full items-start gap-2 rounded-lg px-2 py-1.5 text-start text-sm transition-colors hover:bg-muted",
                     !visibleBands[index] && "opacity-40",
                   )}
                 >

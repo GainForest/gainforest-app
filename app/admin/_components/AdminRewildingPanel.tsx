@@ -220,14 +220,14 @@ function AddGranteeSlot({ slotNumber }: { slotNumber: number }) {
       </div>
 
       <div className="relative">
-        <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" aria-hidden />
+        <SearchIcon className="pointer-events-none absolute start-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" aria-hidden />
         <input
           type="search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder={t("searchPlaceholder")}
           aria-label={t("addTitle")}
-          className="h-9 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="h-9 w-full rounded-lg border border-border bg-background ps-9 pe-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
       </div>
 
@@ -306,7 +306,7 @@ function GranteeCard({
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
-        className="flex w-full items-center gap-3 px-3.5 py-3 text-left transition-colors hover:bg-muted/40"
+        className="flex w-full items-center gap-3 px-3.5 py-3 text-start transition-colors hover:bg-muted/40"
       >
         <span className="grid size-5 shrink-0 place-items-center self-center rounded-full bg-muted text-[10px] font-semibold tabular-nums text-muted-foreground">
           {slotNumber}
@@ -658,7 +658,7 @@ function PayoutSplitControl({
       ) : pending ? (
         <p className="pl-6 text-[11px] text-muted-foreground">{t("saving")}</p>
       ) : saved ? (
-        <p className="flex items-center gap-1 pl-6 text-[11px] font-medium text-primary">
+        <p className="flex items-center gap-1 ps-6 text-[11px] font-medium text-primary">
           <CheckIcon className="size-3" aria-hidden />
           {t("saved")}
         </p>
@@ -991,7 +991,7 @@ function MilestoneRow({
       </span>
       <span className="flex shrink-0 items-center gap-1.5">
         {customPayouts ? (
-          <span className="flex items-center rounded-lg border border-border bg-background pl-2 focus-within:ring-2 focus-within:ring-ring">
+          <span className="flex items-center rounded-lg border border-border bg-background ps-2 focus-within:ring-2 focus-within:ring-ring">
             <span className="text-xs text-muted-foreground" aria-hidden>
               $
             </span>
@@ -1011,7 +1011,7 @@ function MilestoneRow({
               }}
               disabled={planPending || dueDatePending || amountPending}
               aria-label={t("payoutAmountLabel", { title: name })}
-              className="h-8 w-16 rounded-r-lg bg-transparent px-1.5 text-xs text-foreground focus-visible:outline-none disabled:opacity-50"
+              className="h-8 w-16 rounded-e-lg bg-transparent px-1.5 text-xs text-foreground focus-visible:outline-none disabled:opacity-50"
             />
           </span>
         ) : null}
@@ -1163,7 +1163,7 @@ function AddMilestoneForm({
           className="h-8 rounded-lg border border-border bg-background px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
         {customPayouts ? (
-          <span className="flex items-center rounded-lg border border-border bg-background pl-2 focus-within:ring-2 focus-within:ring-ring">
+          <span className="flex items-center rounded-lg border border-border bg-background ps-2 focus-within:ring-2 focus-within:ring-ring">
             <span className="text-xs text-muted-foreground" aria-hidden>
               $
             </span>
@@ -1176,7 +1176,7 @@ function AddMilestoneForm({
               onChange={(event) => setAmount(event.target.value)}
               aria-label={t("payoutAmountNewLabel")}
               placeholder="0"
-              className="h-8 w-16 rounded-r-lg bg-transparent px-1.5 text-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none"
+              className="h-8 w-16 rounded-e-lg bg-transparent px-1.5 text-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none"
             />
           </span>
         ) : null}
@@ -1374,7 +1374,7 @@ function DocumentUploadForm({
           accept={ACCEPTED_FILE_TYPES}
           onChange={(event) => handleFileChange(event.target.files?.[0] ?? null)}
           aria-label={t("uploadFileLabel")}
-          className="h-9 min-w-0 flex-1 rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-muted-foreground file:mr-2 file:rounded-md file:border-0 file:bg-muted file:px-2.5 file:py-1 file:text-xs file:font-medium file:text-foreground"
+          className="h-9 min-w-0 flex-1 rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-muted-foreground file:me-2 file:rounded-md file:border-0 file:bg-muted file:px-2.5 file:py-1 file:text-xs file:font-medium file:text-foreground"
         />
         <button
           type="submit"

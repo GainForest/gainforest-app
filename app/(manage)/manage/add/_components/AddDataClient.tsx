@@ -210,7 +210,7 @@ export function AddDataClient({ target }: { target: ManageTarget }) {
                 disabled={!createPermission.allowed || routingKind !== null}
                 title={createPermission.reason ?? undefined}
                 className={cn(
-                  "group flex items-center gap-4 rounded-2xl border bg-card p-4 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60",
+                  "group flex items-center gap-4 rounded-2xl border bg-card p-4 text-start transition-colors disabled:cursor-not-allowed disabled:opacity-60",
                   suggested ? "border-primary ring-1 ring-primary/40" : "border-border hover:border-primary/40 hover:bg-muted/50",
                 )}
               >

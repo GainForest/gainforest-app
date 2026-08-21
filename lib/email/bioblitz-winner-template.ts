@@ -2,6 +2,8 @@ import {
   DEFAULT_LANGUAGE,
   isSupportedLanguageCode,
   resolvePreferredLanguageFromHeader,
+  resolvePublicLanguage,
+  type PublicLanguageCode,
   type SupportedLanguageCode,
 } from "@/lib/i18n/languages";
 import { BIOBLITZ_PRIZES, bioblitzRoundUsesPoints, type BioblitzPrize } from "@/lib/bioblitz-prizes";
@@ -29,7 +31,7 @@ type WinnerCopy = {
   footer: string;
 };
 
-const copyByLocale: Record<SupportedLanguageCode, WinnerCopy> = {
+const copyByLocale: Record<PublicLanguageCode, WinnerCopy> = {
   en: {
     subject: "Congrats! You won “{prize}” in BioBlitz {round} 🎉",
     preheader: "Your {amount} award details and how to receive your payment.",
@@ -231,7 +233,10 @@ export function renderBioblitzWinnerEmail({
   roundId?: number;
   siteUrl?: string;
 }) {
-  const copy = copyByLocale[locale];
+  // Locales without their own email copy fall back to English, matching how
+  // the message catalog resolves a partially translated locale.
+  const copyLocale = resolvePublicLanguage(locale);
+  const copy = copyByLocale[copyLocale];
   const baseCopy = copy.prizes[prize];
   const legacyRound = roundId !== undefined && !bioblitzRoundUsesPoints(roundId);
   const prizeCopy =
@@ -286,7 +291,7 @@ export function renderBioblitzWinnerEmail({
   </table>`;
 
   const html = `<!DOCTYPE html>
-<html lang="${locale}">
+<html lang="${copyLocale}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />

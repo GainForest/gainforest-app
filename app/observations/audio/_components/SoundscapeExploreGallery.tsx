@@ -54,11 +54,11 @@ function SelectPill({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         aria-label={ariaLabel}
-        className="h-full max-w-full appearance-none truncate rounded-full border border-border bg-background/50 pl-4 pr-9 text-sm font-medium text-foreground shadow-xs backdrop-blur outline-none focus:border-ring focus:ring-[3px] focus:ring-ring/50"
+        className="h-full max-w-full appearance-none truncate rounded-full border border-border bg-background/50 ps-4 pe-9 text-sm font-medium text-foreground shadow-xs backdrop-blur outline-none focus:border-ring focus:ring-[3px] focus:ring-ring/50"
       >
         {children}
       </select>
-      <ChevronDownIcon aria-hidden className="pointer-events-none absolute right-3 size-4 text-muted-foreground" />
+      <ChevronDownIcon aria-hidden className="pointer-events-none absolute end-3 size-4 text-muted-foreground" />
     </span>
   );
 }
@@ -311,7 +311,7 @@ export function SoundscapeExploreGallery({
     <div className="mt-5 flex flex-col gap-6">
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex h-10 min-w-52 flex-1 basis-64 items-center rounded-full border border-input bg-background/50 shadow-xs backdrop-blur transition-[color,box-shadow] focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
-          <SearchIcon className="ml-3 size-4 shrink-0 text-muted-foreground" aria-hidden />
+          <SearchIcon className="ms-3 size-4 shrink-0 text-muted-foreground" aria-hidden />
           <input
             type="search"
             value={query}
@@ -333,7 +333,7 @@ export function SoundscapeExploreGallery({
           value={sort}
           onChange={(value) => setSort(value as SortKey)}
           ariaLabel={t("sortBy")}
-          className="sm:ml-auto"
+          className="sm:ms-auto"
         >
           <option value="added">{t("sortRecentlyAdded")}</option>
           <option value="recorded">{t("sortRecentlyRecorded")}</option>

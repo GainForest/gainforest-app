@@ -85,14 +85,14 @@ export function AdminWalletStatsPanel({ rows }: { rows: WalletStatRow[] | null }
     <div className="space-y-4" onKeyDown={handleKeyDown}>
       <div>
         <div className="relative">
-          <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <SearchIcon className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             ref={inputRef}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             onFocus={() => setActiveIndex(-1)}
             placeholder={t("searchPlaceholder")}
-            className="pl-9"
+            className="ps-9"
             aria-label={t("searchPlaceholder")}
           />
         </div>

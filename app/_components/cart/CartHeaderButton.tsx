@@ -19,7 +19,7 @@ export function CartHeaderButton() {
         {showBadge ? (
           <span
             aria-hidden
-            className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-4 text-primary-foreground"
+            className="absolute -end-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-4 text-primary-foreground"
           >
             {count > 9 ? "9+" : count}
           </span>

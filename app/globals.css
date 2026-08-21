@@ -217,6 +217,26 @@ body {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
+/* Arabic (and any future RTL locale) leads with an Arabic-capable face and
+   keeps Geist behind it, so Latin brand names embedded in Arabic copy still
+   render in the product typeface instead of Noto's Latin. */
+[dir="rtl"],
+[dir="rtl"] body {
+  font-family: var(--font-arabic), var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* Arabic has no capital letters; uppercasing mangles nothing visually but does
+   defeat the point, and letter-spacing breaks the script's cursive joins. */
+[dir="rtl"] .uppercase {
+  text-transform: none;
+}
+
+[dir="rtl"] .tracking-wide,
+[dir="rtl"] .tracking-wider,
+[dir="rtl"] .tracking-widest {
+  letter-spacing: normal;
+}
+
 body {
   transition:
     background-color 0.3s ease,

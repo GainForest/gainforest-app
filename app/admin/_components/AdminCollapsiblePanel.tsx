@@ -38,7 +38,7 @@ export function AdminCollapsiblePanel({
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
-        className="flex w-full items-start gap-2.5 px-4 py-4 text-left transition-colors hover:bg-muted/40 sm:px-6"
+        className="flex w-full items-start gap-2.5 px-4 py-4 text-start transition-colors hover:bg-muted/40 sm:px-6"
       >
         <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-primary/15 bg-primary/[0.08] text-primary">
           {icon}

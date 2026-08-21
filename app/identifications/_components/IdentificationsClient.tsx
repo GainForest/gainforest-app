@@ -198,8 +198,8 @@ export function IdentificationsClient({ sessionDid }: { sessionDid: string | nul
       {total > 0 ? (
         <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card/60 p-3 sm:flex-row sm:items-center">
           <div className="relative sm:w-64">
-            <SearchIcon className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-            <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("searchPlaceholder")} className="h-8 pl-8 text-xs" />
+            <SearchIcon className="pointer-events-none absolute start-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("searchPlaceholder")} className="h-8 ps-8 text-xs" />
           </div>
           <div className="flex flex-wrap gap-1.5">
             <button type="button" aria-pressed={activeCategory === "all"} onClick={() => setActiveCategory("all")} className={cn("rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors", activeCategory === "all" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-muted")}>{t("filterAll", { count: total })}</button>

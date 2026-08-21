@@ -43,7 +43,7 @@ export function MobileNavDrawer({
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-            className="fixed top-0 left-0 bottom-0 z-50 md:hidden focus:outline-none bg-background"
+            className="fixed top-0 start-0 bottom-0 z-50 md:hidden focus:outline-none bg-background"
             aria-label="Navigation"
           >
             {/* Render the full sidebar — identical to desktop */}

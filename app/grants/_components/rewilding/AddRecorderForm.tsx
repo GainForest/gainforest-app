@@ -201,7 +201,7 @@ function OriginOption({
       aria-checked={selected}
       onClick={onSelect}
       className={cn(
-        "flex flex-col gap-1 rounded-xl border p-3 text-left transition-colors",
+        "flex flex-col gap-1 rounded-xl border p-3 text-start transition-colors",
         selected ? "border-primary/60 bg-primary/[0.06]" : "border-border hover:bg-muted",
       )}
     >

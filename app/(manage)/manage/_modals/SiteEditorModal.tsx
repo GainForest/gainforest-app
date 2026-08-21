@@ -341,7 +341,7 @@ export function SiteEditorModal({ did, target, initialData, onSaved, requireBoun
                 />
                 <Button
                   size="sm"
-                  className="absolute right-3 top-3"
+                  className="absolute end-3 top-3"
                   variant="outline"
                   onClick={() => setShowEditor(true)}
                 >
@@ -356,7 +356,7 @@ export function SiteEditorModal({ did, target, initialData, onSaved, requireBoun
                   <Button
                     variant="ghost"
                     aria-label="Back"
-                    className="-ml-2"
+                    className="-ms-2"
                     onClick={() => setShowEditor(false)}
                   >
                     <ArrowLeftIcon />
@@ -389,7 +389,7 @@ export function SiteEditorModal({ did, target, initialData, onSaved, requireBoun
                     <div className="h-px flex-1 bg-border" />
                   </div>
                   <Button variant="outline" className="w-full" onClick={openDrawModal}>
-                    <PencilIcon className="mr-2 size-4" />
+                    <PencilIcon className="me-2 size-4" />
                     Draw site
                   </Button>
                 </div>
@@ -418,7 +418,7 @@ export function SiteEditorModal({ did, target, initialData, onSaved, requireBoun
       <ModalFooter>
         {!isCompleted ? (
           <Button onClick={() => void handleSave()} disabled={disableSubmit}>
-            {isPending && <Loader2Icon className="mr-2 animate-spin" />}
+            {isPending && <Loader2Icon className="me-2 animate-spin" />}
             {isEditMode
               ? isPending ? (isVerifyingBoundary ? "Checking…" : "Saving…") : "Save"
               : isPending ? "Adding…" : "Add"}

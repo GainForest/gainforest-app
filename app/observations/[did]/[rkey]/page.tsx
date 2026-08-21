@@ -141,7 +141,7 @@ export default async function ObservationDetailPage({ params }: { params: Observ
         <h1 className="mt-3 font-instrument text-4xl italic leading-tight tracking-[-0.01em] text-foreground md:text-5xl">
           {name}
           {scientific ? (
-            <span className="ml-2 align-middle text-2xl not-italic text-foreground/55 md:text-3xl">
+            <span className="ms-2 align-middle text-2xl not-italic text-foreground/55 md:text-3xl">
               {scientific}
             </span>
           ) : null}

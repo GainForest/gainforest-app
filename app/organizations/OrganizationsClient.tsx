@@ -350,7 +350,7 @@ export function OrganizationsClient({
           <div className="relative z-20 mt-5 mb-0 space-y-2.5">
             <div className="relative z-30 flex items-center gap-2 animate-in" style={{ animationDelay: "80ms" }}>
               <div className="group/input-group border-input relative flex h-10 min-w-0 flex-1 items-center rounded-full border bg-background/50 shadow-xs backdrop-blur transition-[color,box-shadow] outline-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
-                <div className="flex h-auto cursor-text items-center justify-center gap-2 py-1.5 pl-3.5 text-sm font-medium text-muted-foreground select-none">
+                <div className="flex h-auto cursor-text items-center justify-center gap-2 py-1.5 ps-3.5 text-sm font-medium text-muted-foreground select-none">
                   <SearchIcon className="h-4 w-4" />
                 </div>
                 <input
@@ -688,7 +688,7 @@ const OrganizationListItem = memo(function OrganizationListItem({ record, onOpen
     <button
       type="button"
       onClick={() => onOpen(record)}
-      className={`group grid w-full items-center gap-3 px-2 py-2 text-left outline-none transition-colors hover:bg-surface-sunken focus-visible:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 sm:gap-4 sm:px-3 ${ORG_LIST_GRID}`}
+      className={`group grid w-full items-center gap-3 px-2 py-2 text-start outline-none transition-colors hover:bg-surface-sunken focus-visible:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 sm:gap-4 sm:px-3 ${ORG_LIST_GRID}`}
     >
       {/* Logo */}
       <span aria-hidden className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/15 text-xs font-semibold text-primary">
@@ -751,7 +751,7 @@ const OrganizationCard = memo(function OrganizationCard({ record, onOpen }: { re
   const avatarUrl = organizationAvatarUrl(record);
 
   return (
-    <button type="button" onClick={() => onOpen(record)} className="group h-full w-full text-left">
+    <button type="button" onClick={() => onOpen(record)} className="group h-full w-full text-start">
       <article
         className="flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-lg"
         style={{ viewTransitionName: `org-${record.did.replace(/[^a-z0-9]/gi, "-")}` }}
@@ -773,10 +773,10 @@ const OrganizationCard = memo(function OrganizationCard({ record, onOpen }: { re
           )}
           <div className="absolute inset-0 bg-linear-to-t from-card via-card/40 to-transparent" />
 
-          <TrustedByBadges did={record.did} className="absolute left-2.5 top-2.5 z-10 max-w-[70%]" variant="compact" />
+          <TrustedByBadges did={record.did} className="absolute start-2.5 top-2.5 z-10 max-w-[70%]" variant="compact" />
 
           {countryLabel && (
-            <span className="absolute top-2.5 right-2.5 flex items-center gap-1 rounded-full bg-background/70 px-2 py-0.5 text-xs text-foreground/80 backdrop-blur-sm">
+            <span className="absolute top-2.5 end-2.5 flex items-center gap-1 rounded-full bg-background/70 px-2 py-0.5 text-xs text-foreground/80 backdrop-blur-sm">
               <span>{countryFlag(country)}</span>
               <span className="max-w-[120px] truncate">{countryLabel}</span>
             </span>

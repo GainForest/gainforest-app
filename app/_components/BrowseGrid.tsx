@@ -70,7 +70,7 @@ export function BrowseGrid({ kpis }: { kpis: ExplorerKpis }) {
                   {/* Soft primary glow that warms up on hover — borrowed from the app's card accents. */}
                   <div
                     aria-hidden
-                    className="pointer-events-none absolute -right-16 -top-16 size-40 rounded-full bg-primary/5 blur-2xl transition-all duration-500 group-hover:bg-primary/10"
+                    className="pointer-events-none absolute -end-16 -top-16 size-40 rounded-full bg-primary/5 blur-2xl transition-all duration-500 group-hover:bg-primary/10"
                   />
 
                   <div className="relative">

@@ -138,7 +138,7 @@ export default async function EpdsRouterDocsPage() {
 
       <Section heading={t("api.heading")} intro={t("api.intro")}>
         <div className="overflow-hidden rounded-xl border border-border/60">
-          <table className="w-full border-collapse text-left">
+          <table className="w-full border-collapse text-start">
             <tbody>
               <ApiRow method="POST" path="/v1/lookup" text={t("api.lookup")} />
               <ApiRow method="GET" path="/v1/status" text={t("api.status")} />
@@ -219,7 +219,7 @@ function ApiRow({ method, path, text }: { method: string; path: string; text: st
   return (
     <tr className="border-b border-border/60 last:border-b-0">
       <td className="whitespace-nowrap px-4 py-2.5 font-mono text-[11.5px] text-primary">{method}</td>
-      <td className="whitespace-nowrap px-2 py-2.5 pr-4 font-mono text-[11.5px] text-foreground/90">{path}</td>
+      <td className="whitespace-nowrap px-2 py-2.5 pe-4 font-mono text-[11.5px] text-foreground/90">{path}</td>
       <td className="w-full px-4 py-2.5 text-[12.5px] leading-relaxed text-muted-foreground">{text}</td>
     </tr>
   );

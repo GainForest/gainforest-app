@@ -714,7 +714,7 @@ export function RecordMap({
         className="h-[68vh] min-h-[440px] w-full overflow-hidden rounded-2xl border border-border-soft bg-surface-sunken"
         style={{ zIndex: 0 }}
       />
-      <div className="pointer-events-none absolute right-3 top-3 z-[5] inline-flex items-center gap-1.5 rounded-full bg-background/90 px-3 py-1.5 text-[12.5px] font-medium text-foreground/70 shadow-sm backdrop-blur">
+      <div className="pointer-events-none absolute end-3 top-3 z-[5] inline-flex items-center gap-1.5 rounded-full bg-background/90 px-3 py-1.5 text-[12.5px] font-medium text-foreground/70 shadow-sm backdrop-blur">
         <span aria-hidden className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-brand text-brand" />
         {mappedNote}
       </div>

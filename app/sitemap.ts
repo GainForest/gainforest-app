@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { fetchPubliclyListedDids } from "./_lib/indexer";
 import { INDEXER_URL } from "./_lib/urls";
 import { getRequestOrigin } from "./_lib/request-origin";
-import { SUPPORTED_LOCALES, type SupportedLanguageCode } from "@/lib/i18n/languages";
+import { PUBLIC_LOCALES, type SupportedLanguageCode } from "@/lib/i18n/languages";
 import { getCanonicalPathname, getSeoLocalizedPathnames } from "@/lib/i18n/routing";
 
 export const revalidate = 3600;
@@ -123,14 +123,17 @@ function buildAbsoluteUrl(pathname: string, origin: string): string {
   return new URL(pathname, origin).toString();
 }
 
-function buildAlternates(pathname: string, origin: string): Record<SupportedLanguageCode, string> {
+function buildAlternates(
+  pathname: string,
+  origin: string,
+): Partial<Record<SupportedLanguageCode, string>> {
   const localizedPathnames = getSeoLocalizedPathnames(pathname);
   return Object.fromEntries(
     Object.entries(localizedPathnames).map(([locale, path]) => [
       locale,
       buildAbsoluteUrl(path, origin),
     ]),
-  ) as Record<SupportedLanguageCode, string>;
+  ) as Partial<Record<SupportedLanguageCode, string>>;
 }
 
 function buildLocalizedEntries(options: {
@@ -142,7 +145,7 @@ function buildLocalizedEntries(options: {
 }): MetadataRoute.Sitemap {
   const alternates = buildAlternates(options.pathname, options.origin);
 
-  return SUPPORTED_LOCALES.map((locale) => ({
+  return PUBLIC_LOCALES.map((locale) => ({
     url: buildAbsoluteUrl(getCanonicalPathname(options.pathname, locale), options.origin),
     lastModified: options.lastModified,
     changeFrequency: options.changeFrequency,

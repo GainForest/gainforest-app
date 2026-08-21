@@ -1072,7 +1072,7 @@ export function ObservationsClient({
           Anchored to the viewport so it stays reachable while scrolling a long
           grid instead of pushing the tiles around when it appears. */}
       {selectedRecords.size > 0 ? (
-        <div className="pointer-events-none fixed inset-x-0 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[75] flex justify-center px-4 pr-[4.5rem] sm:pr-4">
+        <div className="pointer-events-none fixed inset-x-0 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[75] flex justify-center px-4 pe-[4.5rem] sm:pr-4">
           <div className="pointer-events-auto flex max-w-full flex-wrap items-center justify-center gap-1.5 rounded-3xl border border-border bg-card p-1.5 shadow-lg sm:rounded-full">
             <button
               type="button"
@@ -1429,7 +1429,7 @@ function INaturalistProjectSyncPanel({
           </div>
         </div>
 
-        <div className="flex min-w-0 flex-col gap-2 sm:flex-row md:ml-auto md:justify-end">
+        <div className="flex min-w-0 flex-col gap-2 sm:flex-row md:ms-auto md:justify-end">
           {projectRequired ? (
             <Select
               value="none"
@@ -1513,7 +1513,7 @@ function INaturalistProjectSyncPanel({
       {truncated ? <p className="mt-3 text-xs text-muted-foreground">{t("truncated")}</p> : null}
 
       {sourceProject ? (
-        <div className="mt-3 grid max-h-72 gap-2 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-3 grid max-h-72 gap-2 overflow-y-auto pe-1 sm:grid-cols-2 lg:grid-cols-3">
           {mergedObservations.map((observation) => {
             const status = observation.status ?? observation.syncStatus;
             const message = observation.message;
@@ -2535,7 +2535,7 @@ function ObservationBulkAddPanel({
             variant="ghost"
             size="sm"
             onClick={onBack}
-            className="-ml-2 mb-2 h-8 gap-1 px-2 text-muted-foreground hover:text-foreground"
+            className="-ms-2 mb-2 h-8 gap-1 px-2 text-muted-foreground hover:text-foreground"
           >
             <ChevronLeftIcon className="size-4" /> {t("backToObservations")}
           </Button>
@@ -2547,7 +2547,7 @@ function ObservationBulkAddPanel({
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             {draftRestored && items.length > 0 ? (
-              <span className="inline-flex h-8 items-center gap-1.5 pr-1 text-xs font-medium text-foreground">
+              <span className="inline-flex h-8 items-center gap-1.5 pe-1 text-xs font-medium text-foreground">
                 <RotateCcwIcon className="size-3.5 shrink-0 text-primary" />
                 {t("draftRestored")}
                 <QuickTooltip content={t("discardDraft")} asChild>
@@ -2562,7 +2562,7 @@ function ObservationBulkAddPanel({
                 </QuickTooltip>
               </span>
             ) : null}
-            <div className="ml-auto flex flex-wrap items-center gap-2">
+            <div className="ms-auto flex flex-wrap items-center gap-2">
               {projectDecisionMade ? (
                 <ProjectBar project={selectedProject} hasProject={Boolean(projectUri)} onChange={changeProject} />
               ) : null}
@@ -2769,7 +2769,7 @@ function ProjectStep({
           </Button>
         ) : projects.length > 0 ? (
           <Select value={value || undefined} onValueChange={onChoose}>
-            <SelectTrigger className="h-10 w-full rounded-full bg-background text-left sm:flex-1">
+            <SelectTrigger className="h-10 w-full rounded-full bg-background text-start sm:flex-1">
               <SelectValue placeholder={t("projectChoose")} />
             </SelectTrigger>
             <SelectContent>
@@ -2889,7 +2889,7 @@ function ObservationListHeader({
       <span className="hidden lg:block">{t("colKind")}</span>
       <span className="hidden lg:block">{t("colGroup")}</span>
       <span className="hidden xl:block">{t("colConfidence")}</span>
-      <span className="text-right">{t("colStatus")}</span>
+      <span className="text-end">{t("colStatus")}</span>
     </div>
   );
 }
@@ -3013,7 +3013,7 @@ function ObservationListItem({
         </motion.div>
       ) : (
       <>
-      {expanded ? <span aria-hidden className="absolute inset-y-0 left-0 w-[3px] bg-primary" /> : null}
+      {expanded ? <span aria-hidden className="absolute inset-y-0 start-0 w-[3px] bg-primary" /> : null}
       <div className={`${ROW_GRID} gap-y-1 px-3 py-2`}>
         <Checkbox
           checked={checked}
@@ -3040,7 +3040,7 @@ function ObservationListItem({
 
         {/* Organism */}
         {canEdit ? (
-          <button type="button" onClick={onToggleExpanded} aria-expanded={expanded} className="group/name min-w-0 text-left" title={t("editDetails")}>
+          <button type="button" onClick={onToggleExpanded} aria-expanded={expanded} className="group/name min-w-0 text-start" title={t("editDetails")}>
             <OrganismCell organism={organism} commonName={commonName} metaBits={metaBits} unidentified={isUnidentified} interactive />
           </button>
         ) : (
@@ -3276,7 +3276,7 @@ function GroupMediaEditor({
                     type="button"
                     onClick={() => onSeparateItem(item.id)}
                     aria-label={t("removeFromObservation")}
-                    className="absolute right-1.5 top-1.5 grid size-7 place-items-center rounded-full bg-background/90 text-foreground opacity-0 shadow-sm ring-1 ring-border transition-opacity hover:bg-background group-hover/media:opacity-100 focus:opacity-100"
+                    className="absolute end-1.5 top-1.5 grid size-7 place-items-center rounded-full bg-background/90 text-foreground opacity-0 shadow-sm ring-1 ring-border transition-opacity hover:bg-background group-hover/media:opacity-100 focus:opacity-100"
                   >
                     <XIcon className="size-4" />
                   </button>

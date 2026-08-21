@@ -163,7 +163,7 @@ export function OwnerFilterButton({
       </PopoverTrigger>
       <PopoverContent align="end" sideOffset={8} className="w-[min(20rem,calc(100vw-2rem))] p-2">
         <div className="relative">
-          <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <SearchIcon className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             ref={inputRef}
             type="text"
@@ -171,7 +171,7 @@ export function OwnerFilterButton({
             onChange={(event) => setQuery(event.target.value)}
             placeholder={labels?.searchPlaceholder ?? t("searchPlaceholder")}
             aria-label={labels?.searchPlaceholder ?? t("searchPlaceholder")}
-            className="h-9 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40"
+            className="h-9 w-full rounded-lg border border-border bg-background ps-9 pe-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40"
           />
         </div>
 
@@ -183,7 +183,7 @@ export function OwnerFilterButton({
                 onChange(null);
                 setOpen(false);
               }}
-              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-start text-sm text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
             >
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted">
                 <XIcon className="h-3.5 w-3.5" />
@@ -217,7 +217,7 @@ export function OwnerFilterButton({
                   setQuery("");
                 }}
                 className={cn(
-                  "flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm transition-colors",
+                  "flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-start text-sm transition-colors",
                   active ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted/60",
                 )}
               >
@@ -260,7 +260,7 @@ export function OwnerFilterBanner({
   return (
     <div
       className={cn(
-        "inline-flex max-w-full items-center gap-2 rounded-full border border-primary/30 bg-primary/5 py-1 pl-1.5 pr-1 text-sm",
+        "inline-flex max-w-full items-center gap-2 rounded-full border border-primary/30 bg-primary/5 py-1 ps-1.5 pe-1 text-sm",
         className,
       )}
     >
@@ -270,7 +270,7 @@ export function OwnerFilterBanner({
         type="button"
         onClick={onClear}
         aria-label={t("clear")}
-        className="ml-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+        className="ms-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
       >
         <XIcon className="h-3.5 w-3.5" />
       </button>

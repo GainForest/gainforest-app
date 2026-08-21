@@ -284,7 +284,7 @@ export function RecordingsPlayerList({
 
   return (
     <>
-      <ul ref={listRef} className="flex flex-col gap-1.5 overflow-y-auto pr-1" style={{ maxHeight }}>
+      <ul ref={listRef} className="flex flex-col gap-1.5 overflow-y-auto pe-1" style={{ maxHeight }}>
         {shown.map((item) => {
           const playing = playingUri === item.uri;
           const active = playing || activeUri === item.uri;

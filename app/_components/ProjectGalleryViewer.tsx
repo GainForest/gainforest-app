@@ -105,7 +105,7 @@ export function ProjectGalleryViewer({
                 className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${selectedProjectUri === project.uri ? "border-primary/35 bg-primary/[0.08] text-primary" : "border-border-soft bg-surface text-muted-foreground hover:text-foreground"}`}
               >
                 {project.title}
-                <span className="ml-1 text-xs opacity-70">{t("projectImageCount", { count: project.count })}</span>
+                <span className="ms-1 text-xs opacity-70">{t("projectImageCount", { count: project.count })}</span>
               </button>
             ))}
           </div>
@@ -124,7 +124,7 @@ export function ProjectGalleryViewer({
               <button
                 type="button"
                 onClick={() => setActiveIndex(index)}
-                className="group relative aspect-square w-full overflow-hidden rounded-lg bg-surface-sunken text-left outline-none transition-all duration-300 hover:z-10 hover:shadow-[0_18px_40px_-22px_rgba(20,30,15,0.55)] focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary/60"
+                className="group relative aspect-square w-full overflow-hidden rounded-lg bg-surface-sunken text-start outline-none transition-all duration-300 hover:z-10 hover:shadow-[0_18px_40px_-22px_rgba(20,30,15,0.55)] focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary/60"
                 aria-label={t("openImage", { projectTitle: image.projectTitle })}
               >
                 <Image
@@ -148,15 +148,15 @@ export function ProjectGalleryViewer({
 
       {activeImage ? (
         <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center bg-black/88 p-4" onClick={closeLightbox}>
-          <button type="button" onClick={closeLightbox} className="absolute right-4 top-4 z-10 grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20" aria-label={t("closeImage")}>
+          <button type="button" onClick={closeLightbox} className="absolute end-4 top-4 z-10 grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20" aria-label={t("closeImage")}>
             <XIcon className="h-5 w-5" aria-hidden />
           </button>
           {images.length > 1 ? (
             <>
-              <button type="button" onClick={(event) => { event.stopPropagation(); stepLightbox(-1); }} className="absolute left-4 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20" aria-label={t("previousImage")}>
+              <button type="button" onClick={(event) => { event.stopPropagation(); stepLightbox(-1); }} className="absolute start-4 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20" aria-label={t("previousImage")}>
                 <ChevronLeftIcon className="h-5 w-5" aria-hidden />
               </button>
-              <button type="button" onClick={(event) => { event.stopPropagation(); stepLightbox(1); }} className="absolute right-4 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20" aria-label={t("nextImage")}>
+              <button type="button" onClick={(event) => { event.stopPropagation(); stepLightbox(1); }} className="absolute end-4 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20" aria-label={t("nextImage")}>
                 <ChevronRightIcon className="h-5 w-5" aria-hidden />
               </button>
             </>

@@ -155,7 +155,7 @@ function BestPictureCard({
         type="button"
         onClick={() => onOpen(record)}
         aria-label={t("openPhoto", { name: name ?? t("unnamed") })}
-        className="group relative flex w-full flex-col overflow-hidden rounded-2xl bg-surface-sunken text-left outline-none ring-1 ring-border/60 transition duration-300 hover:shadow-[0_18px_40px_-22px_rgba(20,30,15,0.55)] focus-visible:ring-2 focus-visible:ring-primary/60"
+        className="group relative flex w-full flex-col overflow-hidden rounded-2xl bg-surface-sunken text-start outline-none ring-1 ring-border/60 transition duration-300 hover:shadow-[0_18px_40px_-22px_rgba(20,30,15,0.55)] focus-visible:ring-2 focus-visible:ring-primary/60"
       >
         <div className="relative aspect-[4/3] w-full overflow-hidden">
           {hasImage ? (
@@ -175,14 +175,14 @@ function BestPictureCard({
           )}
 
           <span
-            className={`absolute left-3 top-3 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold tabular-nums ${RANK_BADGE[rank] ?? "bg-background/90 text-foreground"}`}
+            className={`absolute start-3 top-3 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold tabular-nums ${RANK_BADGE[rank] ?? "bg-background/90 text-foreground"}`}
           >
             {rank === 1 ? <CrownIcon className="size-3.5" aria-hidden /> : `#${rank}`}
             {rank === 1 ? t("leader") : null}
           </span>
 
           <span
-            className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-background/90 px-2.5 py-1 text-xs font-semibold text-foreground"
+            className="absolute end-3 top-3 inline-flex items-center gap-1 rounded-full bg-background/90 px-2.5 py-1 text-xs font-semibold text-foreground"
             aria-label={t("likes", { count: likeCount })}
           >
             <HeartIcon className="size-3.5 fill-primary text-primary" aria-hidden />

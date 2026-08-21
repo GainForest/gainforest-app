@@ -245,7 +245,7 @@ export function AdminBioblitzDuplicatesPanel({
         </div>
         {report ? (
           <div className="flex shrink-0 flex-wrap items-center gap-2">
-            <div className="flex flex-col items-end gap-0.5 text-right">
+            <div className="flex flex-col items-end gap-0.5 text-end">
               <span className="text-xs tabular-nums text-muted-foreground">
                 {t("scanned", { count: report.scannedObservations })}
               </span>
@@ -517,7 +517,7 @@ function DuplicateClusterCard({
                       title={t("keepAria")}
                       onClick={() => onPickCanonical(observation.uri)}
                       className={cn(
-                        "absolute left-1 top-1 flex size-5 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                        "absolute start-1 top-1 flex size-5 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                         isCanonical
                           ? "bg-primary text-primary-foreground"
                           : "bg-background/80 text-muted-foreground hover:text-foreground",
@@ -534,7 +534,7 @@ function DuplicateClusterCard({
                         title={t("includeAria")}
                         onClick={() => onToggleMember(observation.uri)}
                         className={cn(
-                          "absolute right-1 top-1 flex size-5 items-center justify-center rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                          "absolute end-1 top-1 flex size-5 items-center justify-center rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                           isExcluded
                             ? "border-muted-foreground/50 bg-background/80 text-transparent"
                             : "border-transparent bg-amber-500 text-white",

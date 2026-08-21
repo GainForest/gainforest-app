@@ -84,7 +84,7 @@ export function ExpandableBio({
           aria-expanded={false}
           aria-controls={bioId}
           aria-label={t("expandBio")}
-          className="absolute bottom-0 right-0 bg-card pl-1 text-sm font-medium leading-relaxed text-primary transition-opacity before:absolute before:right-full before:top-0 before:h-full before:w-10 before:bg-linear-to-r before:from-transparent before:to-card before:content-[''] hover:opacity-75 focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="absolute bottom-0 end-0 bg-card ps-1 text-sm font-medium leading-relaxed text-primary transition-opacity before:absolute before:end-full before:top-0 before:h-full before:w-10 before:bg-linear-to-r before:from-transparent before:to-card before:content-[''] hover:opacity-75 focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           {t("readMore")}
         </button>

@@ -213,7 +213,7 @@ function ConnectFlow({ did, handle }: { did: string; handle: string | null }) {
 
         <details className="mt-4 rounded-2xl border border-border/70 bg-muted/50 px-4 py-3 text-sm">
           <summary className="cursor-pointer font-medium text-foreground">{t("setup.howTitle")}</summary>
-          <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-muted-foreground">
+          <ol className="mt-3 list-decimal space-y-1.5 ps-5 text-muted-foreground">
             <li>
               {t.rich("setup.howStep1", {
                 botfather: (chunks) => (

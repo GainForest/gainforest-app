@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 export function ListLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="max-h-72 w-full overflow-y-auto">
-      <div className="flex flex-col gap-2 pr-1">{children}</div>
+      <div className="flex flex-col gap-2 pe-1">{children}</div>
     </div>
   );
 }

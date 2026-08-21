@@ -118,8 +118,8 @@ export function BioblitzGallery({ round }: { round: BioblitzRound }) {
               <div className="h-3" aria-hidden />
               <MarqueeRow items={rowB} dir="right" animate={animate} onOpen={setDrawer} t={t} />
               {/* Soft fade at both edges so cards slide in and out, not pop. */}
-              <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-background to-transparent sm:w-20" />
-              <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-background to-transparent sm:w-20" />
+              <div aria-hidden className="pointer-events-none absolute inset-y-0 start-0 w-12 bg-gradient-to-r from-background to-transparent sm:w-20" />
+              <div aria-hidden className="pointer-events-none absolute inset-y-0 end-0 w-12 bg-gradient-to-l from-background to-transparent sm:w-20" />
             </div>
           )}
         </div>
@@ -240,7 +240,7 @@ function GalleryCard({
       }}
       title={name ?? undefined}
       aria-label={t("openPhoto", { name: name ?? t("unnamed") })}
-      className={`group relative block ${sizeClassName} cursor-pointer overflow-hidden rounded-2xl bg-surface-sunken text-left outline-none transition duration-300 hover:z-10 hover:shadow-[0_18px_40px_-22px_rgba(20,30,15,0.55)] focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary/60`}
+      className={`group relative block ${sizeClassName} cursor-pointer overflow-hidden rounded-2xl bg-surface-sunken text-start outline-none transition duration-300 hover:z-10 hover:shadow-[0_18px_40px_-22px_rgba(20,30,15,0.55)] focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary/60`}
     >
       {hasImage ? (
         <Image
@@ -260,7 +260,7 @@ function GalleryCard({
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
 
-      {quickLike ? <QuickLikeButton subjectUri={record.atUri} className="absolute bottom-2 right-2" /> : null}
+      {quickLike ? <QuickLikeButton subjectUri={record.atUri} className="absolute bottom-2 end-2" /> : null}
 
       <div className={`absolute inset-x-0 bottom-0 p-2 ${quickLike ? "pr-10" : ""}`}>
         {name ? (

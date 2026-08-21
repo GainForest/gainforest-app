@@ -386,12 +386,12 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
       </div>
 
       <div className="grid min-h-[680px] overflow-hidden rounded-3xl border border-border bg-card/80 xl:grid-cols-[230px_minmax(0,1fr)_310px]">
-        <aside className="flex max-h-[760px] min-h-0 flex-col border-b border-border xl:border-b-0 xl:border-r">
+        <aside className="flex max-h-[760px] min-h-0 flex-col border-b border-border xl:border-b-0 xl:border-e">
           <div className="border-b border-border p-3">
             <p className="mb-2 px-1 text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">{t("recordings")}</p>
             <div className="relative">
-              <SearchIcon className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-              <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("search")} className="h-8 pl-8 text-xs" />
+              <SearchIcon className="pointer-events-none absolute start-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("search")} className="h-8 ps-8 text-xs" />
             </div>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto p-2">
@@ -399,7 +399,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
               const count = occurrenceCounts[recording.uri];
               const active = recording.uri === selectedRecording?.uri;
               return (
-                <button key={recording.uri} type="button" onClick={() => setSelectedUri(recording.uri)} className={cn("mb-1 flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-left transition-colors", active ? "bg-primary/10 text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground") }>
+                <button key={recording.uri} type="button" onClick={() => setSelectedUri(recording.uri)} className={cn("mb-1 flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-start transition-colors", active ? "bg-primary/10 text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground") }>
                   <span className={cn("grid size-6 shrink-0 place-items-center rounded-full", count && count > 0 ? "bg-primary text-primary-foreground" : "bg-muted") }>
                     {count && count > 0 ? <CheckIcon className="size-3.5" /> : <WavesIcon className="size-3 opacity-60" />}
                   </span>
@@ -413,7 +413,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
           </div>
         </aside>
 
-        <main className="min-w-0 border-b border-border p-4 sm:p-5 xl:border-b-0 xl:border-r">
+        <main className="min-w-0 border-b border-border p-4 sm:p-5 xl:border-b-0 xl:border-e">
           {selectedRecording ? (
             <>
               <div className="flex items-center justify-between gap-3">
@@ -448,7 +448,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
                   <div className="mt-2 grid gap-2 sm:grid-cols-2">
                     {occurrences.map((item) => (
                       <div key={item.uri} className={cn("flex items-center gap-2 rounded-xl border p-2.5", editingUri === item.uri ? "border-primary bg-primary/[0.04]" : "border-border") }>
-                        <button type="button" onClick={() => selectExisting(item)} className="min-w-0 flex-1 text-left">
+                        <button type="button" onClick={() => selectExisting(item)} className="min-w-0 flex-1 text-start">
                           <span className={cn("inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold", CATEGORY_STYLES[item.category].chip)}>{t(`categories.${item.category}`)}</span>
                           <p className="mt-1 truncate text-xs font-medium text-foreground">{occurrenceDisplayName(item) || t(`categories.${item.category}`)}</p>
                           <p className="mt-0.5 text-[10px] text-muted-foreground">{formatTime(item.bounds.startTimeSeconds)}–{formatTime(item.bounds.endTimeSeconds)} · {formatFrequency(item.bounds.minFrequencyHz)}–{formatFrequency(item.bounds.maxFrequencyHz)}</p>
@@ -617,7 +617,7 @@ function SpectrogramEditor({
     <div className="mt-4">
       <div className="flex items-center justify-between gap-2 rounded-t-2xl border border-b-0 border-border bg-[#120f20] px-3 py-2 text-xs text-white/70"><span>{t("drawInstruction")}</span>{duration > 0 ? <span className="font-mono">{formatTime(duration)} · {formatFrequency(maxFrequency)}</span> : null}</div>
       <div className="flex min-h-[330px] overflow-hidden rounded-b-2xl border border-border bg-[#06040b]">
-        <div className="flex w-12 shrink-0 flex-col justify-between border-r border-white/10 py-2 pr-2 text-right font-mono text-[9px] text-white/50">{[1, .75, .5, .25, 0].map((fraction) => <span key={fraction}>{maxFrequency ? formatFrequency(maxFrequency * fraction) : "—"}</span>)}</div>
+        <div className="flex w-12 shrink-0 flex-col justify-between border-e border-white/10 py-2 pe-2 text-end font-mono text-[9px] text-white/50">{[1, .75, .5, .25, 0].map((fraction) => <span key={fraction}>{maxFrequency ? formatFrequency(maxFrequency * fraction) : "—"}</span>)}</div>
         <div className="min-w-0 flex-1">
           <Spectrogram
             source={editorSource}
@@ -635,7 +635,7 @@ function SpectrogramEditor({
               const name = occurrenceDisplayName(item) || t(`categories.${item.category}`);
               return (
                 <button key={item.uri} type="button" onPointerDown={(event) => event.stopPropagation()} onPointerMove={(event) => event.stopPropagation()} onPointerUp={(event) => event.stopPropagation()} onClick={(event) => { event.stopPropagation(); onSelectLabel(item); seekTo(item.bounds.startTimeSeconds); }} className={cn("group absolute z-10 border-2 transition-colors", CATEGORY_STYLES[item.category].box, editingUri === item.uri && "ring-2 ring-white ring-offset-1 ring-offset-transparent")} style={{ left: `${box.startX * 100}%`, top: `${box.topY * 100}%`, width: `${(box.endX - box.startX) * 100}%`, height: `${(box.bottomY - box.topY) * 100}%` }} aria-label={name}>
-                  <span className={cn("pointer-events-none absolute z-30 whitespace-nowrap rounded-md bg-black/85 px-2 py-0.5 text-[10px] font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100", box.topY > 0.1 ? "bottom-full mb-1" : "top-full mt-1", box.startX < 0.5 ? "left-0" : "right-0")}>{name}</span>
+                  <span className={cn("pointer-events-none absolute z-30 whitespace-nowrap rounded-md bg-black/85 px-2 py-0.5 text-[10px] font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100", box.topY > 0.1 ? "bottom-full mb-1" : "top-full mt-1", box.startX < 0.5 ? "start-0" : "end-0")}>{name}</span>
                 </button>
               );
             })}

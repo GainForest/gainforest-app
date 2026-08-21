@@ -113,7 +113,7 @@ export function MyRecordersView({
           type="button"
           onClick={openAddPanel}
           disabled={addDisabled}
-          className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border-[1.5px] border-dashed border-border px-4 py-3 text-left transition-colors enabled:hover:border-primary/40 enabled:hover:bg-primary/[0.04] disabled:cursor-not-allowed"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border-[1.5px] border-dashed border-border px-4 py-3 text-start transition-colors enabled:hover:border-primary/40 enabled:hover:bg-primary/[0.04] disabled:cursor-not-allowed"
         >
           <span className={cn("text-sm", addDisabled ? "text-muted-foreground/70" : "text-muted-foreground")}>
             {addDisabled && addDisabledNote ? addDisabledNote : t("recorders.unknownPrompt")}
@@ -142,7 +142,7 @@ export function MyRecordersView({
                 type="button"
                 onClick={closeAddPanel}
                 aria-label={t("addForm.close")}
-                className="-mr-1 inline-flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                className="-me-1 inline-flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
                 <XIcon className="size-4" aria-hidden />
               </button>

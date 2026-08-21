@@ -159,7 +159,7 @@ export function AudioClient({ did, target }: AudioClientProps) {
       />
 
       {mode !== "list" && (
-        <Button variant="ghost" onClick={backToList} className="-ml-2">
+        <Button variant="ghost" onClick={backToList} className="-ms-2">
           <ChevronLeftIcon className="size-4" />{" "}
           {t("backTo", { section: activeTitle.toLowerCase() })}
         </Button>

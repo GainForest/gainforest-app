@@ -1,6 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
-import { Cormorant_Garamond, Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import {
+  Cormorant_Garamond,
+  Geist,
+  Geist_Mono,
+  Instrument_Serif,
+  Noto_Sans_Arabic,
+} from "next/font/google";
 import { Suspense } from "react";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Analytics } from "@vercel/analytics/next";
@@ -19,7 +25,7 @@ import { RouteChangeIndicator } from "./_components/RouteChangeIndicator";
 import { ViewTransitionNavigationSync } from "./_components/ViewTransitionRouter";
 import { ModalHost, ModalProvider } from "@/components/ui/modal/context";
 import { WagmiProvider } from "@/components/providers/WagmiProvider";
-import { resolveSupportedLanguage } from "@/lib/i18n/languages";
+import { getLocaleDirection, resolveSupportedLanguage } from "@/lib/i18n/languages";
 import { getCanonicalPathname, getSeoLocalizedPathnames, withLocalePrefix } from "@/lib/i18n/routing";
 import { fetchAuthSession } from "./_lib/auth-server";
 import { getRequestOrigin } from "./_lib/request-origin";
@@ -50,6 +56,16 @@ const instrument = Instrument_Serif({
   weight: ["400"],
   style: ["normal", "italic"],
   variable: "--font-instrument-serif-var",
+  display: "swap",
+});
+
+// Geist ships no Arabic glyphs, so Arabic text would otherwise fall back to
+// whatever the OS happens to provide. globals.css prefers this face ahead of
+// Geist under [dir="rtl"]; Latin runs inside Arabic copy ("GainForest",
+// "BioBlitz") still resolve to Geist through the same stack.
+const notoSansArabic = Noto_Sans_Arabic({
+  subsets: ["arabic"],
+  variable: "--font-arabic",
   display: "swap",
 });
 
@@ -207,6 +223,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   ]);
 
   const supportedLocale = resolveSupportedLanguage(locale);
+  const direction = getLocaleDirection(supportedLocale);
   // A DID's first successful email sync marks its first authenticated use of
   // GainForest. Existing identities remain portable regardless of account age.
   scheduleUserEmailSync(authSession, supportedLocale);
@@ -219,9 +236,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const structuredData = buildHomeStructuredData(origin, seoT("description"), locale, navigationItems);
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} dir={direction} suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${instrument.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${instrument.variable} ${notoSansArabic.variable} antialiased`}
       >
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
         <script

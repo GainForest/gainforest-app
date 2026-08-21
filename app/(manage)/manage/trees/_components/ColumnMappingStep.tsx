@@ -163,15 +163,15 @@ export default function ColumnMappingStep({ uploadId, headers, mappings, sampleD
                 key={header}
                 className={`grid grid-cols-[1fr_1fr_1fr] gap-0 items-center px-4 py-3 ${
                   isDuplicate ? "bg-yellow-500/5" :
-                  isSkipped && !isExpectedKoboSkip ? "border-l-2 border-l-yellow-500/60 bg-yellow-500/5" :
+                  isSkipped && !isExpectedKoboSkip ? "border-l-2 border-s-yellow-500/60 bg-yellow-500/5" :
                   isExpectedKoboSkip ? "bg-muted/20" : ""
                 }`}
               >
-                <div className="flex items-center gap-2 pr-3">
+                <div className="flex items-center gap-2 pe-3">
                   <span className="text-sm font-mono truncate">{header}</span>
                   {isRequiredField && <span className="shrink-0 text-xs text-destructive font-medium">*</span>}
                 </div>
-                <div className="pr-3">
+                <div className="pe-3">
                   {sample ? (
                     <span className="text-xs text-muted-foreground font-mono truncate block max-w-[180px]">{sample}</span>
                   ) : (
@@ -188,7 +188,7 @@ export default function ColumnMappingStep({ uploadId, headers, mappings, sampleD
                       <SelectGroup>
                         <SelectLabel>{t("requiredInformation")}</SelectLabel>
                         {OCCURRENCE_REQUIRED.map((f) => (
-                          <SelectItem key={f.field} value={f.field}>{getTargetFieldLabel(f.field)} <span className="text-destructive ml-1">*</span></SelectItem>
+                          <SelectItem key={f.field} value={f.field}>{getTargetFieldLabel(f.field)} <span className="text-destructive ms-1">*</span></SelectItem>
                         ))}
                       </SelectGroup>
                       <SelectGroup>

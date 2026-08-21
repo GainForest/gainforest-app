@@ -72,7 +72,7 @@ const COMPACT = new Intl.NumberFormat(undefined, { notation: "compact", maximumF
 /**
  * The heart itself. Renders nothing without a provider/direct interaction store
  * or for non-AT subjects, so cards can drop it in unconditionally. Position it via `className`
- * (typically `absolute bottom-2 right-2`).
+ * (typically `absolute bottom-2 end-2`).
  *
  * UX notes:
  * - Always visible (galleries are touch-first; hover-only affordances hide the

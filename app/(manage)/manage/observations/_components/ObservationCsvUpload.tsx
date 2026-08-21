@@ -265,7 +265,7 @@ export function ObservationCsvUpload({
               size="icon-sm"
               onClick={onBack}
               aria-label={t("back")}
-              className="-ml-1 -mt-1 shrink-0 rounded-full text-muted-foreground"
+              className="-ms-1 -mt-1 shrink-0 rounded-full text-muted-foreground"
               disabled={uploading}
             >
               <ArrowLeftIcon className="size-4" />
@@ -281,7 +281,7 @@ export function ObservationCsvUpload({
             size="icon-sm"
             onClick={onClose}
             aria-label={t("close")}
-            className="-mr-1 -mt-1 shrink-0 rounded-full"
+            className="-me-1 -mt-1 shrink-0 rounded-full"
             disabled={uploading}
           >
             <XIcon className="size-4" />

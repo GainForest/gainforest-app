@@ -68,7 +68,7 @@ export function InviteScene({
       />
       <div
         aria-hidden
-        className={cn("absolute bottom-12 right-[22%] -z-10 size-72 rounded-full blur-3xl", TONE_GLOW[tone])}
+        className={cn("absolute bottom-12 end-[22%] -z-10 size-72 rounded-full blur-3xl", TONE_GLOW[tone])}
       />
 
       <motion.section
@@ -95,7 +95,7 @@ export function InviteScene({
           )}
 
           {mono ? (
-            <span className="absolute -bottom-1.5 -right-1.5 rounded-full bg-background p-1">
+            <span className="absolute -bottom-1.5 -end-1.5 rounded-full bg-background p-1">
               <span className={cn("flex size-9 items-center justify-center rounded-full", TONE_BADGE[tone])}>
                 {icon}
               </span>

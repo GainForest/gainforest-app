@@ -439,7 +439,7 @@ function EditableHero({
           ) : null}
         </button>
 
-        <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
+        <div className="absolute end-3 top-3 z-10 flex items-center gap-2">
           {viewPublicHref ? (
             <Button asChild variant="outline" size="sm" aria-label={t("hero.viewPublicPage")} title={t("hero.viewPublicPage")}>
               <Link href={viewPublicHref}>

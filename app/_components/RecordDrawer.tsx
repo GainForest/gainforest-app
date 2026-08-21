@@ -567,7 +567,7 @@ export function RecordDrawer({
         className={cn(
           "drawer-sheet thin-scroll relative flex h-full w-full flex-col overflow-y-auto bg-background shadow-[-24px_0_60px_-30px_rgba(20,30,15,0.5)]",
           isProject
-            ? "max-w-[540px] overscroll-contain sm:my-3 sm:h-[calc(100%_-_1.5rem)] sm:rounded-l-[28px] sm:border sm:border-r-0 sm:border-border-soft"
+            ? "max-w-[540px] overscroll-contain sm:my-3 sm:h-[calc(100%_-_1.5rem)] sm:rounded-s-[28px] sm:border sm:border-e-0 sm:border-border-soft"
             : "max-w-[480px]",
         )}
       >
@@ -1000,7 +1000,7 @@ function HeroCarouselControls({
         type="button"
         onClick={onPrev}
         aria-label={t("previousPhoto")}
-        className="pointer-events-auto absolute left-3 top-1/2 z-10 grid size-9 -translate-y-1/2 place-items-center rounded-full bg-foreground/45 text-background backdrop-blur-sm transition-colors hover:bg-foreground/65"
+        className="pointer-events-auto absolute start-3 top-1/2 z-10 grid size-9 -translate-y-1/2 place-items-center rounded-full bg-foreground/45 text-background backdrop-blur-sm transition-colors hover:bg-foreground/65"
       >
         <ChevronLeftIcon className="size-5" aria-hidden />
       </button>
@@ -1008,7 +1008,7 @@ function HeroCarouselControls({
         type="button"
         onClick={onNext}
         aria-label={t("nextPhoto")}
-        className="pointer-events-auto absolute right-3 top-1/2 z-10 grid size-9 -translate-y-1/2 place-items-center rounded-full bg-foreground/45 text-background backdrop-blur-sm transition-colors hover:bg-foreground/65"
+        className="pointer-events-auto absolute end-3 top-1/2 z-10 grid size-9 -translate-y-1/2 place-items-center rounded-full bg-foreground/45 text-background backdrop-blur-sm transition-colors hover:bg-foreground/65"
       >
         <ChevronRightIcon className="size-5" aria-hidden />
       </button>
@@ -2066,7 +2066,7 @@ function ProjectDrawerGallery({ images, projectTitle }: { images: ProjectGallery
             type="button"
             onClick={() => setActiveIndex(null)}
             aria-label={galleryT("closeImage")}
-            className="absolute right-4 top-4 z-10 grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20"
+            className="absolute end-4 top-4 z-10 grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20"
           >
             <XIcon className="h-5 w-5" aria-hidden />
           </button>
@@ -2079,7 +2079,7 @@ function ProjectDrawerGallery({ images, projectTitle }: { images: ProjectGallery
                   setActiveIndex((index) => (index === null ? index : (index - 1 + images.length) % images.length));
                 }}
                 aria-label={galleryT("previousImage")}
-                className="absolute left-4 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20"
+                className="absolute start-4 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20"
               >
                 <ChevronLeftIcon className="h-5 w-5" aria-hidden />
               </button>
@@ -2090,7 +2090,7 @@ function ProjectDrawerGallery({ images, projectTitle }: { images: ProjectGallery
                   setActiveIndex((index) => (index === null ? index : (index + 1) % images.length));
                 }}
                 aria-label={galleryT("nextImage")}
-                className="absolute right-4 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20"
+                className="absolute end-4 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20"
               >
                 <ChevronRightIcon className="h-5 w-5" aria-hidden />
               </button>

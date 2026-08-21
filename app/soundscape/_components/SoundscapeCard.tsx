@@ -280,7 +280,7 @@ export function SoundscapeCard({
       </div>
 
       {/* Player bar */}
-      <div className="mx-4 mb-3 flex items-center gap-3 rounded-full bg-muted/60 py-2 pl-2 pr-4 sm:mx-5">
+      <div className="mx-4 mb-3 flex items-center gap-3 rounded-full bg-muted/60 py-2 ps-2 pe-4 sm:mx-5">
         <button
           type="button"
           onClick={togglePlay}
@@ -292,7 +292,7 @@ export function SoundscapeCard({
           ) : player?.status === "playing" ? (
             <PauseIcon className="size-4 fill-current" />
           ) : (
-            <PlayIcon className="ml-0.5 size-4 fill-current" />
+            <PlayIcon className="ms-0.5 size-4 fill-current" />
           )}
         </button>
         {player ? (

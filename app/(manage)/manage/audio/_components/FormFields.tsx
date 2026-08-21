@@ -45,7 +45,7 @@ export function FormShell(props: {
       {props.disabledReason && <p className="text-sm text-muted-foreground">{props.disabledReason}</p>}
       <div className="flex justify-end">
         <Button onClick={props.onSave} disabled={props.disabled || props.isPending || Boolean(props.disabledReason)} title={props.disabledReason ?? undefined}>
-          {props.isPending && <Loader2Icon className="mr-2 size-4 animate-spin" />}
+          {props.isPending && <Loader2Icon className="me-2 size-4 animate-spin" />}
           {props.isPending ? t("saving") : t("save")}
         </Button>
       </div>

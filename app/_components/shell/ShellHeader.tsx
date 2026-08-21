@@ -233,7 +233,7 @@ export function ShellHeader({
               <motion.div
                 ref={registerTarget}
                 aria-hidden
-                className="pointer-events-none absolute right-0 top-1/2"
+                className="pointer-events-none absolute end-0 top-1/2"
                 animate={pocketControls}
                 style={{ y: "-50%", transformOrigin: "center" }}
               >

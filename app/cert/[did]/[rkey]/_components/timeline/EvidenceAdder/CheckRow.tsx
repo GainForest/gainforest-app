@@ -27,7 +27,7 @@ export function CheckRow({
       aria-pressed={selected}
       disabled={disabled}
       className={cn(
-        "flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60",
+        "flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-start transition-colors disabled:cursor-not-allowed disabled:opacity-60",
         selected
           ? "bg-primary/10"
           : "bg-muted/40 hover:bg-muted/70",

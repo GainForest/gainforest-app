@@ -45,7 +45,7 @@ function Block({ block: b }: { block: RichBlock }) {
       );
     case "blockquote":
       return (
-        <blockquote className="border-l-2 border-primary/40 pl-3.5 text-foreground/70 italic">
+        <blockquote className="border-s-2 border-primary/40 ps-3.5 text-foreground/70 italic">
           <Spans spans={b.spans} />
         </blockquote>
       );
@@ -57,7 +57,7 @@ function Block({ block: b }: { block: RichBlock }) {
       );
     case "list":
       return b.ordered ? (
-        <ol className="list-decimal space-y-1.5 pl-5 marker:text-foreground/40">
+        <ol className="list-decimal space-y-1.5 ps-5 marker:text-foreground/40">
           {b.items.map((it, i) => (
             <li key={i}>
               <Spans spans={it} />
@@ -65,7 +65,7 @@ function Block({ block: b }: { block: RichBlock }) {
           ))}
         </ol>
       ) : (
-        <ul className="list-disc space-y-1.5 pl-5 marker:text-foreground/40">
+        <ul className="list-disc space-y-1.5 ps-5 marker:text-foreground/40">
           {b.items.map((it, i) => (
             <li key={i}>
               <Spans spans={it} />
@@ -242,7 +242,7 @@ function WebsiteCard({
         // eslint-disable-next-line @next/next/no-img-element -- preview blobs vary by host
         <img src={image} alt="" loading="lazy" className="h-[88px] w-[88px] shrink-0 object-cover" />
       )}
-      <div className="min-w-0 flex-1 py-2.5 pr-3">
+      <div className="min-w-0 flex-1 py-2.5 pe-3">
         {title && <div className="truncate text-[13.5px] font-medium text-foreground">{title}</div>}
         {description && (
           <div className="mt-0.5 line-clamp-2 text-[12.5px] leading-[1.4] text-foreground/60">

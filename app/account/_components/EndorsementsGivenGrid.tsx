@@ -58,7 +58,7 @@ function EndorsedCard({
   return (
     <Link
       href={accountPath(organization.did)}
-      className="group flex h-full w-full items-center gap-3.5 rounded-2xl border border-border bg-card p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/55"
+      className="group flex h-full w-full items-center gap-3.5 rounded-2xl border border-border bg-card p-4 text-start shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/55"
     >
       <span className="relative size-12 shrink-0 overflow-hidden rounded-full border border-border/60 bg-muted">
         {hasImage ? (

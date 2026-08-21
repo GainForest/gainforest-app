@@ -336,10 +336,10 @@ function SearchTrigger({
         type="button"
         onClick={onOpen}
         aria-label={ariaLabel}
-        className="hidden h-9 items-center gap-2 rounded-full border border-border-soft bg-background/70 pl-3 pr-2 text-[13px] text-muted-foreground transition-colors hover:border-border hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 lg:inline-flex"
+        className="hidden h-9 items-center gap-2 rounded-full border border-border-soft bg-background/70 ps-3 pe-2 text-[13px] text-muted-foreground transition-colors hover:border-border hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 lg:inline-flex"
       >
         <SearchIcon className="h-4 w-4 shrink-0" aria-hidden />
-        <span className="min-w-[5.5rem] text-left">{label}</span>
+        <span className="min-w-[5.5rem] text-start">{label}</span>
         <kbd className="inline-flex select-none items-center gap-0.5 rounded border border-border-soft bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
           {isMac ? "⌘" : "Ctrl"} K
         </kbd>
@@ -385,7 +385,7 @@ function ResultRow({
       onMouseEnter={onMouseEnter}
       onClick={onClick}
       className={cn(
-        "flex w-full items-center gap-3 px-4 py-2 text-left transition-colors",
+        "flex w-full items-center gap-3 px-4 py-2 text-start transition-colors",
         active ? "bg-muted" : "hover:bg-muted/60",
       )}
     >

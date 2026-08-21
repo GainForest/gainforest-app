@@ -65,7 +65,7 @@ function OrgCard({ group }: { group: CgsGroupMembership }) {
         )}
         <div className="absolute inset-0 bg-linear-to-t from-card via-card/40 to-transparent" />
         <span
-          className={`absolute right-3 top-3 rounded-full px-2.5 py-1 text-xs font-medium capitalize shadow-sm backdrop-blur-sm ${roleBadge(group.role)}`}
+          className={`absolute end-3 top-3 rounded-full px-2.5 py-1 text-xs font-medium capitalize shadow-sm backdrop-blur-sm ${roleBadge(group.role)}`}
         >
           {roleLabel}
         </span>

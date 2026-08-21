@@ -94,7 +94,7 @@ export function BumicertPillRows({
         ) : null}
       </div>
 
-      <div aria-hidden className="invisible pointer-events-none absolute left-0 top-0 flex flex-nowrap items-center gap-2">
+      <div aria-hidden className="invisible pointer-events-none absolute start-0 top-0 flex flex-nowrap items-center gap-2">
         {scopeItems.map((item, index) => (
           <Pill
             key={`measure-scope-${item.key}`}

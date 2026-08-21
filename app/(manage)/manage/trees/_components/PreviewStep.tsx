@@ -204,14 +204,14 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
           <table className="w-full text-xs">
             <thead>
               <tr className="bg-muted/50 border-b border-border">
-                <th className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide w-8">#</th>
+                <th className="px-3 py-2 text-start font-medium text-muted-foreground uppercase tracking-wide w-8">#</th>
                 {mappedHeaders.map((h) => (
-                  <th key={h} className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap">
+                  <th key={h} className="px-3 py-2 text-start font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap">
                     {h === "siteBoundary" ? t("siteBoundaryField") : getTargetFieldLabel(h)}
                   </th>
                 ))}
-                {hasAnyPhotos && <th className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap">{t("photos")}</th>}
-                <th className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide w-16">{t("status")}</th>
+                {hasAnyPhotos && <th className="px-3 py-2 text-start font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap">{t("photos")}</th>}
+                <th className="px-3 py-2 text-start font-medium text-muted-foreground uppercase tracking-wide w-16">{t("status")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -222,7 +222,7 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
                 return (
                   <Fragment key={rowIndex}>
                     <tr
-                      className={`${hasError ? "border-l-2 border-l-destructive bg-destructive/5 cursor-pointer hover:bg-destructive/10" : "hover:bg-muted/20"}`}
+                      className={`${hasError ? "border-l-2 border-s-destructive bg-destructive/5 cursor-pointer hover:bg-destructive/10" : "hover:bg-muted/20"}`}
                       onClick={hasError ? () => toggleRow(rowIndex) : undefined}
                     >
                       <td className="px-3 py-2 text-muted-foreground font-mono">{rowIndex + 1}</td>
@@ -278,7 +278,7 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
         <div className="rounded-lg border border-destructive/30 overflow-hidden">
           <button
             type="button"
-            className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-left hover:bg-muted/30 transition-colors"
+            className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-start hover:bg-muted/30 transition-colors"
             onClick={() => setErrorSectionOpen((v) => !v)}
           >
             <span className="flex items-center gap-2 text-destructive">

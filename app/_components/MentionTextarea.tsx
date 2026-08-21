@@ -225,7 +225,7 @@ export function MentionTextarea({
           id={listId}
           role="listbox"
           aria-label={t("suggestionsAria")}
-          className="absolute left-0 right-0 top-full z-30 mt-1 overflow-hidden rounded-xl border border-border bg-popover shadow-lg"
+          className="absolute start-0 end-0 top-full z-30 mt-1 overflow-hidden rounded-xl border border-border bg-popover shadow-lg"
         >
           {results.length > 0 ? (
             <ul className="max-h-64 overflow-y-auto py-1">
@@ -243,7 +243,7 @@ export function MentionTextarea({
                     }}
                     onMouseEnter={() => setHighlight(index)}
                     className={cn(
-                      "flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors",
+                      "flex w-full items-center gap-2.5 px-3 py-2 text-start text-sm transition-colors",
                       index === highlight ? "bg-primary/10" : "hover:bg-muted/60",
                     )}
                   >

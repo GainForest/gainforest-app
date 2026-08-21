@@ -115,10 +115,10 @@ export function TrustedByBadges({
   // "plain" drops the pill chrome (no rounded background, blur, or check icon)
   // so the endorsement reads as a quiet "Trusted by ●" line under the title.
   const variantClass = variant === "compact"
-    ? "gap-1.5 rounded-full bg-accent/50 p-0.5 pl-2 text-sm"
+    ? "gap-1.5 rounded-full bg-accent/50 p-0.5 ps-2 text-sm"
     : isPlain
       ? "gap-2 text-sm"
-      : "gap-2 rounded-full bg-accent/50 p-1 pl-3 text-lg";
+      : "gap-2 rounded-full bg-accent/50 p-1 ps-3 text-lg";
   const checkIconClass = variant === "compact" ? "size-4" : "size-5";
 
   return (

@@ -746,7 +746,7 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
                           <p className="text-sm font-semibold text-foreground">{entry.symbol}</p>
                           <p className="text-xs text-muted-foreground">{token.name}</p>
                         </div>
-                        <div className="text-right">
+                        <div className="text-end">
                           <p className="font-mono text-sm font-medium text-foreground">
                             {formatTokenUnits(entry.units, token.decimals, TOKEN_DISPLAY_DECIMALS[entry.symbol]) || "0"}
                           </p>
@@ -882,13 +882,13 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
                       inputMode="decimal"
                       aria-label={t("sendAmount")}
                       disabled={sendBusy}
-                      className="pr-14"
+                      className="pe-14"
                     />
                     <button
                       type="button"
                       onClick={applySendMax}
                       disabled={sendBusy || !balances}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md border border-input px-1.5 py-0.5 text-[11px] text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+                      className="absolute end-2 top-1/2 -translate-y-1/2 rounded-md border border-input px-1.5 py-0.5 text-[11px] text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
                     >
                       {t("sendMax")}
                     </button>

@@ -89,7 +89,7 @@ export default async function DeleteAccountPage() {
               <h2 className="font-serif text-2xl font-semibold tracking-tight text-foreground">
                 {t("sections.howTo.title")}
               </h2>
-              <ol className="mt-4 list-decimal space-y-3 pl-5 text-[15px] leading-7 text-muted-foreground">
+              <ol className="mt-4 list-decimal space-y-3 ps-5 text-[15px] leading-7 text-muted-foreground">
                 {STEP_KEYS.map((stepKey) => (
                   <li key={stepKey}>{renderText(t(`sections.howTo.steps.${stepKey}`))}</li>
                 ))}

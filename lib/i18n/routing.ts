@@ -1,6 +1,6 @@
 import {
   DEFAULT_LANGUAGE,
-  SUPPORTED_LOCALES,
+  PUBLIC_LOCALES,
   isSupportedLanguageCode,
   type SupportedLanguageCode,
 } from "./languages";
@@ -56,13 +56,22 @@ export function localizeHref(
   return `${localizedPathname}${querySuffix}${hashSuffix}`;
 }
 
-export function getLocalizedPathnames(pathname: string): Record<SupportedLanguageCode, string> {
+/**
+ * Only public locales are returned: these feed `hreflang` alternates, sitemap
+ * entries, and metadata alternates, none of which should point at a locale that
+ * is still largely English.
+ */
+export function getLocalizedPathnames(
+  pathname: string,
+): Partial<Record<SupportedLanguageCode, string>> {
   return Object.fromEntries(
-    SUPPORTED_LOCALES.map((locale) => [locale, withLocalePrefix(pathname, locale)]),
-  ) as Record<SupportedLanguageCode, string>;
+    PUBLIC_LOCALES.map((locale) => [locale, withLocalePrefix(pathname, locale)]),
+  ) as Partial<Record<SupportedLanguageCode, string>>;
 }
 
-export function getSeoLocalizedPathnames(pathname: string): Record<SupportedLanguageCode, string> {
+export function getSeoLocalizedPathnames(
+  pathname: string,
+): Partial<Record<SupportedLanguageCode, string>> {
   const pathnames = getLocalizedPathnames(pathname);
   if (stripLocaleFromPathname(pathname) !== "/") return pathnames;
 

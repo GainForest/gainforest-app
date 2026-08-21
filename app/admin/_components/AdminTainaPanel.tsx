@@ -112,7 +112,7 @@ function TainaRow({ row, allowanceUsd }: { row: AdminTainaRow; allowanceUsd: num
         </Button>
       </div>
 
-      <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 pl-13 text-xs text-muted-foreground">
+      <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 ps-13 text-xs text-muted-foreground">
         <a
           href={row.botUrl}
           target="_blank"
@@ -137,7 +137,7 @@ function TainaRow({ row, allowanceUsd }: { row: AdminTainaRow; allowanceUsd: num
       </div>
 
       {composing ? (
-        <div className="mt-3 rounded-2xl border border-border bg-muted/30 p-3 sm:ml-13">
+        <div className="mt-3 rounded-2xl border border-border bg-muted/30 p-3 sm:ms-13">
           <Textarea
             value={text}
             maxLength={4000}

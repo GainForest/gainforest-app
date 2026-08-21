@@ -99,7 +99,7 @@ function JobRow({ row }: { row: AdminDataJobRow }) {
         </Button>
       </div>
 
-      <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 pl-13 text-xs text-muted-foreground">
+      <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 ps-13 text-xs text-muted-foreground">
         <span className="font-mono text-foreground/80">{job.filename}</span>
         <span className="tabular-nums">{formatBytes(job.sizeBytes)}</span>
         {job.project ? <span className="truncate">{job.project}</span> : null}
@@ -116,7 +116,7 @@ function JobRow({ row }: { row: AdminDataJobRow }) {
       </div>
 
       {job.notes ? (
-        <p className="mt-2 pl-13 text-xs leading-5 text-muted-foreground">
+        <p className="mt-2 ps-13 text-xs leading-5 text-muted-foreground">
           <span className="font-medium text-foreground/80">{t("submitterNotes")}</span> {job.notes}
         </p>
       ) : null}
@@ -186,7 +186,7 @@ function JobDetails({
   }
 
   return (
-    <div className="mt-3 space-y-4 rounded-2xl border border-border bg-muted/30 p-4 sm:ml-13">
+    <div className="mt-3 space-y-4 rounded-2xl border border-border bg-muted/30 p-4 sm:ms-13">
       {/* status + download */}
       <div className="flex flex-wrap items-center gap-2">
         {DATA_JOB_ADMIN_STATUSES.map((status) => (
@@ -360,7 +360,7 @@ function ContentsView({ jobId, contents }: { jobId: string; contents: ZipContent
 
       {preview ? (
         <div className="overflow-x-auto rounded-xl border border-border bg-background">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-start text-xs">
             <tbody>
               {preview.rows.map((row, rowIndex) => (
                 <tr key={rowIndex} className={cn(rowIndex === 0 && "bg-muted/50 font-medium")}>

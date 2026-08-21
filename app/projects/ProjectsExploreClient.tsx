@@ -493,7 +493,7 @@ export function ProjectsExploreClient({
           <div className="relative z-20 mt-5 space-y-3">
             <div className="relative z-30 flex items-center gap-3 animate-in" style={{ animationDelay: "80ms" }}>
               <div className="group/input-group border-input relative flex h-10 min-w-0 flex-1 items-center rounded-full border bg-background/50 shadow-xs backdrop-blur transition-[color,box-shadow] outline-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
-                <SearchIcon className="ml-3 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                <SearchIcon className="ms-3 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                 <input
                   type="text"
                   value={query}
@@ -532,7 +532,7 @@ export function ProjectsExploreClient({
                 </Button>
 
                 {openFilters ? (
-                  <div aria-label={t("filters.allFilters")} className="quick-popover-in absolute right-0 top-full z-[1000] mt-2 w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-primary/20 bg-popover p-4 shadow-[0_18px_45px_color-mix(in_oklab,var(--primary)_16%,transparent)]">
+                  <div aria-label={t("filters.allFilters")} className="quick-popover-in absolute end-0 top-full z-[1000] mt-2 w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-primary/20 bg-popover p-4 shadow-[0_18px_45px_color-mix(in_oklab,var(--primary)_16%,transparent)]">
                     <div className="mb-3">
                       <h2 className="text-base font-medium text-foreground">{t("filters.allFilters")}</h2>
                       <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{t("filters.description")}</p>
@@ -575,7 +575,7 @@ export function ProjectsExploreClient({
                     aria-pressed={selected}
                     onClick={() => void setCategory(key)}
                     className={cn(
-                      "group flex min-h-24 flex-col items-start justify-between rounded-2xl border p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-md",
+                      "group flex min-h-24 flex-col items-start justify-between rounded-2xl border p-3 text-start transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-md",
                       selected ? "border-primary bg-primary text-primary-foreground shadow-md" : "border-border/70 bg-background/65 text-foreground",
                     )}
                   >
@@ -835,7 +835,7 @@ function SupportProjectCard({
       type="button"
       onClick={() => onOpen(record)}
       aria-label={t("open", { title: record.title })}
-      className="group grid min-h-44 grid-cols-[8.5rem_minmax(0,1fr)] overflow-hidden rounded-2xl border border-border/70 bg-card text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 sm:grid-cols-[11rem_minmax(0,1fr)]"
+      className="group grid min-h-44 grid-cols-[8.5rem_minmax(0,1fr)] overflow-hidden rounded-2xl border border-border/70 bg-card text-start shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 sm:grid-cols-[11rem_minmax(0,1fr)]"
     >
       <span className="relative min-h-44 overflow-hidden bg-muted">
         {hasImage ? (

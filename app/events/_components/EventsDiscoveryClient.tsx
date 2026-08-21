@@ -271,13 +271,13 @@ export function EventsDiscoveryClient({ adapter = liveEventsAdapter }: { adapter
       {/* Search + filters */}
       <div className="mt-5 flex flex-wrap items-center gap-2">
         <label className="relative min-w-0 flex-1 basis-64">
-          <SearchIcon className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+          <SearchIcon className="pointer-events-none absolute start-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("searchPlaceholder")}
-            className="w-full rounded-full border border-border bg-surface py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+            className="w-full rounded-full border border-border bg-surface py-2.5 ps-10 pe-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
           />
         </label>
         <div className="flex max-w-full flex-wrap items-center gap-2">
@@ -338,7 +338,7 @@ export function EventsDiscoveryClient({ adapter = liveEventsAdapter }: { adapter
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortOrder)}
-            className="rounded-full border border-transparent bg-transparent py-1 pr-1 text-sm font-medium text-foreground focus:outline-none"
+            className="rounded-full border border-transparent bg-transparent py-1 pe-1 text-sm font-medium text-foreground focus:outline-none"
           >
             <option value="soonest">{t("sortSoonest")}</option>
             <option value="newest">{t("sortNewest")}</option>

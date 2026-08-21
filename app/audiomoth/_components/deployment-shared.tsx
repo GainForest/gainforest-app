@@ -288,7 +288,7 @@ export function CreateDeploymentDialog({
       ) : (
         <>
           <ModalHeader>
-            <ModalTitle className="pr-8">{t("createTitle")}</ModalTitle>
+            <ModalTitle className="pe-8">{t("createTitle")}</ModalTitle>
             <ModalDescription>{t("createIntro")}</ModalDescription>
           </ModalHeader>
 
@@ -489,7 +489,7 @@ export function EditDeploymentDialog({
   return (
     <ModalContent dismissible={!saving} className="w-full">
       <ModalHeader>
-        <ModalTitle className="pr-8">{t("editTitle")}</ModalTitle>
+        <ModalTitle className="pe-8">{t("editTitle")}</ModalTitle>
         <ModalDescription>{t("editIntro")}</ModalDescription>
       </ModalHeader>
 

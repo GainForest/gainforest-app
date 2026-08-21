@@ -3,6 +3,8 @@ import {
   SUPPORTED_LOCALES,
   isSupportedLanguageCode,
   resolvePreferredLanguageFromHeader,
+  resolvePublicLanguage,
+  type PublicLanguageCode,
   type SupportedLanguageCode,
 } from "@/lib/i18n/languages";
 
@@ -73,7 +75,7 @@ const copyByLocale = {
     tagline: "Meregenerasi ekosistem, bersama",
     attributionSuffix: "oleh GainForest",
   },
-} satisfies Record<SupportedLanguageCode, OtpEmailTemplateCopy>;
+} satisfies Record<PublicLanguageCode, OtpEmailTemplateCopy>;
 
 export function resolveEmailTemplateLocale(options: {
   explicitLocale?: string | null;
@@ -87,10 +89,13 @@ export function resolveEmailTemplateLocale(options: {
 }
 
 export function renderOtpEmailTemplate(locale: SupportedLanguageCode = DEFAULT_LANGUAGE): string {
-  const copy = copyByLocale[locale];
+  // Locales without their own email copy fall back to English, matching how
+  // the message catalog resolves a partially translated locale.
+  const copyLocale = resolvePublicLanguage(locale);
+  const copy = copyByLocale[copyLocale];
 
   return `<!DOCTYPE html>
-<html lang="${locale}">
+<html lang="${copyLocale}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />

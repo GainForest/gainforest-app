@@ -616,7 +616,7 @@ function FeedFilterRail({
                 )}
               />
               <span className="truncate">{label}</span>
-              {adminOnly ? <AdminOnlyIndicator className="ml-auto" /> : null}
+              {adminOnly ? <AdminOnlyIndicator className="ms-auto" /> : null}
             </button>
           );
         })}
@@ -817,7 +817,7 @@ function FeedRow({
                     e.stopPropagation();
                     onOpenImage(item);
                   }}
-                  className="block w-full cursor-zoom-in text-left"
+                  className="block w-full cursor-zoom-in text-start"
                 >
                   <FeedImage item={item} />
                 </button>
@@ -825,7 +825,7 @@ function FeedRow({
                   subjectUri={subjectUri}
                   signedIn={signedIn}
                   interactions={interactions}
-                  className="absolute bottom-2 right-2"
+                  className="absolute bottom-2 end-2"
                 />
               </div>
             ) : null}
@@ -846,7 +846,7 @@ function FeedRow({
         </div>
 
         {/* Like + comment, aligned under the row content (outside the link). */}
-        <div className="pb-2 pl-16 pr-3">
+        <div className="pb-2 ps-16 pe-3">
           <FeedActionBar
             subjectUri={subjectUri}
             signedIn={signedIn}
@@ -1022,7 +1022,7 @@ function DonationRow({
       </div>
 
       {/* Like + comment, aligned like every other row. */}
-      <div className="pb-2 pl-16 pr-3">
+      <div className="pb-2 ps-16 pr-3">
         <FeedActionBar
           subjectUri={item.id}
           signedIn={signedIn}
@@ -1074,7 +1074,7 @@ function RowTextWrapper({
           onToggle();
         }
       }}
-      className="block cursor-pointer text-left"
+      className="block cursor-pointer text-start"
     >
       {children}
     </div>
@@ -1283,7 +1283,7 @@ function ObservationBatchCard({
                       signedIn={signedIn}
                       interactions={interactions}
                       size="sm"
-                      className="absolute bottom-1.5 right-1.5"
+                      className="absolute bottom-1.5 end-1.5"
                     />
                   </div>
                 );
@@ -1488,7 +1488,7 @@ function BatchCommentNode({
           />
         ) : null}
         {node.replies.length > 0 ? (
-          <ul className="mt-2.5 space-y-2.5 border-l border-border/40 pl-2.5">
+          <ul className="mt-2.5 space-y-2.5 border-s border-border/40 pl-2.5">
             {node.replies.map((child) => (
               <BatchCommentNode
                 key={child.comment.uri}

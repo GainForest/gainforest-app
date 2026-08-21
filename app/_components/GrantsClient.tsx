@@ -391,7 +391,7 @@ function RewildingApplyModal({
       ) : (
         <>
           <div className="group/input-group border-input mt-5 flex h-10 items-center rounded-full border bg-background/70 shadow-xs backdrop-blur transition-[color,box-shadow] focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
-            <SearchIcon className="ml-3 h-4 w-4 text-muted-foreground" />
+            <SearchIcon className="ms-3 h-4 w-4 text-muted-foreground" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
@@ -406,7 +406,7 @@ function RewildingApplyModal({
               {t("noMatch")}
             </p>
           ) : (
-            <ul className="mt-3 max-h-[46vh] space-y-2 overflow-y-auto pr-1" role="list">
+            <ul className="mt-3 max-h-[46vh] space-y-2 overflow-y-auto pe-1" role="list">
               {filtered.map((project) => {
                 const submitting = submittingRkey === project.rkey;
                 const disabled = submittingRkey !== null;
@@ -417,7 +417,7 @@ function RewildingApplyModal({
                       onClick={() => void apply(project)}
                       disabled={disabled}
                       aria-label={t("applyWith", { project: project.title })}
-                      className="group flex w-full items-center gap-3 rounded-2xl border border-border bg-card px-3 py-3 text-left transition-colors hover:border-primary/40 hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="group flex w-full items-center gap-3 rounded-2xl border border-border bg-card px-3 py-3 text-start transition-colors hover:border-primary/40 hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <span className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-muted">
                         {project.imageUrl ? (

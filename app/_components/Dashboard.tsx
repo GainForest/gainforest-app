@@ -264,7 +264,7 @@ function TopCountriesTable({ stats, loading }: { stats: GeoStats; loading: boole
             {visibleCountries.map((country, index) => (
               <li key={country.countryCode} className="flex items-center justify-between gap-4 text-sm">
                 <span className="flex min-w-0 items-center gap-2 text-muted-foreground">
-                  <span className="w-4 shrink-0 text-right text-xs text-muted-foreground/50 tabular-nums">
+                  <span className="w-4 shrink-0 text-end text-xs text-muted-foreground/50 tabular-nums">
                     {index + 1}
                   </span>
                   <span className="shrink-0">{country.emoji}</span>
@@ -440,7 +440,7 @@ function TopDonorsTable({ rows }: { rows: TopDonor[] }) {
               <thead>
                 <tr className="border-t border-border/60">
                   <SortableCol col="rank" sortKey={sortKey} sortDir={sortDir} onSort={sort}>#</SortableCol>
-                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("donor")}</th>
+                  <th className="px-3 py-2 text-start text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("donor")}</th>
                   <SortableCol col="totalAmount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>{t("totalDonated")}</SortableCol>
                   <SortableCol col="donationCount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>{t("donations")}</SortableCol>
                   <SortableCol col="lastDonatedAt" sortKey={sortKey} sortDir={sortDir} onSort={sort}>{t("lastDonation")}</SortableCol>
@@ -517,7 +517,7 @@ function OrganizationsTable({ rows }: { rows: OrgRow[] }) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-t border-border/60">
-                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("organization")}</th>
+                  <th className="px-3 py-2 text-start text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("organization")}</th>
                   <SortableCol col="totalRaised" sortKey={sortKey} sortDir={sortDir} onSort={sort}>{t("totalRaised")}</SortableCol>
                   <SortableCol col="bumicertCount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>{t("bumicerts")}</SortableCol>
                   <SortableCol col="donorCount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>{t("donors")}</SortableCol>
@@ -585,10 +585,10 @@ function RecentTransactionsTable({ rows }: { rows: TxRow[] }) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-t border-border/60">
-                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("date")}</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("donor")}</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("amount")}</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("bumicert")}</th>
+                  <th className="px-3 py-2 text-start text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("date")}</th>
+                  <th className="px-3 py-2 text-start text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("donor")}</th>
+                  <th className="px-3 py-2 text-start text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("amount")}</th>
+                  <th className="px-3 py-2 text-start text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("bumicert")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -650,7 +650,7 @@ function SortableCol<T extends string>({
 }) {
   return (
     <th
-      className="cursor-pointer px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase transition-colors select-none hover:text-foreground"
+      className="cursor-pointer px-3 py-2 text-start text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase transition-colors select-none hover:text-foreground"
       onClick={() => onSort(col)}
     >
       <span className="inline-flex items-center gap-1">

@@ -98,7 +98,7 @@ export function StewardTools({ did, accountName, initialTestFlagged, initialAwar
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         aria-label={open ? t("hide") : t("show")}
-        className="flex w-full items-center gap-3 px-3.5 py-3 text-left transition-colors hover:bg-muted/40"
+        className="flex w-full items-center gap-3 px-3.5 py-3 text-start transition-colors hover:bg-muted/40"
       >
         <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
           <ShieldCheckIcon className="size-4" />

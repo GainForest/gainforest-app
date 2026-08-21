@@ -1179,7 +1179,7 @@ export default function UploadStep({
         <div className="rounded-lg border border-destructive/30 overflow-hidden">
           <button
             type="button"
-            className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-left hover:bg-muted/30 transition-colors"
+            className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-start hover:bg-muted/30 transition-colors"
             onClick={() => setFailedRowsOpen((v) => !v)}
           >
             <span className="flex items-center gap-2 text-destructive">

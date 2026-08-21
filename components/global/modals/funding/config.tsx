@@ -76,7 +76,7 @@ function StyledSelect({
         className={cn(
           "h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs",
           "focus-visible:outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
-          "appearance-none pr-8 dark:bg-input/30",
+          "appearance-none pe-8 dark:bg-input/30",
           !value && "text-muted-foreground",
         )}
       >
@@ -87,7 +87,7 @@ function StyledSelect({
           </option>
         ))}
       </select>
-      <ChevronDownIcon className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+      <ChevronDownIcon className="pointer-events-none absolute end-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
     </div>
   );
 }
@@ -353,7 +353,7 @@ export function FundingConfigModal({
                     {t("fundingGoal")}
                   </Label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm pointer-events-none select-none">
+                    <span className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm pointer-events-none select-none">
                       $
                     </span>
                     <Input
@@ -363,7 +363,7 @@ export function FundingConfigModal({
                       onChange={(e) =>
                         setGoalInUSD(e.target.value.replace(/[^0-9.]/g, ""))
                       }
-                      className="pl-6"
+                      className="ps-6"
                     />
                   </div>
                 </div>
@@ -374,7 +374,7 @@ export function FundingConfigModal({
                       {t("minDonation")}
                     </Label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm pointer-events-none select-none">
+                      <span className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm pointer-events-none select-none">
                         $
                       </span>
                       <Input
@@ -386,7 +386,7 @@ export function FundingConfigModal({
                             e.target.value.replace(/[^0-9.]/g, ""),
                           )
                         }
-                        className="pl-6"
+                        className="ps-6"
                       />
                     </div>
                   </div>
@@ -395,7 +395,7 @@ export function FundingConfigModal({
                       {t("maxDonation")}
                     </Label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm pointer-events-none select-none">
+                      <span className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm pointer-events-none select-none">
                         $
                       </span>
                       <Input
@@ -407,7 +407,7 @@ export function FundingConfigModal({
                             e.target.value.replace(/[^0-9.]/g, ""),
                           )
                         }
-                        className="pl-6"
+                        className="ps-6"
                       />
                     </div>
                   </div>

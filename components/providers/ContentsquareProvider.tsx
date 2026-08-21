@@ -124,7 +124,7 @@ function ContentsquareConsentCard({
 }) {
   return (
     <div
-      className="fixed right-4 bottom-4 left-4 z-40 sm:left-auto sm:right-6 sm:bottom-6 sm:w-full sm:max-w-md"
+      className="fixed end-4 bottom-4 start-4 z-40 sm:start-auto sm:end-6 sm:bottom-6 sm:w-full sm:max-w-md"
       role="region"
       aria-labelledby="contentsquare-consent-title"
       aria-describedby="contentsquare-consent-description"

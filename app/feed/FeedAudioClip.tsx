@@ -428,10 +428,10 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
           {formatTime(clip.startTimeSeconds)}–{formatTime(clip.endTimeSeconds)} · {formatFrequency(clip.minFrequencyHz)}–{formatFrequency(clip.maxFrequencyHz)}
         </span>
         {audioFailed || (source && source.audioUrls.length === 0) ? (
-          <span className="ml-auto shrink-0 text-[11px] text-muted-foreground">{t("unavailable")}</span>
+          <span className="ms-auto shrink-0 text-[11px] text-muted-foreground">{t("unavailable")}</span>
         ) : playhead !== null && duration ? (
           /* Live position through the whole recording once playback started. */
-          <span className="ml-auto shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground">
+          <span className="ms-auto shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground">
             {formatTime(playhead)} / {formatTime(duration)}
           </span>
         ) : null}

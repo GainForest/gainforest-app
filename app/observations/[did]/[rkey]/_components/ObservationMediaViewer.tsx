@@ -96,7 +96,7 @@ export function ObservationMediaViewer({
                 label={t("next")}
                 onClick={() => setActive((index) => (index + 1) % images.length)}
               />
-              <span className="absolute bottom-2 right-2 rounded-full bg-black/60 px-2.5 py-1 text-[12px] font-medium text-white backdrop-blur-sm">
+              <span className="absolute bottom-2 end-2 rounded-full bg-black/60 px-2.5 py-1 text-[12px] font-medium text-white backdrop-blur-sm">
                 {safeActive + 1} / {images.length}
               </span>
             </>
@@ -167,7 +167,7 @@ export function ObservationMediaViewer({
             type="button"
             onClick={() => setLightboxOpen(false)}
             aria-label={t("close")}
-            className="absolute right-4 top-4 z-10 grid h-10 w-10 place-items-center rounded-full bg-white/15 text-white transition-colors hover:bg-white/25"
+            className="absolute end-4 top-4 z-10 grid h-10 w-10 place-items-center rounded-full bg-white/15 text-white transition-colors hover:bg-white/25"
           >
             <XIcon className="h-5 w-5" aria-hidden />
           </button>

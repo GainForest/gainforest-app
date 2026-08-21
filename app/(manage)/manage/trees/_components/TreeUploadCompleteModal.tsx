@@ -130,7 +130,7 @@ export function TreeUploadCompleteModal({
               <AlertTriangle className="mt-0.5 size-4 shrink-0" />
               <div className="space-y-1">
                 <p className="font-medium">Some items need review</p>
-                <ul className="list-disc space-y-0.5 pl-4 text-xs">
+                <ul className="list-disc space-y-0.5 ps-4 text-xs">
                   {partialCount > 0 ? (
                     <li>
                       {pluralize(partialCount, "saved row")} {" "}
@@ -155,7 +155,7 @@ export function TreeUploadCompleteModal({
                     <p className="mb-2 text-xs font-medium text-foreground">
                       Rows needing review
                     </p>
-                    <ul className={cn("space-y-2 pr-1 text-xs", !isDrawer && "max-h-44 overflow-y-auto")}>
+                    <ul className={cn("space-y-2 pe-1 text-xs", !isDrawer && "max-h-44 overflow-y-auto")}>
                       {rowAttentionSummaries.map((summary) => (
                         <li
                           key={`${summary.kind}-${summary.sourceRowIndex}`}

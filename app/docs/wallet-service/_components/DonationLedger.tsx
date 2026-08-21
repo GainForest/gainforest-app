@@ -132,7 +132,7 @@ export function DonationLedger() {
         </ol>
 
         {/* What exists at the address. */}
-        <div className="flex flex-col justify-center gap-4 border-t border-border bg-background/60 p-4 sm:border-t-0 sm:border-l sm:p-5">
+        <div className="flex flex-col justify-center gap-4 border-t border-border bg-background/60 p-4 sm:border-t-0 sm:border-s sm:p-5">
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">{t("balanceLabel")}</div>
             <motion.div
@@ -142,7 +142,7 @@ export function DonationLedger() {
               className="mt-1 font-mono text-2xl font-medium tracking-tight text-foreground"
             >
               {balance}
-              <span className="ml-1 text-[12px] text-muted-foreground">USDC</span>
+              <span className="ms-1 text-[12px] text-muted-foreground">USDC</span>
             </motion.div>
           </div>
           <div>

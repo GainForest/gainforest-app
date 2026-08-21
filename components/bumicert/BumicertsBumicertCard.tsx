@@ -94,7 +94,7 @@ export function BumicertsBumicertCard({
       </div>
 
       <div className="relative z-1 -mt-6 flex flex-1 flex-col justify-between px-4 py-3">
-        <div className="absolute -top-2 left-0 right-0 z-0 h-8 bg-linear-to-b from-transparent via-background/65 to-background" />
+        <div className="absolute -top-2 start-0 end-0 z-0 h-8 bg-linear-to-b from-transparent via-background/65 to-background" />
         <div>
           <h3 className="relative z-1 line-clamp-2 font-instrument text-2xl italic leading-snug text-foreground">
             {record.title}
@@ -109,7 +109,7 @@ export function BumicertsBumicertCard({
         <BumicertPillRows scopeItems={scopeItems} iconItems={iconItems} />
       </div>
 
-      <div className="absolute left-2 top-2 flex max-w-[calc(100%-1rem)] min-w-0 items-center gap-1 overflow-hidden rounded-full bg-background/70 p-1 shadow-lg backdrop-blur-lg">
+      <div className="absolute start-2 top-2 flex max-w-[calc(100%-1rem)] min-w-0 items-center gap-1 overflow-hidden rounded-full bg-background/70 p-1 shadow-lg backdrop-blur-lg">
         <BumicertOwnerAvatar
           did={record.did}
           avatarRef={record.creatorAvatarRef}

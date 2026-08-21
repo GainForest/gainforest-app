@@ -481,7 +481,7 @@ export function INaturalistSettingsSection({
             {truncated ? <p className="text-xs text-muted-foreground">{uploadT("truncated")}</p> : null}
 
             {sourceProject ? (
-              <div className="grid max-h-72 gap-2 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid max-h-72 gap-2 overflow-y-auto pe-1 sm:grid-cols-2 lg:grid-cols-3">
                 {mergedObservations.map((observation) => {
                   const state = observation.status ?? observation.syncStatus;
                   const imageUrl = observation.photos[0]?.url ?? null;

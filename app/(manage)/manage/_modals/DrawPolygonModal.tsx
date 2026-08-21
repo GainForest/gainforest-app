@@ -100,7 +100,7 @@ export function DrawPolygonModal({ onSubmit }: DrawPolygonModalProps) {
         />
         {stack.length > 1 && (
           <Button
-            className="absolute left-3 top-3 rounded-full"
+            className="absolute start-3 top-3 rounded-full"
             variant="outline"
             size="icon-sm"
             onClick={() => popModal()}

@@ -95,7 +95,7 @@ export function RouteChangeIndicator() {
           transition={{ duration: 0.12 }}
         >
           <motion.div
-            className="h-full rounded-r-full bg-primary shadow-[0_0_18px_rgba(93,126,69,0.45)]"
+            className="h-full rounded-e-full bg-primary shadow-[0_0_18px_rgba(93,126,69,0.45)]"
             initial={{ width: "8%", x: "-20%" }}
             animate={{ width: ["8%", "52%", "78%"], x: ["-20%", "18%", "28%"] }}
             transition={{ duration: 1.35, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}

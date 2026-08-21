@@ -359,7 +359,7 @@ export function NatureEvidencePicker({
               {natureT("noDataMatches")}
             </p>
           ) : (
-            <div className="grid max-h-[360px] gap-2 overflow-auto pr-1">
+            <div className="grid max-h-[360px] gap-2 overflow-auto pe-1">
               {displayedRows.map((item) => {
                 const title = occurrenceTitle(item, fallbackObservationName);
                 const datasetName = item.datasetRef

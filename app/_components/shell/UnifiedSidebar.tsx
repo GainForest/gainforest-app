@@ -54,7 +54,7 @@ export function UnifiedSidebar({
     <SidebarCollapsedProvider value={collapsed}>
     <nav
       className={cn(
-        "relative isolate z-30 flex h-full flex-col border-r border-border bg-foreground/3 transition-[width,padding] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] motion-reduce:transition-none",
+        "relative isolate z-30 flex h-full flex-col border-e border-border bg-foreground/3 transition-[width,padding] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] motion-reduce:transition-none",
         collapsed ? "w-[76px] overflow-visible p-3" : "w-[256px] overflow-hidden p-4",
       )}
     >
@@ -73,7 +73,7 @@ export function UnifiedSidebar({
 
       <div className="mt-3 border-t border-border" />
 
-      <div className={cn("flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pt-3", collapsed ? "overflow-x-hidden" : "pr-1")}>
+      <div className={cn("flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pt-3", collapsed ? "overflow-x-hidden" : "pe-1")}>
         {authSession?.isLoggedIn ? <SidebarProfileRow did={authSession.did} /> : null}
         {authSession?.isLoggedIn ? <SidebarManageSection did={authSession.did} /> : null}
         <LayoutGroup id="unified-sidebar-nav">
@@ -113,7 +113,7 @@ export function SidebarCollapseToggle({ collapsed, onToggle }: { collapsed: bool
             onClick={onToggle}
             aria-label={label}
             aria-expanded={!collapsed}
-            className="absolute -right-3 top-7 z-40 grid size-6 place-items-center rounded-full border border-border bg-background text-muted-foreground shadow-sm transition-colors hover:border-primary/40 hover:text-primary hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+            className="absolute -end-3 top-7 z-40 grid size-6 place-items-center rounded-full border border-border bg-background text-muted-foreground shadow-sm transition-colors hover:border-primary/40 hover:text-primary hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
           >
             <ChevronLeftIcon className={cn("size-3.5 transition-transform duration-300 motion-reduce:transition-none", collapsed && "rotate-180")} />
           </button>
@@ -174,7 +174,7 @@ function SidebarProfileRow({ did }: { did: string }) {
           )}
         </span>
         {collapsed ? null : (
-          <span className="flex min-w-0 flex-1 flex-col text-left">
+          <span className="flex min-w-0 flex-1 flex-col text-start">
             <span className="truncate text-sm font-medium text-foreground">{name}</span>
             {/* Say what kind of account is active (mirrors the top-right
                 switcher) so it's always clear whether new uploads go to the
@@ -384,7 +384,7 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
                 </span>
                 {collapsed ? null : (
                   <>
-                    <span className="flex-1 text-left">{sidebarT("more")}</span>
+                    <span className="flex-1 text-start">{sidebarT("more")}</span>
                     <ChevronDownIcon className="size-3.5" />
                   </>
                 )}
@@ -407,7 +407,7 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
                   <span className="flex size-6 shrink-0 items-center justify-center">
                     <ChevronDownIcon className="size-4 rotate-180" />
                   </span>
-                  {collapsed ? null : <span className="flex-1 text-left">{sidebarT("hideMore")}</span>}
+                  {collapsed ? null : <span className="flex-1 text-start">{sidebarT("hideMore")}</span>}
                 </button>
               </SidebarTooltip>
             </>
@@ -481,12 +481,12 @@ function NavLeafRow({ item, isActive, index, paired = false }: { item: NavLeafVi
         delay: 0.05 * index,
         ease: [0.25, 0.1, 0.25, 1],
       }}
-      className={cn("relative", showConnector && "ml-3.5")}
+      className={cn("relative", showConnector && "ms-3.5")}
     >
       {showConnector ? (
         <span
           aria-hidden
-          className="pointer-events-none absolute -left-3.5 -top-1 bottom-1/2 w-3 rounded-bl-[10px] border-b border-l border-border"
+          className="pointer-events-none absolute -start-3.5 -top-1 bottom-1/2 w-3 rounded-es-[10px] border-b border-s border-border"
         />
       ) : null}
       <SidebarTooltip label={item.text}>
@@ -511,12 +511,12 @@ function NavLeafRow({ item, isActive, index, paired = false }: { item: NavLeafVi
             <span className="flex size-6 shrink-0 items-center justify-center">
               <item.Icon className="h-4 w-4 shrink-0" />
             </span>
-            {collapsed ? null : <span className="flex-1 text-left">{item.text}</span>}
+            {collapsed ? null : <span className="flex-1 text-start">{item.text}</span>}
             {item.restriction ? (
               <RestrictedIndicator
                 label={item.restriction.label}
                 Icon={item.restriction.Icon}
-                className={collapsed ? "absolute right-1 top-1" : undefined}
+                className={collapsed ? "absolute end-1 top-1" : undefined}
               />
             ) : null}
           </motion.div>
@@ -557,22 +557,22 @@ function BumicertCreationCard({ sessionDid }: { sessionDid: string }) {
     <div className="group flex flex-col w-full h-20 border border-border bg-background rounded-2xl p-1">
       <div className="flex-1 relative">
         <SparkleIcon
-          className="absolute bottom-2 left-4 size-6 rotate-30 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          className="absolute bottom-2 start-4 size-6 rotate-30 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
           fill="currentcolor"
           strokeWidth={0}
         />
         <SparkleIcon
-          className="absolute bottom-1 left-12 size-3 rotate-60 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          className="absolute bottom-1 start-12 size-3 rotate-60 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
           fill="currentcolor"
           strokeWidth={0}
         />
         <SparkleIcon
-          className="absolute bottom-2 right-2 size-6 rotate-60 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          className="absolute bottom-2 end-2 size-6 rotate-60 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
           fill="currentcolor"
           strokeWidth={0}
         />
         <SparkleIcon
-          className="absolute bottom-1 right-10 size-3 rotate-30 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          className="absolute bottom-1 end-10 size-3 rotate-30 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
           fill="currentcolor"
           strokeWidth={0}
         />
@@ -625,22 +625,22 @@ function AddObservationsCard({ sessionDid }: { sessionDid: string }) {
     <div className="group flex flex-col w-full h-20 border border-border bg-background rounded-2xl p-1">
       <div className="flex-1 relative">
         <SparkleIcon
-          className="absolute bottom-2 left-4 size-6 rotate-30 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          className="absolute bottom-2 start-4 size-6 rotate-30 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
           fill="currentcolor"
           strokeWidth={0}
         />
         <SparkleIcon
-          className="absolute bottom-1 left-12 size-3 rotate-60 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          className="absolute bottom-1 start-12 size-3 rotate-60 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
           fill="currentcolor"
           strokeWidth={0}
         />
         <SparkleIcon
-          className="absolute bottom-2 right-2 size-6 rotate-60 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          className="absolute bottom-2 end-2 size-6 rotate-60 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
           fill="currentcolor"
           strokeWidth={0}
         />
         <SparkleIcon
-          className="absolute bottom-1 right-10 size-3 rotate-30 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          className="absolute bottom-1 end-10 size-3 rotate-30 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
           fill="currentcolor"
           strokeWidth={0}
         />
@@ -695,8 +695,8 @@ function ExploreArt() {
   // the sidebar.
   return (
     <>
-      <Vine side="left" className="bottom-0 left-0 h-26 w-5" />
-      <Vine side="right" className="bottom-0 right-0 h-26 w-5" />
+      <Vine side="left" className="bottom-0 start-0 h-26 w-5" />
+      <Vine side="right" className="bottom-0 end-0 h-26 w-5" />
     </>
   );
 }

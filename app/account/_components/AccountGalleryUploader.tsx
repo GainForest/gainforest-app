@@ -220,7 +220,7 @@ export function AccountGalleryUploader({
                 }
               }}
               className={cn(
-                "mt-3 flex cursor-pointer items-center justify-center gap-3 rounded-xl border border-dashed px-4 py-6 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
+                "mt-3 flex cursor-pointer items-center justify-center gap-3 rounded-xl border border-dashed px-4 py-6 text-start transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
                 isDragOver ? "border-primary bg-primary/[0.06]" : "border-border-soft bg-surface/70 hover:border-primary/50",
                 busy && "pointer-events-none opacity-60",
               )}
@@ -255,7 +255,7 @@ export function AccountGalleryUploader({
                       disabled={busy}
                       onClick={() => removeFile(item.id)}
                       aria-label={t("removeImage", { index: index + 1 })}
-                      className="absolute right-1 top-1 grid size-6 place-items-center rounded-full bg-black/55 text-white opacity-0 transition group-hover:opacity-100 focus-visible:opacity-100 disabled:pointer-events-none"
+                      className="absolute end-1 top-1 grid size-6 place-items-center rounded-full bg-black/55 text-white opacity-0 transition group-hover:opacity-100 focus-visible:opacity-100 disabled:pointer-events-none"
                     >
                       <XIcon className="size-3.5" aria-hidden />
                     </button>

@@ -36,7 +36,7 @@ export function SideNav({
       <Link
         href={BASE}
         className={cn(
-          "mb-5 block pl-3 text-[13px] no-underline transition-colors",
+          "mb-5 block ps-3 text-[13px] no-underline transition-colors",
           overviewActive ? "font-medium text-foreground" : "text-muted-foreground hover:text-foreground",
         )}
       >
@@ -46,7 +46,7 @@ export function SideNav({
       <div className="space-y-5">
         {groups.map((g) => (
           <div key={g.id}>
-            <div className="mb-2 pl-3 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground/50">
+            <div className="mb-2 ps-3 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground/50">
               {g.title}
             </div>
             <ul className="m-0 list-none p-0">
@@ -58,7 +58,7 @@ export function SideNav({
                       href={lexiconHref(item.id)}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "block border-l-2 py-[3px] pl-2.5 font-mono text-[12px] leading-relaxed no-underline transition-colors",
+                        "block border-s-2 py-[3px] ps-2.5 font-mono text-[12px] leading-relaxed no-underline transition-colors",
                         active
                           ? "border-primary font-medium text-primary"
                           : "border-transparent text-muted-foreground hover:text-foreground",

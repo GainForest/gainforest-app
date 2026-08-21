@@ -1202,7 +1202,7 @@ function GlobeHeader({
             transition={{ duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
             onMouseEnter={cancelPreviewClose}
             onMouseLeave={schedulePreviewClose}
-            className="pointer-events-auto absolute left-2.5 top-[3.75rem] z-40 hidden pt-2 md:block"
+            className="pointer-events-auto absolute start-2.5 top-[3.75rem] z-40 hidden pt-2 md:block"
           >
             <div className={cn("flex h-[min(66vh,600px)] w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/70 shadow-xl backdrop-blur-2xl")}>
               {renderPanel(previewTab, "floating")}
@@ -1356,7 +1356,7 @@ function MobileSheet({
       {/* Floating options rail — search + quick tab switch, riding the sheet. */}
       <motion.div
         style={{ bottom: railBottom, opacity: railOpacity, pointerEvents: railPointer }}
-        className="absolute right-2.5 z-30 flex items-center gap-2"
+        className="absolute end-2.5 z-30 flex items-center gap-2"
       >
         <button
           type="button"
@@ -1486,14 +1486,14 @@ function GlobalPanel({
     <div className="flex min-h-0 flex-1 flex-col">
       <div className={cn("flex flex-col gap-2 px-4", variant === "floating" ? "py-4" : "py-3")}>
         <div className="relative min-w-0">
-          <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <SearchIcon className="pointer-events-none absolute start-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <input
             ref={inputRef}
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={t("panel.searchPlaceholder")}
-            className="h-9 w-full rounded-full bg-white/[0.06] pl-9 pr-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:bg-white/[0.12]"
+            className="h-9 w-full rounded-full bg-white/[0.06] ps-9 pe-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:bg-white/[0.12]"
           />
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
@@ -1575,7 +1575,7 @@ function GlobalPanel({
                   <button
                     type="button"
                     onClick={() => onSelect(org.did)}
-                    className="group flex w-full items-center gap-2.5 px-4 py-2 text-left transition-colors hover:bg-white/[0.06]"
+                    className="group flex w-full items-center gap-2.5 px-4 py-2 text-start transition-colors hover:bg-white/[0.06]"
                   >
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center gap-1.5 text-sm font-medium text-foreground group-hover:text-primary">
@@ -1920,7 +1920,7 @@ function SiteRow({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "flex w-full items-center gap-2.5 px-4 py-2 text-left text-sm transition-colors hover:bg-white/[0.06]",
+        "flex w-full items-center gap-2.5 px-4 py-2 text-start text-sm transition-colors hover:bg-white/[0.06]",
         active ? "font-medium text-primary" : "text-foreground",
       )}
     >
@@ -2200,7 +2200,7 @@ function LayerToggleRow({
         <span
           className={cn(
             "absolute top-1/2 size-4 -translate-y-1/2 rounded-full shadow transition-[left,background-color]",
-            checked ? "left-[calc(100%-1.25rem)] bg-white" : "left-1 bg-white",
+            checked ? "start-[calc(100%-1.25rem)] bg-white" : "start-1 bg-white",
           )}
         />
       </button>
@@ -2273,7 +2273,7 @@ function TimeSeriesCard({
           <span
             className={cn(
               "absolute top-1/2 size-4 -translate-y-1/2 rounded-full shadow transition-[left,background-color]",
-              active ? "left-[calc(100%-1.25rem)] bg-white" : "left-1 bg-white",
+              active ? "start-[calc(100%-1.25rem)] bg-white" : "start-1 bg-white",
             )}
           />
         </button>
@@ -2409,7 +2409,7 @@ function TimeSliderCard({
           </button>
         </div>
 
-        <div className="mt-1.5 flex items-center justify-between pl-[4.75rem] pr-9 text-[10px] text-muted-foreground">
+        <div className="mt-1.5 flex items-center justify-between ps-[4.75rem] pe-9 text-[10px] text-muted-foreground">
           <span>{formatDay(series.steps[0]!.date)}</span>
           <span>{t("timeline.step", { current: Math.min(step, lastStep) + 1, total: series.steps.length })}</span>
           <span>{formatDay(series.steps[lastStep]!.date)}</span>
@@ -2439,7 +2439,7 @@ function TreeDetailPanel({ tree, onClose }: { tree: TreeDetail; onClose: () => v
       aria-label={t("tree.title")}
       data-testid="globe-tree-detail"
       className={cn(
-        "pointer-events-auto absolute right-3 top-4 z-30 flex max-h-[calc(100%-2rem)] w-[300px] max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-2xl shadow-xl md:right-4",
+        "pointer-events-auto absolute end-3 top-4 z-30 flex max-h-[calc(100%-2rem)] w-[300px] max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-2xl shadow-xl md:end-4",
         OUTLINE_SURFACE,
       )}
     >
@@ -2574,7 +2574,7 @@ function ActiveLayersCard({
                 type="button"
                 onClick={() => onLocate(layer)}
                 title={t("layers.flyTo", { name: layer.name })}
-                className="flex h-6 min-w-0 flex-1 items-center gap-1.5 rounded text-left text-[11px] text-muted-foreground transition-colors hover:text-primary"
+                className="flex h-6 min-w-0 flex-1 items-center gap-1.5 rounded text-start text-[11px] text-muted-foreground transition-colors hover:text-primary"
               >
                 <LocateFixedIcon className="size-3 shrink-0" />
                 <span className="truncate">{layer.name}</span>

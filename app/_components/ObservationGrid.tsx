@@ -328,7 +328,7 @@ const ObservationCard = memo(function ObservationCard({
           : t("openDetails", { name })
       }
       className={cn(
-        "group relative block aspect-square w-full cursor-pointer select-none overflow-hidden rounded-lg bg-surface-sunken text-left outline-none transition-all duration-300 hover:z-10 hover:shadow-[0_18px_40px_-22px_rgba(20,30,15,0.55)] focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary/60",
+        "group relative block aspect-square w-full cursor-pointer select-none overflow-hidden rounded-lg bg-surface-sunken text-start outline-none transition-all duration-300 hover:z-10 hover:shadow-[0_18px_40px_-22px_rgba(20,30,15,0.55)] focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary/60",
         selected && "ring-2 ring-primary ring-offset-2 ring-offset-background",
       )}
     >
@@ -371,7 +371,7 @@ const ObservationCard = memo(function ObservationCard({
             if (!selectionDisabled) selection.onToggle(record, !selected, event.shiftKey);
           }}
           className={cn(
-            "absolute left-2 top-2 z-30 size-5 cursor-pointer border-white/70 bg-black/45 text-white shadow-md backdrop-blur-md transition-opacity",
+            "absolute start-2 top-2 z-30 size-5 cursor-pointer border-white/70 bg-black/45 text-white shadow-md backdrop-blur-md transition-opacity",
             // Hidden until the tile is hovered — unless it is already selected,
             // or the grid is in selection mode, or the device has no hover.
             selected || selection.active ? "opacity-100" : "opacity-70 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100",
@@ -381,7 +381,7 @@ const ObservationCard = memo(function ObservationCard({
 
       {!compact && mediaCount > 1 ? (
         <span
-          className="absolute right-2 top-2 z-20 inline-flex h-8 min-w-8 items-center justify-center gap-1 rounded-full bg-black/58 px-2 text-[12px] font-semibold text-white shadow-md ring-1 ring-white/25 backdrop-blur-md"
+          className="absolute end-2 top-2 z-20 inline-flex h-8 min-w-8 items-center justify-center gap-1 rounded-full bg-black/58 px-2 text-[12px] font-semibold text-white shadow-md ring-1 ring-white/25 backdrop-blur-md"
           aria-label={t("mediaCount", { count: mediaCount })}
           title={t("mediaCount", { count: mediaCount })}
         >
@@ -397,7 +397,7 @@ const ObservationCard = memo(function ObservationCard({
           aria-label={audioState === "playing" ? t("pauseSound") : t("playSound")}
           className={
             hasImage
-              ? "absolute left-2 top-12 z-20 grid h-9 w-9 place-items-center rounded-full bg-black/55 text-white shadow-md ring-1 ring-white/25 backdrop-blur-md transition hover:bg-black/70"
+              ? "absolute start-2 top-12 z-20 grid h-9 w-9 place-items-center rounded-full bg-black/55 text-white shadow-md ring-1 ring-white/25 backdrop-blur-md transition hover:bg-black/70"
               : "absolute left-1/2 top-[38%] z-20 grid h-14 w-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white text-[#0b2015] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.5)] transition hover:scale-105"
           }
         >
@@ -414,10 +414,10 @@ const ObservationCard = memo(function ObservationCard({
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
 
       {/* Quick like: one tap on the heart likes the sighting without opening it. */}
-      <QuickLikeButton subjectUri={record.atUri} className="absolute bottom-2 right-2" />
+      <QuickLikeButton subjectUri={record.atUri} className="absolute bottom-2 end-2" />
 
       {/* pr keeps the caption clear of the quick-like heart in the corner. */}
-      <div className={cn("absolute inset-x-0 bottom-0 z-10", compact ? "p-1.5 pr-9" : "p-2.5 pr-10")}>
+      <div className={cn("absolute inset-x-0 bottom-0 z-10", compact ? "p-1.5 pe-9" : "p-2.5 pe-10")}>
         {!compact && creatorLabel ? (
           onFilterOwner && record.did ? (
             <button
@@ -428,7 +428,7 @@ const ObservationCard = memo(function ObservationCard({
               }}
               aria-label={ownerFilterT("filterByThis")}
               title={ownerFilterT("filterByThis")}
-              className="block max-w-full cursor-pointer truncate text-left text-[10.5px] font-medium uppercase tracking-[0.06em] text-white/85 underline-offset-2 transition-colors hover:text-white hover:underline focus-visible:underline focus-visible:outline-none"
+              className="block max-w-full cursor-pointer truncate text-start text-[10.5px] font-medium uppercase tracking-[0.06em] text-white/85 underline-offset-2 transition-colors hover:text-white hover:underline focus-visible:underline focus-visible:outline-none"
             >
               {creatorLabel}
             </button>

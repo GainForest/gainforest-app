@@ -326,7 +326,7 @@ function InfoRow({ label, value, dimmed }: { label: string; value: string; dimme
   return (
     <div className="flex items-baseline justify-between gap-4 py-1.5">
       <span className="text-sm text-muted-foreground">{label}</span>
-      <span className={cn("text-right font-mono text-sm", dimmed && "text-muted-foreground/60")}>{value}</span>
+      <span className={cn("text-end font-mono text-sm", dimmed && "text-muted-foreground/60")}>{value}</span>
     </div>
   );
 }
@@ -1129,7 +1129,7 @@ function ConnectionCard({
       {/* Action row: hint on the left, compact actions on the right */}
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-primary/10 pt-3">
         {notReadyReason && <p className="min-w-0 flex-1 basis-48 text-xs text-muted-foreground">{notReadyReason}</p>}
-        <div className="ml-auto flex flex-wrap items-center justify-end gap-1.5">
+        <div className="ms-auto flex flex-wrap items-center justify-end gap-1.5">
           {equipmentStatus.status === "registered" && (
             <Button variant="ghost" size="sm" className="text-muted-foreground" asChild>
               <Link href={equipmentDetailPath(equipmentStatus.item.did, equipmentStatus.item.rkey)}>
@@ -1839,7 +1839,7 @@ function ConfigureTab({
             {t("requireAcousticConfigLabel")}
           </label>
           <label
-            className={cn("flex items-center gap-2 pl-6 text-sm", !config.requireAcousticConfig && "text-muted-foreground/60")}
+            className={cn("flex items-center gap-2 ps-6 text-sm", !config.requireAcousticConfig && "text-muted-foreground/60")}
           >
             <Checkbox
               checked={config.requireLocationInChime}
@@ -1861,7 +1861,7 @@ function ConfigureTab({
             {t("useTimeZoneInChimeLabel")}
           </label>
           <label
-            className={cn("flex items-center gap-2 pl-6 text-sm", !config.useTimeZoneInChime && "text-muted-foreground/60")}
+            className={cn("flex items-center gap-2 ps-6 text-sm", !config.useTimeZoneInChime && "text-muted-foreground/60")}
           >
             <Checkbox
               checked={config.adjustScheduleUsingTimezoneFromAcousticChime}

@@ -126,7 +126,7 @@ export function RegisterButton({ round, status }: { round: BioblitzRound; status
           <CheckCircle2Icon className="size-4" aria-hidden />
           {t("registered")}
         </span>
-        <span className="max-w-xs text-[11px] leading-snug text-muted-foreground md:text-right">
+        <span className="max-w-xs text-[11px] leading-snug text-muted-foreground md:text-end">
           {t("registeredNote")}
         </span>
         {celebrate ? <Confetti onDone={() => setCelebrate(false)} /> : null}
@@ -153,7 +153,7 @@ export function RegisterButton({ round, status }: { round: BioblitzRound; status
       </button>
       <div
         id={`bioblitz-registration-note-${round.id}`}
-        className="max-w-xs space-y-1 text-[11px] leading-snug text-muted-foreground md:text-right"
+        className="max-w-xs space-y-1 text-[11px] leading-snug text-muted-foreground md:text-end"
       >
         <p>{error ? <span className="text-destructive">{t("error")}</span> : t("note")}</p>
         <p>

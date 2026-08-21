@@ -150,7 +150,7 @@ export function AudioMothGuide() {
 
       <section className="mt-16 overflow-hidden rounded-2xl border border-border/60">
         <div className="relative min-h-44 overflow-hidden bg-[radial-gradient(circle_at_25%_20%,color-mix(in_oklab,var(--primary)_25%,transparent),transparent_38%),linear-gradient(145deg,color-mix(in_oklab,var(--primary)_14%,var(--background)),var(--background))] p-6 sm:p-8">
-          <div className="absolute right-5 bottom-0 text-primary/15 sm:right-10">
+          <div className="absolute end-5 bottom-0 text-primary/15 sm:end-10">
             <TreePineIcon className="h-36 w-36" strokeWidth={1} />
           </div>
           <ShieldCheckIcon className="h-5 w-5 text-primary" />
@@ -333,7 +333,7 @@ function PreparationChecklist() {
                     onFocus={() => item.images && setPreviewedItem(item)}
                     onBlur={() => setPreviewedItem(null)}
                     onClick={() => toggle(item.id)}
-                    className="group rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-muted/50 focus-visible:bg-muted/50"
+                    className="group rounded-xl px-3 py-2.5 text-start transition-colors hover:bg-muted/50 focus-visible:bg-muted/50"
                   >
                     <span className="flex items-center gap-3">
                       <span
@@ -431,14 +431,14 @@ function ConfigurationStudio() {
   return (
     <div className="overflow-hidden rounded-2xl border border-border/60">
       <div className="grid sm:grid-cols-[180px_1fr]">
-        <div className="flex overflow-x-auto border-b border-border/60 bg-muted/25 p-2 sm:flex-col sm:border-r sm:border-b-0">
+        <div className="flex overflow-x-auto border-b border-border/60 bg-muted/25 p-2 sm:flex-col sm:border-e sm:border-b-0">
           {tabs.map(({ id, label, Icon }) => (
             <button
               key={id}
               type="button"
               onClick={() => setTab(id)}
               className={cn(
-                "flex min-w-max items-center gap-2 rounded-lg px-3 py-2.5 text-left text-[12.5px] transition-colors",
+                "flex min-w-max items-center gap-2 rounded-lg px-3 py-2.5 text-start text-[12.5px] transition-colors",
                 tab === id ? "bg-background font-medium text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
               )}
             >
@@ -570,7 +570,7 @@ function FieldWalkthrough() {
   return (
     <div className="rounded-2xl border border-border/60 p-4 sm:p-6">
       <div className="relative mx-auto flex max-w-lg items-center justify-between px-3 py-7">
-        <div className="absolute right-10 left-10 top-1/2 h-px -translate-y-1/2 bg-border" />
+        <div className="absolute end-10 start-10 top-1/2 h-px -translate-y-1/2 bg-border" />
         <motion.div
           className="absolute top-1/2 h-px -translate-y-1/2 bg-primary"
           initial={false}
@@ -639,15 +639,15 @@ function FieldWalkthrough() {
 function AudioMothBoard({ mode }: { mode: SwitchMode }) {
   return (
     <div className="relative mx-auto h-36 w-48 shrink-0 rounded-[1.3rem] border border-primary/30 bg-[linear-gradient(145deg,color-mix(in_oklab,var(--primary)_18%,var(--background)),color-mix(in_oklab,var(--primary)_7%,var(--background)))] p-4 shadow-sm">
-      <div className="absolute top-4 left-4 font-mono text-[8px] tracking-[0.12em] text-primary/70">AUDIOMOTH</div>
-      <div className="absolute top-5 right-5 flex gap-2">
+      <div className="absolute top-4 start-4 font-mono text-[8px] tracking-[0.12em] text-primary/70">AUDIOMOTH</div>
+      <div className="absolute top-5 end-5 flex gap-2">
         <motion.span animate={{ opacity: mode === "custom" ? [0.25, 1, 0.25] : 0.2 }} transition={{ repeat: Infinity, duration: 1.2 }} className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
         <motion.span animate={{ opacity: mode === "default" ? [0.25, 1, 0.25] : 0.2 }} transition={{ repeat: Infinity, duration: 0.75 }} className="h-2.5 w-2.5 rounded-full bg-red-500" />
       </div>
       <div className="absolute top-14 left-1/2 flex h-12 w-12 -translate-x-1/2 items-center justify-center rounded-full border border-primary/30 bg-background/60">
         <MicIcon className="h-5 w-5 text-primary" />
       </div>
-      <div className="absolute right-4 bottom-4 left-4 h-2 rounded-full bg-foreground/10">
+      <div className="absolute end-4 bottom-4 start-4 h-2 rounded-full bg-foreground/10">
         <motion.div
           className="h-2 w-1/3 rounded-full bg-primary"
           animate={{ x: mode === "off" ? 0 : mode === "custom" ? 45 : 90 }}
@@ -728,7 +728,7 @@ function ProcessLine({ items }: { items: { icon: React.ReactNode; text: string }
     <ol className="grid gap-0">
       {items.map((item, index) => (
         <li key={item.text} className="relative flex gap-4 pb-5 last:pb-0">
-          {index < items.length - 1 && <span className="absolute top-8 bottom-0 left-[15px] border-l border-dashed border-border" />}
+          {index < items.length - 1 && <span className="absolute top-8 bottom-0 start-[15px] border-s border-dashed border-border" />}
           <span className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary/25 bg-background text-primary">{item.icon}</span>
           <p className="pt-1 text-[13px] leading-relaxed text-muted-foreground">{item.text}</p>
         </li>
@@ -738,7 +738,7 @@ function ProcessLine({ items }: { items: { icon: React.ReactNode; text: string }
 }
 
 function FinishLink({ href, text, external }: { href: string; text: string; external?: boolean }) {
-  const className = "group flex items-center justify-between rounded-xl border border-border/60 px-4 py-3 text-left text-[12.5px] font-medium text-foreground no-underline transition-colors hover:border-primary/50 hover:text-primary";
+  const className = "group flex items-center justify-between rounded-xl border border-border/60 px-4 py-3 text-start text-[12.5px] font-medium text-foreground no-underline transition-colors hover:border-primary/50 hover:text-primary";
   const content = <>{text}<ArrowRightIcon className="h-3.5 w-3.5 opacity-50 transition-transform group-hover:translate-x-0.5" /></>;
   if (external) return <a href={href} target="_blank" rel="noreferrer" className={className}>{content}</a>;
   return <Link href={href} className={className}>{content}</Link>;

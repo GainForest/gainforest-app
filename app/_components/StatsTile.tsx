@@ -71,7 +71,7 @@ export function StatsTile({ label, value, icon, accent = false, href, className:
   );
 
   const className = [
-    "group relative overflow-hidden rounded-2xl bg-foreground/5 p-4 text-left backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-foreground/[0.07] sm:rounded-3xl sm:p-6",
+    "group relative overflow-hidden rounded-2xl bg-foreground/5 p-4 text-start backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-foreground/[0.07] sm:rounded-3xl sm:p-6",
     extraClassName,
   ]
     .filter(Boolean)

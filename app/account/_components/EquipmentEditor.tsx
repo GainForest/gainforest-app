@@ -145,7 +145,7 @@ export function EquipmentEditor({
   return (
     <ModalContent dismissible={!busy} className="w-full">
       <ModalHeader>
-        <ModalTitle className="pr-8">{isEdit ? t("editEquipment") : t("addEquipment")}</ModalTitle>
+        <ModalTitle className="pe-8">{isEdit ? t("editEquipment") : t("addEquipment")}</ModalTitle>
       </ModalHeader>
 
       <div className="mt-4 flex flex-col gap-4">

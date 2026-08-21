@@ -114,7 +114,7 @@ export function MintCertProjectGate({ target }: { target: ManageTarget }) {
       ) : (
         <>
           <div className="group/input-group border-input mt-7 flex h-10 items-center rounded-full border bg-background/70 shadow-xs backdrop-blur transition-[color,box-shadow] focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 sm:max-w-md">
-            <SearchIcon className="ml-3 h-4 w-4 text-muted-foreground" />
+            <SearchIcon className="ms-3 h-4 w-4 text-muted-foreground" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}

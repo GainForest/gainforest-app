@@ -317,7 +317,7 @@ function Field({ label, hint, htmlFor, error, children }: { label: string; hint?
     <div className="space-y-2.5">
       <label htmlFor={htmlFor} className="block text-sm font-medium text-foreground">
         {label}
-        {hint ? <span className="ml-2 font-normal text-muted-foreground">{hint}</span> : null}
+        {hint ? <span className="ms-2 font-normal text-muted-foreground">{hint}</span> : null}
       </label>
       {children}
       {error ? <p className={ERROR_MESSAGE}><TriangleAlertIcon className="size-3.5 text-warn" /> {error}</p> : null}
@@ -577,7 +577,7 @@ function ContributorInput({
             className={cn(FIELD, "px-4 py-2.5 text-sm", error && FIELD_ERROR)}
           />
         )}
-        {loading && !actor ? <Loader2Icon className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground/60" /> : null}
+        {loading && !actor ? <Loader2Icon className="absolute end-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground/60" /> : null}
 
         <AnimatePresence>
           {open && !actor ? (
@@ -603,7 +603,7 @@ function ContributorInput({
                         onMouseDown={(e) => e.preventDefault()}
                         onClick={() => choose(nextActor)}
                         onMouseEnter={() => setHighlight(i)}
-                        className={cn("flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors", i === highlight ? "bg-muted" : "hover:bg-muted/60")}
+                        className={cn("flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-start transition-colors", i === highlight ? "bg-muted" : "hover:bg-muted/60")}
                       >
                         <ActorAvatar actor={nextActor} size="size-7" />
                         <span className="min-w-0">
@@ -661,7 +661,7 @@ function BasicsStep({
           placeholder="Mangrove restoration in the Rufiji Delta"
           className={cn(FIELD, "px-4 py-3 font-instrument text-2xl italic tracking-[-0.01em]", issues.title && FIELD_ERROR)}
         />
-        <div className="mt-1.5 text-right text-xs text-muted-foreground">{values.title.length} / {TITLE_MAX}</div>
+        <div className="mt-1.5 text-end text-xs text-muted-foreground">{values.title.length} / {TITLE_MAX}</div>
       </Field>
 
       <Field label="Type of work" hint="pick everything this covers" error={issues.scopes?.message}>
@@ -833,7 +833,7 @@ function PeopleStep({
             onFieldChange("contributors");
             setValues((c) => ({ ...c, contributors: [...c.contributors, ""] }));
           }}
-          className="mt-2 -ml-2 text-primary hover:text-primary"
+          className="mt-2 -ms-2 text-primary hover:text-primary"
         >
           <PlusIcon className="size-4" /> Add person or group
         </Button>
@@ -923,7 +923,7 @@ function PeopleStep({
                   type="button"
                   onClick={() => toggleLocation(site.metadata.uri)}
                   className={cn(
-                    "flex items-start gap-3 rounded-2xl border px-4 py-3 text-left transition-colors",
+                    "flex items-start gap-3 rounded-2xl border px-4 py-3 text-start transition-colors",
                     active ? "border-primary bg-primary/10" : "border-border bg-background hover:border-primary/30",
                   )}
                 >
@@ -1080,7 +1080,7 @@ function PreviewContent({
             type="button"
             onClick={onCoverClear}
             aria-label="Remove cover photo"
-            className="absolute right-2 top-2 z-20 rounded-full bg-background/90 p-1.5 text-muted-foreground shadow-md transition-colors hover:text-destructive"
+            className="absolute end-2 top-2 z-20 rounded-full bg-background/90 p-1.5 text-muted-foreground shadow-md transition-colors hover:text-destructive"
           >
             <XIcon className="size-3.5" />
           </button>
@@ -1541,7 +1541,7 @@ export function NewBumicertClient({
       {/* Mobile floating Preview button + sheet */}
       {!publishResult ? (
         <>
-          <div className="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-3 xl:hidden">
+          <div className="fixed bottom-5 end-5 z-40 flex flex-col items-end gap-3 xl:hidden">
             {/* Tainá sits just above the Preview button — where the old
                 "Tips" button used to be. Tapping opens her chat in a sheet. */}
             <TaináMobileTrigger />

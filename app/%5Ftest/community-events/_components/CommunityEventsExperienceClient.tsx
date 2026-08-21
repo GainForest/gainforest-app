@@ -278,7 +278,7 @@ export function CommunityEventsExperienceClient() {
         {signInPrompted ? (
           <p className="mx-auto mt-3 max-w-5xl rounded-2xl bg-primary/10 px-4 py-2.5 text-sm text-primary" role="status">
             {t("signInPrompt")}
-            <button type="button" className="ml-2 font-semibold underline underline-offset-4" onClick={() => setSignInPrompted(false)}>
+            <button type="button" className="ms-2 font-semibold underline underline-offset-4" onClick={() => setSignInPrompted(false)}>
               {t("dismiss")}
             </button>
           </p>

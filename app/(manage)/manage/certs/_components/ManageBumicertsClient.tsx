@@ -50,7 +50,7 @@ function CreateHeroCard({ target }: { target: ManageTarget }) {
           className="hidden object-cover object-center dark:block"
         />
         <div className="absolute inset-0 bg-linear-to-r from-background/95 via-background/72 to-background/5 dark:from-background/90 dark:via-background/58 dark:to-background/10" />
-        <div className="absolute -top-8 right-[7%] h-28 w-52 rounded-full bg-background/50 blur-2xl dark:bg-primary/10" />
+        <div className="absolute -top-8 end-[7%] h-28 w-52 rounded-full bg-background/50 blur-2xl dark:bg-primary/10" />
         <div className="absolute inset-x-0 bottom-0 h-16 bg-linear-to-t from-foreground/20 via-foreground/5 to-transparent dark:from-black/55" />
 
         <div className="relative z-30 flex min-h-[6rem] flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-8 lg:px-9">
@@ -71,7 +71,7 @@ function CreateHeroCard({ target }: { target: ManageTarget }) {
         width={1002}
         height={1146}
         priority
-        className="pointer-events-none absolute bottom-0 right-[4%] z-20 hidden h-[9rem] w-auto max-w-[50%] object-contain dark:hidden md:block"
+        className="pointer-events-none absolute bottom-0 end-[4%] z-20 hidden h-[9rem] w-auto max-w-[50%] object-contain dark:hidden md:block"
       />
       <Image
         src="/assets/media/images/create-bumicert/plant-dark.png"
@@ -79,7 +79,7 @@ function CreateHeroCard({ target }: { target: ManageTarget }) {
         width={964}
         height={1129}
         priority
-        className="pointer-events-none absolute bottom-0 right-[4%] z-20 hidden h-[9rem] w-auto max-w-[50%] object-contain dark:md:block"
+        className="pointer-events-none absolute bottom-0 end-[4%] z-20 hidden h-[9rem] w-auto max-w-[50%] object-contain dark:md:block"
       />
     </section>
   );
@@ -193,7 +193,7 @@ function RecentBumicerts({ target, bumicerts, did, ownerIdentifier }: { target: 
                     <CertDeleteButton
                       title={bumicert.title}
                       onClick={() => requestDelete(bumicert)}
-                      className="absolute right-3 top-3 z-10"
+                      className="absolute end-3 top-3 z-10"
                     />
                   ) : null}
                 </motion.div>
@@ -246,7 +246,7 @@ function ManageBumicertListItem({ bumicert, did, ownerIdentifier, onDelete }: { 
 
   return (
     <div className="group relative">
-      <Link href={href} className="flex w-full gap-3 rounded-2xl px-1 py-3 text-left outline-none transition-colors duration-300 hover:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-primary/60 sm:gap-4 sm:px-2 sm:py-4">
+      <Link href={href} className="flex w-full gap-3 rounded-2xl px-1 py-3 text-start outline-none transition-colors duration-300 hover:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-primary/60 sm:gap-4 sm:px-2 sm:py-4">
         <span className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-muted sm:h-28 sm:w-36">
           {bumicert.imageUrl ? (
             <Image src={bumicert.imageUrl} alt={bumicert.title} fill unoptimized sizes="144px" className="object-cover transition-transform duration-500 group-hover:scale-105" />
@@ -269,7 +269,7 @@ function ManageBumicertListItem({ bumicert, did, ownerIdentifier, onDelete }: { 
         <CertDeleteButton
           title={bumicert.title}
           onClick={onDelete}
-          className="absolute right-2 top-2 z-10"
+          className="absolute end-2 top-2 z-10"
         />
       ) : null}
     </div>

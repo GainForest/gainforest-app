@@ -151,7 +151,7 @@ export default async function LexiconPage({ params }: { params: Promise<Params> 
           {next ? (
             <Link
               href={lexiconHref(next.id)}
-              className="group rounded-xl border border-border/60 p-3 text-right no-underline transition-colors hover:border-border hover:bg-muted/40"
+              className="group rounded-xl border border-border/60 p-3 text-end no-underline transition-colors hover:border-border hover:bg-muted/40"
             >
               <div className="text-[11px] text-muted-foreground/60">{t("next")} →</div>
               <div className="mt-0.5 font-mono text-[13px] text-primary group-hover:underline">{shortName(next.id)}</div>

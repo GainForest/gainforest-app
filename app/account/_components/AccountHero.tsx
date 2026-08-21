@@ -160,7 +160,7 @@ export function AccountHero({
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-linear-to-t from-card to-transparent" />
         </motion.div>
 
-        <div className="absolute right-3 top-3 z-20 flex items-start gap-2">
+        <div className="absolute end-3 top-3 z-20 flex items-start gap-2">
           <div className="relative flex flex-col items-end gap-1.5">
             <Button type="button" variant="outline" size="sm" onClick={handleShare} aria-label={heroT("copyProfileLink")}>
               <AnimatePresence mode="wait" initial={false}>
@@ -213,7 +213,7 @@ export function AccountHero({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -4, scale: 0.98 }}
                   transition={{ duration: 0.16, ease: "easeOut" }}
-                  className="absolute right-0 top-full mt-1 flex w-[calc(100vw-9.5rem)] max-w-[19rem] flex-col items-end gap-1"
+                  className="absolute end-0 top-full mt-1 flex w-[calc(100vw-9.5rem)] max-w-[19rem] flex-col items-end gap-1"
                 >
                   <button
                     type="button"
@@ -223,7 +223,7 @@ export function AccountHero({
                     className="group flex w-full items-center gap-1.5 text-[11px] text-muted-foreground/75 transition-colors hover:text-foreground focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <span className="shrink-0 text-[9px] font-medium uppercase tracking-[0.12em] text-muted-foreground/55">{heroT("did")}</span>
-                    <span className="min-w-0 flex-1 truncate text-right font-mono">{account.did}</span>
+                    <span className="min-w-0 flex-1 truncate text-end font-mono">{account.did}</span>
                     {copiedIdentifier === "did" ? <CheckIcon className="size-3 text-primary" aria-hidden /> : <CopyIcon className="size-3 shrink-0 opacity-30 transition-opacity group-hover:opacity-70 group-focus-visible:opacity-70" aria-hidden />}
                   </button>
                   {walletAddress ? (
@@ -235,7 +235,7 @@ export function AccountHero({
                       className="group flex w-full items-center gap-1.5 text-[11px] text-muted-foreground/75 transition-colors hover:text-foreground focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       <span className="shrink-0 text-[9px] font-medium uppercase tracking-[0.12em] text-muted-foreground/55">{heroT("wallet")}</span>
-                      <span className="min-w-0 flex-1 truncate text-right font-mono">{walletAddress}</span>
+                      <span className="min-w-0 flex-1 truncate text-end font-mono">{walletAddress}</span>
                       {copiedIdentifier === "wallet" ? <CheckIcon className="size-3 text-primary" aria-hidden /> : <CopyIcon className="size-3 shrink-0 opacity-30 transition-opacity group-hover:opacity-70 group-focus-visible:opacity-70" aria-hidden />}
                     </button>
                   ) : null}

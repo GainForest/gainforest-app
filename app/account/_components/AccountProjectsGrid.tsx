@@ -134,7 +134,7 @@ function ProjectCard({ project, onOpen }: { project: ProjectRecord; onOpen: () =
     <button
       type="button"
       onClick={onOpen}
-      className="group flex h-full w-full flex-col overflow-hidden rounded-3xl border border-border bg-card text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+      className="group flex h-full w-full flex-col overflow-hidden rounded-3xl border border-border bg-card text-start shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-muted">
         {hasImage ? (

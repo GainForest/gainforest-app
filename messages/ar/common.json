@@ -1,0 +1,313 @@
+{
+  "seo": {
+    "title": "GainForest — مشاهدات التنوع البيولوجي ومشاريع الطبيعة",
+    "description": "استكشف المشاهدات الميدانية وسجلات التنوع البيولوجي ومشاريع الطبيعة من المجتمعات والمنظمات التي تستخدم GainForest."
+  },
+  "language": {
+    "label": "اللغة",
+    "changeAria": "تغيير اللغة",
+    "currentLanguage": "اللغة الحالية"
+  },
+  "navigation": {
+    "navigation": "التنقل",
+    "openNavigation": "فتح التنقل",
+    "homeAria": "الصفحة الرئيسية لـ GainForest",
+    "sectionsAria": "أقسام الموقع",
+    "closeMenu": "إغلاق القائمة",
+    "openMenu": "فتح القائمة",
+    "greenGlobeExternal": "Green Globe"
+  },
+  "search": {
+    "trigger": "بحث",
+    "open": "فتح البحث",
+    "title": "البحث في GainForest",
+    "placeholder": "ابحث عن المشاريع والأشخاص والمنظمات والمشاهدات…",
+    "clear": "مسح البحث",
+    "escKey": "esc",
+    "kinds": {
+      "cert": "الشهادات",
+      "project": "المشاريع",
+      "person": "الأشخاص",
+      "organization": "المنظمات",
+      "observation": "المشاهدات"
+    },
+    "idle": {
+      "headline": "اكتب للبحث",
+      "body": "اعثر على المشاريع والأشخاص والمنظمات والمشاهدات."
+    },
+    "noResults": {
+      "headline": "لا توجد نتائج لـ ”{query}“",
+      "body": "جرّب كلمة أخرى أو تحقق من الإملاء."
+    },
+    "error": {
+      "headline": "حدث خطأ ما",
+      "body": "يواجه البحث مشكلة مؤقتة. يرجى المحاولة مرة أخرى بعد قليل."
+    },
+    "hints": {
+      "navigate": "تنقّل",
+      "open": "فتح"
+    }
+  },
+  "theme": {
+    "toggle": "تبديل المظهر",
+    "switchLight": "التبديل إلى الوضع الفاتح",
+    "switchDark": "التبديل إلى الوضع الداكن"
+  },
+  "sidebar": {
+    "changelogLink": "عرض سجل التغييرات",
+    "sections": {
+      "explore": "استكشاف",
+      "funding": "التمويل",
+      "manage": "الإدارة",
+      "yourWork": "أعمالك",
+      "ai": "الذكاء الاصطناعي"
+    },
+    "items": {
+      "bumicerts": "الشهادات",
+      "organizations": "المنظمات",
+      "leaderboard": "لوحة الصدارة",
+      "bioblitz": "BioBlitz",
+      "organization": "المنظمة",
+      "sites": "المواقع",
+      "audio": "الصوت",
+      "trees": "الأشجار",
+      "profile": "الملف الشخصي",
+      "settings": "الإعدادات",
+      "projects": "المشاريع",
+      "observations": "المشاهدات",
+      "events": "الفعاليات",
+      "donations": "التبرعات",
+      "grants": "المنح",
+      "organizationHome": "الصفحة الرئيسية للمنظمة",
+      "myOrganization": "المنظمة",
+      "myOrganizations": "المنظمات",
+      "mySites": "المواقع",
+      "myAudio": "الصوت",
+      "myDrone": "الطائرة المسيّرة",
+      "myProjects": "المشاريع",
+      "myObservations": "المشاهدات",
+      "myTrees": "الأشجار",
+      "myProfile": "الملف الشخصي",
+      "feed": "التدفق",
+      "taina": "Tainá",
+      "labeler": "أداة التصنيف",
+      "globe": "الكرة الأرضية",
+      "audiomoth": "AudioMoth",
+      "identifications": "التعريفات",
+      "myGrant": "منحتي",
+      "myRecorders": "أجهزة التسجيل الخاصة بي"
+    },
+    "prompts": {
+      "signInDescription": "سجّل الدخول لإدارة حسابك ومحتواك.",
+      "signIn": "تسجيل الدخول",
+      "onboardingDescription": "أكمل عملية الإعداد لإدارة حسابك.",
+      "onboard": "ابدأ الإعداد",
+      "accountLoadError": "تعذّر تحميل حسابك في الوقت الحالي.",
+      "checkingAccount": "جارٍ التحقق من حسابك..."
+    },
+    "headerActions": {
+      "myProjects": "مشاريعي",
+      "myCerts": "شهاداتي",
+      "myObservations": "مشاهداتي",
+      "myOrganizations": "منظماتي",
+      "upload": "رفع"
+    },
+    "creationCard": {
+      "createBumicert": "إنشاء شهادة",
+      "createProject": "إنشاء مشروع",
+      "addObservations": "إضافة مشاهدات",
+      "addData": "إضافة بيانات"
+    },
+    "tabs": {
+      "explore": "استكشاف",
+      "manage": "إدارة"
+    },
+    "manageGroupTitle": "إدارة {account}",
+    "collapse": "طي الشريط الجانبي",
+    "expand": "توسيع الشريط الجانبي",
+    "profileRow": {
+      "viewProfile": "عرض الملف الشخصي",
+      "fallbackName": "ملفك الشخصي",
+      "myObservations": "مشاهداتي",
+      "myProjects": "مشاريعي",
+      "myOrganizations": "منظماتي",
+      "admin": "المشرف",
+      "personalAccount": "حساب شخصي",
+      "organizationAccount": "حساب منظمة",
+      "myCards": "شهادات Bumicerts الخاصة بي"
+    },
+    "more": "المزيد",
+    "hideMore": "إخفاء"
+  },
+  "footer": {
+    "brandAlt": "GainForest",
+    "tagline": "نربط المجتمعات من خلال أدلة ميدانية موثوقة.",
+    "builtWith": "بنية تحتية مفتوحة. مبنية باستخدام GainForest.",
+    "dataCollectionsAria": "مجموعات البيانات",
+    "footerLinksAria": "روابط التذييل",
+    "copyright": "مفتوح المصدر، بدعم من المجتمع.",
+    "nonprofit": "جمعية سويسرية غير ربحية مسجّلة",
+    "swissRegistration": "التسجيل السويسري",
+    "bottomTagline": "مبني من أجل الأثر الجماعي",
+    "links": {
+      "projects": "المشاريع",
+      "gainforest": "GainForest",
+      "documentation": "التوثيق",
+      "bluesky": "Bluesky",
+      "instagram": "Instagram",
+      "github": "GitHub",
+      "bumicerts": "الشهادات",
+      "organizations": "المنظمات",
+      "observations": "المشاهدات",
+      "leaderboard": "لوحة الصدارة",
+      "bioblitz": "BioBlitz",
+      "greenGlobe": "Green Globe",
+      "status": "الحالة",
+      "lexicons": "مخططات البيانات",
+      "privacyPolicy": "سياسة الخصوصية",
+      "deleteAccount": "حذف الحساب"
+    }
+  },
+  "status": {
+    "pillTitle": "حالة النظام",
+    "page": {
+      "degraded": "بيانات الحالة غير متاحة",
+      "UP": "كل شيء يعمل",
+      "HASISSUES": "بعض الخدمات بطيئة",
+      "UNDERMAINTENANCE": "أعمال صيانة مُخطط لها",
+      "DOWN": "إحدى الخدمات لا تعمل"
+    },
+    "component": {
+      "OPERATIONAL": "تعمل",
+      "UNDERMAINTENANCE": "قيد الصيانة",
+      "DEGRADEDPERFORMANCE": "أداء متدنٍّ",
+      "PARTIALOUTAGE": "انقطاع جزئي",
+      "MAJOROUTAGE": "انقطاع كبير",
+      "UNKNOWN": "غير معروف"
+    },
+    "services": {
+      "search": {
+        "name": "فهرس البحث",
+        "detail": "الاكتشاف والفهرسة"
+      },
+      "storage": {
+        "name": "خادم البيانات الشخصية",
+        "detail": "تخزين السجلات والوسائط"
+      },
+      "labels": {
+        "name": "خدمة التصنيف",
+        "detail": "تصنيفات الثقة والإشراف"
+      },
+      "website": {
+        "name": "تطبيق الويب",
+        "detail": "واجهة الشهادات"
+      },
+      "api": {
+        "name": "API",
+        "detail": "الواجهة الخلفية للتطبيق"
+      },
+      "defaultName": "الخدمة"
+    },
+    "summary": {
+      "working": "{operational}/{total} من الخدمات تعمل",
+      "healthy": "{percent}% سليمة",
+      "updated": "آخر تحديث {time}"
+    },
+    "hero": {
+      "imageAlt": "مظلة الغابة عند شروق الشمس",
+      "eyebrow": "الحالة المباشرة",
+      "title": "GainForest",
+      "accent": "سلامة النظام",
+      "lede": "التوافر الحالي للشهادات وخدمات البيانات والبنية التحتية الداعمة."
+    },
+    "unavailable": {
+      "title": "الحالة غير متاحة مؤقتًا",
+      "bodyBeforeLink": "تعذّر علينا تحميل اللوحة المباشرة. لا يزال بإمكانك الاطلاع على صفحة الحالة العامة على",
+      "link": "حالة GainForest"
+    },
+    "incidents": {
+      "title": "الأعطال الأخيرة",
+      "last": "{count, plural, zero {لا توجد أعطال} one {آخر عُطل} two {آخر عُطلين} few {آخر # أعطال} many {آخر # عُطلًا} other {آخر # عُطل}}",
+      "window": "آخر 90 يومًا",
+      "empty": "لم يتم الإبلاغ عن أي أعطال حديثة.",
+      "viewFull": "عرض صفحة الحالة كاملة",
+      "happeningNow": "يحدث الآن",
+      "fixed": "تم الإصلاح",
+      "downFor": "متوقف منذ {duration}"
+    },
+    "serviceCard": {
+      "health90Day": "السلامة خلال 90 يومًا"
+    },
+    "loadingAria": "جارٍ تحميل حالة النظام",
+    "time": {
+      "justNow": "الآن",
+      "minutesAgo": "{count, plural, zero {الآن} one {قبل دقيقة} two {قبل دقيقتين} few {قبل # دقائق} many {قبل # دقيقة} other {قبل # دقيقة}}",
+      "hoursAgo": "{count, plural, zero {الآن} one {قبل ساعة} two {قبل ساعتين} few {قبل # ساعات} many {قبل # ساعة} other {قبل # ساعة}}"
+    },
+    "metadata": {
+      "title": "سلامة الموقع",
+      "description": "السلامة المباشرة للخدمات التي يعتمد عليها GainForest."
+    }
+  },
+  "pagination": {
+    "loadMore": "تحميل المزيد",
+    "loading": "جارٍ التحميل",
+    "end": "لقد وصلت إلى النهاية."
+  },
+  "notFound": {
+    "description": "هذه الصفحة غير موجودة. ربما تم نقلها، أو ربما لم تكن موجودة من الأساس.",
+    "backHome": "العودة إلى الصفحة الرئيسية"
+  },
+  "errorPage": {
+    "title": "حدث خطأ ما.",
+    "description": "نعتذر، فقد حدث خطأ أثناء معالجة طلبك.",
+    "tryAgain": "حاول مرة أخرى",
+    "home": "الرئيسية"
+  },
+  "auth": {
+    "getStarted": "ابدأ الآن",
+    "unknown": "غير معروف",
+    "completeOnboarding": "أكمل عملية الإعداد",
+    "organizationAccount": "حساب منظمة",
+    "userAccount": "حساب مستخدم",
+    "myAccount": "حسابي",
+    "signOut": "تسجيل الخروج",
+    "settings": "الإعدادات",
+    "organizationRole": "منظمة · {role}",
+    "roleOwner": "المالك",
+    "roleAdmin": "مشرف",
+    "roleMember": "عضو",
+    "switchAccount": "تبديل الحساب",
+    "switchAccountHint": "يتم حفظ عمليات الرفع والمشاريع الجديدة في الحساب الذي تختاره هنا."
+  },
+  "accountTabs": {
+    "home": "الرئيسية",
+    "overview": "نظرة عامة",
+    "donations": "التبرعات",
+    "bumicerts": "الشهادات",
+    "projects": "المشاريع",
+    "organizations": "المنظمات",
+    "donationHistory": "سجل التبرعات",
+    "donationsReceived": "التبرعات المستلمة",
+    "observations": "المشاهدات",
+    "gallery": "المعرض",
+    "settings": "الإعدادات",
+    "timeline": "الجدول الزمني",
+    "sites": "المواقع",
+    "audio": "الصوت",
+    "drone": "الطائرة المسيّرة",
+    "trees": "الأشجار",
+    "measurements": "القياسات",
+    "members": "الأعضاء",
+    "admin": "المشرف",
+    "posts": "المنشورات",
+    "filesAndPhotos": "الملفات والصور",
+    "photos": "الصور",
+    "files": "الملفات",
+    "taina": "Tainá",
+    "wallet": "المحفظة",
+    "endorsementsGiven": "التزكيات",
+    "equipment": "المعدات",
+    "more": "المزيد"
+  }
+}

@@ -101,7 +101,7 @@ export default async function AdminPage({
                   <area.Icon className="size-4" />
                 </span>
                 <span className="text-base font-semibold text-foreground">{area.title}</span>
-                <ChevronRightIcon className="ml-auto size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                <ChevronRightIcon className="ms-auto size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
               </span>
               <span className="mt-2 text-sm leading-6 text-muted-foreground">{area.items.join(" · ")}</span>
             </Link>

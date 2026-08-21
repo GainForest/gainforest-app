@@ -173,7 +173,7 @@ export function BioblitzPrizeNotificationStatus({
   return (
     <div className="flex flex-wrap items-center gap-2 text-[11px]">
       <span className={attention ? "text-amber-700 dark:text-amber-300" : "text-muted-foreground"}>
-        {attention ? <AlertTriangleIcon className="mr-1 inline size-3.5" aria-hidden /> : notification.status === "sent" || notification.status === "handled_manually" ? <CheckIcon className="mr-1 inline size-3.5" aria-hidden /> : <MailIcon className="mr-1 inline size-3.5" aria-hidden />}
+        {attention ? <AlertTriangleIcon className="me-1 inline size-3.5" aria-hidden /> : notification.status === "sent" || notification.status === "handled_manually" ? <CheckIcon className="me-1 inline size-3.5" aria-hidden /> : <MailIcon className="me-1 inline size-3.5" aria-hidden />}
         {label}: {t(`notification.${notification.status}`)}
       </span>
       {notification.canRetry ? (

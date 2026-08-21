@@ -237,7 +237,7 @@ export function AudioPaceChart({
               : t(ahead ? "aheadPhrase" : "behindPhrase", { phrase: t(`phrases.${range}`) })}
           </div>
         </div>
-        <div className="text-right text-xs text-muted-foreground">
+        <div className="text-end text-xs text-muted-foreground">
           <div>
             <span className="font-medium text-foreground">+{minutes(view.actualGrowth)}</span>{" "}
             {t("actual")}

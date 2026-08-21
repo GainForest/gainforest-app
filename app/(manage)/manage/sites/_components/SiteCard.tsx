@@ -127,12 +127,12 @@ export function SiteCard({
         type="button"
         onClick={handleCardClick}
         className={cn(
-          "flex w-full flex-col text-left",
+          "flex w-full flex-col text-start",
           variant === "card" ? "rounded-xl" : "py-1",
           isPreviewable ? "cursor-pointer focus-visible:outline-none" : "cursor-default",
         )}
       >
-        <div className="flex h-10 items-center justify-between gap-2 border-b border-border px-3 pr-11">
+        <div className="flex h-10 items-center justify-between gap-2 border-b border-border px-3 pe-11">
           {isPreviewing ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-medium text-primary-foreground">
               Viewing
@@ -188,7 +188,7 @@ export function SiteCard({
         </div>
       </button>
 
-      <div className="absolute right-1.5 top-1.5">
+      <div className="absolute end-1.5 top-1.5">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -207,7 +207,7 @@ export function SiteCard({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={onEdit} disabled={disableActions || Boolean(updateDisabledReason)} title={updateDisabledReason ?? undefined}>
-              <PencilIcon className="mr-2 h-3.5 w-3.5" />
+              <PencilIcon className="me-2 h-3.5 w-3.5" />
               Edit
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -215,7 +215,7 @@ export function SiteCard({
               disabled={isDefault || disableActions || Boolean(updateDisabledReason)}
               title={updateDisabledReason ?? undefined}
             >
-              <BadgeCheckIcon className="mr-2 h-3.5 w-3.5" />
+              <BadgeCheckIcon className="me-2 h-3.5 w-3.5" />
               {isDefault ? "Already default" : "Make default"}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -225,7 +225,7 @@ export function SiteCard({
               disabled={isDefault || disableActions || Boolean(deleteDisabledReason)}
               title={deleteDisabledReason ?? undefined}
             >
-              <Trash2Icon className="mr-2 h-3.5 w-3.5" />
+              <Trash2Icon className="me-2 h-3.5 w-3.5" />
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>

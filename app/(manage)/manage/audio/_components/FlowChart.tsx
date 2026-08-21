@@ -30,7 +30,7 @@ export function FlowChart() {
   };
   return (
     <div className="bg-background rounded-2xl grid grid-rows-3 md:grid-rows-none md:grid-cols-3 gap-2 md:gap-1 p-3 relative">
-      <div className="hidden md:block absolute z-1 h-2 bg-foreground/5 top-7 left-[16.66%] right-[16.66%] overflow-hidden">
+      <div className="hidden md:block absolute z-1 h-2 bg-foreground/5 top-7 start-[16.66%] end-[16.66%] overflow-hidden">
         <motion.div
           className="h-6 w-6 bg-primary blur-md absolute -translate-x-1/2 top-1/2 -translate-y-1/2"
           animate={{
@@ -43,7 +43,7 @@ export function FlowChart() {
           }}
         ></motion.div>
       </div>
-      <div className="block md:hidden absolute z-1 w-2 bg-foreground/5 left-12 top-[16.66%] bottom-[16.66%] overflow-hidden">
+      <div className="block md:hidden absolute z-1 w-2 bg-foreground/5 start-12 top-[16.66%] bottom-[16.66%] overflow-hidden">
         <motion.div
           className="h-6 w-6 bg-primary blur-md absolute -translate-y-1/2 left-1/2 -translate-x-1/2"
           animate={{
@@ -64,10 +64,10 @@ export function FlowChart() {
           <CalendarDaysIcon className="size-5" />
         </motion.div>
         <div className="flex flex-col items-start md:items-center">
-          <span className="text-left md:text-center text-foreground text-xl font-medium font-instrument italic">
+          <span className="text-start md:text-center text-foreground text-xl font-medium font-instrument italic">
             Choose an event
           </span>
-          <p className="text-left md:text-center text-pretty">
+          <p className="text-start md:text-center text-pretty">
             Add date, place, location and people involved.
           </p>
         </div>
@@ -80,10 +80,10 @@ export function FlowChart() {
           <RadioTowerIcon className="size-5" />
         </motion.div>
         <div className="flex flex-col items-start md:items-center">
-          <span className="text-left md:text-center text-foreground text-xl font-medium font-instrument italic">
+          <span className="text-start md:text-center text-foreground text-xl font-medium font-instrument italic">
             Add device info
           </span>
-          <p className="text-left md:text-center text-pretty">
+          <p className="text-start md:text-center text-pretty">
             Add the device model and other info.
           </p>
         </div>
@@ -97,10 +97,10 @@ export function FlowChart() {
           <HeadphonesIcon className="size-5" />
         </motion.div>
         <div className="flex flex-col items-start md:items-center">
-          <span className="text-left md:text-center text-foreground text-xl font-medium font-instrument italic">
+          <span className="text-start md:text-center text-foreground text-xl font-medium font-instrument italic">
             Upload audio
           </span>
-          <p className="text-left md:text-center text-pretty">
+          <p className="text-start md:text-center text-pretty">
             Upload the data recorded by the device.
           </p>
         </div>

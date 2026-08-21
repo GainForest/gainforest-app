@@ -65,7 +65,7 @@ export function DatePicker({
         type="button"
         disabled={disabled}
         className={cn(
-          "flex w-full items-center gap-2.5 rounded-xl bg-muted/60 px-4 py-2.5 text-left text-sm text-foreground outline-none transition-colors",
+          "flex w-full items-center gap-2.5 rounded-xl bg-muted/60 px-4 py-2.5 text-start text-sm text-foreground outline-none transition-colors",
           "hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary/25 data-[state=open]:bg-muted data-[state=open]:ring-2 data-[state=open]:ring-primary/25",
           "disabled:cursor-not-allowed disabled:opacity-50",
           className,

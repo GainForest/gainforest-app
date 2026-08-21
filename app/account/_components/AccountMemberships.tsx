@@ -33,7 +33,7 @@ export function AccountMemberships({
             key={organization.did}
             href={accountPath(organization.identifier)}
             title={organization.displayName}
-            className="group inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/70 py-0.5 pl-0.5 pr-2.5 transition-colors hover:border-primary/40 hover:bg-muted"
+            className="group inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/70 py-0.5 ps-0.5 pe-2.5 transition-colors hover:border-primary/40 hover:bg-muted"
           >
             <span className="relative size-6 shrink-0 overflow-hidden rounded-full border border-border/50 bg-muted">
               {organization.avatarUrl ? (

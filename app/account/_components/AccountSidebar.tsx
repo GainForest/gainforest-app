@@ -172,13 +172,13 @@ function DecorativeLeafCluster() {
   const leafClass = "absolute rounded-full bg-primary/[0.12] shadow-sm";
 
   return (
-    <div className="pointer-events-none absolute inset-y-0 right-0 w-40 overflow-hidden" aria-hidden="true">
-      <div className="absolute -right-10 bottom-0 size-40 rounded-full bg-primary/[0.08] blur-2xl" />
-      <div className="absolute bottom-0 right-12 h-32 w-px -rotate-12 bg-primary/20" />
-      <span className={cn(leafClass, "bottom-16 right-12 h-12 w-6 -rotate-45")} />
-      <span className={cn(leafClass, "bottom-10 right-4 h-16 w-7 rotate-12")} />
-      <span className={cn(leafClass, "bottom-24 right-2 h-11 w-5 rotate-45")} />
-      <span className={cn(leafClass, "bottom-2 right-24 h-10 w-5 -rotate-12")} />
+    <div className="pointer-events-none absolute inset-y-0 end-0 w-40 overflow-hidden" aria-hidden="true">
+      <div className="absolute -end-10 bottom-0 size-40 rounded-full bg-primary/[0.08] blur-2xl" />
+      <div className="absolute bottom-0 end-12 h-32 w-px -rotate-12 bg-primary/20" />
+      <span className={cn(leafClass, "bottom-16 end-12 h-12 w-6 -rotate-45")} />
+      <span className={cn(leafClass, "bottom-10 end-4 h-16 w-7 rotate-12")} />
+      <span className={cn(leafClass, "bottom-24 end-2 h-11 w-5 rotate-45")} />
+      <span className={cn(leafClass, "bottom-2 end-24 h-10 w-5 -rotate-12")} />
     </div>
   );
 }

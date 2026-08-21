@@ -397,7 +397,7 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
             size="icon-sm"
             onClick={closeModal}
             aria-label={t("close")}
-            className="-mr-1 -mt-1 rounded-full"
+            className="-me-1 -mt-1 rounded-full"
           >
             <XIcon className="size-4" />
           </Button>
@@ -407,7 +407,7 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
       <form className="space-y-2" onSubmit={searchLocations}>
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+            <SearchIcon className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
             <Input
               value={searchQuery}
               onChange={(event) => {
@@ -417,7 +417,7 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
               }}
               aria-label={t("searchLabel")}
               placeholder={t("searchPlaceholder")}
-              className="pl-9 pr-9"
+              className="ps-9 pe-9"
             />
             {searchQuery ? (
               <Button
@@ -426,7 +426,7 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
                 size="icon-sm"
                 onClick={clearSearch}
                 aria-label={t("searchClear")}
-                className="absolute right-1 top-1/2 size-7 -translate-y-1/2 rounded-full"
+                className="absolute end-1 top-1/2 size-7 -translate-y-1/2 rounded-full"
               >
                 <XIcon className="size-3.5" />
               </Button>
@@ -444,7 +444,7 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
                 key={result.id}
                 type="button"
                 onClick={() => chooseSearchResult(result)}
-                className="flex w-full flex-col gap-1 border-b px-3 py-2 text-left transition-colors last:border-b-0 hover:bg-muted focus-visible:bg-muted focus-visible:outline-none"
+                className="flex w-full flex-col gap-1 border-b px-3 py-2 text-start transition-colors last:border-b-0 hover:bg-muted focus-visible:bg-muted focus-visible:outline-none"
                 aria-label={t("searchResultAria", { name: result.name })}
               >
                 <span className="text-sm font-medium text-foreground">{result.name}</span>
@@ -467,7 +467,7 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
         <div ref={elRef} className="h-[420px] w-full overflow-hidden rounded-xl" style={{ zIndex: 0 }} />
         {stack.length > 1 && (
           <Button
-            className="absolute left-3 top-3 z-[2] rounded-full"
+            className="absolute start-3 top-3 z-[2] rounded-full"
             variant="outline"
             size="icon-sm"
             onClick={() => popModal()}
@@ -481,7 +481,7 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
           size="sm"
           onClick={useMyLocation}
           disabled={locating || !ready}
-          className="absolute right-3 top-3 z-[2] bg-background/90 shadow-sm backdrop-blur"
+          className="absolute end-3 top-3 z-[2] bg-background/90 shadow-sm backdrop-blur"
         >
           {locating ? <Loader2Icon className="size-4 animate-spin" /> : <LocateFixedIcon className="size-4" />}
           {t("useMyLocation")}
@@ -493,7 +493,7 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
                 type="button"
                 variant="outline"
                 size="sm"
-                className="absolute bottom-3 left-3 z-[2] bg-background/90 shadow-sm backdrop-blur"
+                className="absolute bottom-3 start-3 z-[2] bg-background/90 shadow-sm backdrop-blur"
               >
                 <LayersIcon className="size-4" />
                 {t(LAYER_OPTIONS.find((option) => option.id === activeLayer)?.labelKey ?? "layerStreets")}
@@ -518,7 +518,7 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
         ) : (
           <span>{t("hint")}</span>
         )}
-        {geoError ? <span className="ml-auto text-xs text-destructive">{geoError}</span> : null}
+        {geoError ? <span className="ms-auto text-xs text-destructive">{geoError}</span> : null}
       </div>
       <ModalFooter>
         <Button type="button" variant="outline" onClick={closeModal}>

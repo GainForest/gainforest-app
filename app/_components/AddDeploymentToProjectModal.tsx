@@ -280,7 +280,7 @@ export function AddDeploymentToProjectModal({
   return (
     <ModalContent dismissible={!busy} className="w-full">
       <ModalHeader>
-        <ModalTitle className="break-words pr-8">{t("title", { name: folderName })}</ModalTitle>
+        <ModalTitle className="break-words pe-8">{t("title", { name: folderName })}</ModalTitle>
         <ModalDescription>{t("body")}</ModalDescription>
       </ModalHeader>
 
@@ -309,13 +309,13 @@ export function AddDeploymentToProjectModal({
         <>
           {projects.length > 6 ? (
             <div className="relative mt-4">
-              <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <SearchIcon className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder={t("searchPlaceholder")}
                 aria-label={t("searchPlaceholder")}
-                className="w-full rounded-xl border border-border bg-background py-2 pl-9 pr-3 text-sm outline-none focus:border-primary/50"
+                className="w-full rounded-xl border border-border bg-background py-2 ps-9 pe-3 text-sm outline-none focus:border-primary/50"
               />
             </div>
           ) : null}
@@ -335,7 +335,7 @@ export function AddDeploymentToProjectModal({
                       onClick={() => void addToExisting(project)}
                       disabled={busy}
                       className={cn(
-                        "flex w-full items-center gap-3 rounded-xl border border-border/60 px-3 py-2.5 text-left transition-colors hover:bg-muted disabled:opacity-60",
+                        "flex w-full items-center gap-3 rounded-xl border border-border/60 px-3 py-2.5 text-start transition-colors hover:bg-muted disabled:opacity-60",
                         projectBusy && "border-primary/40 bg-primary/5",
                       )}
                     >

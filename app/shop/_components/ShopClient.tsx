@@ -174,7 +174,7 @@ export function ShopClient() {
               <span className="relative text-primary">
                 nature
                 <svg
-                  className="absolute -bottom-1 left-0 w-full"
+                  className="absolute -bottom-1 start-0 w-full"
                   viewBox="0 0 100 8"
                   preserveAspectRatio="none"
                   aria-hidden="true"
@@ -567,7 +567,7 @@ export function ShopClient() {
                 value={item.id}
                 className="border-b border-border"
               >
-                <AccordionTrigger className="py-3 text-left font-instrument text-base italic hover:no-underline">
+                <AccordionTrigger className="py-3 text-start font-instrument text-base italic hover:no-underline">
                   {item.question}
                 </AccordionTrigger>
                 <AccordionContent className="pb-3 text-sm leading-relaxed text-muted-foreground">
@@ -588,7 +588,7 @@ export function ShopClient() {
           showBar ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
         )}
       >
-        <div className="pointer-events-auto flex w-full max-w-sm items-center justify-between gap-3 rounded-full border border-border bg-background/90 py-2 pl-4 pr-2 shadow-lg backdrop-blur-md">
+        <div className="pointer-events-auto flex w-full max-w-sm items-center justify-between gap-3 rounded-full border border-border bg-background/90 py-2 ps-4 pe-2 shadow-lg backdrop-blur-md">
           <div className="flex min-w-0 flex-col">
             <span className="font-mono text-sm">${total}</span>
             <span className="truncate text-[10px] text-muted-foreground">

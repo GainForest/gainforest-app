@@ -81,14 +81,14 @@ export function ListPanel(props: {
     <section className="space-y-4">
       <div className="flex items-center justify-between w-full gap-2">
         <div className="relative max-w-md">
-          <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <SearchIcon className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={props.searchQuery}
             onChange={(event) => props.onSearchChange(event.target.value)}
             placeholder={t("list.searchPlaceholder", {
               section: sectionLabel.toLowerCase(),
             })}
-            className="pl-9"
+            className="ps-9"
           />
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -226,7 +226,7 @@ function RecordCard(props: {
     <button
       type="button"
       onClick={props.onClick}
-      className={props.variant === "list" ? "w-full rounded-2xl px-1 py-3 text-left outline-none transition-colors duration-300 hover:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-primary/60 sm:px-2" : "rounded-2xl border p-4 text-left transition hover:border-primary/50 hover:bg-muted/30"}
+      className={props.variant === "list" ? "w-full rounded-2xl px-1 py-3 text-start outline-none transition-colors duration-300 hover:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-primary/60 sm:px-2" : "rounded-2xl border p-4 text-start transition hover:border-primary/50 hover:bg-muted/30"}
     >
       <p className="font-medium">{props.title ?? t("untitled")}</p>
       {props.subtitle && (
@@ -471,7 +471,7 @@ function MiniLink(props: {
     <button
       type="button"
       onClick={props.onClick}
-      className="w-full rounded-xl border p-3 text-left text-sm hover:bg-muted/40"
+      className="w-full rounded-xl border p-3 text-start text-sm hover:bg-muted/40"
     >
       <p className="font-medium">{props.label ?? t("untitled")}</p>
       {props.detail && (

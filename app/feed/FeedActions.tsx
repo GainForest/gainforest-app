@@ -1159,7 +1159,7 @@ export function FeedComposer({
           </button>
         </div>
       </div>
-      {error ? <p className="mt-1 pl-12 text-xs text-destructive">{error}</p> : null}
+      {error ? <p className="mt-1 ps-12 text-xs text-destructive">{error}</p> : null}
       <BlueskyConsentModal
         open={consentOpen}
         needsProfile={hasProfile === null ? null : !hasProfile}
@@ -1272,7 +1272,7 @@ export function MobileComposerBar({
           // z-20 keeps the island above the scrolling feed but *below* the
           // sticky header (z-30) so its user menu / sign-out dropdown, which is
           // trapped in the header's stacking context, stays clickable on phones.
-          "fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-20 flex items-center gap-3 rounded-full border-2 border-primary bg-background/90 py-2 pl-2 pr-4 text-left shadow-lg backdrop-blur transition-[transform,opacity] duration-300 active:bg-muted supports-[backdrop-filter]:bg-background/80",
+          "fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-20 flex items-center gap-3 rounded-full border-2 border-primary bg-background/90 py-2 ps-2 pe-4 text-start shadow-lg backdrop-blur transition-[transform,opacity] duration-300 active:bg-muted supports-[backdrop-filter]:bg-background/80",
           footerNear && "pointer-events-none translate-y-[calc(100%+2rem)] opacity-0",
         )}
       >
@@ -1302,7 +1302,7 @@ export function MobileComposerBar({
               type="button"
               onClick={closeComposer}
               aria-label={t("composer.close")}
-              className="-mr-1 inline-flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="-me-1 inline-flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <XIcon className="size-4" />
             </button>
@@ -1339,7 +1339,7 @@ function ComposerObservationButton({ sessionDid }: { sessionDid: string }) {
         onClick={open}
         aria-label={t("composer.addObservation")}
         title={t("composer.addObservation")}
-        className="-ml-1.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full text-primary transition-colors hover:bg-primary/10"
+        className="-ms-1.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full text-primary transition-colors hover:bg-primary/10"
       >
         <ImageIcon className="size-5" />
       </button>
@@ -1455,7 +1455,7 @@ function LikersTooltipBody({
   const extra = names.length - shown.length;
 
   return (
-    <div className="text-left">
+    <div className="text-start">
       <p className="mb-1 font-medium">{t("actions.likedBy")}</p>
       <ul className="space-y-0.5">
         {shown.map((name, i) => (
@@ -1766,7 +1766,7 @@ function LightboxCommentNode({
           )}
         </div>
         {!editing ? (
-          <div className="-ml-2 mt-0.5 flex items-center gap-1">
+          <div className="-ms-2 mt-0.5 flex items-center gap-1">
             <LikeButton subjectUri={c.uri} signedIn={signedIn} interactions={interactions} size="sm" />
             <ReplyToggle signedIn={signedIn} onOpen={() => setReplying(true)} />
             {isYou ? (
@@ -1792,7 +1792,7 @@ function LightboxCommentNode({
           />
         ) : null}
         {node.replies.length > 0 ? (
-          <ul className="mt-2.5 space-y-2.5 border-l border-border/40 pl-2.5">
+          <ul className="mt-2.5 space-y-2.5 border-s border-border/40 ps-2.5">
             {node.replies.map((child) => (
               <LightboxCommentNode
                 key={child.comment.uri}

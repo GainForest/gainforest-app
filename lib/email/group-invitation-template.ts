@@ -3,6 +3,8 @@ import {
   SUPPORTED_LOCALES,
   isSupportedLanguageCode,
   resolvePreferredLanguageFromHeader,
+  resolvePublicLanguage,
+  type PublicLanguageCode,
   type SupportedLanguageCode,
 } from "@/lib/i18n/languages";
 
@@ -124,7 +126,7 @@ const copyByLocale = {
     teamName: "Tim GainForest",
     footer: "Anda menerima email ini karena seseorang mengundang alamat ini ke organisasi GainForest.",
   },
-} satisfies Record<SupportedLanguageCode, InviteCopy>;
+} satisfies Record<PublicLanguageCode, InviteCopy>;
 
 function escapeHtml(value: string): string {
   return value
@@ -216,7 +218,10 @@ export function renderGroupInvitationEmailTemplate({
   logoUri?: string | null;
   siteUrl?: string;
 }): GroupInvitationEmailRenderResult {
-  const copy = copyByLocale[locale];
+  // Locales without their own email copy fall back to English, matching how
+  // the message catalog resolves a partially translated locale.
+  const copyLocale = resolvePublicLanguage(locale);
+  const copy = copyByLocale[copyLocale];
   const safeOrganizationName = organizationName?.trim() || copy.fallbackOrganizationName;
   const safeInviterName = inviterName?.trim() || "";
   const roleLabel = copy.roles[role];
@@ -238,7 +243,7 @@ export function renderGroupInvitationEmailTemplate({
   </table>`;
 
   const html = `<!DOCTYPE html>
-<html lang="${locale}">
+<html lang="${copyLocale}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />

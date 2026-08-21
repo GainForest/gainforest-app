@@ -185,7 +185,7 @@ export function ProjectDetailSkeleton() {
             <Skeleton className="h-4 w-36 rounded-full" />
             <Skeleton className="h-3 w-24 rounded-full" />
           </div>
-          <Skeleton className="ml-auto h-9 w-24 rounded-full" />
+          <Skeleton className="ms-auto h-9 w-24 rounded-full" />
           <Skeleton className="h-9 w-9 rounded-full" />
         </div>
         <Skeleton className="mt-6 aspect-[16/10] w-full rounded-2xl sm:aspect-[16/7]" />
@@ -321,7 +321,7 @@ function FeedRowSkeleton({ bodyLines }: { bodyLines: number }) {
         </div>
       </div>
       {/* Like / reshare / comment — fixed-size controls, so they are painted. */}
-      <div className="pb-2 pl-16 pr-3">
+      <div className="pb-2 ps-16 pe-3">
         <div className="mt-2 flex items-center gap-1">
           {["w-14", "w-20", "w-20"].map((width) => (
             <Skeleton key={width} className={`h-[26px] rounded-full ${width}`} />
@@ -404,7 +404,7 @@ export function FeedPageSkeleton() {
                 <Skeleton className="mt-0.5 size-9 shrink-0 rounded-full" />
                 <Skeleton className="h-[62px] flex-1 rounded-lg" />
               </div>
-              <div className="mt-1 flex items-center justify-between gap-2 pl-12">
+              <div className="mt-1 flex items-center justify-between gap-2 ps-12">
                 <TextSpace height={16} />
                 <Skeleton className="h-8 w-[72px] rounded-full" />
               </div>
@@ -463,7 +463,7 @@ export function BioblitzPageSkeleton() {
               <div key={index} className="flex items-center gap-3">
                 <Skeleton className="size-7 shrink-0 rounded-full" />
                 <Skeleton className="h-4 w-36 max-w-full" />
-                <Skeleton className="ml-auto h-4 w-10 shrink-0" />
+                <Skeleton className="ms-auto h-4 w-10 shrink-0" />
               </div>
             ))}
           </div>
@@ -477,7 +477,7 @@ export function GlobePageSkeleton() {
   return (
     <main className="relative min-h-[calc(100vh-4rem)] overflow-hidden bg-[#0d1612]" aria-busy="true" aria-live="polite">
       <Skeleton className="absolute inset-0 rounded-none opacity-40" />
-      <div className="absolute left-4 top-4 z-10 w-[min(24rem,calc(100vw-2rem))] rounded-3xl border border-white/10 bg-background/90 p-4 shadow-2xl backdrop-blur">
+      <div className="absolute start-4 top-4 z-10 w-[min(24rem,calc(100vw-2rem))] rounded-3xl border border-white/10 bg-background/90 p-4 shadow-2xl backdrop-blur">
         <Skeleton className="h-6 w-44" />
         <Skeleton className="mt-3 h-4 w-full rounded-full" />
         <Skeleton className="mt-2 h-4 w-2/3 rounded-full" />

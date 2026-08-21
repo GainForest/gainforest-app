@@ -121,7 +121,7 @@ export function MarkdownDocument({ source }: { source: string }) {
       }
       blocks.push(
         <div key={`table-${index}`} className="my-5 overflow-x-auto rounded-xl border border-border/70">
-          <table className="w-full min-w-[620px] border-collapse text-left text-[13px]">
+          <table className="w-full min-w-[620px] border-collapse text-start text-[13px]">
             <thead className="bg-muted/60">
               <tr>{header.map((cell, cellIndex) => <th key={cellIndex} className="border-b border-border px-3 py-2 font-semibold text-foreground">{inline(cell)}</th>)}</tr>
             </thead>
@@ -145,7 +145,7 @@ export function MarkdownDocument({ source }: { source: string }) {
         index += 1;
       }
       blocks.push(
-        <ul key={`ul-${index}`} className="my-3 list-disc space-y-1.5 pl-6 text-[14px] leading-relaxed text-muted-foreground">
+        <ul key={`ul-${index}`} className="my-3 list-disc space-y-1.5 ps-6 text-[14px] leading-relaxed text-muted-foreground">
           {items.map((item, itemIndex) => <li key={itemIndex}>{inline(item)}</li>)}
         </ul>,
       );
@@ -159,7 +159,7 @@ export function MarkdownDocument({ source }: { source: string }) {
         index += 1;
       }
       blocks.push(
-        <ol key={`ol-${index}`} className="my-3 list-decimal space-y-1.5 pl-6 text-[14px] leading-relaxed text-muted-foreground">
+        <ol key={`ol-${index}`} className="my-3 list-decimal space-y-1.5 ps-6 text-[14px] leading-relaxed text-muted-foreground">
           {items.map((item, itemIndex) => <li key={itemIndex}>{inline(item)}</li>)}
         </ol>,
       );

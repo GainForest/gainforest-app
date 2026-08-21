@@ -772,7 +772,7 @@ export function CheckoutView({
               <li key={`${line.txHash}-${index}`} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
                 <div className="min-w-0">
                   <p className="truncate text-sm text-foreground">
-                    {line.kind === "tip" ? <HeartHandshakeIcon className="mr-1 inline size-3.5 text-primary" aria-hidden /> : null}
+                    {line.kind === "tip" ? <HeartHandshakeIcon className="me-1 inline size-3.5 text-primary" aria-hidden /> : null}
                     {line.title}
                   </p>
                   <p className="truncate text-xs text-muted-foreground">{line.orgName}</p>
