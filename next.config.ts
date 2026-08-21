@@ -30,12 +30,16 @@ const nextConfig: NextConfig = {
     // Record thumbnails (occurrences, bumicerts, org covers) are resolved to
     // each record owner's PDS via com.atproto.sync.getBlob. The host is
     // derived from the DID at request time, so we accept any PDS that exposes
-    // the public sync endpoint.
+    // the public sync endpoint — but ONLY that endpoint. There is deliberately
+    // no catch-all host entry: it would let anyone use our image optimizer as
+    // a free proxy for arbitrary content. Record images on other hosts must be
+    // rendered with `unoptimized` (gate on `isPdsBlobUrl`, see app/_lib/pds.ts).
     remotePatterns: [
       { protocol: "https", hostname: "**", pathname: "/xrpc/com.atproto.sync.getBlob/**" },
       { protocol: "https", hostname: "**", pathname: "/xrpc/com.atproto.sync.getBlob" },
       { protocol: "https", hostname: "certified.one" },
-      { protocol: "https", hostname: "**" },
+      // The landing page's explainer-video poster.
+      { protocol: "https", hostname: "i.ytimg.com" },
     ],
   },
 };

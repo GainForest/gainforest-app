@@ -36,7 +36,7 @@ import { useModal } from "@/components/ui/modal/context";
 import { cn } from "@/lib/utils";
 import { manageApiHref } from "@/lib/links";
 import { localProjectHref } from "@/app/_lib/urls";
-import { resolveStrongRef } from "@/app/_lib/pds";
+import { isPdsBlobUrl, resolveStrongRef } from "@/app/_lib/pds";
 import { notifyProjectsChanged } from "@/app/_lib/projects-events";
 import { createRecord, deleteRecord } from "@/app/(manage)/manage/_lib/mutations";
 import {
@@ -341,7 +341,16 @@ export function AddDeploymentToProjectModal({
                     >
                       <span className="relative grid size-9 shrink-0 place-items-center overflow-hidden rounded-lg bg-muted text-muted-foreground">
                         {project.imageUrl ? (
-                          <Image src={project.imageUrl} alt="" fill sizes="36px" className="object-cover" />
+                          <Image
+                            src={project.imageUrl}
+                            alt=""
+                            fill
+                            // Only PDS blob URLs are safe to optimize; a project
+                            // banner can point at an arbitrary external host.
+                            unoptimized={!isPdsBlobUrl(project.imageUrl)}
+                            sizes="36px"
+                            className="object-cover"
+                          />
                         ) : (
                           <FolderKanbanIcon className="size-4" />
                         )}
