@@ -28,7 +28,7 @@ import type { ActivityFeedItem, ActivityFeedKind, ActivityFeedPage } from "../_l
 import type { MentionCandidate } from "../_lib/mentions";
 import { AdminOnlyIndicator } from "@/app/_components/AdminOnlyIndicator";
 import { MentionText } from "@/app/_components/MentionText";
-import { resolveBlobUrl } from "../_lib/pds";
+import { isPdsBlobUrl, resolveBlobUrl } from "../_lib/pds";
 import {
   BlueskyPostLink,
   DeleteButton,
@@ -1528,7 +1528,9 @@ function ObservationThumb({ item, overlay }: { item: ActivityFeedItem; overlay: 
 
   return (
     <span className="relative block aspect-square overflow-hidden rounded-lg border border-border/60 bg-muted">
-      {src ? <Image src={src} alt="" fill unoptimized sizes="140px" className="object-cover" /> : null}
+      {src ? (
+        <Image src={src} alt="" fill unoptimized={!isPdsBlobUrl(src)} sizes="140px" className="object-cover" />
+      ) : null}
       {overlay ? (
         <span className="absolute inset-0 grid place-items-center bg-black/55 text-sm font-semibold text-white">
           {overlay}
@@ -1553,6 +1555,7 @@ function FeedAvatar({ item }: { item: ActivityFeedItem }) {
       <ResolvedAvatar
         did={item.actorDid}
         avatarRef={item.actorAvatarRef}
+        imageUrl={item.actorAvatarUrl}
         name={item.actorName}
         fallbackIcon={hasName ? undefined : <KindIcon kind={item.kind} className="size-4" />}
         className="mt-0.5 size-10"
@@ -1582,7 +1585,14 @@ function FeedImage({ item }: { item: ActivityFeedItem }) {
 
   return (
     <span className="relative block aspect-[16/9] w-full bg-muted">
-      <Image src={src} alt="" fill unoptimized sizes="(max-width: 672px) 100vw, 608px" className="object-cover" />
+      <Image
+        src={src}
+        alt=""
+        fill
+        unoptimized={!isPdsBlobUrl(src)}
+        sizes="(max-width: 672px) 100vw, 608px"
+        className="object-cover"
+      />
     </span>
   );
 }

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState, type ReactNode } from "react";
-import { resolveBlobUrl } from "../_lib/pds";
+import { isPdsBlobUrl, resolveBlobUrl } from "../_lib/pds";
 import { cn } from "@/lib/utils";
 
 /** Up-to-two-letter initials from a display name, for the avatar fallback. */
@@ -16,10 +16,15 @@ function initialsOf(name: string | null | undefined): string {
 }
 
 /**
- * Avatar that prefers a ready image URL, otherwise resolves a PDS blob ref for
- * the given DID, and finally falls back to initials (or a supplied icon). Shared
- * by the feed timeline, composer, and comment threads so identity renders
- * consistently everywhere.
+ * Avatar that prefers a ready image URL (the feed resolves these server-side),
+ * otherwise resolves a PDS blob ref for the given DID, and finally falls back
+ * to initials (or a supplied icon). Shared by the feed timeline, composer, and
+ * comment threads so identity renders consistently everywhere.
+ *
+ * PDS blob URLs go through the Next image optimizer — avatars are often
+ * multi-megabyte originals rendered at ~40px, so serving a resized, cached
+ * variant is a huge win. Arbitrary external URLs stay `unoptimized` (their
+ * hosts aren't ours to allowlist).
  */
 export function ResolvedAvatar({
   did,
@@ -64,7 +69,7 @@ export function ResolvedAvatar({
       aria-hidden
     >
       {src ? (
-        <Image src={src} alt="" fill unoptimized sizes={sizes} className="object-cover" />
+        <Image src={src} alt="" fill unoptimized={!isPdsBlobUrl(src)} sizes={sizes} className="object-cover" />
       ) : fallbackIcon ? (
         fallbackIcon
       ) : initials ? (

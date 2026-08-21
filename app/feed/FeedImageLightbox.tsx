@@ -15,7 +15,7 @@ import { useTranslations } from "next-intl";
 import { ArrowUpRightIcon, UserIcon, XIcon } from "lucide-react";
 import type { ActivityFeedItem } from "../_lib/feed";
 import { MentionText } from "@/app/_components/MentionText";
-import { resolveBlobUrl } from "../_lib/pds";
+import { isPdsBlobUrl, resolveBlobUrl } from "../_lib/pds";
 import { formatRelative } from "../_lib/format";
 import { FeedActionBar, type FeedInteractions } from "./FeedActions";
 import { AccountHoverCard } from "@/app/_components/AccountHoverCard";
@@ -93,6 +93,7 @@ export function FeedImageLightbox({
             <ResolvedAvatar
               did={item.actorDid}
               avatarRef={item.actorAvatarRef}
+              imageUrl={item.actorAvatarUrl}
               name={item.actorName}
               fallbackIcon={<UserIcon className="size-4" />}
               className="size-9"
@@ -128,7 +129,8 @@ export function FeedImageLightbox({
               alt={item.title ?? ""}
               width={1200}
               height={900}
-              unoptimized
+              unoptimized={!isPdsBlobUrl(src)}
+              quality={95}
               sizes="(max-width: 672px) 100vw, 672px"
               className="h-auto max-h-[60vh] w-full object-contain"
             />

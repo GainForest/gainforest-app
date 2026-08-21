@@ -25,6 +25,7 @@
  * others (independent per-stream cursors would interleave out of order).
  */
 
+import { unstable_cache } from "next/cache";
 import { accountAudioPath } from "@/app/account/_lib/account-route";
 import { cachedAsync } from "./async-cache";
 import { listAudioUploadDays, type AudioUploadDay } from "./audio-upload-days";
@@ -36,7 +37,7 @@ import { getTipWalletAddress } from "@/lib/facilitator/tip";
 import { fetchPinnedPostUris } from "./feed-pins";
 import { fetchAccountCards, fetchHiddenRecordUris, fetchPublicHiddenAccountDids, indexerQuery } from "./indexer";
 import { mentionCandidatesFromFacets, type MentionCandidate, type RawIndexedFacet } from "./mentions";
-import { normaliseRef } from "./pds";
+import { blobUrl, normaliseRef, resolvePdsHost } from "./pds";
 import { FACILITATOR_DID, accountHref, localBumicertHref, localObservationHref, localProjectHref } from "./urls";
 
 /** The kinds of activity a feed row represents.
@@ -94,8 +95,11 @@ export interface ActivityFeedItem {
   actorDid: string;
   /** Owner display name from the certified profile, when known. */
   actorName: string | null;
-  /** PDS avatar blob ref for the owner; resolved client-side. */
+  /** PDS avatar blob ref for the owner; kept as the client-side fallback. */
   actorAvatarRef: string | null;
+  /** Ready-to-fetch avatar URL, resolved server-side from the blob ref so the
+   *  browser never has to look up the owner's PDS host first. */
+  actorAvatarUrl?: string | null;
   /** Headline (project title, scientific name, cert title, org name, amount). */
   title: string | null;
   /** Body text (short description, habitat, donation summary). */
@@ -1203,6 +1207,55 @@ async function enrichDonations(
   }
 }
 
+// ── Server-side image URL resolution ─────────────────────────────────────────
+//
+// Feed rows carry PDS blob refs (avatars, sighting photos, project banners).
+// Historically the browser turned each ref into a URL itself: hydrate → fetch
+// the owner's DID document from plc.directory → build the getBlob URL → fetch
+// the image. That's a three-hop waterfall per image that can't start until
+// React hydrates. Resolving the PDS hosts here instead — where the DID set is
+// small, deduplicated, and the result is memoised with the page cache — lets
+// the SSR HTML ship ready image URLs, so the browser starts fetching pixels
+// immediately. The refs stay on the payload as the client-side fallback (and
+// for consumers like comment threads that still resolve on the client).
+
+/** Fill `actorAvatarUrl` and `imageUrl` on every row that only has a blob ref,
+ *  by resolving each unique owner DID to its PDS host once (in parallel,
+ *  process-cached). Resolution failures leave the ref-only fallback in place. */
+async function resolveFeedImageUrls(items: ActivityFeedItem[]): Promise<void> {
+  const dids = new Set<string>();
+  for (const it of items) {
+    if (!it.actorDid) continue;
+    if ((it.actorAvatarRef && !it.actorAvatarUrl) || (it.imageRef && !it.imageUrl)) {
+      dids.add(it.actorDid);
+    }
+  }
+  if (dids.size === 0) return;
+
+  const hosts = new Map<string, string | null>();
+  await Promise.all(
+    [...dids].map(async (did) => {
+      const host = await resolvePdsHost(did).catch(() => null);
+      hosts.set(did, host);
+    }),
+  );
+
+  const urlFor = (did: string, ref: string | null): string | null => {
+    const cid = normaliseRef(ref);
+    const host = hosts.get(did);
+    return cid && host ? blobUrl(host, did, cid) : null;
+  };
+  for (const it of items) {
+    if (!it.actorDid) continue;
+    if (it.actorAvatarRef && !it.actorAvatarUrl) {
+      it.actorAvatarUrl = urlFor(it.actorDid, it.actorAvatarRef);
+    }
+    if (it.imageRef && !it.imageUrl) {
+      it.imageUrl = urlFor(it.actorDid, it.imageRef);
+    }
+  }
+}
+
 // ── Pinned post (steward-managed, moderation repo) ───────────────────────────
 
 /** Fetch the steward-pinned post(s) by AT-URI and map them to feed rows.
@@ -1615,6 +1668,36 @@ async function buildFeedPageUncached(
   };
 }
 
+/** Assemble one finished page: raw merge, pinned-post prepend, image URLs. */
+async function buildFinishedPage(
+  rawCursor: string | null,
+  filter: ActivityFeedFilter,
+  following: FollowingScope | null,
+): Promise<ActivityFeedPage> {
+  const cursor = decodeCursor(rawCursor);
+  const page = await buildFeedPageUncached(cursor, filter, following);
+  const withPins = await applyPinnedPost(page, cursor, filter, following);
+  await resolveFeedImageUrls(withPins.items);
+  return withPins;
+}
+
+/**
+ * Global feed pages in the shared Next data cache. `cachedAsync` alone is
+ * per-process, which on serverless means every cold or parallel instance
+ * rebuilds the whole page (a 6-stream indexer merge + the audio sweep) from
+ * scratch — exactly what a first-time visitor hits. `unstable_cache` persists
+ * the finished page across instances with stale-while-revalidate semantics, so
+ * one build per minute serves everyone. The cursor and filter are part of the
+ * cache key (extra args are keyed automatically). Only the GLOBAL scope may
+ * live here: a following feed is per-viewer, so it stays in-process only.
+ */
+const readCachedGlobalFeedPage = unstable_cache(
+  async (rawCursor: string | null, filter: ActivityFeedFilter) =>
+    buildFinishedPage(rawCursor, filter, null),
+  ["activity-feed-page-v2"],
+  { revalidate: FEED_CACHE_MS / 1000 },
+);
+
 /**
  * Build one page of the activity feed.
  *
@@ -1628,11 +1711,14 @@ export async function buildActivityFeed(
   filter: ActivityFeedFilter = "all",
   following?: FollowingScope | null,
 ): Promise<ActivityFeedPage> {
-  const cursor = decodeCursor(rawCursor);
   const scopeKey = following ? `follow:${following.viewerDid}` : "global";
   const key = `activity-feed:v2:${filter}:${scopeKey}:${rawCursor ?? "start"}`;
-  return cachedAsync(key, FEED_CACHE_MS, async () => {
-    const page = await buildFeedPageUncached(cursor, filter, following ?? null);
-    return applyPinnedPost(page, cursor, filter, following ?? null);
-  });
+  // The in-process memo stays on top of the data cache: it dedupes concurrent
+  // builds within an instance and skips re-reading (and re-parsing) the cached
+  // payload on every request for the busy first page.
+  return cachedAsync(key, FEED_CACHE_MS, () =>
+    following
+      ? buildFinishedPage(rawCursor ?? null, filter, following)
+      : readCachedGlobalFeedPage(rawCursor ?? null, filter),
+  );
 }
