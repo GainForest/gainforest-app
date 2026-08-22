@@ -29,6 +29,7 @@ vi.mock("@/app/_lib/species-identifications", () => ({
 
 import {
   assembleReport,
+  buildFlagViews,
   buildProblemViews,
   buildStandings,
   dedupeIdentifications,
@@ -86,6 +87,7 @@ function flag(overrides: Partial<ArenaFlagInput> & { parentUri: string }): Arena
     did: AGENT_A,
     kind: "invalid",
     duplicateUri: null,
+    reason: "potted plant",
     createdAt: null,
     flaggedOwnerDid: OWNER,
     roundId: 1,
@@ -532,5 +534,62 @@ describe("problemStatusFromProposals", () => {
         { did: AGENT_A, subjectCid: "cid-old", scientificName: "quercus ROBUR" },
       ]),
     ).toEqual({ state: "resolved", by: "owner", taxon: "Quercus robur" });
+  });
+});
+
+// ── Flag views (review sub-page) ────────────────────────────────────────────
+
+describe("buildFlagViews", () => {
+  it("derives confirmed / voided / pending outcomes", () => {
+    const mergedParent = occUri();
+    const liveTarget = occUri();
+    const ctx = reviewContext({
+      merges: [{ canonicalUri: mergedParent, duplicateUris: [occUri()] }],
+      knownObservationUris: new Set([mergedParent, liveTarget]),
+    });
+    const views = buildFlagViews(
+      [
+        flag({ parentUri: mergedParent, kind: "duplicate", duplicateUri: [...ctx.merges[0]!.duplicateUris][0]! }),
+        flag({ parentUri: "at://did:plc:x/app.gainforest.dwc.occurrence/deleted" }),
+        flag({ parentUri: liveTarget }),
+      ],
+      ctx,
+    );
+    const byOutcome = Object.fromEntries(views.map((v) => [v.outcome, v]));
+    expect(Object.keys(byOutcome).sort()).toEqual(["confirmed", "pending", "voided"]);
+    expect(byOutcome.pending!.subjectUri).toBe(liveTarget);
+  });
+
+  it("orders pending-first then most recent first, and passes reason through", () => {
+    const hiddenTarget = occUri();
+    const liveTarget = occUri(); // known, nothing covering it → pending
+    const ctx = reviewContext({
+      hiddenRecordUris: new Set([hiddenTarget]),
+      knownObservationUris: new Set([hiddenTarget, liveTarget]),
+    });
+    const views = buildFlagViews(
+      [
+        flag({ parentUri: hiddenTarget, createdAt: "2026-07-01T08:00:00.000Z", reason: "old confirm" }),
+        flag({ did: AGENT_B, parentUri: hiddenTarget, createdAt: "2026-07-02T08:00:00.000Z", reason: "newer confirm" }),
+        flag({ did: AGENT_C, parentUri: liveTarget, createdAt: "2026-07-01T09:00:00.000Z", reason: "still pending elsewhere" }),
+      ],
+      ctx,
+    );
+    // The pending one leads despite being oldest; confirms follow newest-first.
+    expect(views.map((v) => v.reason)).toEqual([
+      "still pending elsewhere",
+      "newer confirm",
+      "old confirm",
+    ]);
+    expect(views.every((v) => v.imageUrl === null)).toBe(true);
+  });
+
+  it("reports flags with no outcome data as pending when the target exists", () => {
+    const target = occUri();
+    const views = buildFlagViews(
+      [flag({ parentUri: target })],
+      reviewContext({ knownObservationUris: new Set([target]) }),
+    );
+    expect(views[0]!.outcome).toBe("pending");
   });
 });

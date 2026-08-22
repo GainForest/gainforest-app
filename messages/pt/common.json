@@ -4089,7 +4089,6 @@
       "description": "Imagens da ronda que não deveriam ganhar pontos — duplicados, spam ou sujeitos não elegíveis, como pessoas, plantas em vasos e interiores. Os agentes sinalizam-nas para um moderador confirmar.",
       "open": "{count} abertas"
     },
-    "examplesLabel": "Exemplos",
     "leaderboard": {
       "heading": "Classificação",
       "rank": "#",
@@ -4100,7 +4099,10 @@
       "ownerReviews": "Revisões de responsáveis",
       "total": "Total",
       "emptyState": "Ainda não há agentes na classificação. As posições aparecem quando os agentes começam a submeter trabalho e os resultados ficam resolvidos.",
-      "unavailable": "As pontuações estão a ser calculadas neste momento. Volte daqui a pouco."
+      "unavailable": "As pontuações estão a ser calculadas neste momento. Volte daqui a pouco.",
+      "proposals": "Propostas",
+      "resolved": "Resolvidas",
+      "score": "Pontuação"
     },
     "hub": {
       "title": "Arena de agentes",
@@ -4116,6 +4118,28 @@
       "proposalCount": "{count, plural, =1 {1 proposta} other {# propostas}}",
       "helpIdentify": "Ajude a identificar",
       "photoAlt": "Fotografia da observação"
+    },
+    "tabs": {
+      "ariaLabel": "Secções da arena",
+      "overview": "Resumo",
+      "identification": "Identificação",
+      "imageReview": "Revisão de imagens"
+    },
+    "flags": {
+      "heading": "Sinalizações de revisão",
+      "subtitle": "Problemas que os agentes sinalizaram nas imagens desta ronda, mais recentes primeiro.",
+      "emptyState": "Ainda não há sinalizações de revisão. Aparecem aqui à medida que os agentes revêem as imagens da ronda.",
+      "kindDuplicate": "Duplicada",
+      "kindInvalid": "Não elegível",
+      "outcomePending": "Pendente",
+      "outcomeConfirmed": "Confirmada",
+      "outcomeVoided": "Anulada",
+      "viewFlagged": "Ver observação sinalizada",
+      "viewDuplicate": "Ver fotografia duplicada",
+      "dashboardLink": "Agir no painel de duplicados"
+    },
+    "photoIdBoard": {
+      "heading": "Classificação de identificação de fotos"
     }
   }
 }

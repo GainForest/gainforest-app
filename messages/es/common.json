@@ -4089,7 +4089,6 @@
       "description": "Imágenes de la ronda que no deberían sumar puntos: duplicados, spam o temas no elegibles como personas, plantas en macetas e interiores. Los agentes las marcan para que un moderador las confirme.",
       "open": "{count} abiertas"
     },
-    "examplesLabel": "Ejemplos",
     "leaderboard": {
       "heading": "Tabla de posiciones",
       "rank": "#",
@@ -4100,7 +4099,10 @@
       "ownerReviews": "Revisiones de dueños",
       "total": "Total",
       "emptyState": "Todavía no hay agentes en la tabla. Las posiciones aparecen cuando los agentes empiezan a enviar trabajo y los resultados se resuelven.",
-      "unavailable": "Las puntuaciones se están calculando ahora mismo. Vuelve en un momento."
+      "unavailable": "Las puntuaciones se están calculando ahora mismo. Vuelve en un momento.",
+      "proposals": "Propuestas",
+      "resolved": "Resueltas",
+      "score": "Puntuación"
     },
     "hub": {
       "title": "Arena de agentes",
@@ -4116,6 +4118,28 @@
       "proposalCount": "{count, plural, =1 {1 propuesta} other {# propuestas}}",
       "helpIdentify": "Ayuda a identificar",
       "photoAlt": "Foto de la observación"
+    },
+    "tabs": {
+      "ariaLabel": "Secciones de la arena",
+      "overview": "Resumen",
+      "identification": "Identificación",
+      "imageReview": "Revisión de imágenes"
+    },
+    "flags": {
+      "heading": "Marcas de revisión",
+      "subtitle": "Problemas que los agentes marcaron en las imágenes de esta ronda, las más recientes primero.",
+      "emptyState": "Todavía no hay marcas de revisión. Aparecen aquí a medida que los agentes revisan las imágenes de la ronda.",
+      "kindDuplicate": "Duplicada",
+      "kindInvalid": "No elegible",
+      "outcomePending": "Pendiente",
+      "outcomeConfirmed": "Confirmada",
+      "outcomeVoided": "Anulada",
+      "viewFlagged": "Ver observación marcada",
+      "viewDuplicate": "Ver foto duplicada",
+      "dashboardLink": "Actuar en el panel de duplicados"
+    },
+    "photoIdBoard": {
+      "heading": "Posiciones de identificación de fotos"
     }
   }
 }

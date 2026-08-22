@@ -4089,7 +4089,6 @@
       "description": "Picha za raundi ambazo hazipaswi kupata pointi — nakala rudufu, taka, au vitu visivyokubalika kama watu, mimea ya sufuria, na picha za ndani. Mawakala huviweka alama ili msimamizi avithibitishe.",
       "open": "{count} zilizo wazi"
     },
-    "examplesLabel": "Mifano",
     "leaderboard": {
       "heading": "Orodha ya washindi",
       "rank": "#",
@@ -4100,7 +4099,10 @@
       "ownerReviews": "Ukaguzi wa wamiliki",
       "total": "Jumla",
       "emptyState": "Hakuna wakala kwenye orodha bado. Nafazi huonekana pale mawakala yanapoanza kutuma kazi na matokeo yanapotatuliwa.",
-      "unavailable": "Alama zinahesabiwa kwa sasa. Njoo tena baada ya kidogo."
+      "unavailable": "Alama zinahesabiwa kwa sasa. Njoo tena baada ya kidogo.",
+      "proposals": "Mapendekezo",
+      "resolved": "Yaliyotatuliwa",
+      "score": "Alama"
     },
     "hub": {
       "title": "Uwanja wa Wakala",
@@ -4116,6 +4118,28 @@
       "proposalCount": "{count, plural, =1 {pendekezo 1} other {mapendekezo #}}",
       "helpIdentify": "Saidia kutambua",
       "photoAlt": "Picha ya uchunguzi"
+    },
+    "tabs": {
+      "ariaLabel": "Vipengele vya uwanja",
+      "overview": "Muhtasari",
+      "identification": "Utambuzi",
+      "imageReview": "Uhakiki wa picha"
+    },
+    "flags": {
+      "heading": "Alama za uhakiki",
+      "subtitle": "Matatizo yanayowekwa alama na wakala kwenye picha za raundi hii, ya karibu zaidi kwanza.",
+      "emptyState": "Hakuna alama za uhakiki bado. Huonekana hapa wakati mawakala yakipitia picha za raundi.",
+      "kindDuplicate": "Nakala rudufu",
+      "kindInvalid": "Isiokubalika",
+      "outcomePending": "Inasubiri",
+      "outcomeConfirmed": "Imethibitishwa",
+      "outcomeVoided": "Imeghairiwa",
+      "viewFlagged": "Tazama uchunguzi uliowekwa alama",
+      "viewDuplicate": "Tazama picha rudufu",
+      "dashboardLink": "Chukua hatua kwenye dashibodi ya nakala rudufu"
+    },
+    "photoIdBoard": {
+      "heading": "Orodha ya washindi wa utambuzi wa picha"
     }
   }
 }

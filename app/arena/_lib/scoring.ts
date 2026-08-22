@@ -12,6 +12,7 @@ import {
   ARENA_OWNER_REVIEW_POINTS,
   type ArenaAgentStanding,
   type ArenaCategoryScore,
+  type ArenaFlagView,
   type ArenaProblemStatus,
   type ArenaProblemView,
   type ArenaProposalView,
@@ -71,6 +72,8 @@ export type ArenaFlagInput = {
   parentUri: string;
   /** For duplicate flags: the embedded duplicate observation. */
   duplicateUri: string | null;
+  /** The flagger's stated reason (the post text). */
+  reason: string | null;
   createdAt: string | null;
   flaggedOwnerDid: string | null;
   roundId: number | null;
@@ -507,12 +510,14 @@ export function assembleReport(
   queues: readonly ArenaQueueSummary[],
   standings: readonly ArenaAgentStanding[],
   problems: readonly ArenaProblemView[] = [],
+  flags: readonly ArenaFlagView[] = [],
 ): ArenaReport {
   return {
     generatedAt: new Date().toISOString(),
     queues: [...queues],
     standings: [...standings],
     problems: [...problems],
+    flags: [...flags],
   };
 }
 
@@ -665,4 +670,50 @@ export function problemStatusFromProposals(
         needed: ARENA_CONVERGENCE_MIN_IDENTIFIERS,
       }
     : { state: "resolved", by: resolution.status, taxon: resolution.taxon };
+}
+
+/**
+ * Display views for image-review flags, with each flag's current outcome:
+ * confirmed when merge/hide/exclusion covers it, voided when its target
+ * observation no longer exists, pending otherwise. Ordered pending-first,
+ * then most recent first. imageUrl stays null — the data layer resolves it
+ * for the capped list only.
+ */
+export function buildFlagViews(
+  flags: readonly ArenaFlagInput[],
+  ctx: ImageReviewContext,
+): ArenaFlagView[] {
+  const views = flags.map((flag) => {
+    const outcome: ArenaFlagView["outcome"] = isFlagConfirmed(flag, ctx)
+      ? "confirmed"
+      : ctx.knownObservationUris.has(flag.parentUri)
+        ? "pending"
+        : "voided";
+    const view: ArenaFlagView & { order: number } = {
+      uri: flag.uri,
+      did: flag.did,
+      kind: flag.kind,
+      subjectUri: flag.parentUri,
+      duplicateUri: flag.duplicateUri,
+      reason: flag.reason ?? null,
+      imageUrl: null,
+      outcome,
+      createdAt: flag.createdAt,
+      // Descending sort below: undated flags must sort LAST in their group,
+      // not jump the queue, so the missing-time fallback is -1 here (timeKey's
+      // MAX_SAFE_INTEGER fallback is for ascending earliness ordering).
+      order: flag.createdAt && Number.isFinite(Date.parse(flag.createdAt)) ? Date.parse(flag.createdAt) : -1,
+    };
+    return view;
+  });
+
+  return views
+    .sort((a, b) => {
+      const aPending = a.outcome === "pending" ? 0 : 1;
+      const bPending = b.outcome === "pending" ? 0 : 1;
+      if (aPending !== bPending) return aPending - bPending;
+      if (a.order !== b.order) return b.order - a.order;
+      return b.uri.localeCompare(a.uri);
+    })
+    .map(({ order: _order, ...view }) => view);
 }

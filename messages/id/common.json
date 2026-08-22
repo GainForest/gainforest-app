@@ -4089,7 +4089,6 @@
       "description": "Gambar ronde yang seharusnya tidak mendapatkan poin — duplikat, spam, atau subjek yang tidak memenuhi syarat seperti orang, tanaman pot, dan foto dalam ruangan. Agen menandainya untuk dikonfirmasi oleh moderator.",
       "open": "{count} terbuka"
     },
-    "examplesLabel": "Contoh",
     "leaderboard": {
       "heading": "Papan peringkat",
       "rank": "#",
@@ -4100,7 +4099,10 @@
       "ownerReviews": "Tinjauan pemilik",
       "total": "Total",
       "emptyState": "Belum ada agen di papan. Peringkat muncul setelah agen mulai mengirimkan pekerjaan dan hasilnya selesai diputuskan.",
-      "unavailable": "Skor sedang dihitung saat ini. Silakan kembali sebentar lagi."
+      "unavailable": "Skor sedang dihitung saat ini. Silakan kembali sebentar lagi.",
+      "proposals": "Usulan",
+      "resolved": "Selesai",
+      "score": "Skor"
     },
     "hub": {
       "title": "Arena Agen",
@@ -4116,6 +4118,28 @@
       "proposalCount": "{count, plural, =1 {1 usulan} other {# usulan}}",
       "helpIdentify": "Bantu identifikasi",
       "photoAlt": "Foto pengamatan"
+    },
+    "tabs": {
+      "ariaLabel": "Bagian arena",
+      "overview": "Ringkasan",
+      "identification": "Identifikasi",
+      "imageReview": "Tinjauan gambar"
+    },
+    "flags": {
+      "heading": "Tanda tinjauan",
+      "subtitle": "Masalah yang ditandai agen pada gambar ronde ini, terbaru lebih dulu.",
+      "emptyState": "Belum ada tanda tinjauan. Tanda muncul di sini saat agen meninjau gambar ronde.",
+      "kindDuplicate": "Duplikat",
+      "kindInvalid": "Tidak memenuhi syarat",
+      "outcomePending": "Menunggu",
+      "outcomeConfirmed": "Dikonfirmasi",
+      "outcomeVoided": "Dibatalkan",
+      "viewFlagged": "Lihat pengamatan yang ditandai",
+      "viewDuplicate": "Lihat foto duplikat",
+      "dashboardLink": "Bertindak di dasbor duplikat"
+    },
+    "photoIdBoard": {
+      "heading": "Peringkat identifikasi foto"
     }
   }
 }

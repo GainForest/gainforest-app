@@ -41,6 +41,7 @@ import {
 
 import {
   assembleReport,
+  buildFlagViews,
   buildProblemViews,
   buildStandings,
   dedupeIdentifications,
@@ -76,6 +77,8 @@ const PDS_CONCURRENCY = 8;
 const OCCURRENCE_LOOKUP_LIMIT = 60;
 /** How many collaboration problems the report list carries. */
 const PROBLEM_VIEW_CAP = 12;
+/** How many image-review flags the report list carries. */
+const FLAG_VIEW_CAP = 20;
 
 /** Internal walk record: scoring input plus the blob ref for image resolution. */
 type IndexedOccurrence = ArenaOccurrenceInput & { imageRef: string | null };
@@ -86,6 +89,7 @@ type TaggedPostNode = {
   uri?: string | null;
   did?: string | null;
   createdAt?: string | null;
+  text?: string | null;
   tags?: string[] | null;
   reply?: { root?: { uri?: string | null } | null; parent?: { uri?: string | null } | null } | null;
   embed?: unknown;
@@ -107,7 +111,7 @@ const TAGGED_POSTS_QUERY = `
     ) {
       edges {
         node {
-          uri did createdAt tags
+          uri did createdAt text tags
           reply { root { uri } parent { uri } }
           embed
         }
@@ -463,6 +467,7 @@ export async function loadArenaReport(signal?: AbortSignal): Promise<ArenaReport
         kind,
         parentUri,
         duplicateUri: kind === "duplicate" ? embeddedRecordUri(post.embed) : null,
+        reason: nonEmptyString(post.text),
         createdAt: post.createdAt?.trim() ?? null,
       };
     })
@@ -488,13 +493,24 @@ export async function loadArenaReport(signal?: AbortSignal): Promise<ArenaReport
 
   // ── Score ───────────────────────────────────────────────────────────────
   const knownObservationUris = new Set(occurrenceByUri.keys());
-  const photoId = scorePhotoIdCategory(problemAll, dedupeIdentifications(submissions));
-  const imageReview = scoreImageReviewCategory(enrichedFlags, {
+  const reviewContext = {
     merges: activeMerges,
     hiddenRecordUris: hiddenRecords,
     hiddenAccountDids: hiddenAccounts,
     excludedDidsByRound,
     knownObservationUris,
+  };
+  const photoId = scorePhotoIdCategory(problemAll, dedupeIdentifications(submissions));
+  const imageReview = scoreImageReviewCategory(enrichedFlags, reviewContext);
+
+  // ── Flag views (review sub-page) ────────────────────────────────────────
+  // Cap first (pending-first, most recent first), then resolve the flagged
+  // observation's photo for the capped list only.
+  const flagViews = buildFlagViews(enrichedFlags, reviewContext).slice(0, FLAG_VIEW_CAP);
+  await mapWithConcurrency(flagViews, PDS_CONCURRENCY, async (view) => {
+    const indexed = occurrenceByUri.get(view.subjectUri) as IndexedOccurrence | undefined;
+    if (!indexed?.imageRef) return;
+    view.imageUrl = await resolveBlobUrl(indexed.did, indexed.imageRef, signal).catch(() => null);
   });
 
   // ── Queues ──────────────────────────────────────────────────────────────
@@ -517,5 +533,5 @@ export async function loadArenaReport(signal?: AbortSignal): Promise<ArenaReport
     }),
   ];
 
-  return assembleReport(queues, buildStandings(photoId, imageReview), problems);
+  return assembleReport(queues, buildStandings(photoId, imageReview), problems, flagViews);
 }

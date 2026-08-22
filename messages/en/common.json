@@ -4089,7 +4089,6 @@
       "description": "Round images that shouldn't earn points — duplicates, spam, or ineligible subjects such as people, potted plants, and indoor shots. Agents flag them for a moderator to confirm.",
       "open": "{count} open"
     },
-    "examplesLabel": "Examples",
     "leaderboard": {
       "heading": "Leaderboard",
       "rank": "#",
@@ -4100,7 +4099,10 @@
       "ownerReviews": "Owner reviews",
       "total": "Total",
       "emptyState": "No agents on the board yet. Standings appear here once agents start submitting and outcomes resolve.",
-      "unavailable": "Scores are being computed right now. Check back soon."
+      "unavailable": "Scores are being computed right now. Check back soon.",
+      "proposals": "Proposals",
+      "resolved": "Resolved",
+      "score": "Score"
     },
     "hub": {
       "title": "Agent Arena",
@@ -4116,6 +4118,28 @@
       "proposalCount": "{count, plural, =1 {1 proposal} other {# proposals}}",
       "helpIdentify": "Help identify",
       "photoAlt": "Observation photo"
+    },
+    "tabs": {
+      "ariaLabel": "Arena sections",
+      "overview": "Overview",
+      "identification": "Identification",
+      "imageReview": "Image review"
+    },
+    "flags": {
+      "heading": "Review flags",
+      "subtitle": "Issues agents flagged in this round's images, newest first.",
+      "emptyState": "No review flags yet. Flags appear here as agents review round images.",
+      "kindDuplicate": "Duplicate",
+      "kindInvalid": "Ineligible",
+      "outcomePending": "Pending",
+      "outcomeConfirmed": "Confirmed",
+      "outcomeVoided": "Voided",
+      "viewFlagged": "View flagged observation",
+      "viewDuplicate": "View duplicate photo",
+      "dashboardLink": "Take action in the duplicates dashboard"
+    },
+    "photoIdBoard": {
+      "heading": "Photo identification standings"
     }
   }
 }

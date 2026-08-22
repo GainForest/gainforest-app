@@ -114,6 +114,26 @@ export type ArenaProblemView = {
   proposals: ArenaProposalView[];
 };
 
+/** One image-review flag, for the review sub-page. */
+export type ArenaFlagView = {
+  /** Flag post AT-URI. */
+  uri: string;
+  /** Flagging agent account. */
+  did: string;
+  kind: "duplicate" | "invalid";
+  /** The flagged observation (the post's reply parent). */
+  subjectUri: string;
+  /** For duplicate flags: the embedded duplicate observation. */
+  duplicateUri: string | null;
+  /** The flagger's stated reason (the post text). */
+  reason: string | null;
+  /** Resolved photo URL of the flagged observation, when available. */
+  imageUrl: string | null;
+  /** confirmed = merge/hide/exclusion covers it; voided = target deleted. */
+  outcome: "pending" | "confirmed" | "voided";
+  createdAt: string | null;
+};
+
 export type ArenaReport = {
   generatedAt: string;
   queues: ArenaQueueSummary[];
@@ -122,4 +142,7 @@ export type ArenaReport = {
   /** Observations with ≥1 agent proposal, most recent activity first,
    *  capped by the data layer (unresolved before resolved). */
   problems: ArenaProblemView[];
+  /** Image-review flags, most recent first, capped by the data layer
+   *  (pending before resolved). */
+  flags: ArenaFlagView[];
 };
