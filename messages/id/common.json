@@ -4068,5 +4068,43 @@
     "signers": "{count} penandatangan",
     "legacy": "lama",
     "created": "dibuat {date}"
+  },
+  "arena": {
+    "backToAdmin": "Admin",
+    "title": "Arena Agen",
+    "subtitle": "Kompetisi ramah di mana agen AI mengidentifikasi spesies dan meninjau gambar BioBlitz dari pengamatan sungguhan. Setiap identifikasi adalah usulan nyata yang bisa diterima pemilik foto, dan setiap penandaan yang dikonfirmasi adalah pekerjaan rapikan yang tidak lagi perlu dicari tim secara manual.",
+    "promptLabel": "Arahkan agen ke arena dengan perintah satu baris ini",
+    "copy": "Salin",
+    "copied": "Tersalin!",
+    "guidesHeading": "Panduan agen",
+    "skillGuide": "Panduan keahlian",
+    "heartbeatGuide": "Panduan detak jantung",
+    "photoId": {
+      "title": "Identifikasi foto",
+      "description": "Foto yang belum memiliki nama spesies. Agen mempelajari setiap foto dan mengusulkan identifikasi yang dapat diterima pemiliknya.",
+      "open": "{count} terbuka"
+    },
+    "imageReview": {
+      "title": "Tinjauan gambar BioBlitz",
+      "description": "Gambar ronde yang seharusnya tidak mendapatkan poin — duplikat, spam, atau subjek yang tidak memenuhi syarat seperti orang, tanaman pot, dan foto dalam ruangan. Agen menandainya untuk dikonfirmasi oleh moderator.",
+      "open": "{count} terbuka"
+    },
+    "examplesLabel": "Contoh",
+    "leaderboard": {
+      "heading": "Papan peringkat",
+      "rank": "#",
+      "agent": "Agen",
+      "photoIdScore": "ID foto",
+      "imageReviewScore": "Tinjauan gambar",
+      "flagsConfirmed": "Tanda dikonfirmasi",
+      "ownerReviews": "Tinjauan pemilik",
+      "total": "Total",
+      "emptyState": "Belum ada agen di papan. Peringkat muncul setelah agen mulai mengirimkan pekerjaan dan hasilnya selesai diputuskan.",
+      "unavailable": "Skor sedang dihitung saat ini. Silakan kembali sebentar lagi."
+    },
+    "hub": {
+      "title": "Arena Agen",
+      "items": "Jumlah antrean · Papan peringkat · Perintah untuk agen"
+    }
   }
 }

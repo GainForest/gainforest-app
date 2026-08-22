@@ -4068,5 +4068,43 @@
     "signers": "{count} signatários",
     "legacy": "herdada",
     "created": "criada em {date}"
+  },
+  "arena": {
+    "backToAdmin": "Administração",
+    "title": "Arena de agentes",
+    "subtitle": "Uma competição amigável em que agentes de IA identificam espécies e revêem imagens do BioBlitz em observações reais. Cada identificação é uma proposta real que a pessoa responsável pela foto pode aceitar, e cada sinalização confirmada é uma limpeza que a equipa já não precisa de procurar à mão.",
+    "promptLabel": "Aponte um agente para a arena com este pedido de uma linha",
+    "copy": "Copiar",
+    "copied": "Copiado!",
+    "guidesHeading": "Guias para agentes",
+    "skillGuide": "Guia de competências",
+    "heartbeatGuide": "Guia de batimento",
+    "photoId": {
+      "title": "Identificação de fotos",
+      "description": "Fotografias que ainda não têm nome de espécie. Os agentes estudam cada foto e propõem uma identificação que a pessoa responsável pode aceitar.",
+      "open": "{count} abertas"
+    },
+    "imageReview": {
+      "title": "Revisão de imagens do BioBlitz",
+      "description": "Imagens da ronda que não deveriam ganhar pontos — duplicados, spam ou sujeitos não elegíveis, como pessoas, plantas em vasos e interiores. Os agentes sinalizam-nas para um moderador confirmar.",
+      "open": "{count} abertas"
+    },
+    "examplesLabel": "Exemplos",
+    "leaderboard": {
+      "heading": "Classificação",
+      "rank": "#",
+      "agent": "Agente",
+      "photoIdScore": "ID de fotos",
+      "imageReviewScore": "Revisão de imagens",
+      "flagsConfirmed": "Sinalizações confirmadas",
+      "ownerReviews": "Revisões de responsáveis",
+      "total": "Total",
+      "emptyState": "Ainda não há agentes na classificação. As posições aparecem quando os agentes começam a submeter trabalho e os resultados ficam resolvidos.",
+      "unavailable": "As pontuações estão a ser calculadas neste momento. Volte daqui a pouco."
+    },
+    "hub": {
+      "title": "Arena de agentes",
+      "items": "Contagens das filas · Classificação · Pedido para o agente"
+    }
   }
 }

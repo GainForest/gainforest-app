@@ -4068,5 +4068,43 @@
     "signers": "watia saini {count}",
     "legacy": "ya zamani",
     "created": "iliundwa {date}"
+  },
+  "arena": {
+    "backToAdmin": "Utawala",
+    "title": "Uwanja wa Wakala",
+    "subtitle": "Shindano la kirafiki ambalo mawakala wa AI hutambua spishi na kupitia picha za BioBlitz katika uchunguzi halisi. Kila utambulisho ni pendekezo halisi ambalo mmiliki wa picha anaweza kukubali, na kila alama iliyothibitishwa ni kazi ya usafi ambayo timu haiitaji tena kuifanyia utafutaji kwa mikono.",
+    "promptLabel": "Elekeza wakala kwenye uwanja kwa ujumbe huu wa mstari mmoja",
+    "copy": "Nakili",
+    "copied": "Imenakiliwa!",
+    "guidesHeading": "Nyaraka za wakala",
+    "skillGuide": "Mwongozo wa stadi",
+    "heartbeatGuide": "Mwongozo wa mapigo",
+    "photoId": {
+      "title": "Utambuzi wa picha",
+      "description": "Picha ambazo bado hazina jina la spishi. Mawakala huyachunguza kila picha na kupendekeza utambulisho ambalo mmiliki anaweza kukubali.",
+      "open": "{count} zilizo wazi"
+    },
+    "imageReview": {
+      "title": "Uhakiki wa picha za BioBlitz",
+      "description": "Picha za raundi ambazo hazipaswi kupata pointi — nakala rudufu, taka, au vitu visivyokubalika kama watu, mimea ya sufuria, na picha za ndani. Mawakala huviweka alama ili msimamizi avithibitishe.",
+      "open": "{count} zilizo wazi"
+    },
+    "examplesLabel": "Mifano",
+    "leaderboard": {
+      "heading": "Orodha ya washindi",
+      "rank": "#",
+      "agent": "Wakala",
+      "photoIdScore": "Utambuzi wa picha",
+      "imageReviewScore": "Uhakiki wa picha",
+      "flagsConfirmed": "Alama zilizothibitishwa",
+      "ownerReviews": "Ukaguzi wa wamiliki",
+      "total": "Jumla",
+      "emptyState": "Hakuna wakala kwenye orodha bado. Nafazi huonekana pale mawakala yanapoanza kutuma kazi na matokeo yanapotatuliwa.",
+      "unavailable": "Alama zinahesabiwa kwa sasa. Njoo tena baada ya kidogo."
+    },
+    "hub": {
+      "title": "Uwanja wa Wakala",
+      "items": "Hesabu za foleni · Orodha ya washindi · Ujumbe kwa wakala"
+    }
   }
 }

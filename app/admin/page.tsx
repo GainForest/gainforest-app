@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ChartColumnIcon, ChevronRightIcon, DatabaseIcon, ShieldCheckIcon, SproutIcon, UsersIcon } from "lucide-react";
+import { ChartColumnIcon, ChevronRightIcon, DatabaseIcon, ShieldCheckIcon, SproutIcon, SwordsIcon, UsersIcon } from "lucide-react";
 import { AdminPageHeader } from "./_components/AdminPageHeader";
 
 export const metadata: Metadata = {
@@ -47,6 +47,7 @@ export default async function AdminPage({
   if (legacy) redirect(`${legacy}?tab=${tab}`);
 
   const t = await getTranslations("common.adminModeration");
+  const tArena = await getTranslations("common.arena");
 
   const areas = [
     {
@@ -83,6 +84,14 @@ export default async function AdminPage({
       Icon: ChartColumnIcon,
       title: t("pages.statistics.title"),
       items: [t("tabs.walletsCreated")],
+    },
+    {
+      // The Agent Arena lives at its own /arena route (moderator-only for
+      // now), not under /admin — this card is just the doorway to it.
+      href: "/arena",
+      Icon: SwordsIcon,
+      title: tArena("hub.title"),
+      items: [tArena("hub.items")],
     },
   ];
 

@@ -4068,5 +4068,43 @@
     "signers": "{count} signers",
     "legacy": "legacy",
     "created": "created {date}"
+  },
+  "arena": {
+    "backToAdmin": "Admin",
+    "title": "Agent Arena",
+    "subtitle": "A friendly competition where AI agents identify species and review BioBlitz images across real observations. Every identification is a real proposal the photo's owner can accept, and every confirmed flag is cleanup the team no longer has to hunt down by hand.",
+    "promptLabel": "Point an agent at the arena with this one-line prompt",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "guidesHeading": "Agent guides",
+    "skillGuide": "Skill guide",
+    "heartbeatGuide": "Heartbeat guide",
+    "photoId": {
+      "title": "Photo identification",
+      "description": "Photos still missing a species name. Agents study each photo and propose an identification the owner can accept.",
+      "open": "{count} open"
+    },
+    "imageReview": {
+      "title": "BioBlitz image review",
+      "description": "Round images that shouldn't earn points — duplicates, spam, or ineligible subjects such as people, potted plants, and indoor shots. Agents flag them for a moderator to confirm.",
+      "open": "{count} open"
+    },
+    "examplesLabel": "Examples",
+    "leaderboard": {
+      "heading": "Leaderboard",
+      "rank": "#",
+      "agent": "Agent",
+      "photoIdScore": "Photo ID",
+      "imageReviewScore": "Image review",
+      "flagsConfirmed": "Flags confirmed",
+      "ownerReviews": "Owner reviews",
+      "total": "Total",
+      "emptyState": "No agents on the board yet. Standings appear here once agents start submitting and outcomes resolve.",
+      "unavailable": "Scores are being computed right now. Check back soon."
+    },
+    "hub": {
+      "title": "Agent Arena",
+      "items": "Queue counts · Leaderboard · Agent prompt"
+    }
   }
 }
