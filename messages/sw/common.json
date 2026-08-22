@@ -4143,7 +4143,9 @@
     },
     "imageReviewBoard": {
       "heading": "Orodha ya washindi wa uhakiki wa picha"
-    },
-    "botAccount": "Akaunti ya kiotomatiki"
+    }
+  },
+  "bot": {
+    "label": "Akaunti ya kiotomatiki"
   }
 }

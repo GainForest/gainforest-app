@@ -25,6 +25,7 @@ import { formatCountry } from "../../_lib/format";
 import { countryCodeFromLocationLabel, getCountry } from "../../_lib/countries";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { TrustedByBadges } from "@/app/_components/TrustedByBadges";
+import { BotBadge } from "@/app/_components/BotBadge";
 import { AccountAwards } from "./AccountAwards";
 import { ExpandableBio } from "./ExpandableBio";
 import { FollowButton, FollowProvider, FollowStats } from "@/app/_components/FollowButton";
@@ -268,6 +269,11 @@ export function AccountHero({
           <div className="min-w-0 max-w-2xl md:flex-1 md:pb-1">
             <h1 className="font-instrument text-3xl font-light italic leading-[1.1] tracking-[-0.02em] text-foreground md:text-4xl">
               {account.displayName}
+              {account.isBot ? (
+                <span className="ms-2 inline-flex align-middle [&_svg]:size-5">
+                  <BotBadge />
+                </span>
+              ) : null}
             </h1>
             <ExpandableBio text={account.description ?? ""} className="mt-1.5" />
             <FollowStats targetDid={account.did} identifier={account.urlIdentifier} className="mt-2.5" />

@@ -20,6 +20,7 @@ import { PUBLIC_EXPLORE_CACHE_TTL_MS, publicExploreCache } from "./public-explor
 import { INDEXER_URL } from "./urls";
 import { countryCodeFromCertifiedLocation, fetchCertifiedLocationSummary, type CertifiedLocationLike } from "./country-location";
 import { blobUrl, resolveBlobUrl, resolvePdsHost, normaliseRef } from "./pds";
+import { fetchBotSelfLabeledDids } from "./bot-self-label";
 import { fetchEndorserRecords } from "./endorsers";
 import { asNumber, formatNumber, formatDate, formatDateTime, formatCountry } from "./format";
 import { workScopeTermToKey } from "./work-scope-cel";
@@ -7828,6 +7829,8 @@ export type AccountSummary = {
   certOrgType: string | null;
   bumicertCount: number;
   observationCount: number;
+  /** The account self-labels as a bot (app.bsky.actor.profile labels). */
+  isBot: boolean;
 };
 
 type AccountSummaryNode = {
@@ -7897,7 +7900,7 @@ export async function fetchAccountSummary(
   did: string,
   signal?: AbortSignal,
 ): Promise<AccountSummary> {
-  const [data, plc, directCertOrg] = await Promise.all([
+  const [data, plc, directCertOrg, botDids] = await Promise.all([
     indexerQuery<AccountSummaryNode>(
       ACCOUNT_SUMMARY_QUERY,
       {
@@ -7909,6 +7912,8 @@ export async function fetchAccountSummary(
     ),
     fetchPlcIdentity(did, signal),
     fetchDirectCertifiedOrgRecord(did, signal).catch(() => null),
+    // Self-reported bot label lives on the account's Bluesky profile record.
+    fetchBotSelfLabeledDids([did]).catch(() => new Set<string>()),
   ]);
 
   const certOrg = data?.certOrg ?? null;
@@ -7956,5 +7961,6 @@ export async function fetchAccountSummary(
     certOrgType: certType,
     bumicertCount: data?.bumi?.totalCount ?? 0,
     observationCount: data?.occ?.totalCount ?? 0,
+    isBot: botDids.has(did),
   };
 }

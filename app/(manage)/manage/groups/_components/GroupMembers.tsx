@@ -485,6 +485,7 @@ export function GroupMembers({
             handle: identity.handle ?? null,
             displayName: identity.displayName ?? null,
             avatar: identity.avatarUrl ?? null,
+            isBot: false,
           },
         }));
         setMembers((current) =>

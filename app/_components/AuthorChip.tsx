@@ -9,6 +9,7 @@ import {
 } from "../_lib/did-profile";
 import { formatDate } from "../_lib/format";
 import { resolveBlobUrl } from "../_lib/pds";
+import { BotBadge } from "./BotBadge";
 import { useAccountDrawer } from "./AccountDrawer";
 import { AccountHoverCard } from "./AccountHoverCard";
 
@@ -81,7 +82,14 @@ export function AuthorChip({
       >
         <Avatar did={did} handle={handle} avatar={avatar} avatarRef={avatarRefOverride ?? null} className={av} />
         <div className="min-w-0 flex-1 leading-tight">
-          <div className={`truncate font-medium text-foreground ${primaryCls}`}>{primary}</div>
+          <div className={`truncate font-medium text-foreground ${primaryCls}`}>
+            {primary}
+            {profile?.isBot ? (
+              <span className="ms-1 inline-flex align-[-2px]">
+                <BotBadge />
+              </span>
+            ) : null}
+          </div>
           {date ? (
             <div className="truncate text-[10.5px] text-foreground/50">
               Shared {date}
@@ -134,6 +142,7 @@ export function AuthorInline({
       <span className="inline-flex min-w-0 items-center gap-1.5 align-middle" title={label}>
         {showAvatar ? <Avatar did={did} handle={handle} avatar={avatar} avatarRef={avatarRefOverride ?? null} className="h-4 w-4 text-[8px]" /> : null}
         <span className="truncate text-foreground/80">{label}</span>
+        {profile?.isBot ? <BotBadge /> : null}
       </span>
     </AccountHoverCard>
   );

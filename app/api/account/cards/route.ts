@@ -1,5 +1,6 @@
 import { getCertifiedProfileCard } from "@/app/account/_lib/account-route";
 import { fetchIndexedCertifiedProfileCards, type IndexedCertifiedProfileCard } from "@/app/_lib/indexer";
+import { fetchBotSelfLabeledDids } from "@/app/_lib/bot-self-label";
 
 export const runtime = "nodejs";
 
@@ -10,6 +11,8 @@ type AccountCardProfile = {
   handle: string | null;
   displayName: string | null;
   avatar: string | null;
+  /** The account self-labels as a bot (app.bsky.actor.profile labels). */
+  isBot: boolean;
 };
 
 type DirectAccountCard = {
@@ -75,6 +78,10 @@ export async function GET(request: Request) {
   );
   const directByDid = new Map(directEntries);
 
+  // Bot self-labels come straight from each account's Bluesky profile record;
+  // fail-open, so an unreachable PDS just means "not labeled".
+  const botDids = await fetchBotSelfLabeledDids(dids).catch(() => new Set<string>());
+
   const profiles = dids.map((did): AccountCardProfile => {
     const indexed = indexedByDid.get(did);
     const direct = directByDid.get(did);
@@ -83,6 +90,7 @@ export async function GET(request: Request) {
       handle: nonEmpty(direct?.handle),
       displayName: nonEmpty(indexed?.displayName) ?? nonEmpty(direct?.displayName),
       avatar: nonEmpty(indexed?.avatarUrl) ?? nonEmpty(direct?.avatarUrl),
+      isBot: botDids.has(did),
     };
   });
 

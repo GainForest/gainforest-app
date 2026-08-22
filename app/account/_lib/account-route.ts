@@ -41,6 +41,8 @@ export type AccountRouteData = {
   /** Social / website URLs stored on the org record's `urls` list. */
   socialLinks: string[];
   kind: AccountKind;
+  /** The account self-labels as a bot (app.bsky.actor.profile labels). */
+  isBot: boolean;
   summary: AccountSummary;
   detail: RecordDetail | null;
 };
@@ -265,6 +267,7 @@ export const getAccountRouteData = cache(async (
     certOrgType: null,
     bumicertCount: 0,
     observationCount: 0,
+    isBot: false,
   };
 
   const baseSummary = summaryResult ?? fallbackSummary;
@@ -310,6 +313,7 @@ export const getAccountRouteData = cache(async (
     orgType: directCertifiedOrganization?.orgType ?? summary.certOrgType ?? null,
     socialLinks: directCertifiedOrganization?.socialLinks ?? [],
     kind,
+    isBot: summary.isBot,
     summary,
     detail,
   };

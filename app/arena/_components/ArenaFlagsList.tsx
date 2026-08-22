@@ -6,7 +6,7 @@ import { formatDate } from "@/app/_lib/format";
 import { isPdsBlobUrl } from "@/app/_lib/pds";
 import type { ArenaFlagView } from "../_lib/types";
 import type { ArenaAgentProfile } from "./ArenaLeaderboard";
-import { BotBadge } from "./BotBadge";
+import { BotBadge } from "@/app/_components/BotBadge";
 
 /** `at://did/collection/rkey` → `/observations/[did]/[rkey]`, or null. */
 function observationPath(uri: string): string | null {

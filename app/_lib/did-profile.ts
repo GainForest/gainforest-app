@@ -18,12 +18,14 @@ export type DidProfile = {
   handle: string | null;
   displayName: string | null;
   avatar: string | null;
+  /** The account self-labels as a bot (app.bsky.actor.profile labels). */
+  isBot: boolean;
 };
 
 const BATCH_WINDOW_MS = 60;
 const BATCH_SIZE = 25;
 
-type AccountCardProfile = { did?: string; handle?: string | null; displayName?: string | null; avatar?: string | null };
+type AccountCardProfile = { did?: string; handle?: string | null; displayName?: string | null; avatar?: string | null; isBot?: boolean };
 
 const cache = new Map<string, DidProfile>();
 const inflight = new Map<string, Promise<DidProfile>>();
@@ -32,7 +34,7 @@ let queue: string[] = [];
 let scheduled = false;
 
 function fallback(did: string): DidProfile {
-  return { did, handle: null, displayName: null, avatar: null };
+  return { did, handle: null, displayName: null, avatar: null, isBot: false };
 }
 
 function nonEmpty(value: string | null | undefined): string | null {
@@ -80,6 +82,7 @@ async function flush() {
         handle: nonEmpty(certified?.handle),
         displayName: nonEmpty(certified?.displayName),
         avatar: nonEmpty(certified?.avatar),
+        isBot: certified?.isBot === true,
       });
     }
   }

@@ -4143,7 +4143,9 @@
     },
     "imageReviewBoard": {
       "heading": "Posiciones de revisión de imágenes"
-    },
-    "botAccount": "Cuenta automatizada"
+    }
+  },
+  "bot": {
+    "label": "Cuenta automatizada"
   }
 }

@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import type { ArenaAgentStanding, ArenaCategory } from "../_lib/types";
-import { BotBadge } from "./BotBadge";
+import { BotBadge } from "@/app/_components/BotBadge";
 
 /** Display info resolved for one standing's DID (null when unknown). */
 export type ArenaAgentProfile = {

@@ -4,8 +4,7 @@ import { BookOpenTextIcon, CameraIcon, HeartPulseIcon, ScanSearchIcon } from "lu
 import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
 import { CopyPromptButton } from "./_components/CopyPromptButton";
 import { ArenaCategoryCard } from "./_components/ArenaCategoryCard";
-import { ArenaLeaderboard, type ArenaAgentProfile } from "./_components/ArenaLeaderboard";
-import { loadReport, resolveAgentNames } from "./_lib/load-report";
+import { loadReport } from "./_lib/load-report";
 
 export const metadata: Metadata = {
   title: "Agent Arena · Admin",
@@ -23,8 +22,8 @@ const AGENT_PROMPT =
 
 /**
  * Arena overview (moderator-only; the gate lives in the layout): what the
- * arena is, the copyable agent prompt, the two category summaries linking to
- * their sub-pages, and the full leaderboard.
+ * arena is, the copyable agent prompt, and the two category summaries linking
+ * to their sub-pages. Standings live on each category tab, not here.
  */
 export default async function ArenaPage() {
   // Defense-in-depth parity with app/admin pages — the layout already gates.
@@ -33,7 +32,6 @@ export default async function ArenaPage() {
 
   const t = await getTranslations("common.arena");
   const report = await loadReport();
-  const profiles: Map<string, ArenaAgentProfile> = report ? await resolveAgentNames(report) : new Map();
 
   const openCount = (category: "photo-id" | "image-review") =>
     report?.queues.find((queue) => queue.category === category)?.openCount ?? 0;
@@ -93,23 +91,6 @@ export default async function ArenaPage() {
           href="/arena/image-review"
         />
       </div>
-
-      {/* Leaderboard. While the scoring lib is still being wired up, keep the
-          page shell useful with a gentle "in progress" note instead of failing. */}
-      <section aria-labelledby="arena-leaderboard-heading">
-        <div className="mb-3">
-          <h2 id="arena-leaderboard-heading" className="text-base font-semibold text-foreground">
-            {t("leaderboard.heading")}
-          </h2>
-        </div>
-        {report ? (
-          <ArenaLeaderboard standings={report.standings} profiles={profiles} />
-        ) : (
-          <div className="rounded-2xl bg-muted/40 p-8 text-center text-sm text-muted-foreground">
-            {t("leaderboard.unavailable")}
-          </div>
-        )}
-      </section>
     </>
   );
 }

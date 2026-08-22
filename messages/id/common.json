@@ -4143,7 +4143,9 @@
     },
     "imageReviewBoard": {
       "heading": "Peringkat tinjauan gambar"
-    },
-    "botAccount": "Akun otomatis"
+    }
+  },
+  "bot": {
+    "label": "Akun otomatis"
   }
 }

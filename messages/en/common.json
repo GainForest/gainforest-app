@@ -4143,7 +4143,9 @@
     },
     "imageReviewBoard": {
       "heading": "Image review standings"
-    },
-    "botAccount": "Automated account"
+    }
+  },
+  "bot": {
+    "label": "Automated account"
   }
 }

@@ -5,7 +5,7 @@ import { ArrowRightIcon, LeafIcon, UsersRoundIcon } from "lucide-react";
 import { isPdsBlobUrl } from "@/app/_lib/pds";
 import type { ArenaProblemView } from "../_lib/types";
 import type { ArenaAgentProfile } from "./ArenaLeaderboard";
-import { BotBadge } from "./BotBadge";
+import { BotBadge } from "@/app/_components/BotBadge";
 
 /**
  * One active-problem card: photo thumb, collaboration status, and the leading

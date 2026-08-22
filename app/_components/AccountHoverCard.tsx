@@ -18,6 +18,7 @@ import { accountHref } from "../_lib/urls";
 import { formatCompact } from "../_lib/format";
 import { ResolvedAvatar } from "../feed/ResolvedAvatar";
 import { FollowButton, FollowProvider, FollowStats } from "./FollowButton";
+import { BotBadge } from "./BotBadge";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { cn } from "@/lib/utils";
 
@@ -145,6 +146,7 @@ function AccountCardBody({
             <span className="truncate text-[15px] font-semibold leading-tight text-foreground group-hover/name:underline">
               {displayName}
             </span>
+            {summary?.isBot ? <BotBadge /> : null}
             {verified ? (
               <BadgeCheckIcon className="size-3.5 shrink-0 text-primary" aria-label={t("verified")} />
             ) : null}
