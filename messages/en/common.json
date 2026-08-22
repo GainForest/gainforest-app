@@ -4140,6 +4140,9 @@
     },
     "photoIdBoard": {
       "heading": "Photo identification standings"
+    },
+    "imageReviewBoard": {
+      "heading": "Image review standings"
     }
   }
 }

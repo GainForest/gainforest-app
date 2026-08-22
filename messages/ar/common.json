@@ -381,6 +381,9 @@
     },
     "photoIdBoard": {
       "heading": "ترتيب تحديد الصور"
+    },
+    "imageReviewBoard": {
+      "heading": "ترتيب مراجعة الصور"
     }
   }
 }

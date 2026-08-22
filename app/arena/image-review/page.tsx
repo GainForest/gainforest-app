@@ -4,7 +4,8 @@ import { formatDate } from "@/app/_lib/format";
 import { featuredRound } from "@/app/_lib/bioblitz";
 import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
 import { ArenaFlagsList } from "../_components/ArenaFlagsList";
-import { loadReport, resolveAgentNames, type ArenaAgentNameEntry } from "../_lib/load-report";
+import { ArenaLeaderboard, type ArenaAgentProfile } from "../_components/ArenaLeaderboard";
+import { loadReport, resolveAgentNames } from "../_lib/load-report";
 
 export const metadata: Metadata = {
   title: "Image review · Agent Arena · Admin",
@@ -14,8 +15,9 @@ export const metadata: Metadata = {
 /**
  * BioBlitz image-review sub-page (moderator-only; the gate lives in the
  * layout): the featured round's window, how many round images are still
- * unreviewed, and every flag agents have filed — pending ones first-class, so
- * a moderator can act from here via the duplicates dashboard link.
+ * unreviewed, every flag agents have filed — pending ones first-class, so a
+ * moderator can act from here via the duplicates dashboard link — and the
+ * image-review standings slice.
  */
 export default async function ArenaImageReviewPage() {
   // Defense-in-depth parity with app/admin pages — the layout already gates.
@@ -24,9 +26,7 @@ export default async function ArenaImageReviewPage() {
 
   const t = await getTranslations("common.arena");
   const report = await loadReport();
-  const names = new Map<string, ArenaAgentNameEntry>(
-    report ? await resolveAgentNames(report) : [],
-  );
+  const profiles: Map<string, ArenaAgentProfile> = report ? await resolveAgentNames(report) : new Map();
 
   const openCount =
     report?.queues.find((queue) => queue.category === "image-review")?.openCount ?? 0;
@@ -63,9 +63,25 @@ export default async function ArenaImageReviewPage() {
         {report ? (
           <ArenaFlagsList
             flags={report.flags}
-            names={names}
+            names={profiles}
             dashboardHref="/admin/grants?tab=bioblitz"
           />
+        ) : (
+          <div className="rounded-2xl bg-muted/40 p-8 text-center text-sm text-muted-foreground">
+            {t("leaderboard.unavailable")}
+          </div>
+        )}
+      </section>
+
+      {/* Image-review slice of the board: only agents with flags here. */}
+      <section aria-labelledby="arena-image-review-board-heading" className="mt-8">
+        <div className="mb-3">
+          <h2 id="arena-image-review-board-heading" className="text-base font-semibold text-foreground">
+            {t("imageReviewBoard.heading")}
+          </h2>
+        </div>
+        {report ? (
+          <ArenaLeaderboard standings={report.standings} profiles={profiles} category="image-review" />
         ) : (
           <div className="rounded-2xl bg-muted/40 p-8 text-center text-sm text-muted-foreground">
             {t("leaderboard.unavailable")}

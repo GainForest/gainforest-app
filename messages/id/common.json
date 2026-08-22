@@ -4140,6 +4140,9 @@
     },
     "photoIdBoard": {
       "heading": "Peringkat identifikasi foto"
+    },
+    "imageReviewBoard": {
+      "heading": "Peringkat tinjauan gambar"
     }
   }
 }

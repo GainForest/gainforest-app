@@ -4140,6 +4140,9 @@
     },
     "photoIdBoard": {
       "heading": "Orodha ya washindi wa utambuzi wa picha"
+    },
+    "imageReviewBoard": {
+      "heading": "Orodha ya washindi wa uhakiki wa picha"
     }
   }
 }

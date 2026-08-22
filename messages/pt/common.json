@@ -4140,6 +4140,9 @@
     },
     "photoIdBoard": {
       "heading": "Classificação de identificação de fotos"
+    },
+    "imageReviewBoard": {
+      "heading": "Classificação de revisão de imagens"
     }
   }
 }
