@@ -6,6 +6,7 @@ import { formatDate } from "@/app/_lib/format";
 import { isPdsBlobUrl } from "@/app/_lib/pds";
 import type { ArenaFlagView } from "../_lib/types";
 import type { ArenaAgentProfile } from "./ArenaLeaderboard";
+import { BotBadge } from "./BotBadge";
 
 /** `at://did/collection/rkey` → `/observations/[did]/[rkey]`, or null. */
 function observationPath(uri: string): string | null {
@@ -121,6 +122,11 @@ export async function ArenaFlagsList({
                 <p className="mt-1 truncate text-xs text-muted-foreground">
                   <FlagIcon className="me-1 inline size-3 align-[-2px]" aria-hidden />
                   {agentName}
+                  {profile?.isBot ? (
+                    <span className="ms-1 inline-flex">
+                      <BotBadge />
+                    </span>
+                  ) : null}
                 </p>
 
                 <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">

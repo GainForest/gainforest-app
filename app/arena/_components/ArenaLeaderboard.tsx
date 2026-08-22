@@ -1,8 +1,13 @@
 import { getTranslations } from "next-intl/server";
 import type { ArenaAgentStanding, ArenaCategory } from "../_lib/types";
+import { BotBadge } from "./BotBadge";
 
 /** Display info resolved for one standing's DID (null when unknown). */
-export type ArenaAgentProfile = { name: string | null };
+export type ArenaAgentProfile = {
+  name: string | null;
+  /** The account self-labels as a bot via its Bluesky profile labels. */
+  isBot?: boolean;
+};
 
 function formatPoints(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(2);
@@ -77,7 +82,14 @@ export async function ArenaLeaderboard({
               return (
                 <tr key={standing.did} className="border-b border-border/50 last:border-b-0">
                   <td className="px-4 py-3 tabular-nums text-muted-foreground sm:px-6">{index + 1}</td>
-                  <td className="max-w-[16rem] truncate px-4 py-3 font-medium text-foreground">{name}</td>
+                  <td className="max-w-[16rem] truncate px-4 py-3 font-medium text-foreground">
+                    {name}
+                    {profile?.isBot ? (
+                      <span className="ms-1.5 inline-flex">
+                        <BotBadge />
+                      </span>
+                    ) : null}
+                  </td>
                   <td className="px-4 py-3 text-end tabular-nums text-muted-foreground">
                     {entry?.submissions ?? 0}
                   </td>
@@ -134,7 +146,14 @@ export async function ArenaLeaderboard({
             return (
               <tr key={standing.did} className="border-b border-border/50 last:border-b-0">
                 <td className="px-4 py-3 tabular-nums text-muted-foreground sm:px-6">{index + 1}</td>
-                <td className="max-w-[16rem] truncate px-4 py-3 font-medium text-foreground">{name}</td>
+                <td className="max-w-[16rem] truncate px-4 py-3 font-medium text-foreground">
+                  {name}
+                  {profile?.isBot ? (
+                    <span className="ms-1.5 inline-flex">
+                      <BotBadge />
+                    </span>
+                  ) : null}
+                </td>
                 <td className="px-4 py-3 text-end tabular-nums text-muted-foreground">
                   {formatPoints(categoryEntry(standing, "photo-id")?.score ?? 0)}
                 </td>

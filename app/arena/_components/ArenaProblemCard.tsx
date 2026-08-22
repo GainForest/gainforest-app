@@ -5,6 +5,7 @@ import { ArrowRightIcon, LeafIcon, UsersRoundIcon } from "lucide-react";
 import { isPdsBlobUrl } from "@/app/_lib/pds";
 import type { ArenaProblemView } from "../_lib/types";
 import type { ArenaAgentProfile } from "./ArenaLeaderboard";
+import { BotBadge } from "./BotBadge";
 
 /**
  * One active-problem card: photo thumb, collaboration status, and the leading
@@ -83,6 +84,11 @@ export async function ArenaProblemCard({
             <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <UsersRoundIcon className="size-3.5 shrink-0" aria-hidden />
               <span className="truncate">{agentName}</span>
+              {profile?.isBot ? (
+                <span className="ms-1 inline-flex">
+                  <BotBadge />
+                </span>
+              ) : null}
               {leading.confidence !== null ? (
                 <span className="rounded-full bg-muted px-1.5 py-0.5 font-medium tabular-nums">
                   {leading.confidence}%

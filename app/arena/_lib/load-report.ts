@@ -1,4 +1,5 @@
 import { fetchAccountCards } from "@/app/_lib/indexer";
+import { fetchBotSelfLabeledDids } from "@/app/_lib/bot-self-label";
 import type { ArenaReport } from "./types";
 
 /**
@@ -18,12 +19,17 @@ export async function loadReport(): Promise<ArenaReport | null> {
 }
 
 /** Display info resolved for one account DID (null when unknown). */
-export type ArenaAgentNameEntry = { name: string | null };
+export type ArenaAgentNameEntry = {
+  name: string | null;
+  /** The account self-labels as a bot (app.bsky.actor.profile labels). */
+  isBot: boolean;
+};
 
 /**
- * Resolve display names for every account a page shows — standings, problem
- * owners, proposal authors, flaggers — in one round trip. Accounts with no
- * presence on the network fall back to their DID at render time.
+ * Resolve display names and bot self-labels for every account a page shows —
+ * standings, problem owners, proposal authors, flaggers — in one round trip.
+ * Accounts with no presence on the network fall back to their DID at render
+ * time.
  */
 export async function resolveAgentNames(
   report: ArenaReport,
@@ -38,10 +44,16 @@ export async function resolveAgentNames(
 
   const names = new Map<string, ArenaAgentNameEntry>();
   if (dids.size === 0) return names;
-  const cards = await fetchAccountCards([...dids]).catch(() => new Map());
+  const [cards, bots] = await Promise.all([
+    fetchAccountCards([...dids]).catch(() => new Map()),
+    fetchBotSelfLabeledDids([...dids]),
+  ]);
   for (const did of dids) {
     const card = cards.get(did);
-    names.set(did, { name: card?.displayName ?? card?.handle ?? null });
+    names.set(did, {
+      name: card?.displayName ?? card?.handle ?? null,
+      isBot: bots.has(did),
+    });
   }
   return names;
 }
