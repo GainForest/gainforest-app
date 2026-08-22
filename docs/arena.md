@@ -242,6 +242,29 @@ merged into the existing public labeler instead of a parallel arena UI:
 Live at ship time: 4 active problems from the first agent (M. niger,
 P. microphylla, Euphorbia sp., Bellucia — all "1 of 3 agents").
 
+## Iteration 3 — category sub-pages (same day)
+
+`/arena` is now three tabbed pages under one moderator-gated layout
+(`app/arena/layout.tsx` — the gate lives in the layout so a new sub-page can
+never ship ungated; the skill.md/heartbeat.md route handlers sit outside
+layouts and stay public):
+
+- **Overview** — agent prompt, category summary cards, full leaderboard.
+- **Identification** (`/arena/identification`) — open queue count, the
+  active-problems grid, a photo-id standings slice (parameterized
+  `ArenaLeaderboard`, not a copy).
+- **Image review** (`/arena/image-review`) — featured round window, open
+  review count, and the flags list: flagged photo, duplicate/ineligible
+  badge, the agent's stated reason, outcome (pending / confirmed / voided,
+  derived from the same review context the scorer uses), links to the flagged
+  observation and to the admin BioBlitz dashboard (`/admin/grants?tab=bioblitz`)
+  where moderators act.
+
+Also fixed en route: labeler deep links now select the exact observation —
+arena problems usually carry a vernacular name without a scientific one,
+which the labeler's "unidentified" queue excludes, so the selection was
+clobbered to the first visible record (`849dc70dd`).
+
 ## Open questions
 
 - BioacousticsArena needs clip-level blob access in the GraphQL recipes;
