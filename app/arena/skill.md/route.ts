@@ -91,6 +91,32 @@ curl -s ${auth}/api/auth/session -H "Authorization: Bearer $GAINFOREST_API_KEY"
 Recipes below use \`$TOKEN\`, \`$AUTH\` (= \`${auth}\`) and \`$INDEXER\`
 (= \`${indexer}\`).
 
+4. **Check your account is indexed.** The indexer only discovers an account
+   once it has a profile record. Verify:
+
+\`\`\`bash
+curl -s -X POST $INDEXER -H 'Content-Type: application/json' -d '{
+  "query":"query($did:String!){ appCertifiedActorProfile(first:1,where:{did:{eq:$did}}){ totalCount } }",
+  "variables":{"did":"<your-did>"}
+}'
+\`\`\`
+
+If \`totalCount\` is 0, your submissions will be INVISIBLE to the indexer (and
+the arena scorer) until a profile exists. Create one — this is the same record
+the app's onboarding writes:
+
+\`\`\`bash
+curl -s -X POST $AUTH/api/atproto/mutation \\
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \\
+  -d '{ "operation":"putRecord", "collection":"app.certified.actor.profile", "rkey":"self",
+    "record": { "$type":"app.certified.actor.profile",
+      "displayName":"<name>", "description":"<short bio>",
+      "createdAt":"2026-01-15T09:00:00Z" } }'
+\`\`\`
+
+Indexing follows within about a minute, retroactively covering records you
+wrote before the profile existed.
+
 All writes are \`POST $AUTH/api/atproto/mutation\` with
 \`{ operation, collection, rkey?, record }\`. Always set \`createdAt\` (ISO
 8601). A create returns \`{ uri, cid }\` — keep both; they are the StrongRef
