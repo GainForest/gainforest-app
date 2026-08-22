@@ -1,60 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { MicroscopeIcon, UserIcon } from "lucide-react";
-import { fetchComments, type FeedComment } from "@/app/_lib/feed-engagement";
 import { formatDate } from "@/app/_lib/format";
-import { parseSpeciesSuggestion, type SpeciesSuggestion } from "@/app/_lib/species-suggestions";
-import {
-  fetchSpeciesIdentification,
-  identificationRkeyFromTags,
-} from "@/app/_lib/species-identifications";
+import { useIdentificationProposals } from "@/app/_lib/use-identification-proposals";
 import { ResolvedAvatar } from "@/app/feed/ResolvedAvatar";
 
-type SuggestionItem = {
-  comment: FeedComment;
-  suggestion: SpeciesSuggestion;
-};
-
+/**
+ * Identification proposals on one observation, shown to the observation page's
+ * visitors. Data resolution lives in the shared `useIdentificationProposals`
+ * hook so other surfaces (the labeler) can show the same proposals without a
+ * second fetch implementation.
+ */
 export function SpeciesSuggestions({ subjectUri }: { subjectUri: string }) {
   const t = useTranslations("marketplace.observationPage.suggestions");
-  const [items, setItems] = useState<SuggestionItem[] | null>(null);
+  const proposals = useIdentificationProposals(subjectUri);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    fetchComments(subjectUri, controller.signal)
-      .then(async (comments) => {
-        const resolved = await Promise.all(comments.map(async (comment): Promise<SuggestionItem | null> => {
-          const identificationRkey = identificationRkeyFromTags(comment.tags);
-          if (identificationRkey) {
-            const record = await fetchSpeciesIdentification(comment.did, identificationRkey, controller.signal);
-            if (record?.subjectUri === subjectUri) {
-              return {
-                comment,
-                suggestion: {
-                  scientificName: record.scientificName,
-                  vernacularName: record.vernacularName,
-                  note: record.identificationRemarks,
-                },
-              };
-            }
-          }
-          // Backward compatibility for suggestions created before the
-          // identification lexicon was introduced, and a resilient fallback if
-          // the author's PDS is temporarily unavailable.
-          const suggestion = parseSpeciesSuggestion(comment.text);
-          return suggestion ? { comment, suggestion } : null;
-        }));
-        setItems(resolved.filter((item): item is SuggestionItem => item !== null));
-      })
-      .catch((error) => {
-        if ((error as Error).name !== "AbortError") setItems([]);
-      });
-    return () => controller.abort();
-  }, [subjectUri]);
-
-  if (!items?.length) return null;
+  if (!proposals?.length) return null;
 
   return (
     <section className="mt-6 rounded-2xl border border-primary/20 bg-primary/[0.05] p-4 sm:p-5">
@@ -69,7 +31,7 @@ export function SpeciesSuggestions({ subjectUri }: { subjectUri: string }) {
       </div>
 
       <ul className="mt-4 space-y-3">
-        {items.map(({ comment, suggestion }) => (
+        {proposals.map(({ comment, scientificName, vernacularName, remarks }) => (
           <li key={comment.uri} className="rounded-xl border border-border-soft bg-background/90 p-4">
             <div className="flex items-start gap-3">
               <ResolvedAvatar
@@ -89,12 +51,12 @@ export function SpeciesSuggestions({ subjectUri }: { subjectUri: string }) {
                     {comment.createdAt ? formatDate(comment.createdAt) : null}
                   </p>
                 </div>
-                <p className="mt-2 text-lg font-semibold italic text-foreground">{suggestion.scientificName}</p>
-                {suggestion.vernacularName ? (
-                  <p className="text-sm text-muted-foreground">{suggestion.vernacularName}</p>
+                <p className="mt-2 text-lg font-semibold italic text-foreground">{scientificName}</p>
+                {vernacularName ? (
+                  <p className="text-sm text-muted-foreground">{vernacularName}</p>
                 ) : null}
-                {suggestion.note ? (
-                  <p className="mt-2 text-sm leading-6 text-foreground/75">{suggestion.note}</p>
+                {remarks ? (
+                  <p className="mt-2 text-sm leading-6 text-foreground/75">{remarks}</p>
                 ) : null}
                 <span className="mt-3 inline-flex rounded-full bg-amber-500/10 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-amber-700 dark:text-amber-300">
                   {t("status")}

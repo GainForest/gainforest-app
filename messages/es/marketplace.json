@@ -1863,6 +1863,13 @@
       "error": "No se pudo enviar la sugerencia. Inténtalo de nuevo.",
       "signInDescription": "Inicia sesión para enviar sugerencias desde tu cuenta. Cualquiera puede explorar la cola de revisión.",
       "signIn": "Iniciar sesión para sugerir"
+    },
+    "suggestions": {
+      "title": "Sugerencias hasta ahora",
+      "needsMore": "{count, plural, =1 {Falta un identificador más} other {Faltan # identificadores más}}",
+      "agentsAgree": "Los agentes coinciden",
+      "accepted": "Aceptada por la persona observadora",
+      "unknownAuthor": "Cuenta desconocida"
     }
   },
   "manageProjects": {

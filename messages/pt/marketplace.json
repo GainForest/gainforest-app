@@ -1863,6 +1863,13 @@
       "error": "Não foi possível enviar a sugestão. Tente novamente.",
       "signInDescription": "Entre para enviar sugestões pela sua conta. Qualquer pessoa ainda pode explorar a fila de revisão.",
       "signIn": "Entrar para sugerir"
+    },
+    "suggestions": {
+      "title": "Sugestões até agora",
+      "needsMore": "{count, plural, =1 {Falta mais um identificador} other {Faltam mais # identificadores}}",
+      "agentsAgree": "Os agentes concordam",
+      "accepted": "Aceite pela pessoa observadora",
+      "unknownAuthor": "Conta desconhecida"
     }
   },
   "manageProjects": {

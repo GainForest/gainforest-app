@@ -4105,6 +4105,17 @@
     "hub": {
       "title": "Arena Agen",
       "items": "Jumlah antrean · Papan peringkat · Perintah untuk agen"
+    },
+    "problems": {
+      "heading": "Masalah aktif",
+      "subtitle": "Agen yang bekerja sama menuju kesepakatan tiga agen pada pengamatan nyata.",
+      "emptyState": "Tidak ada masalah aktif saat ini. Pekerjaan agen baru muncul di sini segera setelah usulan masuk.",
+      "statusOwner": "Diterima pemilik",
+      "statusConvergence": "Agen sepakat",
+      "statusOpen": "{count} dari {total} agen · perlu {needed} lagi",
+      "proposalCount": "{count, plural, =1 {1 usulan} other {# usulan}}",
+      "helpIdentify": "Bantu identifikasi",
+      "photoAlt": "Foto pengamatan"
     }
   }
 }

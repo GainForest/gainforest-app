@@ -29,14 +29,15 @@ vi.mock("@/app/_lib/species-identifications", () => ({
 
 import {
   assembleReport,
+  buildProblemViews,
   buildStandings,
   dedupeIdentifications,
   imageReviewQueueSummary,
   isArenaPhotoProblem,
-  loadArenaReport,
   matchTaxa,
   mergeCoversPair,
   photoIdQueueSummary,
+  problemStatusFromProposals,
   resolveOccurrence,
   scoreImageReviewCategory,
   scorePhotoIdCategory,
@@ -45,6 +46,7 @@ import {
   type ArenaOccurrenceInput,
   type ImageReviewContext,
 } from "./scoring";
+import { loadArenaReport } from "./data";
 
 const AGENT_A = "did:plc:agent-a";
 const AGENT_B = "did:plc:agent-b";
@@ -68,8 +70,10 @@ function identification(
     did: AGENT_A,
     subjectCid: "cid-old",
     scientificName: "Quercus robur",
+    vernacularName: null,
     taxonRank: "species",
     confidence: 80,
+    remarks: null,
     createdAt: "2026-07-01T10:00:00.000Z",
     indexedAt: "2026-07-01T10:00:05.000Z",
     ...overrides,
@@ -424,5 +428,109 @@ describe("queues and standings", () => {
     expect(report.generatedAt).toBeTruthy();
     expect(report.queues).toEqual([]);
     expect(report.standings).toEqual([]);
+    expect(report.problems).toEqual([]);
+  });
+});
+
+// ── Problem views + client-side status ───────────────────────────────────
+
+describe("buildProblemViews", () => {
+  it("groups proposals per observation with open status counts", () => {
+    const o = occurrence();
+    const map = new Map([[o.uri, o]]);
+    const views = buildProblemViews(map, [
+      identification({ subjectUri: o.uri, did: AGENT_A }),
+      identification({ subjectUri: o.uri, did: AGENT_B }),
+      // A second version by the same agent — deduped, not a second proposal.
+      identification({ subjectUri: o.uri, did: AGENT_A, subjectCid: "cid-old", indexedAt: "2026-07-01T11:00:00.000Z" }),
+    ]);
+    expect(views).toHaveLength(1);
+    expect(views[0]).toMatchObject({
+      subjectUri: o.uri,
+      ownerDid: OWNER,
+      currentName: null,
+      status: { state: "open", identifiers: 2, needed: 3 },
+    });
+    expect(views[0]!.proposals).toHaveLength(2);
+  });
+
+  it("orders proposals leading-taxon-first then oldest-first within taxon", () => {
+    const o = occurrence();
+    const map = new Map([[o.uri, o]]);
+    const views = buildProblemViews(map, [
+      // Dissenting taxon, newest overall — must still come after the leading group.
+      identification({ subjectUri: o.uri, did: AGENT_C, scientificName: "Acer palmatum", indexedAt: "2026-07-01T12:00:00.000Z" }),
+      // Second proposer of the leading taxon.
+      identification({ subjectUri: o.uri, did: AGENT_B, indexedAt: "2026-07-01T09:00:00.000Z" }),
+      // First proposer of the leading taxon.
+      identification({ subjectUri: o.uri, did: AGENT_A, indexedAt: "2026-07-01T08:00:00.000Z" }),
+    ]);
+    expect(views[0]!.proposals.map((p) => p.did)).toEqual([AGENT_A, AGENT_B, AGENT_C]);
+  });
+
+  it("leads with the resolved taxon and reports resolution status", () => {
+    const o = occurrence({ cid: "cid-new", scientificName: "Quercus robur" });
+    const map = new Map([[o.uri, o]]);
+    const views = buildProblemViews(map, [
+      identification({ subjectUri: o.uri, did: AGENT_B, subjectCid: "cid-old" }),
+      identification({
+        subjectUri: o.uri,
+        did: AGENT_C,
+        scientificName: "Acer palmatum",
+        subjectCid: "cid-old",
+        vernacularName: "English oak",
+      }),
+    ]);
+    expect(views[0]!.status).toEqual({ state: "resolved", by: "owner", taxon: "Quercus robur" });
+    expect(views[0]!.proposals[0]!.did).toBe(AGENT_B); // resolved taxon leads
+    expect(views[0]!.currentName).toBe("Quercus robur");
+  });
+
+  it("lists unresolved problems first, then most-recent-proposal-first", () => {
+    const olderOpen = occurrence();
+    const newerOpen = occurrence();
+    const resolvedOlder = occurrence({ cid: "cid-new", scientificName: "Morpho peleides" });
+    const map = new Map([
+      [olderOpen.uri, olderOpen],
+      [newerOpen.uri, newerOpen],
+      [resolvedOlder.uri, resolvedOlder],
+    ]);
+    const subs = [
+      identification({ subjectUri: newerOpen.uri, did: AGENT_A, indexedAt: "2026-07-02T08:00:00.000Z" }),
+      identification({ subjectUri: olderOpen.uri, did: AGENT_A, indexedAt: "2026-07-01T08:00:00.000Z" }),
+      identification({ subjectUri: resolvedOlder.uri, did: AGENT_B, subjectCid: "cid-old", scientificName: "Morpho peleides", indexedAt: "2026-07-03T08:00:00.000Z" }),
+    ];
+    const views = buildProblemViews(map, subs);
+    expect(views.map((v) => v.status.state)).toEqual(["open", "open", "resolved"]);
+    expect(views[0]!.subjectUri).toBe(newerOpen.uri);
+    expect(views[1]!.subjectUri).toBe(olderOpen.uri);
+  });
+
+  it("skips proposals on observations that are unknown to the caller", () => {
+    const views = buildProblemViews(new Map(), [identification({ subjectUri: "at://missing" })]);
+    expect(views).toEqual([]);
+  });
+});
+
+describe("problemStatusFromProposals", () => {
+  const minimalOccurrence = { did: OWNER, cid: "cid-new", scientificName: "Quercus robur" };
+
+  it("counts distinct non-self identifiers while open", () => {
+    const unnamed = { did: OWNER, cid: null, scientificName: null };
+    expect(
+      problemStatusFromProposals(unnamed, [
+        { did: OWNER, subjectCid: "cid-old", scientificName: "Quercus robur" }, // self, ignored
+        { did: AGENT_A, subjectCid: "cid-old", scientificName: "Quercus robur" },
+        { did: AGENT_B, subjectCid: null, scientificName: "Querus robur" },
+      ]),
+    ).toEqual({ state: "open", identifiers: 2, needed: 3 });
+  });
+
+  it("resolves by owner acceptance even when a CID is missing on one proposal", () => {
+    expect(
+      problemStatusFromProposals(minimalOccurrence, [
+        { did: AGENT_A, subjectCid: "cid-old", scientificName: "quercus ROBUR" },
+      ]),
+    ).toEqual({ state: "resolved", by: "owner", taxon: "Quercus robur" });
   });
 });

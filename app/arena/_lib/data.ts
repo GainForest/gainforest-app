@@ -33,7 +33,7 @@ import {
   fetchHiddenRecordUris,
   indexerQueryStrict,
 } from "@/app/_lib/indexer";
-import { resolvePdsHost } from "@/app/_lib/pds";
+import { normaliseRef, resolveBlobUrl, resolvePdsHost } from "@/app/_lib/pds";
 import {
   identificationRkeyFromTags,
   SPECIES_IDENTIFICATION_TAG,
@@ -41,6 +41,7 @@ import {
 
 import {
   assembleReport,
+  buildProblemViews,
   buildStandings,
   dedupeIdentifications,
   imageReviewQueueSummary,
@@ -57,6 +58,7 @@ import {
   ARENA_FLAG_TAG,
   ARENA_IDENTIFICATION_COLLECTION,
   ARENA_INVALID_TAG,
+  type ArenaProblemView,
   type ArenaQueueSummary,
   type ArenaReport,
 } from "./types";
@@ -69,9 +71,14 @@ const PROBLEM_WALK_MAX_PAGES = 8;
 const ROUND_WALK_MAX_PAGES = 4;
 const TAGGED_POSTS_LIMIT = 1000;
 const PDS_CONCURRENCY = 8;
-/** Upper bound on single-occurrence lookups for flags whose target was not in
- *  any walked page (deleted records fail fast and cheap). */
+/** Upper bound on single-occurrence lookups for flags and problem subjects
+ *  that were not in any walked page (deleted records fail fast and cheap). */
 const OCCURRENCE_LOOKUP_LIMIT = 60;
+/** How many collaboration problems the report list carries. */
+const PROBLEM_VIEW_CAP = 12;
+
+/** Internal walk record: scoring input plus the blob ref for image resolution. */
+type IndexedOccurrence = ArenaOccurrenceInput & { imageRef: string | null };
 
 // ── GraphQL ─────────────────────────────────────────────────────────────────
 
@@ -148,6 +155,7 @@ type OccurrenceByUriResponse = {
     cid?: string | null;
     createdAt?: string | null;
     scientificName?: string | null;
+    imageEvidence?: { file?: { ref?: string | null } | null } | null;
   } | null;
 };
 
@@ -155,6 +163,7 @@ const OCCURRENCE_BY_URI_QUERY = `
   query ArenaOccurrenceByUri($uri: String!) {
     appGainforestDwcOccurrenceByUri(uri: $uri) {
       uri did cid createdAt scientificName
+      imageEvidence { file { ref } }
     }
   }
 `;
@@ -174,8 +183,8 @@ async function walkOccurrences(
   where: Record<string, unknown>,
   maxPages: number,
   signal?: AbortSignal,
-): Promise<ArenaOccurrenceInput[]> {
-  const out: ArenaOccurrenceInput[] = [];
+): Promise<IndexedOccurrence[]> {
+  const out: IndexedOccurrence[] = [];
   let after: string | null = null;
   for (let page = 0; page < maxPages; page += 1) {
     const data: OccurrencesResponse | null = await indexerQueryStrict<OccurrencesResponse>(
@@ -198,6 +207,7 @@ async function walkOccurrences(
         cid: node.cid?.trim() || null,
         scientificName: node.scientificName?.trim() || null,
         createdAt: node.createdAt?.trim() || null,
+        imageRef: normaliseRef(node.imageEvidence?.file?.ref),
       });
     }
     if (!connection.pageInfo?.hasNextPage || !connection.pageInfo.endCursor) break;
@@ -218,8 +228,10 @@ type IdentifiedRecord = {
   /** Subject strongRef CID — pins the occurrence version the agent evaluated. */
   subjectCid: string | null;
   scientificName: string;
+  vernacularName: string | null;
   taxonRank: string | null;
   confidence: number | null;
+  identificationRemarks: string | null;
   createdAt: string | null;
 };
 
@@ -249,8 +261,10 @@ export async function fetchIdentificationWithSubject(
         $type?: unknown;
         subject?: { uri?: unknown; cid?: unknown } | null;
         scientificName?: unknown;
+        vernacularName?: unknown;
         taxonRank?: unknown;
         confidence?: unknown;
+        identificationRemarks?: unknown;
         createdAt?: unknown;
       };
     };
@@ -270,12 +284,15 @@ export async function fetchIdentificationWithSubject(
       subjectUri,
       subjectCid: nonEmptyString(data.value.subject?.cid),
       scientificName,
+      vernacularName: nonEmptyString(data.value.vernacularName),
       taxonRank: nonEmptyString(data.value.taxonRank),
       confidence:
         typeof data.value.confidence === "number" &&
         Number.isInteger(data.value.confidence)
           ? Math.min(100, Math.max(0, data.value.confidence))
           : null,
+      // Full text — the UI clamps for display.
+      identificationRemarks: nonEmptyString(data.value.identificationRemarks),
       createdAt: nonEmptyString(data.value.createdAt),
     };
   } catch (error) {
@@ -336,8 +353,10 @@ async function fetchIdentificationSubmissions(
       subjectUri: record.subjectUri,
       subjectCid: record.subjectCid,
       scientificName: record.scientificName,
+      vernacularName: record.vernacularName,
       taxonRank: record.taxonRank,
       confidence: record.confidence,
+      remarks: record.identificationRemarks,
       createdAt: record.createdAt,
       indexedAt,
     }));
@@ -346,7 +365,7 @@ async function fetchIdentificationSubmissions(
 async function lookupOccurrenceByUri(
   uri: string,
   signal?: AbortSignal,
-): Promise<ArenaOccurrenceInput | null> {
+): Promise<IndexedOccurrence | null> {
   const data = await indexerQueryStrict<OccurrenceByUriResponse>(
     OCCURRENCE_BY_URI_QUERY,
     { uri },
@@ -360,6 +379,7 @@ async function lookupOccurrenceByUri(
     cid: node.cid?.trim() || null,
     scientificName: node.scientificName?.trim() || null,
     createdAt: node.createdAt?.trim() || null,
+    imageRef: normaliseRef(node.imageEvidence?.file?.ref),
   };
 }
 
@@ -398,6 +418,27 @@ export async function loadArenaReport(signal?: AbortSignal): Promise<ArenaReport
   // point at them. The page cap means openCount is a floor once the photo
   // stream outgrows the walk.)
   const submissions = await fetchIdentificationSubmissions(idPosts, signal);
+
+  // Make sure every proposed-on observation is known (owner/current name are
+  // required to render a problem). Misses share the bounded lookup budget.
+  let problemLookups = 0;
+  for (const subjectUri of new Set(submissions.map((s) => s.subjectUri))) {
+    if (occurrenceByUri.has(subjectUri)) continue;
+    if (problemLookups >= OCCURRENCE_LOOKUP_LIMIT) break;
+    problemLookups += 1;
+    const target = await lookupOccurrenceByUri(subjectUri, signal);
+    if (target) occurrenceByUri.set(target.uri, target);
+  }
+
+  // ── Problems (collaboration view) ────────────────────────────────────
+  // Cap first, then resolve image URLs — only for the capped list.
+  const cappedProblems = buildProblemViews(occurrenceByUri, submissions).slice(0, PROBLEM_VIEW_CAP);
+  await mapWithConcurrency(cappedProblems, PDS_CONCURRENCY, async (problem) => {
+    const indexed = occurrenceByUri.get(problem.subjectUri) as IndexedOccurrence | undefined;
+    if (!indexed?.imageRef) return;
+    problem.imageUrl = await resolveBlobUrl(indexed.did, indexed.imageRef, signal).catch(() => null);
+  });
+  const problems: ArenaProblemView[] = cappedProblems;
 
   // ── Flags ───────────────────────────────────────────────────────────────
   const activeMerges = effectiveBioblitzMergeRecords(mergesRaw);
@@ -476,5 +517,5 @@ export async function loadArenaReport(signal?: AbortSignal): Promise<ArenaReport
     }),
   ];
 
-  return assembleReport(queues, buildStandings(photoId, imageReview));
+  return assembleReport(queues, buildStandings(photoId, imageReview), problems);
 }

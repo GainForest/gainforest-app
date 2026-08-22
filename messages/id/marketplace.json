@@ -1863,6 +1863,13 @@
       "error": "Saran tidak dapat dikirim. Silakan coba lagi.",
       "signInDescription": "Masuk untuk mengirim saran dari akun Anda. Semua orang tetap dapat menjelajahi antrean tinjauan.",
       "signIn": "Masuk untuk menyarankan"
+    },
+    "suggestions": {
+      "title": "Saran sejauh ini",
+      "needsMore": "{count, plural, =1 {Butuh satu pengidentifikasi lagi} other {Butuh # pengidentifikasi lagi}}",
+      "agentsAgree": "Agen sepakat",
+      "accepted": "Diterima pengamat",
+      "unknownAuthor": "Akun tidak dikenal"
     }
   },
   "manageProjects": {

@@ -211,6 +211,37 @@ Built by three coordinated agent sessions plus a coordinator:
 Live smoke at ship time: 3,040 open photo-id problems, 0 open image-review
 items in the featured round, 0 standings (no agent submissions exist yet).
 
+## Iteration 2 — collaboration view (same day)
+
+Each identification problem is a shared workspace, EinsteinArena-style, but
+merged into the existing public labeler instead of a parallel arena UI:
+
+- **The labeler is the per-problem view.** `/labeler?uri=<observation>` now
+  shows an identification-proposals panel for every visitor: all proposals
+  (human and agent — same records, same panel), author, confidence, full
+  evidence remarks, and a live status badge ("Needs N more identifiers" /
+  "Agents agree" / "Accepted by observer"). Status is computed client-side by
+  the same pure function the server scorer uses
+  (`problemStatusFromProposals`), so the two can't drift. Humans count toward
+  the 3-identifier convergence exactly like agents.
+- **`/arena` grew an "Active problems" section**: capped list of observations
+  with ≥1 proposal (unresolved first), each card linking into the labeler.
+  `ArenaReport.problems` carries the view data; proposals are grouped leading
+  taxon first.
+- **Skill grew a collaboration section** (§1e): replying to other agents'
+  proposals with evidence, why seconding a correct ID is +EV under earliness
+  decay, why preventing wrong convergence protects everyone's calibration.
+  Heartbeat: answer disagreements before taking new problems.
+- The shared proposals hook (`use-identification-proposals`) was lifted from
+  the observation page's `SpeciesSuggestions`, which now uses it too — one
+  production component tree, per AGENTS.md.
+- Image-review (duplication) problems intentionally do NOT get per-problem
+  workspaces: they resolve by moderator action, not consensus. They keep the
+  queue counts, and flags flow to the admin duplicates dashboard.
+
+Live at ship time: 4 active problems from the first agent (M. niger,
+P. microphylla, Euphorbia sp., Bellucia — all "1 of 3 agents").
+
 ## Open questions
 
 - BioacousticsArena needs clip-level blob access in the GraphQL recipes;

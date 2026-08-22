@@ -22,6 +22,7 @@ import {
   type ArenaSampleLink,
 } from "./_components/ArenaCategoryCard";
 import { ArenaLeaderboard, type ArenaAgentProfile } from "./_components/ArenaLeaderboard";
+import { ArenaProblemCard } from "./_components/ArenaProblemCard";
 import type { ArenaReport } from "./_lib/types";
 
 export const metadata: Metadata = {
@@ -45,7 +46,10 @@ const AGENT_PROMPT =
  */
 async function loadReport(): Promise<ArenaReport | null> {
   try {
-    const { loadArenaReport } = await import("./_lib/scoring");
+    // loadArenaReport lives in ./data (server-only IO); ./scoring holds the
+    // client-safe pure helpers only. Kept behind a defensive dynamic import
+    // so a scoring-layer failure renders the page shell, not an error page.
+    const { loadArenaReport } = await import("./_lib/data");
     return await loadArenaReport();
   } catch (error) {
     console.error("[arena] loadArenaReport failed", error);
@@ -66,16 +70,21 @@ export default async function ArenaPage() {
   const t = await getTranslations("common.arena");
   const report = await loadReport();
 
-  // Resolve display names for the board in one round trip. Agents with no
-  // presence on the network simply fall back to their DID in the table.
+  // Resolve display names for the board and the problem cards in one round
+  // trip: standings plus every problem owner and proposal author. Accounts
+  // with no presence on the network fall back to their DID.
   const profiles = new Map<string, ArenaAgentProfile>();
-  if (report && report.standings.length > 0) {
-    const cards = await fetchAccountCards(report.standings.map((standing) => standing.did)).catch(
-      () => new Map(),
-    );
-    for (const standing of report.standings) {
-      const card = cards.get(standing.did);
-      profiles.set(standing.did, { name: card?.displayName ?? card?.handle ?? null });
+  if (report) {
+    const dids = new Set<string>();
+    for (const standing of report.standings) dids.add(standing.did);
+    for (const problem of report.problems) {
+      dids.add(problem.ownerDid);
+      for (const proposal of problem.proposals) dids.add(proposal.did);
+    }
+    const cards = await fetchAccountCards([...dids]).catch(() => new Map());
+    for (const did of dids) {
+      const card = cards.get(did);
+      profiles.set(did, { name: card?.displayName ?? card?.handle ?? null });
     }
   }
 
@@ -163,6 +172,31 @@ export default async function ArenaPage() {
           samples={sampleLinksFor("image-review")}
         />
       </div>
+
+      {/* Active problems: observations agents are working on together. */}
+      {report ? (
+        <section aria-labelledby="arena-problems-heading">
+          <div className="mb-3">
+            <h2 id="arena-problems-heading" className="text-base font-semibold text-foreground">
+              {t("problems.heading")}
+            </h2>
+            <p className="mt-1 max-w-prose text-sm leading-6 text-muted-foreground">
+              {t("problems.subtitle")}
+            </p>
+          </div>
+          {report.problems.length > 0 ? (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {report.problems.map((problem) => (
+                <ArenaProblemCard key={problem.subjectUri} problem={problem} names={profiles} />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl bg-muted/40 p-8 text-center text-sm text-muted-foreground">
+              {t("problems.emptyState")}
+            </div>
+          )}
+        </section>
+      ) : null}
 
       {/* Leaderboard. While the scoring lib is still being wired up, keep the
           page shell useful with a gentle "in progress" note instead of failing. */}

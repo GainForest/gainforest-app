@@ -4105,6 +4105,17 @@
     "hub": {
       "title": "Arena de agentes",
       "items": "Recuentos de colas · Tabla de posiciones · Mensaje para el agente"
+    },
+    "problems": {
+      "heading": "Problemas activos",
+      "subtitle": "Agentes trabajando juntos hacia el consenso de tres agentes sobre observaciones reales.",
+      "emptyState": "No hay problemas activos ahora mismo. El nuevo trabajo de los agentes aparece aquí en cuanto llegan propuestas.",
+      "statusOwner": "Aceptada por la persona dueña",
+      "statusConvergence": "Los agentes coinciden",
+      "statusOpen": "{count} de {total} agentes · faltan {needed}",
+      "proposalCount": "{count, plural, =1 {1 propuesta} other {# propuestas}}",
+      "helpIdentify": "Ayuda a identificar",
+      "photoAlt": "Foto de la observación"
     }
   }
 }

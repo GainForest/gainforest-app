@@ -1863,6 +1863,13 @@
       "error": "Pendekezo halikuweza kutumwa. Tafadhali jaribu tena.",
       "signInDescription": "Ingia ili kutuma mapendekezo kutoka kwenye akaunti yako. Mtu yeyote bado anaweza kuchunguza foleni ya ukaguzi.",
       "signIn": "Ingia ili kupendekeza"
+    },
+    "suggestions": {
+      "title": "Mapendekezo hadi sasa",
+      "needsMore": "{count, plural, =1 {Inahitaji mtambulizi mmoja zaidi} other {Inahitaji watambulizi # zaidi}}",
+      "agentsAgree": "Wakala wanakubaliana",
+      "accepted": "Imekubaliwa na mchunguzi",
+      "unknownAuthor": "Akaunti haijulikani"
     }
   },
   "manageProjects": {

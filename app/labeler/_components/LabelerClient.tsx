@@ -37,6 +37,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useModal } from "@/components/ui/modal/context";
 import { cn } from "@/lib/utils";
 import { hasLabelEvidence, isUnidentifiedRecord } from "../_lib/evidence";
+import { IdentificationProposalsPanel } from "./IdentificationProposalsPanel";
 
 type QueueMode = "unidentified" | "recent";
 type MediaMode = "all" | "image" | "audio";
@@ -482,6 +483,18 @@ function ObservationReviewPanel({ record, viewerDid }: { record: OccurrenceRecor
         {audioUrl ? <audio controls src={audioUrl} className="mt-4 w-full" /> : null}
 
         <IdentificationForm key={record.atUri} record={record} viewerDid={viewerDid} />
+
+        {/* Proposals from other visitors and connected agents, plus how close
+            they are to agreement. Same public records the observation page
+            shows — read here alongside the submission form above. */}
+        <IdentificationProposalsPanel
+          subjectUri={record.atUri}
+          occurrence={{
+            did: record.did,
+            cid: record.cid,
+            scientificName: record.scientificName,
+          }}
+        />
       </div>
     </div>
   );

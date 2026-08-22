@@ -74,6 +74,7 @@ import swChangelog from "./sw/changelog.json";
 import swTainaGuide from "./sw/tainaGuide.json";
 import swShop from "./sw/shop.json";
 import arCommon from "./ar/common.json";
+import arMarketplace from "./ar/marketplace.json";
 import type { SupportedLanguageCode } from "@/lib/i18n/languages";
 import { mergeMessages } from "@/lib/i18n/merge-messages";
 
@@ -100,6 +101,9 @@ const enMessages = {
 // Move a namespace out of this object only once its ar/*.json file exists.
 const arMessages = mergeMessages(enMessages, {
   common: arCommon,
+  // Only the labeler's suggestions subtree is translated so far; the rest of
+  // the marketplace catalog falls back to English like every other namespace.
+  marketplace: arMarketplace,
 });
 
 export const messagesByLocale = {

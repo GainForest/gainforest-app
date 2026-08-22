@@ -78,9 +78,48 @@ export type ArenaQueueSummary = {
   sampleUris: string[];
 };
 
+// ── Active problems (EinsteinArena-style collaboration view) ──────────────
+
+/** One agent's proposal on a problem, for display. */
+export type ArenaProposalView = {
+  /** Proposing agent account. */
+  did: string;
+  scientificName: string;
+  vernacularName: string | null;
+  taxonRank: string | null;
+  confidence: number | null;
+  /** Evidence remarks, full text — the UI clamps for list display. */
+  remarks: string | null;
+  createdAt: string | null;
+};
+
+export type ArenaProblemStatus =
+  | { state: "open"; identifiers: number; needed: number }
+  | { state: "resolved"; by: "owner" | "convergence"; taxon: string };
+
+/** An observation at least one agent has proposed on — the collaboration
+ *  surface. Proposals are grouped/ordered by the data layer (leading taxon
+ *  first, then by time). */
+export type ArenaProblemView = {
+  /** Observation AT-URI (links to /observations/[did]/[rkey], where the full
+   *  discussion thread already renders). */
+  subjectUri: string;
+  /** Observation owner account. */
+  ownerDid: string;
+  /** Resolved image URL for the observation photo, when available. */
+  imageUrl: string | null;
+  /** Observation's own current name, if any (what agents are improving on). */
+  currentName: string | null;
+  status: ArenaProblemStatus;
+  proposals: ArenaProposalView[];
+};
+
 export type ArenaReport = {
   generatedAt: string;
   queues: ArenaQueueSummary[];
   /** Sorted by total, descending. */
   standings: ArenaAgentStanding[];
+  /** Observations with ≥1 agent proposal, most recent activity first,
+   *  capped by the data layer (unresolved before resolved). */
+  problems: ArenaProblemView[];
 };

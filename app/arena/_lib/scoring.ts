@@ -12,6 +12,9 @@ import {
   ARENA_OWNER_REVIEW_POINTS,
   type ArenaAgentStanding,
   type ArenaCategoryScore,
+  type ArenaProblemStatus,
+  type ArenaProblemView,
+  type ArenaProposalView,
   type ArenaQueueSummary,
   type ArenaReport,
 } from "./types";
@@ -32,8 +35,11 @@ export type ArenaIdentificationInput = {
   /** CID pinned by the strongRef at proposal time, when resolvable. */
   subjectCid: string | null;
   scientificName: string;
+  vernacularName: string | null;
   taxonRank: string | null;
   confidence: number | null;
+  /** Evidence remarks, already truncated by the data layer for display. */
+  remarks: string | null;
   /** Record `createdAt`. Backdateable — ordering prefers indexedAt. */
   createdAt: string | null;
   /** Indexer ingest time of the tagged notification post, when known.
@@ -227,8 +233,8 @@ export type OccurrenceResolution =
  * same species-rank name.
  */
 export function resolveOccurrence(
-  occurrence: ArenaOccurrenceInput,
-  allSubmissions: readonly ArenaIdentificationInput[],
+  occurrence: ArenaOccurrenceCore,
+  allSubmissions: readonly ArenaProposalCore[],
 ): OccurrenceResolution {
   // Self-identifications never help resolution: an agent cannot converge with
   // itself, and an owner “accepting” its own record is not review work.
@@ -500,14 +506,163 @@ export function buildStandings(
 export function assembleReport(
   queues: readonly ArenaQueueSummary[],
   standings: readonly ArenaAgentStanding[],
+  problems: readonly ArenaProblemView[] = [],
 ): ArenaReport {
   return {
     generatedAt: new Date().toISOString(),
     queues: [...queues],
     standings: [...standings],
+    problems: [...problems],
   };
 }
 
-// The IO entry point lives in ./data.ts (this file stays pure); re-exported
-// here so lib consumers only ever import from "./scoring".
-export { loadArenaReport, fetchIdentificationWithSubject } from "./data";
+// ── Problem views (collaboration surface) ────────────────────────────────
+
+/** Minimal proposal shape status/grouping logic actually reads.
+ *  ArenaIdentificationInput satisfies this structurally, and so does what a
+ *  client component can assemble from public records. */
+export type ArenaProposalCore = {
+  did: string;
+  subjectCid: string | null;
+  scientificName: string;
+};
+
+/** Minimal occurrence shape the same logic reads. */
+export type ArenaOccurrenceCore = {
+  did: string;
+  cid: string | null;
+  scientificName: string | null;
+};
+
+// ── Problem views (collaboration surface) ───────────────────────────────
+
+/** Map an identification to its display shape. */
+function toProposalView(s: ArenaIdentificationInput): ArenaProposalView {
+  return {
+    did: s.did,
+    scientificName: s.scientificName,
+    vernacularName: s.vernacularName ?? null,
+    taxonRank: s.taxonRank,
+    confidence: typeof s.confidence === "number" ? Math.min(100, Math.max(0, s.confidence)) : null,
+    remarks: s.remarks ?? null,
+    createdAt: s.createdAt,
+  };
+}
+
+/**
+ * Group deduped proposals per observation into display problems.
+ *
+ * Proposal order within a problem: leading taxon first (the resolved taxon,
+ * or the most-proposed taxon while open), then oldest-first within each
+ * taxon. The list itself is unresolved-first, then most-recent-proposal-first.
+ */
+export function buildProblemViews(
+  occurrenceByUri: ReadonlyMap<string, ArenaOccurrenceInput>,
+  submissions: readonly ArenaIdentificationInput[],
+): ArenaProblemView[] {
+  const bySubject = new Map<string, ArenaIdentificationInput[]>();
+  for (const s of dedupeIdentifications(submissions)) {
+    const list = bySubject.get(s.subjectUri) ?? [];
+    list.push(s);
+    bySubject.set(s.subjectUri, list);
+  }
+
+  const views: Array<{ view: ArenaProblemView; lastActivityAt: number }> = [];
+  for (const [subjectUri, all] of bySubject) {
+    const occurrence = occurrenceByUri.get(subjectUri);
+    // Without the observation we cannot render owner or current name; scoring
+    // still handled it, but it is not a displayable collaboration problem.
+    if (!occurrence) continue;
+
+    const others = all.filter((s) => s.did !== occurrence.did);
+    const resolution = resolveOccurrence(occurrence, others);
+
+    const status: ArenaProblemView["status"] =
+      resolution.status === "open"
+        ? {
+            state: "open",
+            identifiers: new Set(others.map((s) => s.did)).size,
+            needed: ARENA_CONVERGENCE_MIN_IDENTIFIERS,
+          }
+        : { state: "resolved", by: resolution.status, taxon: resolution.taxon };
+
+    // Group proposals by taxon; the leading group sorts first.
+    const groups = new Map<string, ArenaIdentificationInput[]>();
+    for (const s of others) {
+      const key = taxonKey(s.scientificName);
+      const list = groups.get(key) ?? [];
+      list.push(s);
+      groups.set(key, list);
+    }
+    const leadingKey =
+      resolution.status === "open"
+        ? [...groups.entries()]
+            .sort(
+              (a, b) =>
+                new Set(b[1].map((s) => s.did)).size - new Set(a[1].map((s) => s.did)).size ||
+                proposalInstant(a[1][0]!) - proposalInstant(b[1][0]!),
+            )
+            .map(([key]) => key)[0] ?? null
+        : taxonKey(resolution.taxon);
+
+    const orderedGroups = [...groups.keys()].sort((a, b) => {
+      if (a === leadingKey) return -1;
+      if (b === leadingKey) return 1;
+      return 0;
+    });
+    const ordered: ArenaIdentificationInput[] = [];
+    for (const key of orderedGroups) {
+      const group = groups.get(key)!;
+      group.sort(
+        (a, b) =>
+          proposalInstant(a) - proposalInstant(b) ||
+          (proposalInstant(a) === proposalInstant(b) ? a.uri.localeCompare(b.uri) : 0),
+      );
+      ordered.push(...group);
+    }
+
+    views.push({
+      view: {
+        subjectUri,
+        ownerDid: occurrence.did,
+        imageUrl: null, // filled by the data layer for capped problems only
+        currentName: occurrence.scientificName,
+        status,
+        proposals: ordered.map(toProposalView),
+      },
+      lastActivityAt: Math.max(...ordered.map(proposalInstant)),
+    });
+  }
+
+  return views
+    .sort((a, b) => {
+      const aResolved = a.view.status.state === "resolved" ? 1 : 0;
+      const bResolved = b.view.status.state === "resolved" ? 1 : 0;
+      if (aResolved !== bResolved) return aResolved - bResolved;
+      return b.lastActivityAt - a.lastActivityAt;
+    })
+    .map((entry) => entry.view);
+}
+
+// NOTE: scoring.ts stays 100% client-safe pure — the IO entry point
+// loadArenaReport lives in ./data.ts and must be imported from there.
+
+/**
+ * Client-safe status for one problem, computed from whatever proposals the UI
+ * already has (public records). Thin wrapper over resolveOccurrence with the
+ * open-state identifier counts filled in.
+ */
+export function problemStatusFromProposals(
+  occurrence: ArenaOccurrenceCore,
+  proposals: readonly ArenaProposalCore[],
+): ArenaProblemStatus {
+  const others = proposals.filter((p) => p.did !== occurrence.did);
+  const resolution = resolveOccurrence(occurrence, others);
+  return resolution.status === "open"
+    ? {
+        state: "open",
+        identifiers: new Set(others.map((s) => s.did)).size,
+        needed: ARENA_CONVERGENCE_MIN_IDENTIFIERS,
+      }
+    : { state: "resolved", by: resolution.status, taxon: resolution.taxon };
+}

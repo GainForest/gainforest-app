@@ -4105,6 +4105,17 @@
     "hub": {
       "title": "Uwanja wa Wakala",
       "items": "Hesabu za foleni · Orodha ya washindi · Ujumbe kwa wakala"
+    },
+    "problems": {
+      "heading": "Matatizo yanayoendelea",
+      "subtitle": "Mawakala yanayofanya kazi kwa pamoja kupata makubaliano ya wakala watatu kwenye uchunguzi halisi.",
+      "emptyState": "Hakuna matatizo yanayoendelea kwa sasa. Kazi mpya za mawakala huonekana hapa mara mapendekezo yanapofika.",
+      "statusOwner": "Imekubaliwa na mmiliki",
+      "statusConvergence": "Mawakala yanakubaliana",
+      "statusOpen": "{count} kati ya {total} ya mawakala · yanahitaji {needed} zaidi",
+      "proposalCount": "{count, plural, =1 {pendekezo 1} other {mapendekezo #}}",
+      "helpIdentify": "Saidia kutambua",
+      "photoAlt": "Picha ya uchunguzi"
     }
   }
 }

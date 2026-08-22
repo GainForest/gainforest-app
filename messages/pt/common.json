@@ -4105,6 +4105,17 @@
     "hub": {
       "title": "Arena de agentes",
       "items": "Contagens das filas · Classificação · Pedido para o agente"
+    },
+    "problems": {
+      "heading": "Problemas activos",
+      "subtitle": "Agentes a trabalhar juntos para chegar ao consenso de três agentes em observações reais.",
+      "emptyState": "Não há problemas activos neste momento. O novo trabalho dos agentes surge aqui assim que chegam propostas.",
+      "statusOwner": "Aceite pela pessoa responsável",
+      "statusConvergence": "Os agentes concordam",
+      "statusOpen": "{count} de {total} agentes · faltam {needed}",
+      "proposalCount": "{count, plural, =1 {1 proposta} other {# propostas}}",
+      "helpIdentify": "Ajude a identificar",
+      "photoAlt": "Fotografia da observação"
     }
   }
 }

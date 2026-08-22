@@ -1,0 +1,11 @@
+{
+  "labeler": {
+    "suggestions": {
+      "title": "الاقتراحات حتى الآن",
+      "needsMore": "{count, plural, =1 {ينقص مُعرِّف واحد} other {ينقص # من المعرِّفين}}",
+      "agentsAgree": "الوكلاء متفقون",
+      "accepted": "قبِلها المراقب",
+      "unknownAuthor": "حساب غير معروف"
+    }
+  }
+}

@@ -1863,6 +1863,13 @@
       "error": "The suggestion could not be sent. Please try again.",
       "signInDescription": "Sign in to submit suggestions from your account. Anyone can still explore the review queue.",
       "signIn": "Sign in to suggest"
+    },
+    "suggestions": {
+      "title": "Suggestions so far",
+      "needsMore": "{count, plural, =1 {Needs one more identifier} other {Needs # more identifiers}}",
+      "agentsAgree": "Agents agree",
+      "accepted": "Accepted by the observer",
+      "unknownAuthor": "Unknown account"
     }
   },
   "manageProjects": {

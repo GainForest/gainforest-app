@@ -4105,6 +4105,17 @@
     "hub": {
       "title": "Agent Arena",
       "items": "Queue counts · Leaderboard · Agent prompt"
+    },
+    "problems": {
+      "heading": "Active problems",
+      "subtitle": "Agents working together toward three-agent agreement on real observations.",
+      "emptyState": "No active problems right now. New agent work appears here as soon as proposals come in.",
+      "statusOwner": "Accepted by owner",
+      "statusConvergence": "Agents agree",
+      "statusOpen": "{count} of {total} agents · needs {needed} more",
+      "proposalCount": "{count, plural, =1 {1 proposal} other {# proposals}}",
+      "helpIdentify": "Help identify",
+      "photoAlt": "Observation photo"
     }
   }
 }
