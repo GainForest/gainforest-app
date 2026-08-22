@@ -129,9 +129,20 @@ export function LabelerClient({
 
   // Resolve the deep-linked record when it isn't part of the loaded pages.
   useEffect(() => {
-    if (!requestedUri) return;
-    if (records.some((record) => record.atUri === requestedUri)) {
-      pendingDeepLinkRef.current = null;
+    // Only while the deep link is unsatisfied — once the visibility effect
+    // clears the pending flag, later `records` changes (load more) must not
+    // yank the user back to the deep-linked record.
+    if (!requestedUri || pendingDeepLinkRef.current !== requestedUri) return;
+    const existing = records.find((record) => record.atUri === requestedUri);
+    if (existing) {
+      // Already loaded — but it may fail the current filters: a record with a
+      // vernacular name and no scientific name is an open problem elsewhere
+      // (arena deep links) yet not "unidentified" here. Select it, switch to
+      // the queue it lives in, and let the visibility effect below clear the
+      // pending flag only once it actually renders — clearing it earlier lets
+      // the reconciliation effect clobber the selection in the same pass.
+      setSelectedUri(requestedUri);
+      if (!isUnidentified(existing)) setMode("recent");
       return;
     }
     const parts = parseAtUri(requestedUri);
@@ -145,29 +156,45 @@ export function LabelerClient({
         const pdsRecord = await getPdsRecord(parts.did, parts.collection, parts.rkey, controller.signal);
         const record = pdsRecord ? occurrenceFromPdsRecord(pdsRecord) : null;
         if (controller.signal.aborted) return;
-        if (record) {
-          setRecords((current) =>
-            current.some((existing) => existing.atUri === record.atUri) ? current : [record, ...current],
-          );
-          setSelectedUri(record.atUri);
-          // A deep-linked record that's already identified lives in the
-          // "recent" queue, not "unidentified" — switch so it stays visible.
-          if (!isUnidentified(record)) setMode("recent");
+        if (!record) {
+          pendingDeepLinkRef.current = null;
+          return;
         }
-      } finally {
+        setRecords((current) =>
+          current.some((item) => item.atUri === record.atUri) ? current : [record, ...current],
+        );
+        setSelectedUri(record.atUri);
+        // A deep-linked record that's already identified lives in the
+        // "recent" queue, not "unidentified" — switch so it stays visible.
+        if (!isUnidentified(record)) setMode("recent");
+      } catch {
         if (!controller.signal.aborted) pendingDeepLinkRef.current = null;
       }
     })();
     return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [requestedUri]);
+  }, [requestedUri, records]);
 
   useEffect(() => {
-    if (pendingDeepLinkRef.current) return;
+    const pending = pendingDeepLinkRef.current;
+    if (pending) {
+      if (filtered.some((record) => record.atUri === pending)) {
+        // Deep-linked record is visible now — normal reconciliation resumes.
+        pendingDeepLinkRef.current = null;
+      } else if (
+        records.some((record) => record.atUri === pending) &&
+        !reviewableRecords.some((record) => record.atUri === pending)
+      ) {
+        // Loaded but not reviewable (no openable evidence) — the deep link
+        // can never display; stop protecting it so the list stays usable.
+        pendingDeepLinkRef.current = null;
+      }
+      return;
+    }
     if (!filtered.some((record) => record.atUri === selectedUri)) {
       setSelectedUri(filtered[0]?.atUri ?? null);
     }
-  }, [filtered, selectedUri]);
+  }, [filtered, selectedUri, records, reviewableRecords]);
 
   const selected = filtered.find((record) => record.atUri === selectedUri) ?? null;
 
